@@ -8,6 +8,7 @@
 //   node 06-demo/ui_check.mjs guards OUTDIR         child profile, child word, out of scope
 //   node 06-demo/ui_check.mjs people OUTDIR         add, edit and delete a person through the form
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
+//   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
 //   node 06-demo/ui_check.mjs review OUTDIR IDS     the finish review's screenshots (six ids, comma-separated)
 //
@@ -141,10 +142,10 @@ async function flow(out) {
   const p = await tab();
   await p.size(DESKTOP);
   await p.go("/?p=mum");
-  await p.click('[data-preset="4"]');
-  check("the Mum preset selects Mum", /Mum/.test(await p.text("#chips [aria-pressed=true]")));
+  await p.click('[data-preset="0"]');
+  check("a preset keeps the person picked", /Mum/.test(await p.text("#chips [aria-pressed=true]")));
   check("the preset fills the composer", await p.eval(
-    "document.querySelector('#ta').value === document.querySelector('[data-preset=\"4\"] .snip').textContent"));
+    "document.querySelector('#ta').value === document.querySelector('[data-preset=\"0\"] .snip').textContent"));
   await p.click("#send");
   await p.until("document.querySelector('[data-live] .steps4')", 30000);
   check("the URL becomes the assessment's own", /^\/c\//.test(await p.eval("location.pathname")));
@@ -172,7 +173,7 @@ async function flow(out) {
   await sendAndWait(p, "follow-up");
   const lines = await p.eval("[...document.querySelectorAll('.checked')].map(e => e.innerText)");
   check("the follow-up reports its cache reuse", /cached, read/.test(lines[lines.length - 1] || ""), lines.join(" | "));
-  check("the allowance counts down", /3 follow-ups left|Last follow-up/.test(await p.text(".allow")));
+  check("the allowance counts down", /3 follow-ups left|1 follow-up left/.test(await p.text(".allow")));
   await p.shot(join(out, "desktop-followup.png"), true);
   const path = await p.eval("location.pathname");
   await p.size(PHONE);
@@ -200,12 +201,31 @@ async function oneLeftEdge(p, where) {
 async function compare(out) {
   const p = await tab();
   await p.size(DESKTOP);
-  await p.go("/?p=self");
-  await p.click("[data-compare]");
+  // Beat 3 is one click: from Dad, with Compare off, preset 5 alone turns Compare
+  // on, sets You against Mum and sends.
+  await p.go("/?p=dad");
+  const t0 = Date.now();
   await p.click('[data-preset="4"]');
-  check("compare with the Mum preset picks You and Mum", await p.count("#chips .chip .ab") === 2);
-  await sendAndWait(p, "compare, both sides");
+  await p.until("location.pathname.startsWith('/c/') && document.querySelector('[data-live]')", 30000);
+  check("preset 5 turns Compare on by itself", await p.eval("document.querySelector('#chips [data-compare]').getAttribute('aria-pressed')") === "true");
+  check("preset 5 sets You against Mum", /^You\s*A\s*Mum\s*B$/.test(
+    (await p.eval("[...document.querySelectorAll('#chips .chip[aria-pressed=true]:not([data-compare])')].map(c => c.innerText).join(' ')")).trim()));
+  check("preset 5 sends by itself", /^\/c\//.test(await p.eval("location.pathname")));
+  await p.until(`document.querySelectorAll("#thread .bar, #thread .err-panel").length >= 2 && !document.querySelector("[data-live] .steps4")`, 300000, 300);
+  await sleep(700);
+  console.log(`      compare, both sides, one click: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   check("both sides answered", await p.count(".turn.pair .side-ans .bar") === 2);
+  // Constraint 16: a verdict a rule raised to red shows the app's steps, not
+  // the ones the model wrote for its own lower verdict. Skipped if no rule fired.
+  const raised = await p.eval(`(() => {
+    const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+    return side ? side.innerText.replace(/\\s+/g, " ") : null;
+  })()`);
+  if (raised) {
+    check("a raised red shows the app's steps",
+      ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raised.includes(t)), raised.slice(0, 300));
+    check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raised), raised.slice(0, 300));
+  }
   await oneLeftEdge(p, "compare");
   await p.shot(join(out, "desktop-compare.png"), true);
   const path = await p.eval("location.pathname");
@@ -315,14 +335,44 @@ async function reread(out, cid) {
   await p.go(`/c/${cid}`);
   await p.type("#ta", "It has come back again, just now.");
   await p.click("#send");
-  await p.until("/Re-reading this whole assessment/.test(document.querySelector('[data-live]')?.innerText || '')", 60000, 250);
+  await p.until("/lost this conversation and is re-reading/.test(document.querySelector('[data-live]')?.innerText || '')", 60000, 250);
   check("a slow read says it is re-reading, while it happens", true);
   await p.shot(join(out, "desktop-rereading.png"));
   await p.until(`document.querySelectorAll("#thread .checked").length >= 2 && !document.querySelector("[data-live] .steps4")`, 300000, 400);
   await sleep(700);
   const last = await p.eval("[...document.querySelectorAll('.checked')].pop().innerText");
-  check("the answer says it re-read everything, and why", /re-read/.test(last) && /memory of this assessment/.test(last), last);
+  check("the answer says it re-read everything, and why", /re-read/.test(last) && /lost this conversation/.test(last), last);
   await p.shot(join(out, "desktop-reread-answer.png"));
+  await p.close();
+}
+
+// A stream that drops mid-answer, as two did once on 2026-09-19 with the server
+// still finishing and saving both. The page's stream reader is made to fail
+// after a few reads; the server is untouched. The page must say the answer is
+// still being written, then show the saved answer without a reload.
+async function drop(out) {
+  const p = await tab();
+  await p.size(DESKTOP);
+  await p.go("/?p=self");
+  await p.eval(`(() => {
+    const read = ReadableStreamDefaultReader.prototype.read;
+    let n = 0;
+    ReadableStreamDefaultReader.prototype.read = function () {
+      return ++n > 4 ? Promise.reject(new TypeError("network error")) : read.call(this);
+    };
+    return true;
+  })()`);
+  const t0 = Date.now();
+  await p.click('[data-preset="0"]');
+  await p.click("#send");
+  await p.until("document.querySelector('#busy-note')", 120000, 250);
+  check("a dropped stream says the answer is still being written", /Still writing/.test(await p.text("#busy-note")));
+  check("the composer waits while it is written", await p.eval("document.querySelector('#send').disabled"));
+  await p.shot(join(out, "desktop-dropped.png"));
+  await p.until(`document.querySelector("#thread .bar") && !document.querySelector("#busy-note")`, 300000, 500);
+  console.log(`      dropped, then saved: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  check("the saved answer appears without a reload", await p.count("#thread .bar") === 1);
+  await p.shot(join(out, "desktop-dropped-answer.png"), true);
   await p.close();
 }
 
@@ -393,7 +443,7 @@ const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const chrome = await launch();
 try {
-  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review }[mode];
+  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

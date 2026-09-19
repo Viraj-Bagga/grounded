@@ -4441,3 +4441,127 @@ grounded. That makes You refused 7 of 7 and Mum escalated to red 5 of 5
 across both sessions. One outlier it could not explain: Mum's first turn ran
 at 6.6 tok/s (53.6 s). The compare took 36.9 s.
 `06-demo/results/2026-09-19-ui-check.txt`.
+
+### 2026-09-19 Demo UI rebuilt as a product, 06-demo/. Committed as 19652e1.
+
+The test page is replaced by a conversation UI, phone first and widened for
+the laptop: person chips in the top bar, past assessments in a sidebar (a
+drawer on the phone), and a People page that is a form, never chat. Every
+assessment and person has its own URL, `/c/<id>` and `/people/<id>`. The old
+`server.py` and `index.html` are in `06-demo/_backup/2026-09-19-before-rebuild/`,
+identical to c48e67b and gitignored. Everything the old page showed is kept.
+
+**Follow-ups, up to 4 per assessment.** A follow-up keeps the messages, the
+profile and the first turn's chunks, with no retrieval (constraint 8). The
+system prompt and first message stay byte-identical and the follow-up goes in
+as `[FOLLOW-UP] ... [/FOLLOW-UP]`, so the prefix cache hits. Each assessment is
+pinned to a llama-server slot. Guards run on every turn: pregnancy over
+everything said so far, the scope floor on turn 1 only, Viraj's call. Deleting
+a person keeps their assessments, Viraj's call. History is one JSON file per
+assessment in `06-demo/data/conversations/`, with every turn's raw model
+output, gitignored.
+
+**Measured on CPU with Low Power Mode off.** First turn 15.0 to 54.0 s.
+Follow-up 7.1 to 22.5 s: it reads 37 to 48 new tokens in 1.1 to 1.9 s and
+reuses 1,420 to 1,805, and the rest is generation. Compare, both sides at once,
+23.3 to 42.1 s, the fastest when an identical prompt was still in the cache. Generation 19.6 to 22.2 tok/s alone and about 8 to 12 with two
+at once; prompt eval 62 to 69 tok/s. About double the Low Power Mode figures.
+`06-demo/results/2026-09-19-multiturn-latency.txt`, `2026-09-19-ui-check.txt`.
+
+**A taken slot is not a lost cache.** Predicted: when a third assessment takes
+a slot, the evicted one re-reads everything on its next follow-up, about 36 s.
+Measured: 1,805 tokens reused, read in 1.3 s. llama-server keeps idle slots in
+a host prompt cache (`--cache-ram`, default 8 GiB) and restores them. Only a
+restart loses it; then a follow-up re-read 1,664 tokens in 24.6 s, 35.1 s in
+all (`2026-09-19-reread-after-restart.txt`). The page says so while it
+happens and again in the answer's summary line.
+
+**The model cites prompt sections.** 8 of 37 model turns cited a section of
+the prompt instead of a key: `PATIENT PROFILE:`, `SYMPTOMS:`, `FOLLOW-UP:` or
+`RETRIEVED CONTEXT: CP-ACS-003 (...)`. The guard drops all of them. 2 of the 8
+had the right key behind the label. Whether that should count is an open
+guards call, recorded under constraint 9, and the guard is unchanged.
+`2026-09-19-prompt-section-citations.txt`.
+
+**Tooth on 35 chunks.** "My tooth is killing me and my gums are swollen" on
+You came back red citing CP-PERI-001, one run. Constraint 13's hole.
+`2026-09-19-tooth-on-35-chunks.txt`.
+
+**A test deleted a real profile.** The first people test found its test person
+with `/Sam/`, which also matched the new Sample tag, and deleted You (`self`)
+from `data/people.json`. Restored, with its prompt text checked byte-identical
+to the seed. The test now looks its person up by exact label and refuses to
+delete a seeded person.
+
+**Design.** Impeccable skill, direction "Health Worker's Handset", seed
+18445d6f. The finish review found 8 material fixes, all resolved over two
+rounds, disposition ship. `06-demo/DESIGN.md` records the system as built.
+Then Viraj's calls: the refusal hatch draws dark stripes instead of light, so
+white text on it is 6.39:1 or better where it was 4.40:1, under WCAG AA,
+checked from the rendered pixels. The claude.md dispositions table now matches
+the page's wording. The accent blue, corner radii and two unused tokens are
+left as they are.
+
+**After 19652e1, Viraj's calls.**
+
+- **Beat 3 is one click.** Preset 5 is now "Indigestion (You and Mum)". It
+  turns Compare on, sets You against Mum and sends, from any person and with
+  Compare off. If either profile has been deleted it falls back to an
+  ordinary preset. It held 3 of 3 in the page: You refused (nothing cited),
+  Mum red raised by R1. `06-demo/results/2026-09-19-copy-and-one-click.txt`.
+- **Patient-facing copy is Viraj's wording.** The child and pregnancy refusals
+  and the not-grounded note (the constants in `02-pairs/guards.py`), the
+  who-is-this-for question (`06-demo/pipeline.py`), the rule line heads
+  ("Raised to red", "Backs up this red", "At least yellow", "Flagged"), the
+  re-read notice, the busy line, the Sample note, the status line, the model
+  lamp, the still-writing notice and the follow-up count.
+- **No guard matches on any of these strings.** The guards self-test compares
+  the pregnancy message with the constant, not with its text. Guards 84 of 84
+  and escalation 34 of 34 pass after the change.
+- **Three UI test expectations broke and were updated.** The re-read test
+  waited for "Re-reading this whole assessment" and then looked for "memory
+  of this assessment", and would have timed out. The countdown check's "Last
+  follow-up" alternative no longer exists. Separately, the flow test used the
+  Mum preset, which now runs a comparison, so it uses preset 1. Every UI check
+  passes on the final code except the re-read test, which was not run: it
+  restarts llama-server, and a browser had the demo open.
+- **Where the copy needed a choice.** The heads take the real level, so a
+  raise that ends at yellow reads "Raised to yellow" and a rule backing a
+  yellow reads "Backs up this yellow". "Noted", shown only when there is no
+  verdict to raise, is unchanged. The who-is-this-for question names the
+  person on someone else's profile ("continue if it's about Mum"). The re-read
+  summary line uses the same words in the past tense, "The model lost this
+  conversation and re-read it.", and the live notice no longer gives a time.
+
+**A dropped stream froze the page. Fixed.** The first one-click comparison
+stalled with A at 1 token and B still reading. The server finished both and
+saved them (34.3 s and 41.5 s), but in the page both streams ended together
+12.8 s in: the connections were cut, the stream reader threw, and the answer
+never appeared. Cause not known, and it did not reproduce. The page now treats
+a dropped stream like an answer running in another tab: it says "Still writing
+this side...", holds the composer and polls until the saved turn lands.
+`ui_check.mjs drop` makes the page's reader fail mid-answer with the server
+untouched, and passes: the saved answer appeared 25.3 s later without a
+reload.
+
+**A raised red kept the model's yellow steps. Fixed, and now constraint 16.**
+When R1 raised Mum to red, the bar said "Call emergency services now" while the
+steps under it were the ones the model wrote for its yellow: "Monitor symptoms"
+and, in one run, "Follow up with primary care provider within 24 hours". It was
+on screen in every one-click comparison. Viraj's call: a red that says "monitor
+symptoms" contradicts its own disposition, so a raise to red now replaces the
+model's steps with the app's own, "Call emergency services now.", "Do not drive
+yourself.", "Stay where you are.". They need no citation for the same reason
+the disposition needs none. The model's steps are not hidden: they render
+struck through, tagged "removed: written for a yellow". `RAISED_RED_STEPS` in
+`06-demo/pipeline.py`, and the compare check in `ui_check.mjs` asserts both
+halves. Not covered: a raise that ends at yellow, and the rationale, which is
+always still the model's, so a raised red can carry a "Why" that argues for a
+yellow, as these runs do.
+
+**Also Viraj's calls, same pass.** The still-writing notice reads "Still
+writing..." in a single assessment and keeps "this side" only in a comparison.
+The child note on the empty screen now uses the refusal's words, "This app
+can't assess children." The demo history was cleared for the desk:
+`rm -f 06-demo/data/conversations/*.json` is all it takes, one file per
+assessment and no cache, and `06-demo/data/people.json` is untouched.

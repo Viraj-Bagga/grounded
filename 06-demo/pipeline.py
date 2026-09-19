@@ -66,6 +66,14 @@ TOP_K = 3
 ALPHA = 0.5
 
 MAX_FOLLOWUPS = 4
+# CONSTRAINT 16. When a profile rule raises a verdict to red, the model's steps
+# were written for the verdict IT gave, so a yellow's "monitor symptoms" sits
+# under a red disposition and contradicts it. Measured 2026-09-19 on the
+# one-click comparison. These replace them. They are the app's own words, like
+# the disposition, so they carry no citation. Viraj's wording.
+RAISED_RED_STEPS = ("Call emergency services now.",
+                    "Do not drive yourself.",
+                    "Stay where you are.")
 TURN_BUDGET = 520       # tokens set aside per follow-up: its message and an answer
 MAX_TOKENS = 1024
 MIN_ANSWER = 300        # below this the answer could be cut off mid-JSON
@@ -286,8 +294,8 @@ class Engine:
             you = "you" if prof["label"] == "You" else prof["label"]
             emit("confirm_subject", {
                 "term": term, "who": you,
-                "message": (f'This mentions a child ("{term}"). If it is about them, '
-                            f"choose their profile. If it is about {you}, continue.")})
+                "message": (f"This sounds like it's about a child. Pick their profile, "
+                            f"or continue if it's about {you}.")})
             return
 
         # Everything the person has typed in this assessment, in order. The
@@ -495,6 +503,12 @@ class Engine:
             result["follow_up_questions"] = kept_q
             dropped = dict(dropped, follow_up_questions=list(
                 dropped.get("follow_up_questions") or []) + cleared)
+            # Constraint 16: the steps must match the urgency that is SHOWN.
+            # The model's steps go out as removed, so the swap is visible.
+            if result["urgency"] == "red":
+                dropped = dict(dropped, next_steps_urgency=list(
+                    result.get("next_steps") or []))
+                result["next_steps"] = list(RAISED_RED_STEPS)
 
         cites = [self.chunk_meta(k) for k in result.get("citations", [])]
         ev = {"result": result, "ungrounded": ungrounded, "escalation": escalation,

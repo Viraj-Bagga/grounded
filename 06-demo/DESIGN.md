@@ -294,7 +294,7 @@ Blunt and filled with ink; there is no blue button.
 - **Style:** 3rem, paper, 1.5px rule-2 border, 6px corners, 1.0625rem body text; the composer field grows to 10rem. Placeholder in ink-3.
 - **Focus:** blue border plus a 3px action-soft halo, no outline.
 - **Error:** the border goes to 2px ink and a bold line with the alert icon appears. No red is used for form errors.
-- **Disabled (busy composer):** the field and send are disabled while a turn runs, with a status line above saying why. That line ("Writing and checking the answer. You can add more when it is done.") and its placeholder ("Waiting for the answer to finish") are surface copy for Viraj to put in his own voice.
+- **Disabled (busy composer):** the field and send are disabled while a turn runs, with a status line above saying why. That line, "Writing the answer. You can add more once it's done.", is Viraj's wording (2026-09-19). Its placeholder, "Waiting for the answer to finish", is still surface copy for him to confirm.
 - **Segmented control:** a joined pair in one 1.5px rule-2 frame; the pressed half fills with ink.
 - **Token field:** conditions and medications as well-filled 4px tokens with a drawn close button, inside a field-styled frame.
 
@@ -306,13 +306,13 @@ Blunt and filled with ink; there is no blue button.
 A square full-width field, at least 3.75rem, holding the verdict word at 800 and the disposition at 700. Red, yellow and green for the three WHO categories; hatched hold for OUT OF SCOPE, NOT ASSESSED and WHO IS THIS FOR?. It is exposed as a level-2 heading. On arrival it develops left to right in two hard steps over 180ms, and not at all under reduced motion. The disposition strings are Viraj's copy and are recorded here as he wrote them, not as system copy to vary: "Call emergency services now", "Be seen today", "Self-care, and the signs that change the answer". The refusal and not-assessed messages beneath the bar are also his.
 
 ### Rule Lines (signature)
-Pinned directly under the bar in a hairline frame with no top border, so they read as part of the verdict. Each line has a drawn icon (blue raise arrow when the rule raised the verdict, ink-3 check-circle when it supports it, flag when it only flags), a bold head ("Raised YELLOW to RED", "Supports this RED"), the profile fact and symptom, the quoted source line in ink-2 with curly quotes, and a citation chip with the rule id in mono. The wording of rule lines is Viraj's.
+Pinned directly under the bar in a hairline frame with no top border, so they read as part of the verdict. Each line has a drawn icon (blue raise arrow when the rule raised the verdict, ink-3 check-circle when it supports it, flag when it only flags), a bold head ("Raised to red" or "Raised to yellow", "Backs up this red", "At least yellow", "Flagged"), the profile fact and symptom, the quoted source line in ink-2 with curly quotes, and a citation chip with the rule id in mono. The wording of rule lines is Viraj's.
 
 ### Said Row
 What the person said, as a record: a square well row across the column with "For Dad · 3:34 PM" in meta, the words in body, and an optional timeline in mono with a bold "Timeline" label. Never a bubble, never right-aligned.
 
 ### Working Steps
-Four equal columns, Retrieve, Read, Write, Check, each topped by a 4px stripe: rule when waiting, a blue and wash dashed stripe while running, solid blue when done, dashed and greyed when skipped. A mono-free sub-line under each gives the count or time. The raw model stream stays hidden behind a "Show what the model is writing" text action. A slow re-read shows a well notice with the info icon; its wording ("Re-reading this whole assessment. ...") is surface copy for Viraj to put in his own voice.
+Four equal columns, Retrieve, Read, Write, Check, each topped by a 4px stripe: rule when waiting, a blue and wash dashed stripe while running, solid blue when done, dashed and greyed when skipped. A mono-free sub-line under each gives the count or time. The raw model stream stays hidden behind a "Show what the model is writing" text action. A slow re-read shows a well notice with the info icon; its wording, "The model lost this conversation and is re-reading it.", is Viraj's (2026-09-19), and the answer's summary line says "The model lost this conversation and re-read it." afterwards.
 
 ### Keypad Numerals
 Numbered steps and presets sit beside a 2rem square with a 1.5px ink border, 6px corners and a bold numeral. "What to do" is always numbered this way.
@@ -327,7 +327,7 @@ A full-width text button above a hairline: check icon, "Checked", total time, re
 
 ### Profile Tags
 - **Under 16:** a small hatched hold tag, bold 0.75rem.
-- **Sample:** a small dashed ink-3 tag on seeded demo people ("Sample" in the list, "Sample profile" on the who-card). This label, and the list note "People marked Sample are made-up profiles for the demo, not patients.", are surface copy for Viraj to put in his own voice.
+- **Sample:** a small dashed ink-3 tag on seeded demo people ("Sample" in the list, "Sample profile" on the who-card). The list note, "Sample profiles are made up for this demo.", is Viraj's wording (2026-09-19). The two labels are surface copy for him to confirm.
 - **Rule id:** mono bold 0.75rem in a 1px rule-2 box.
 
 ### Source Sheet

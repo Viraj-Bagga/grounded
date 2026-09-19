@@ -32,7 +32,7 @@ export function peopleListHTML(people, flash) {
       <a class="btn primary" href="/people/new" data-link>${icon("plus")}Add person</a></div>
     <p class="lede">Each person's profile changes what the app watches for when it assesses them.
       Profiles are changed here, never in the conversation.</p>
-    ${people.some(p => p.sample) ? `<p class="lede">People marked Sample are made-up profiles for the demo, not patients.</p>` : ""}
+    ${people.some(p => p.sample) ? `<p class="lede">Sample profiles are made up for this demo.</p>` : ""}
     <ul class="people">${people.map(p => `<li><a href="/people/${esc(p.id)}" data-link>
       <span class="nm">${esc(p.label)}${p.child ? '<span class="u16">Under 16</span>' : ""}${p.sample ? '<span class="sample">Sample</span>' : ""}</span>
       <span class="fx">${esc(facts(p))}</span>

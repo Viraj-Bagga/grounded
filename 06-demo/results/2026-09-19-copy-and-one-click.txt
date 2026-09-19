@@ -1,0 +1,242 @@
+2026-09-19 20:47 to 20:59 UTC (16:47 to 16:59 local) Viraj's copy, the one-click beat 3 preset, and a dropped stream
+config: llama-server b10809-5266f24da, Q4_K_M, --jinja -np 2 -ngl 0 -c 8192 (CPU); demo 06-demo/server.py restarted at 16:47
+        with the new guard messages; temperature 0.2, reasoning off, schema on; 35 chunks; macOS low power mode 0;
+        the other session's servers off
+build: main at 19652e1 plus, uncommitted: Viraj's copy (02-pairs/guards.py constants, 06-demo/pipeline.py, the page),
+       preset 5 as a one-click comparison, and the dropped-stream recovery below
+
+== self-tests after the copy change
+  python 02-pairs/guards.py      84/84 passed (fixtures shared with guards.ts)
+  python 02-pairs/escalation.py  34/34 passed
+  No guard matches on any replaced string: the guards self-test compares the pregnancy message with the
+  constant itself, and no fixture, test or code path reads the message text.
+
+== the new copy, straight from the server (refused before generation, so no model output involved)
+  child profile (Maya), 20260919-164746-142aea
+    said: She has a pain in her chest.
+    refused: This app can't assess children. Call a doctor or emergency services.
+  pregnancy on You, 20260919-164746-aebf96
+    said: I'm pregnant and my chest hurts when I breathe in.
+    refused: This app can't assess chest or stomach symptoms during pregnancy, or when a period is late. Call your doctor, your midwife, or emergency services now.
+  child word on You: confirm_subject: This sounds like it's about a child. Pick their profile, or continue if it's about you.
+  child word on Mum: confirm_subject: This sounds like it's about a child. Pick their profile, or continue if it's about Mum.
+    (a question is not a turn, so these two files have no turns; the text is as the API returned it)
+
+== UI checks, first pass, as printed
+  === shots  16:48:04
+  PASS  desktop: new assessment shows presets
+  PASS  desktop: people list shows the household
+  PASS  desktop: Mum's form shows the rules her profile turns on
+  PASS  desktop: Maya's empty screen says she is not assessed
+  PASS  phone: new assessment shows presets
+  PASS  phone: people list shows the household
+  PASS  phone: Mum's form shows the rules her profile turns on
+  PASS  phone: Maya's empty screen says she is not assessed
+  all passed
+  === shots exit 0  16:48:10
+  === people  16:48:11
+  PASS  an empty form names what is missing
+  PASS  the preview shows the rule the new condition turns on
+  PASS  the new person is saved and listed
+  PASS  the new person gets a chip
+  PASS  the deleted person is gone, and only them
+  all passed
+  === people exit 0  16:48:13
+  === guards  16:48:13
+        child profile: 1.0 s
+  PASS  a child's profile gets NOT ASSESSED
+  PASS  a child word on an adult profile asks who it is for
+        out of scope: 1.0 s
+  PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+  all passed
+  === guards exit 0  16:48:18
+  === flow  16:48:18
+  PASS  a preset keeps the person picked
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 12.5 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0  16:49:00
+  === compare  16:49:00
+  PASS  preset 5 turns Compare on by itself
+  PASS  preset 5 sets You against Mum
+  PASS  preset 5 sends by itself
+  === compare exit 143  16:52:59
+
+== what stalled: the first one-click compare (20260919-164902-fbbeeb)
+  The page froze mid-answer: A at 'Write 1 tokens', B at 'Read' with its timer still counting. The server finished
+  both, You refused at 34.3 s and Mum red at 41.5 s, and saved them. In the page, the browser's resource timing showed
+  both /turn responses ending together 12.8 s into the stream, long before the server finished, so the connections were
+  cut, not completed. The stream reader then threw, which left the steps frozen and the timer running, and the saved
+  answer never appeared. The demo server has no timeout of its own. Cause of the cut: not known. It did not reproduce:
+
+== compare again, alone, 16:53, as printed
+  PASS  preset 5 turns Compare on by itself
+  PASS  preset 5 sets You against Mum
+  PASS  preset 5 sends by itself
+        compare, both sides, one click: 31.7 s
+  PASS  both sides answered
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+
+== the fix, and the drop test that checks it
+  api.js streamTurn: a connection that breaks mid-answer now emits 'dropped' instead of throwing. app.js: the side's
+  live view is cleared, the page shows 'Still writing this side...' with the composer held, and polls until the saved
+  turn lands. The same path already served an answer running in another tab. ui_check.mjs drop makes the page's
+  stream reader fail after four reads, with the server untouched, which is the failure seen above.
+  first run 16:55: PASS 'a dropped stream says the answer is still being written', FAIL 'the composer waits while
+    it is written': bindComposer re-enabled send from the live streams alone. Fixed to honour the held composer.
+  second run 16:56, as printed:
+  PASS  a dropped stream says the answer is still being written
+  PASS  the composer waits while it is written
+        dropped, then saved: 25.3 s
+  PASS  the saved answer appears without a reload
+  all passed
+
+== flow and compare on the final code, as printed
+  === flow  16:57:33
+  PASS  a preset keeps the person picked
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 12.8 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0  16:58:11
+  === compare  16:58:11
+  PASS  preset 5 turns Compare on by itself
+  PASS  preset 5 sets You against Mum
+  PASS  preset 5 sends by itself
+        compare, both sides, one click: 23.3 s
+  PASS  both sides answered
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+  === compare exit 0  16:58:37
+
+  not run: ui_check reread, whose two expected strings changed with the copy. It restarts llama-server, and a
+  browser had the demo open (a health poll every 15 s with no test running), so it was left for Viraj:
+  a first turn through the API, restart llama-server on 8080, then node 06-demo/ui_check.mjs reread OUTDIR <id>.
+
+== the three one-click comparisons, turn by turn
+-- 20260919-164902-fbbeeb  for You and Mum
+  You: refused, the model cited nothing, so it had no grounded source to reason from; withheld green; total 34.3 s
+  Mum: red (model said yellow); total 41.5 s
+    rule R1 raised: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    citations kept: ['CP-ANG-003', 'CP-ACS-003']; removed: []
+    why: Indigestion is a common symptom of angina and heart attack, but no red flags are present. The patient is 64, has coronary artery disease, and is on metformin and atorvastatin, which are risk modifiers. However, symptoms are mild and not accompanied by chest pain, shortness of breath, or sweating. No red flags from symptom timeline. Risk factors from profile increase concern but do not require immediate care.
+    next steps: ['Monitor symptoms; if chest pain, shortness of breath, or sweating develop, seek emergency care immediately.', 'Continue current medications and lifestyle measures.', 'Follow up with primary care provider within 24 hours to assess for angina or cardiac events.']
+-- 20260919-165306-ebbe66  for You and Mum
+  You: refused, the model cited nothing, so it had no grounded source to reason from; withheld yellow; total 25.1 s
+  Mum: red (model said yellow); total 30.9 s
+    rule R1 raised: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    citations kept: ['CP-ANG-003', 'CP-ACS-003']; removed: []
+    why: Patient is 64 years old with coronary artery disease, which is a risk modifier. She reports mild indigestion after lunch, a possible symptom of angina or heart attack. However, symptoms are mild, not accompanied by chest pain, heaviness, or shortness of breath, and she is not experiencing acute distress. No red flags present. Risk factors from profile (CAD) increase concern but do not require immediate care.
+    next steps: ['If symptoms worsen, especially chest pain, pressure, or shortness of breath, seek immediate care.', 'Monitor for new or worsening symptoms such as chest discomfort, arm pain, or shortness of breath.']
+-- 20260919-165812-14079a  for You and Mum
+  You: refused, the model cited nothing, so it had no grounded source to reason from; withheld yellow; total 19.7 s
+  Mum: red (model said yellow); total 22.4 s
+    rule R1 raised: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    citations kept: ['CP-ANG-003']; removed: ['PATIENT PROFILE: Age 64, female, type 2 diabetes, coronary artery disease.']
+    why: Indigestion is a common symptom of angina and may indicate cardiac ischemia, especially given the patient's coronary artery disease. However, symptoms are mild and not accompanied by chest pain, heaviness, or shortness of breath. Risk modifiers (diabetes, CAD) increase concern but do not meet red criteria. No red flags present.
+    next steps: ['Monitor symptoms; if chest pain, pressure, or worsening indigestion occurs, seek immediate care.', 'Avoid exertion; rest and stay hydrated.']
+
+reading: the one-click beat held 3 of 3: You refused (nothing cited) and Mum red, raised by R1 each time. One of the
+three stalled in the page on a dropped connection; the page now recovers from that, verified by the drop test.
+
+
+==================================================================================================
+2026-09-19 21:07 to 21:10 UTC (17:07 to 17:10 local) constraint 16: the steps must match the urgency that is SHOWN
+config: as above; demo server restarted 17:07 with the change; the other session's servers off
+change: when the escalation layer raises a verdict to red, the model's next_steps are replaced by the app's own
+        (RAISED_RED_STEPS in 06-demo/pipeline.py) and the model's render struck through, tagged 'written for a yellow'.
+
+== the compare, as printed (the new checks are the last two before the left-edge one)
+  PASS  preset 5 turns Compare on by itself
+  PASS  preset 5 sets You against Mum
+  PASS  preset 5 sends by itself
+        compare, both sides, one click: 22.6 s
+  PASS  both sides answered
+  PASS  a raised red shows the app's steps
+  PASS  the model's own steps are shown as removed
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+
+== the rest of the checks on the final code, as printed
+  === shots  17:09:18
+  PASS  desktop: new assessment shows presets
+  PASS  desktop: people list shows the household
+  PASS  desktop: Mum's form shows the rules her profile turns on
+  PASS  desktop: Maya's empty screen says she is not assessed
+  PASS  phone: new assessment shows presets
+  PASS  phone: people list shows the household
+  PASS  phone: Mum's form shows the rules her profile turns on
+  PASS  phone: Maya's empty screen says she is not assessed
+  all passed
+  === shots exit 0
+  === people  17:09:24
+  PASS  an empty form names what is missing
+  PASS  the preview shows the rule the new condition turns on
+  PASS  the new person is saved and listed
+  PASS  the new person gets a chip
+  PASS  the deleted person is gone, and only them
+  all passed
+  === people exit 0
+  === guards  17:09:27
+        child profile: 1.0 s
+  PASS  a child's profile gets NOT ASSESSED
+  PASS  a child word on an adult profile asks who it is for
+        out of scope: 1.4 s
+  PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+  all passed
+  === guards exit 0
+  === flow  17:09:32
+  PASS  a preset keeps the person picked
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 8.0 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0
+  === drop  17:10:01
+  PASS  a dropped stream says the answer is still being written
+  PASS  the composer waits while it is written
+        dropped, then saved: 13.9 s
+  PASS  the saved answer appears without a reload
+  all passed
+  === drop exit 0
+
+== the raised red, turn by turn
+-- 20260919-170740-baca01  for You and Mum
+  You: refused, the model cited nothing, so it had no grounded source to reason from; withheld green
+  Mum: red (model said yellow), total 21.8 s
+    rule R1 raised: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    steps shown: ['Call emergency services now.', 'Do not drive yourself.', 'Stay where you are.']
+    steps removed as written for a yellow: ['Monitor for any chest pain, heaviness, or shortness of breath. If symptoms worsen or new symptoms develop, seek immediate care.', 'Continue current medications and follow up with cardiology as per routine plan.']
+    questions removed on a red: ['Any chest pain, heaviness, or discomfort in the center or left side of the chest?', 'Any shortness of breath at rest or with minimal activity?', 'Any sweating, light-headedness, or unusual fatigue?']
+    citations kept: ['CP-ACS-003', 'CP-ANG-003']
+    why (still the model's, and still argues for its own verdict): Indigestion is a non-specific symptom that can occur in many conditions, including angina. The patient is 64, female, with coronary artery disease, which is a risk modifier. However, no red flags such as chest pain, heaviness, or shortness of breath are present. The symptom is mild and not worsening. Risk factors from profile (CAD) increase concern but do not meet emergency criteria. No red flags present. Cites: CP-ANG-003 (angina symptoms include indigestion), CP-ACS-003 (heart attack symptoms include indigestion).
+
+reading: the red now carries steps that match it. The model's own steps stay visible as removed, so the swap is not
+hidden. The rationale is untouched and still reads as the model's yellow reasoning, which constraint 16 records as
+not covered.

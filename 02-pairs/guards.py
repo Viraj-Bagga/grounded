@@ -414,10 +414,8 @@ PREGNANCY_SYMPTOM = re.compile(
     r"short\s+of\s+breath|breathless|palpitation\w*)\b", re.IGNORECASE)
 
 PREGNANCY_REFUSAL = (
-    "This system cannot assess chest or abdominal symptoms in pregnancy, or "
-    "when a period is late or missed. Those symptoms can have causes it has no "
-    "information about, and some of them are urgent. Please contact a doctor, "
-    "your midwife or emergency services now rather than relying on this.")
+    "This app can't assess chest or stomach symptoms during pregnancy, or when a "
+    "period is late. Call your doctor, your midwife, or emergency services now.")
 
 
 # CHILDREN. Decided by the selected PROFILE'S AGE since 2026-09-19, not by text.
@@ -468,9 +466,7 @@ AGE_INFANT = re.compile(
     rf"\b(?:{_NUMBER})[\s-]*(?:months?|weeks?|days?)[\s-]*old\b", re.IGNORECASE)
 
 PAEDIATRIC_REFUSAL = (
-    "This system cannot assess children. Their symptoms can have causes it has "
-    "no information about, and some of them are urgent. Please contact a doctor "
-    "or emergency services now rather than relying on this.")
+    "This app can't assess children. Call a doctor or emergency services.")
 
 
 def _number(s):
@@ -546,9 +542,8 @@ def scope_check(max_cosine=None, citations=None, floor=SCOPE_FLOOR):
 # and questions are withheld, because none of them is grounded in a source.
 # The caller gets them back separately; nothing is silently dropped. A yellow or
 # green that cites nothing is still refused.
-UNGROUNDED_NOTE = ("This system could not ground this answer in its sources, so "
-                   "only the urgency is shown. A possible emergency is never "
-                   "withheld.")
+UNGROUNDED_NOTE = ("We couldn't match this to a source, so we're only showing the "
+                   "urgency. We don't hide a possible emergency.")
 
 
 def post_flight(result):

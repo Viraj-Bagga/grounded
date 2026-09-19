@@ -51,12 +51,18 @@ export async function streamTurn(cid, body, onEvent) {
   const reader = r.body.getReader();
   const dec = new TextDecoder();
   let buf = "";
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const parts = buf.split("\n\n");
-    buf = parts.pop();
-    for (const p of parts) if (p.startsWith("data: ")) onEvent(JSON.parse(p.slice(6)));
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const parts = buf.split("\n\n");
+      buf = parts.pop();
+      for (const p of parts) if (p.startsWith("data: ")) onEvent(JSON.parse(p.slice(6)));
+    }
+  } catch {
+    // The connection dropped mid-answer. The server still finishes the turn and
+    // saves it, so the caller waits for it instead of freezing.
+    onEvent({ event: "dropped" });
   }
 }

@@ -239,6 +239,12 @@ Violating any of these silently breaks something downstream. They are not prefer
 
     **Symptom matching is lexical.** A miss means no escalation, and the model's verdict stands. Profile facts are structured. Python and demo only; `guards.ts` has no port.
 
+16. **The steps shown must match the urgency that is SHOWN, not the one the model gave.** When the escalation layer raises a verdict, the model wrote its `next_steps` for its own lower verdict, and they then sit under a disposition that contradicts them. **Measured 2026-09-19** on the one-click comparison: Mum's RED banner, "Call emergency services now", above "Monitor symptoms; if chest pain, pressure, or worsening indigestion occurs, seek immediate care" and, in another run, "Follow up with primary care provider within 24 hours". It was on screen in every run of that beat, because R1 raises that case every time. This is app logic, like constraints 9 and 12; a prompt rule cannot hold it, because the model never sees the raised verdict.
+
+    **A raise to red replaces them with the app's own steps:** "Call emergency services now.", "Do not drive yourself.", "Stay where you are." They are the app's words, like the disposition itself, so they carry no citation and need none. Viraj's wording and his call. `RAISED_RED_STEPS` in `06-demo/pipeline.py`. **The model's steps are not hidden:** they render struck through and tagged "removed: written for a yellow", so the swap is visible, same as every other guard removal. Verified live 2026-09-19, `06-demo/results/2026-09-19-copy-and-one-click.txt` and the compare check in `06-demo/ui_check.mjs`.
+
+    **Not covered, and worth knowing:** a raise that ends at yellow still shows the model's steps, and **the rationale is always still the model's**, so a raised red can carry a "Why" that argues for a yellow, as the measured runs do. The verdict, the disposition and the steps are what a person acts on; the rule line above the answer says what raised it. Python and the demo only; `guards.ts` has no port.
+
 ---
 
 ## Licensing: what may and may not ship

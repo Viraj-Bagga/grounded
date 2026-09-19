@@ -33,15 +33,16 @@ const PRESETS = [
   ["Sharp pain when breathing in",
    "Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.",
    "T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion."],
-  // BEAT 3, REFRAMED 2026-09-19: same symptom, two people. In compare mode it
-  // sets You against Mum. Mum gets a red that R1 escalated (her diabetes,
+  // BEAT 3, REFRAMED 2026-09-19: same symptom, two people. One click turns
+  // Compare on, sets You against Mum and sends (Viraj's call, so the whole beat
+  // is one click at the desk). Mum gets a red that R1 escalated (her diabetes,
   // CP-ACS-002) with the rule line; You gets refused, because the model cited
   // nothing. Held on every run on the 35-chunk corpus: You refused 6 of 6, Mum
   // escalated to red 3 of 3, one grounded and two through the refusal rescue.
   // It replaced "Feeling a bit sick and sweaty after dinner", which refused You
   // only 2 of 3. 01-data/eval/runs/2026-09-19-beat3-reframe-indigestion-pairs.txt
-  ["Indigestion (Mum)",
-   "A bit of indigestion after lunch, nothing much.", "", "mum"],
+  ["Indigestion (You and Mum)",
+   "A bit of indigestion after lunch, nothing much.", "", ["self", "mum"]],
 ];
 
 const S = {
@@ -165,7 +166,7 @@ function renderStatus() {
   const el = $("#status");
   el.classList.toggle("down", !(h && h.ok));
   el.innerHTML = `<span class="lamp"></span>` + (h && h.ok
-    ? `Model on this device, ready`
+    ? `Model loaded, ready`
     : `Model not running. Start llama-server.`);
 }
 
@@ -187,7 +188,7 @@ function whoCard(p, big) {
     ${big ? `<h1>For ${esc(p.label === "You" ? "you" : p.label)}</h1>` : `<h2 style="margin:0;font-size:var(--t-20)">${esc(p.label)}</h2>`}
     ${p.sample ? `<div><span class="sample">Sample profile</span></div>` : ""}
     <div class="facts">${esc(facts(p))}</div>
-    ${p.child ? `<div class="kid-note">${esc(p.label)} is under 16. This app does not assess children.</div>` : ""}
+    ${p.child ? `<div class="kid-note">${esc(p.label)} is under 16. This app can't assess children.</div>` : ""}
     ${watch}
     <a class="edit" href="/people/${esc(p.id)}" data-link>Edit ${esc(p.label === "You" ? "your profile" : p.label)}</a>
   </div>`;
@@ -223,11 +224,21 @@ function showNew() {
 
 function usePreset(i) {
   const [, text, tl, who] = PRESETS[i];
-  if (who && byId(who)) {
-    // A preset that needs a profile picks it: alone, or against You to compare.
-    S.picked = S.compare && who !== "self" ? ["self", who] : [who];
-  }
   S.draft = { text, timeline: tl, showTl: !!tl };
+  const pair = Array.isArray(who) ? who.filter(byId) : [];
+  if (pair.length === 2) {
+    // A pair is a whole demo beat: Compare on, both people, sent at once.
+    S.compare = true;
+    S.picked = pair;
+    showNew();
+    send();
+    return;
+  }
+  const one = Array.isArray(who) ? pair[0] : who;
+  if (one && byId(one)) {
+    // A preset that needs a profile picks it: alone, or against You to compare.
+    S.picked = S.compare && one !== "self" ? ["self", one] : [one];
+  }
   showNew();
   $("#ta").focus();
 }
@@ -251,7 +262,7 @@ function allowance(conv) {
 function composerHTML({ first, left, max = 4, names, busy }) {
   if (busy) {
     return `<div class="composer"><form class="in" id="compose" autocomplete="off">
-      <div class="waiting" role="status">Writing and checking the answer. You can add more when it is done.</div>
+      <div class="waiting" role="status">Writing the answer. You can add more once it's done.</div>
       <div class="field-row"><label class="sr" for="ta">Waiting</label>
         <textarea class="ta" id="ta" rows="1" disabled placeholder="Waiting for the answer to finish">${esc(S.draft.text)}</textarea>
         <button class="send" id="send" type="submit" disabled aria-label="Send">${icon("send")}</button></div>
@@ -268,8 +279,8 @@ function composerHTML({ first, left, max = 4, names, busy }) {
     const pips = `<span class="pips" aria-hidden="true">${Array.from({ length: max }, (_, i) =>
       `<span class="pip${i < used ? " used" : ""}"></span>`).join("")}</span>`;
     line = left === 1
-      ? `<div class="allow last">${pips}Last follow-up in this assessment</div>`
-      : `<div class="allow">${pips}${left} follow-ups left in this assessment</div>`;
+      ? `<div class="allow last">${pips}1 follow-up left</div>`
+      : `<div class="allow">${pips}${left} follow-ups left</div>`;
   }
   const ph = first ? "Describe what is happening, in your own words" : "Add something, or answer a question";
   return `<div class="composer"><form class="in" id="compose" autocomplete="off">
@@ -308,7 +319,7 @@ function bindComposer() {
     if (S.draft.showTl) { tl.value = ""; tl.focus(); }
   };
   form.onsubmit = e => { e.preventDefault(); send(); };
-  const busy = Object.keys(S.live).some(k => !S.live[k].final);
+  const busy = ta.disabled || Object.keys(S.live).some(k => !S.live[k].final);
   $("#send").disabled = busy;
   if (!touch && !busy) ta.focus();
 }
@@ -397,13 +408,13 @@ function renderConversation() {
   }
   const busyOther = (conv.busy || []).filter(k => !S.live[k]);
   if (busyOther.length) {
-    h += `<div class="notice" id="busy-note">${icon("info")}<span><b>Still writing an answer here.</b> ` +
-      `It started in another tab or before a reload, and appears when it is saved.</span></div>`;
+    h += `<div class="notice" id="busy-note">${icon("info")}<span>` +
+      `Still writing${conv.sides.length > 1 ? " this side" : ""}...</span></div>`;
   }
   const first = conv.sides.every(s => !s.anchor);
   const left = allowance(conv);
   $("#main").innerHTML = `<div class="page${pair ? " pair" : ""}" id="thread">${h}</div>` +
-    composerHTML({ first, left, busy: Object.values(S.live).some(p => !p.final),
+    composerHTML({ first, left, busy: Object.values(S.live).some(p => !p.final) || busyOther.length > 0,
       max: S.health ? S.health.max_followups : 4,
       names: conv.sides.map(s => s.profile.label).join(" and ") });
   bindThread();
@@ -538,6 +549,7 @@ async function runTurn(cid, k, text, timeline, confirmed) {
     soon();
   });
   clearInterval(tick);
+  if (p.final && p.final.event === "dropped") return awaitSaved(cid, k);
   if (!p.final) p.final = { event: "error", message: "The answer stopped before it finished." };
   paint();
   p.shown = true;
@@ -558,14 +570,29 @@ async function runTurn(cid, k, text, timeline, confirmed) {
   }
 }
 
-// A side that was already running when this page opened: wait for it to land.
+// A stream that dropped mid-answer. The server finishes the turn and saves it,
+// so the side shows as still being written until it lands.
+async function awaitSaved(cid, k) {
+  delete S.live[k];
+  try { S.conv = await api.conversation(cid); } catch { /* keep what is on screen */ }
+  if (location.pathname !== `/c/${cid}`) return;
+  renderConversation();
+  pollBusy(cid);
+}
+
+// A side still running on the server, from another tab, before a reload, or
+// after its stream dropped: wait for it to land.
+let polling = null;
 function pollBusy(id) {
+  if (polling === id) return;
+  polling = id;
   const t = setInterval(async () => {
-    if (location.pathname !== `/c/${id}`) return clearInterval(t);
+    if (location.pathname !== `/c/${id}`) { polling = null; return clearInterval(t); }
     const conv = await api.conversation(id).catch(() => null);
     if (!conv) return;
     if (!conv.busy || !conv.busy.length) {
       clearInterval(t);
+      polling = null;
       S.conv = conv;
       await refreshLists().catch(() => {});
       renderConversation();

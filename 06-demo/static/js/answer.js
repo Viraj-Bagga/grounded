@@ -77,9 +77,7 @@ export function pendingHTML(p) {
       (p.showRaw ? `<pre>${esc(p.raw)}</pre>` : "") + `</div>`;
   }
   if (p.slow) {
-    h += `<div class="notice">${icon("info")}<span><b>Re-reading this whole assessment.</b> ` +
-      `The model's memory of it was cleared, so it is reading everything again, ` +
-      `about ${secs(p.reading.full_read_ms)} in all.</span></div>`;
+    h += `<div class="notice">${icon("info")}<span>The model lost this conversation and is re-reading it.</span></div>`;
   }
   return h;
 }
@@ -102,12 +100,12 @@ function rulesHTML(ev) {
   const e = ev.escalation;
   if (!e || !e.fired || !e.fired.length) return "";
   const whose = ev.profile === "You" ? "your profile" : `${esc(ev.profile)}'s profile`;
-  const U = s => esc(String(s).toUpperCase());
+  const lc = s => esc(String(s).toLowerCase());
   return `<div class="rules">` + e.fired.map(f => {
-    const head = f.status === "raised" ? `Raised ${U(e.original)} to ${U(e.final)}`
-      : f.status === "supports" ? `Supports this ${U(e.final)}`
-      : f.status === "at_least" ? `Supports at least ${U(f.cap)}`
-      : f.status === "noted" ? "Noted" : "Flagged, no change";
+    const head = f.status === "raised" ? `Raised to ${lc(e.final)}`
+      : f.status === "supports" ? `Backs up this ${lc(e.final)}`
+      : f.status === "at_least" ? `At least ${lc(f.cap)}`
+      : f.status === "noted" ? "Noted" : "Flagged";
     const ic = f.status === "raised" ? "raised" : f.status === "flag" ? "flag" : "supports";
     return `<div class="rule${f.status === "raised" ? " raised" : ""}"><span class="ic">${icon(ic)}</span>` +
       `<div><div><span class="h">${head}</span>: ${esc(f.fact)} on ${whose}, with ${esc(f.symptom)}</div>` +
@@ -123,11 +121,17 @@ function resultHTML(ev, ctx) {
   let h = bar(u, u.toUpperCase(), DISPOSITION[u] || "", ctx.animate) + rulesHTML(ev);
 
   const steps = r.next_steps || [], goneSteps = drop.next_steps || [];
+  // Constraint 16: steps the model wrote for a lower verdict, replaced by the
+  // app's own when a profile rule raised the answer to red.
+  const goneLower = drop.next_steps_urgency || [];
+  const wrote = String(((ev.escalation || {}).original) || "").toLowerCase();
   h += section("What to do",
     (steps.length ? `<ol class="keys">${steps.map((s, i) => `<li><span class="key">${i + 1}</span>` +
       `<span>${esc(s)}${flagged.has(s) ? '<span class="tag">flagged, kept</span>' : ""}</span></li>`).join("")}</ol>`
       : `<p class="muted">No steps given.</p>`) +
-    (goneSteps.length ? `<ul class="plain">${goneSteps.map(x => gone(x, "medication instruction")).join("")}</ul>` : ""));
+    (goneSteps.length ? `<ul class="plain">${goneSteps.map(x => gone(x, "medication instruction")).join("")}</ul>` : "") +
+    (goneLower.length ? `<ul class="plain">${goneLower.map(x =>
+      gone(x, wrote ? `written for a ${wrote}` : "does not match a red")).join("")}</ul>` : ""));
 
   h += section("Why", `<p>${esc(r.rationale || "")}</p>`);
 
@@ -205,7 +209,7 @@ function errorHTML(ev) {
 // ------------------------------------------------ the one line, and its details
 
 function countRemoved(d = {}) {
-  return ["red_flags", "next_steps", "citations", "follow_up_questions"]
+  return ["red_flags", "next_steps", "next_steps_urgency", "citations", "follow_up_questions"]
     .reduce((n, k) => n + ((d[k] || []).length), 0);
 }
 
@@ -219,8 +223,7 @@ function checkedHTML(ev, ctx) {
   const bits = ["<b>Checked</b>", secs(ev.total_ms || 0), read, `wrote ${fmt(t.predicted_n)}`];
   if (removed) bits.push(`<b>${removed} removed</b>`);
   const why = !ev.first && c.re_read
-    ? `<span class="why">The model's memory of this assessment had been cleared` +
-      `${c.slot_taken ? " after another assessment used its slot" : ""}, so it read everything again.</span>`
+    ? `<span class="why">The model lost this conversation and re-read it.</span>`
     : "";
   const id = "d" + Math.random().toString(36).slice(2, 9);
   return `<button class="checked" type="button" aria-expanded="false" aria-controls="${id}">` +
@@ -258,6 +261,6 @@ function detailsHTML(ev, ctx) {
   h += `<div><h4>Removed by app guards</h4>${removed.length
     ? `<ul class="plain">${removed.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">Nothing.</span>`}</div>`;
   if (ctx.raw) h += `<div><h4>What the model wrote</h4><pre>${esc(ctx.raw)}</pre></div>`;
-  h += `<div class="fine">Reasoning off, schema-constrained, guards applied, no network.</div>`;
+  h += `<div class="fine">Runs on this device. Reasoning off, schema enforced, guards on, no network.</div>`;
   return h;
 }
