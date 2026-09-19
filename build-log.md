@@ -4442,6 +4442,98 @@ across both sessions. One outlier it could not explain: Mum's first turn ran
 at 6.6 tok/s (53.6 s). The compare took 36.9 s.
 `06-demo/results/2026-09-19-ui-check.txt`.
 
+### 2026-09-19 Held-out eval set drafted, 20 cases, awaiting Viraj's review. NOT frozen, no pairs generated.
+
+**Why first:** pairs written before the eval set exists can leak into it. No
+pair has been generated.
+
+**`01-data/eval/heldout-eval/HELDOUT-EVAL-v1.DRAFT.json`.** 20 cases: 2 red, 7
+yellow, 11 green (10/35/55%, weighted to the IITT base rate of 7/34/59; exact
+rounding would leave one red case). All nine conditions appear. Verdicts are
+held to the system prompt's own definitions: red is minutes matter, yellow is
+assessment within hours, green can wait or be self-managed. Every case has a
+structured profile, justifying keys and the verbatim lines that justify the
+verdict: 77 quotes, all verified.
+
+**The green gap shapes the set.** Only GERD (5), panic (4) and the chest pain
+overview (2, chest wall) can ground a green, because 7 of 9 conditions have no
+green chunk. The two chest wall greens rest on CP-DIFF-001 naming "Sore
+muscles" and costochondritis, and nothing more: the NEG-DISC gap.
+
+**Designed tensions, flagged for review:**
+- HE03, known stable angina: yellow on the 09-17 precedent, but green by the
+  prompt's own words.
+- HE06, pleurisy: no chunk gives it a disposition.
+- HE09, reflux with black stools: the chunk says only "see a doctor".
+- HE08 and HE09 are on purpose a different colour from the chunks they cite.
+  The DVT case is yellow on a red chunk and the bleeding case is yellow on a
+  green one, to test whether the model copies the chunk's category.
+- The panic greens are kept away from chest pain with sweating, dizziness,
+  nausea or breathlessness. CP-DIFF-001 sends that combination for immediate
+  care whatever the cause, and it is one of the corpus's own drivers toward
+  red.
+- The angina chunks disagree about a pattern change: CP-ANG-006 lists it as
+  unstable, CP-ANG-009 says tell your provider right away. So no case turns
+  on it, and it is not a safe contrast axis for pairs either.
+
+**`check_heldout.py`,** in the same directory, checks:
+- quotes verbatim and keys in the registry;
+- the mix;
+- the pregnancy and child exclusions;
+- the scope floor, which every case clears, by 0.184 at least;
+- blend retrieval, reported for information;
+- overlap with all 466 existing case texts, by MiniLM cosine and word
+  Jaccard.
+
+Leak means cosine 0.85 or more, or Jaccard 0.50 or more. **The first run
+caught one:** HE07, pneumonia, at 0.866 to pair P0053, whose wording it shared.
+Rewritten; it is now 0.677. Final: 0 problems, 0 leaks, 0 near-duplicates
+within the set. With `--pairs` it checks a batch of pairs against the set: on
+the 40 candidates, 0 leaks and 8 warnings. NumPy's matmul raises spurious
+warnings on macOS here, in float32 and float64; they are silenced for that one
+product and the result is asserted finite.
+`01-data/eval/runs/2026-09-19-heldout-draft-check.txt`.
+
+**Retrieval finding.** Run on retrieval rather than matched chunks, HE02 (PE),
+HE06 (pleurisy) and HE20 (costochondritis) get CP-PERI chunks and none of their
+own keys. CP-PERI-002 over-retrieves again. Model scoring should use matched
+chunks; retrieval is a separate, end-to-end number.
+
+### 2026-09-19 Held-out eval set FROZEN: 22 cases, 4/7/11, sha256 6d1af06e...
+
+**Viraj's review:**
+- HE03 stays yellow. CP-ANG-002 calls angina a warning sign of raised heart
+  attack risk, and the existing pairs treat known angina as same-day.
+  CP-ANG-002 is now a cited key.
+- HE06 and HE09 stay yellow. HE09 is consistent with the GERD pairs on black
+  stool.
+- HE19 and HE20 stay. They are the only greens outside GERD and panic.
+- HE06, HE19 and HE20 are marked `grounding: thin` in the file.
+- HE02 red stands, and the 2/7/11 mix was kept.
+
+**Two reds added on his call, each the red half of an axis the set already
+had a yellow for:**
+- HE21, CP-PERI: severe breathlessness at rest and getting worse. Those are
+  the two triggers in CP-PERI-001's call-9-1-1 line, set against HE05.
+- HE22, CP-PNA: an 81-year-old, suddenly confused and breathless. That is
+  CP-PNA-001's older-adult pattern and its "life-threatening complications"
+  line, set against HE07.
+
+**The set is now 22 cases, 18/32/50%, deliberately further from the base
+rate.** Six of nine prefixes carry more than one verdict, up from four.
+CP-PANIC and CP-PLEU cannot be made mixed: panic attacks are stated as not
+life-threatening, and pleurisy has no disposition in the corpus. A model that
+learned those two shortcuts would score perfectly and this set could not tell.
+Recorded in the README, with CP-ANG single-colour by choice.
+
+**Frozen:** `01-data/eval/heldout-eval/HELDOUT-EVAL-v1.json`, sha256
+`6d1af06eb393d4afd2c6dc4af1669b70dbc0d6e5f46accf88b686fe3e6826035`.
+`check_heldout.py` pins that hash and refuses a changed file; a copy with one
+verdict edited was refused. The final check found 86 quotes verbatim, 0
+problems, 0 leaks, and no near-duplicates within the set: HE21 against HE05
+is 0.750, and HE22 against HE07 is 0.548.
+`01-data/eval/runs/2026-09-19-heldout-v1-frozen-check.txt`.
+
 ### 2026-09-19 Demo UI rebuilt as a product, 06-demo/. Committed as 19652e1.
 
 The test page is replaced by a conversation UI, phone first and widened for
@@ -4572,3 +4664,78 @@ The child note on the empty screen now uses the refusal's words, "This app
 can't assess children." The demo history was cleared for the desk:
 `rm -f 06-demo/data/conversations/*.json` is all it takes, one file per
 assessment and no cache, and `06-demo/data/people.json` is untouched.
+
+### 2026-09-19 Pairs to 120 against the 35-chunk corpus. Three of five single-colour prefixes broken.
+
+**Written after the held-out set was frozen**, in Viraj's priority order. 80 new
+pairs on top of the reviewed 40: `02-pairs/review/candidates-120.jsonl`, from
+three content modules in `02-pairs/review/`. Not frozen; candidates for his
+review.
+
+**Priority 1, contrast sets on axes the corpus states.** 17 new sets, 22 in the
+file. For CP-PE: leg-only clot against leg plus breathing symptoms, on
+CP-PE-001's "may lead to a life-threatening pulmonary embolism", in four risk
+settings (bed rest, chemotherapy, a leg in plaster, a previous clot). For
+CP-PNA: breathlessness alongside the chest pain on CP-DIFF-001's immediate-care
+line, and sudden confusion in an older adult on CP-PNA-001. The angina
+equivalents the appended chunks allow: onset at rest against on exertion
+(CP-ANG-006 "Pain during rest or sleep"), and settling within five minutes
+against lasting beyond twenty. Plus the ACS mimic both ways, and three reflux
+alarm axes, each a line in CP-GERD-002: vomit like coffee grounds, trouble
+swallowing, unexplained weight loss.
+
+**CP-PANIC and CP-PLEU got no sets, and cannot.** CP-PANIC-002 states panic
+attacks are not life-threatening, which contradicts a yellow or red half, and
+CP-PLEU-001 gives pleurisy no disposition. That is the same wall the held-out
+set hit. Each needs a source, not a case.
+
+**Priority 2, 19 pairs only the 13 appended chunks make possible:** heart attack
+in women (CP-ACS-006), angina in women (CP-ANG-004), the stable and unstable
+criteria as thresholds, microvascular and vasospastic angina, pneumonia risk
+from COPD, steroids and heart failure (CP-PNA-002), and the cold that outlasts
+a cold (CP-PNA-003).
+
+**Priority 3, 45 pairs of register breadth,** weighted to green on purpose.
+Priorities 1 and 2 are mostly red and yellow, because most appended chunks are
+red and every set carries a red or yellow half; as first drafted the 80 came to
+37 red and 8 green, which would have trained more of the red bias the adapter
+exists to remove. The single-colour clusters were NOT multiplied: another panic
+green deepens the shortcut.
+
+**THE TOP OPEN ITEM, verdict per cited prefix, 40 before against 120 now**
+(red/yellow/green):
+
+| prefix | before | after | |
+|---|---|---|---|
+| CP-ACS | 4/1/1 | 10/1/1 | |
+| CP-ANG | 2/5/0 | 11/18/2 | |
+| CP-DIFF | 1/0/0 | 4/2/4 | was single |
+| CP-GERD | 0/3/5 | 0/10/17 | |
+| CP-PANIC | 0/0/5 | 0/0/8 | still single |
+| CP-PE | 2/0/0 | 6/6/0 | was single |
+| CP-PERI | 1/4/1 | 2/8/1 | |
+| CP-PLEU | 0/3/0 | 0/3/0 | still single |
+| CP-PNA | 0/3/0 | 4/13/0 | was single |
+
+Three of the five broken. Mix 32 red / 57 yellow / 31 green, 27/48/26%.
+
+**Checks, all clean:** `validate_pairs.py` 0 errors 0 warnings, including ten
+red flags reworded so the qualifier lint passes rather than leaving ten warnings
+for a human. New `check_pair_extras.py`: 348 verbatim quote lines, all 22
+contrast sets with their axis quote in a chunk both halves cite, every first
+turn above the 0.25 scope floor, no pregnancy or child exclusion tripped, and
+the app's own guards run over all 120 gold answers with nothing dropped.
+`01-data/eval/runs/2026-09-19-pairs-120-checks.txt`.
+
+**The leak check earned its place.** Run against the frozen held-out set, three
+pairs came back over the line: P0124 at 0.900 cosine to HE19, P0130 at 0.866 to
+HE21, P0135 at 0.861 to HE08. All three were reworded to a different mechanism
+and wording; the file is now 0 leaks, highest remaining 0.841 (P0128 against
+HE09). One next step, "Ask your GP whether the naproxen is still needed", was
+rewritten because the app's own medication guard would have edited it on the way
+to the screen.
+
+**Open, measured, not decided.** Reference keys against what retrieval actually
+returns for the pair's own text: the 80 new pairs are 28 exact, 38 partial, 14
+with no overlap, against 12/12/16 for the older 40. That is the review README's
+open question 3, and it is a train-serve choice rather than a bug.

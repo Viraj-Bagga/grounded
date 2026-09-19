@@ -1,0 +1,204 @@
+# 2026-09-19 checks on 02-pairs/review/candidates-120.jsonl: the 40 reviewed pairs plus 80 written today.
+# validate_pairs.py, check_pair_extras.py, and the held-out leak check. Three pairs were reworded after the
+# first leak run: P0124, P0130 and P0135 sat at 0.900, 0.866 and 0.861 cosine to HE19, HE21 and HE08.
+
+---- validate_pairs.py
+02-pairs/review/candidates-120.jsonl
+  pairs                 : 120
+  exchanges per pair    : {1: 116, 2: 4}
+  urgency across turns  : {'yellow': 61, 'red': 32, 'green': 31}
+  pairs with errors     : 0  (0 errors)
+  pairs with warnings   : 0  (0 warnings)
+
+Clean.
+
+---- check_pair_extras.py
+== QUOTES: 80 of 120 pairs carry them, 348 lines checked
+   40 older pairs carry none (written before the rule)
+
+== CONTRAST SETS: 22
+   C01 yellow/red    ok   does the exertional pain resolve with rest
+   C02 yellow/green  ok   is there black tarry stool
+   C03 yellow/red    ok   is there breathlessness at rest
+   C07 yellow/red    ok   does the exertional pain resolve with rest
+   C08 yellow/green  ok   is there black tarry stool
+   C13 yellow/red    ok   have breathing symptoms joined the swollen leg
+   C14 yellow/red    ok   have breathing symptoms joined the swollen leg
+   C15 yellow/red    ok   have breathing symptoms joined the swollen leg
+   C16 yellow/red    ok   is there breathlessness alongside the chest pain
+   C17 yellow/red    ok   has an older adult become suddenly confused
+   C18 yellow/red    ok   did the episode come on at rest or on exertion
+   C19 yellow/red    ok   did it settle within five minutes or last beyond twenty
+   C20  green/yellow ok   is the burning brought on by meals or by exertion
+   C21 yellow/red    ok   have breathing symptoms joined the swollen leg
+   C22 yellow/red    ok   is there breathlessness alongside the chest pain
+   C23 yellow/red    ok   has an older adult become suddenly confused
+   C24 yellow/red    ok   did the episode come on at rest or on exertion
+   C25 yellow/red    ok   is there breathlessness at rest
+   C26  green/yellow ok   is there vomit that looks like coffee grounds
+   C27  green/yellow ok   is swallowing affected
+   C28  green/yellow ok   is there unexplained weight loss
+   C29  green/yellow ok   is the burning brought on by meals or by exertion
+
+== SCOPE, EXCLUSIONS, APP GUARDS: floor 0.25, lowest case 0.254 (P0002)
+
+== VERDICT PER CITED PREFIX (a pair counts once under each prefix in its reference keys)
+   CP-ACS     12 pairs  red 10  yellow  1  green  1  mixed
+   CP-ANG     31 pairs  red 11  yellow 18  green  2  mixed
+   CP-DIFF    10 pairs  red  4  yellow  2  green  4  mixed
+   CP-GERD    27 pairs  red  0  yellow 10  green 17  mixed
+   CP-PANIC    8 pairs  red  0  yellow  0  green  8  SINGLE COLOUR
+   CP-PE      12 pairs  red  6  yellow  6  green  0  mixed
+   CP-PERI    11 pairs  red  2  yellow  8  green  1  mixed
+   CP-PLEU     3 pairs  red  0  yellow  3  green  0  SINGLE COLOUR
+   CP-PNA     17 pairs  red  4  yellow 13  green  0  mixed
+   single-colour prefixes: CP-PANIC, CP-PLEU
+
+== MIX  red 32  yellow 57  green 31  (27%, 48%, 26%)
+   kinds: {'underspecified': 3, 'standalone': 67, 'grounding': 6, 'contrast': 44}
+   registers: {'minimising the symptom': 12, 'verbose and anxious': 16, 'describing a third person': 18, 'panicked caregiver': 10, 'poor spelling and punctuation': 20, 'plain and factual': 24, 'terse adult': 20}
+   note: C01: no axis quote recorded (pair written before the rule)
+   note: C02: no axis quote recorded (pair written before the rule)
+   note: C03: no axis quote recorded (pair written before the rule)
+   note: C07: no axis quote recorded (pair written before the rule)
+   note: C08: no axis quote recorded (pair written before the rule)
+   note: P0018 turn 2: scores 0.142, under the floor, which is fine: follow-up turns are not scope-checked
+
+RESULT: 0 problem(s)
+extras exit 0
+
+---- check_heldout.py --pairs
+
+PAIRS in candidates-120.jsonl against the held-out set: 0 leak(s) at cos >= 0.85 or jaccard >= 0.5
+  P0002          ok    cos 0.390 (HE03)  jaccard 0.07 (HE01)
+  P0003          ok    cos 0.602 (HE21)  jaccard 0.14 (HE02)
+  P0004          ok    cos 0.572 (HE15)  jaccard 0.14 (HE17)
+  P0009          ok    cos 0.596 (HE20)  jaccard 0.07 (HE20)
+  P0011          ok    cos 0.684 (HE13)  jaccard 0.18 (HE09)
+  P0012          warn  cos 0.780 (HE05)  jaccard 0.24 (HE05)
+  P0013          ok    cos 0.647 (HE06)  jaccard 0.15 (HE02)
+  P0014          ok    cos 0.618 (HE02)  jaccard 0.15 (HE06)
+  P0015          ok    cos 0.550 (HE01)  jaccard 0.13 (HE06)
+  P0017          ok    cos 0.592 (HE03)  jaccard 0.10 (HE03)
+  P0018          ok    cos 0.556 (HE03)  jaccard 0.05 (HE14)
+  P0018          ok    cos 0.085 (HE03)  jaccard 0.11 (HE13)
+  P0021          ok    cos 0.699 (HE03)  jaccard 0.10 (HE21)
+  P0022          ok    cos 0.481 (HE03)  jaccard 0.13 (HE03)
+  P0023          ok    cos 0.723 (HE15)  jaccard 0.13 (HE15)
+  P0024          ok    cos 0.660 (HE06)  jaccard 0.24 (HE05)
+  P0025          ok    cos 0.594 (HE17)  jaccard 0.08 (HE06)
+  P0026          warn  cos 0.774 (HE03)  jaccard 0.39 (HE03)
+  P0028          warn  cos 0.777 (HE06)  jaccard 0.24 (HE08)
+  P0029          warn  cos 0.769 (HE19)  jaccard 0.18 (HE19)
+  P0031          ok    cos 0.665 (HE10)  jaccard 0.12 (HE09)
+  P0034          ok    cos 0.524 (HE06)  jaccard 0.10 (HE01)
+  P0034          ok    cos 0.489 (HE21)  jaccard 0.10 (HE21)
+  P0035          ok    cos 0.419 (HE22)  jaccard 0.08 (HE22)
+  P0036          ok    cos 0.702 (HE03)  jaccard 0.14 (HE03)
+  P0039          ok    cos 0.588 (HE13)  jaccard 0.18 (HE13)
+  P0040          warn  cos 0.801 (HE22)  jaccard 0.14 (HE22)
+  P0041          warn  cos 0.751 (HE05)  jaccard 0.13 (HE08)
+  P0041          ok    cos 0.646 (HE07)  jaccard 0.12 (HE19)
+  P0042          warn  cos 0.754 (HE03)  jaccard 0.27 (HE03)
+  P0043          ok    cos 0.543 (HE21)  jaccard 0.12 (HE19)
+  P0043          ok    cos 0.509 (HE21)  jaccard 0.17 (HE05)
+  P0044          ok    cos 0.653 (HE01)  jaccard 0.11 (HE08)
+  P0045          ok    cos 0.672 (HE06)  jaccard 0.18 (HE21)
+  P0046          ok    cos 0.508 (HE03)  jaccard 0.11 (HE02)
+  P0048          ok    cos 0.702 (HE11)  jaccard 0.18 (HE13)
+  P0049          warn  cos 0.762 (HE10)  jaccard 0.13 (HE10)
+  P0050          ok    cos 0.689 (HE03)  jaccard 0.12 (HE13)
+  P0052          ok    cos 0.657 (HE11)  jaccard 0.10 (HE01)
+  P0053          ok    cos 0.676 (HE07)  jaccard 0.09 (HE08)
+  P0054          ok    cos 0.641 (HE13)  jaccard 0.20 (HE13)
+  P0056          warn  cos 0.797 (HE06)  jaccard 0.21 (HE02)
+  P0057          ok    cos 0.438 (HE03)  jaccard 0.13 (HE04)
+  P0059          ok    cos 0.662 (HE13)  jaccard 0.19 (HE13)
+  P0061          warn  cos 0.755 (HE08)  jaccard 0.31 (HE08)
+  P0062          ok    cos 0.716 (HE08)  jaccard 0.20 (HE08)
+  P0063          ok    cos 0.639 (HE08)  jaccard 0.25 (HE02)
+  P0064          ok    cos 0.654 (HE08)  jaccard 0.31 (HE02)
+  P0065          ok    cos 0.612 (HE08)  jaccard 0.23 (HE08)
+  P0066          ok    cos 0.591 (HE08)  jaccard 0.17 (HE08)
+  P0067          ok    cos 0.679 (HE05)  jaccard 0.15 (HE08)
+  P0068          ok    cos 0.704 (HE05)  jaccard 0.13 (HE02)
+  P0069          ok    cos 0.531 (HE22)  jaccard 0.12 (HE08)
+  P0070          ok    cos 0.525 (HE22)  jaccard 0.14 (HE22)
+  P0071          ok    cos 0.668 (HE03)  jaccard 0.15 (HE03)
+  P0072          ok    cos 0.645 (HE03)  jaccard 0.10 (HE17)
+  P0073          ok    cos 0.465 (HE18)  jaccard 0.09 (HE03)
+  P0074          ok    cos 0.471 (HE18)  jaccard 0.11 (HE15)
+  P0075          ok    cos 0.689 (HE11)  jaccard 0.19 (HE11)
+  P0076          ok    cos 0.647 (HE20)  jaccard 0.12 (HE13)
+  P0077          warn  cos 0.809 (HE01)  jaccard 0.17 (HE02)
+  P0078          ok    cos 0.473 (HE13)  jaccard 0.07 (HE04)
+  P0079          ok    cos 0.504 (HE05)  jaccard 0.20 (HE01)
+  P0080          ok    cos 0.658 (HE01)  jaccard 0.21 (HE04)
+  P0081          ok    cos 0.665 (HE04)  jaccard 0.19 (HE04)
+  P0082          ok    cos 0.511 (HE02)  jaccard 0.12 (HE03)
+  P0083          ok    cos 0.500 (HE14)  jaccard 0.10 (HE04)
+  P0084          ok    cos 0.481 (HE03)  jaccard 0.07 (HE16)
+  P0085          ok    cos 0.707 (HE03)  jaccard 0.20 (HE03)
+  P0086          ok    cos 0.649 (HE21)  jaccard 0.16 (HE21)
+  P0087          ok    cos 0.642 (HE06)  jaccard 0.10 (HE08)
+  P0088          ok    cos 0.467 (HE21)  jaccard 0.09 (HE03)
+  P0089          ok    cos 0.711 (HE03)  jaccard 0.12 (HE11)
+  P0090          ok    cos 0.580 (HE20)  jaccard 0.15 (HE04)
+  P0091          ok    cos 0.388 (HE03)  jaccard 0.09 (HE03)
+  P0092          ok    cos 0.610 (HE07)  jaccard 0.16 (HE08)
+  P0093          ok    cos 0.473 (HE05)  jaccard 0.16 (HE05)
+  P0094          ok    cos 0.617 (HE05)  jaccard 0.14 (HE14)
+  P0095          warn  cos 0.751 (HE05)  jaccard 0.09 (HE08)
+  P0096          ok    cos 0.672 (HE08)  jaccard 0.19 (HE08)
+  P0097          ok    cos 0.658 (HE08)  jaccard 0.20 (HE02)
+  P0098          ok    cos 0.727 (HE05)  jaccard 0.10 (HE08)
+  P0099          ok    cos 0.709 (HE05)  jaccard 0.14 (HE02)
+  P0100          ok    cos 0.635 (HE22)  jaccard 0.17 (HE08)
+  P0101          ok    cos 0.652 (HE22)  jaccard 0.16 (HE22)
+  P0102          ok    cos 0.556 (HE03)  jaccard 0.23 (HE03)
+  P0103          ok    cos 0.575 (HE21)  jaccard 0.16 (HE03)
+  P0104          ok    cos 0.723 (HE06)  jaccard 0.19 (HE05)
+  P0105          ok    cos 0.700 (HE06)  jaccard 0.22 (HE21)
+  P0106          ok    cos 0.598 (HE11)  jaccard 0.15 (HE12)
+  P0107          ok    cos 0.679 (HE14)  jaccard 0.15 (HE11)
+  P0108          ok    cos 0.696 (HE11)  jaccard 0.20 (HE10)
+  P0109          ok    cos 0.683 (HE11)  jaccard 0.18 (HE13)
+  P0110          ok    cos 0.610 (HE11)  jaccard 0.17 (HE11)
+  P0111          ok    cos 0.579 (HE11)  jaccard 0.15 (HE09)
+  P0112          ok    cos 0.651 (HE11)  jaccard 0.14 (HE11)
+  P0113          ok    cos 0.609 (HE11)  jaccard 0.09 (HE13)
+  P0114          warn  cos 0.787 (HE10)  jaccard 0.24 (HE10)
+  P0115          ok    cos 0.574 (HE14)  jaccard 0.10 (HE12)
+  P0116          ok    cos 0.683 (HE10)  jaccard 0.16 (HE12)
+  P0117          ok    cos 0.521 (HE14)  jaccard 0.09 (HE11)
+  P0118          ok    cos 0.724 (HE11)  jaccard 0.15 (HE14)
+  P0119          ok    cos 0.706 (HE11)  jaccard 0.17 (HE13)
+  P0120          ok    cos 0.586 (HE14)  jaccard 0.14 (HE14)
+  P0121          ok    cos 0.469 (HE17)  jaccard 0.17 (HE17)
+  P0122          ok    cos 0.651 (HE15)  jaccard 0.09 (HE18)
+  P0123          ok    cos 0.662 (HE16)  jaccard 0.13 (HE17)
+  P0124          ok    cos 0.667 (HE19)  jaccard 0.19 (HE19)
+  P0125          ok    cos 0.710 (HE19)  jaccard 0.13 (HE20)
+  P0126          ok    cos 0.601 (HE19)  jaccard 0.15 (HE19)
+  P0127          ok    cos 0.747 (HE19)  jaccard 0.20 (HE19)
+  P0128          warn  cos 0.841 (HE09)  jaccard 0.40 (HE09)
+  P0129          warn  cos 0.754 (HE09)  jaccard 0.20 (HE09)
+  P0130          ok    cos 0.739 (HE21)  jaccard 0.14 (HE21)
+  P0131          ok    cos 0.618 (HE22)  jaccard 0.21 (HE21)
+  P0132          ok    cos 0.677 (HE19)  jaccard 0.30 (HE05)
+  P0133          ok    cos 0.745 (HE05)  jaccard 0.13 (HE08)
+  P0134          ok    cos 0.741 (HE05)  jaccard 0.12 (HE19)
+  P0135          ok    cos 0.672 (HE08)  jaccard 0.23 (HE08)
+  P0136          warn  cos 0.837 (HE08)  jaccard 0.24 (HE08)
+  P0137          ok    cos 0.384 (HE03)  jaccard 0.19 (HE03)
+  P0138          ok    cos 0.697 (HE05)  jaccard 0.14 (HE21)
+  P0139          ok    cos 0.637 (HE05)  jaccard 0.12 (HE01)
+  P0140          ok    cos 0.522 (HE03)  jaccard 0.09 (HE03)
+leak exit 0
+
+---- reference keys against what retrieval returns for the pair's own text (blend, top 3)
+# The README's open question 3, measured for the 80 new pairs on the 35-chunk corpus.
+  the 40 older pairs   all keys retrieved  12   some  12   none  16
+     none retrieved: P0002, P0003, P0009, P0014, P0015, P0021, P0026, P0028, P0034, P0035, P0036, P0041, P0042, P0043, P0046, P0056
+  the 80 new pairs     all keys retrieved  28   some  38   none  14
+     none retrieved: P0072, P0074, P0078, P0081, P0082, P0085, P0086, P0102, P0103, P0106, P0117, P0124, P0125, P0126

@@ -1,0 +1,744 @@
+{
+ "_status": "FROZEN 2026-09-19 after Viraj's review. NEVER TRAINING DATA. A verdict change is a new version (HELDOUT-EVAL-v2.json), never an edit to this file; check_heldout.py refuses this file if its sha256 changes.",
+ "_rule": "These cases are never used as training pairs, never as few-shot examples and never as demo presets. Pair generation is checked against them for overlap (check_heldout.py --leak). Changing a verdict is a clinical decision.",
+ "_mix": "4 red / 7 yellow / 11 green = 18/32/50%. 2/7/11 kept from review; two reds added on Viraj's call so the eval can catch the chunk-to-colour shortcut on CP-PERI and CP-PNA too. Worth the move from the 7/34/59 base rate.",
+ "_categories": "As the model's system prompt defines them: red = emergency, needs immediate care, minutes matter; yellow = priority, needs assessment within hours; green = non-urgent, can wait or be self-managed.",
+ "cases": [
+  {
+   "id": "HE01",
+   "verdict": "red",
+   "condition": "CP-ACS",
+   "profile": {
+    "age": 63,
+    "sex": "female",
+    "conditions": [
+     "high blood pressure"
+    ],
+    "medications": [
+     "amlodipine"
+    ]
+   },
+   "symptoms": "For about forty minutes my upper back and left shoulder have been aching, I get out of breath just sitting here, and I suddenly feel completely drained and a bit queasy. There is no real chest pain.",
+   "timeline": "T+0:00 back and shoulder ache began while folding laundry. T+0:15 short of breath sitting down. T+0:40 still aching, very tired.",
+   "keys": [
+    "CP-ACS-006",
+    "CP-ACS-003"
+   ],
+   "quotes": {
+    "CP-ACS-006": [
+     "Pain in the shoulder, back, or arm",
+     "Unusual tiredness and weakness",
+     "These symptoms can happen together with chest pain or without any chest pain.",
+     "It is important to call 9-1-1 if you have these symptoms."
+    ],
+    "CP-ACS-003": [
+     "Shortness of breath when resting or doing a little bit of physical activity (this is more common in older adults)"
+    ]
+   },
+   "why": "Back and shoulder pain, breathlessness at rest and sudden exhaustion in a 63-year-old woman, with no chest pain: the pattern CP-ACS-006 says women get, and says to call 9-1-1 for.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE02",
+   "verdict": "red",
+   "condition": "CP-PE",
+   "profile": {
+    "age": 44,
+    "sex": "male",
+    "conditions": [],
+    "medications": [],
+    "surgery": {
+     "what": "knee ligament repair",
+     "weeks_ago": 2
+    }
+   },
+   "symptoms": "Sudden sharp pain on the right side of my chest when I breathe in, and I'm short of breath even lying on the sofa. My right calf has been swollen and sore for a couple of days.",
+   "timeline": "T+0:00 sharp pain on breathing in came on suddenly at rest. T+0:05 breathless at rest. T+0:30 no better.",
+   "keys": [
+    "CP-PE-001",
+    "CP-PE-003",
+    "CP-DIFF-001"
+   ],
+   "quotes": {
+    "CP-PE-001": [
+     "Shortness of breath and pain when breathing, if you have a blood clot that travels to the lungs ( pulmonary embolism )",
+     "Deep vein thrombosis (DVT) should be taken seriously, as it may lead to a life-threatening pulmonary embolism (PE)."
+    ],
+    "CP-PE-003": [
+     "The chance of developing a blood clot is highest in the first 3 months after surgery and lowers with time."
+    ],
+    "CP-DIFF-001": [
+     "Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath."
+    ]
+   },
+   "why": "Pain on breathing and breathlessness at rest two weeks after knee surgery, with a swollen calf: the PE pattern CP-PE-001 calls life-threatening, inside the post-surgery window CP-PE-003 names.",
+   "flags": [
+    "Viraj 2026-09-19: red stands. No chunk says 9-1-1 for PE in so many words; red rests on 'life-threatening' in CP-PE-001 and CP-DIFF-001's immediate-care line."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE03",
+   "verdict": "yellow",
+   "condition": "CP-ANG",
+   "profile": {
+    "age": 69,
+    "sex": "male",
+    "conditions": [
+     "coronary artery disease",
+     "stable angina"
+    ],
+    "medications": [
+     "atorvastatin",
+     "bisoprolol"
+    ]
+   },
+   "symptoms": "Walking up the hill to the shops my chest went tight, same as it does a couple of times a week. I stopped for a couple of minutes and it went away completely.",
+   "timeline": "T+0:00 tightness began walking uphill. T+0:02 stopped. T+0:04 gone. Same pattern for the past year.",
+   "keys": [
+    "CP-ANG-005",
+    "CP-ANG-009",
+    "CP-ACS-005",
+    "CP-ANG-002"
+   ],
+   "quotes": {
+    "CP-ANG-005": [
+     "Pain that occurs during physical activity or mental stress",
+     "Pattern of symptoms that has not changed in the last 2 months",
+     "Pain that is relieved by rest or medicines",
+     "Symptoms that go away within 5 minutes"
+    ],
+    "CP-ANG-009": [
+     "If you have stable angina, you can learn its pattern and predict when an event will occur, such as during physical activity or mental stress."
+    ],
+    "CP-ACS-005": [
+     "The pain from angina usually happens after physical activity and goes away in a few minutes when you rest or take medicine to treat it."
+    ],
+    "CP-ANG-002": [
+     "Angina can be a warning sign that you are at a higher risk of having a heart attack."
+    ]
+   },
+   "why": "Every CP-ANG-005 stable angina criterion is met, in a known stable pattern: stable, not unstable, so not red. Yellow, not green, because CP-ANG-002 calls angina a warning sign of raised heart attack risk.",
+   "flags": [
+    "Viraj 2026-09-19: yellow stays. CP-ANG-002 calls angina a warning sign of raised heart attack risk, and the existing pairs treat known angina as same-day."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE04",
+   "verdict": "yellow",
+   "condition": "CP-ANG",
+   "profile": {
+    "age": 58,
+    "sex": "female",
+    "conditions": [
+     "high blood pressure",
+     "high cholesterol"
+    ],
+    "medications": [
+     "ramipril"
+    ]
+   },
+   "symptoms": "For about four months my jaw and left arm ache and I get breathless when I carry shopping up the stairs. It settles within a few minutes once I stop. I've never had it checked.",
+   "timeline": "",
+   "keys": [
+    "CP-ANG-004",
+    "CP-ANG-005",
+    "CP-ANG-001"
+   ],
+   "quotes": {
+    "CP-ANG-004": [
+     "It is more common for women to feel angina pain in the arms, neck, back, and jaw — areas far from the source of the pain.",
+     "Sometimes these are not recognized as symptoms of a heart condition."
+    ],
+    "CP-ANG-005": [
+     "Pain that occurs during physical activity or mental stress",
+     "Pain that is relieved by rest or medicines"
+    ],
+    "CP-ANG-001": [
+     "All chest pain should be checked by a healthcare provider."
+    ]
+   },
+   "why": "An exertional jaw and arm pattern in a woman, relieved by rest and consistent for four months: angina not yet diagnosed, which needs assessing, but it is stable rather than an emergency.",
+   "flags": [
+    "Four months on purpose. CP-ANG-009 defines stable as consistent for at least 2 months, and CP-ANG-010 says unstable angina 'may be new'. A few weeks would make the corpus argue red."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE05",
+   "verdict": "yellow",
+   "condition": "CP-PERI",
+   "profile": {
+    "age": 36,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "Sharp pain in the middle of my chest for two days. It's worse when I lie back or take a deep breath and easier when I sit up and lean forward. I had a sore throat and a runny nose last week and I feel feverish.",
+   "timeline": "T+0:00 sharp central pain began at rest two days ago. T+48:00 still there, worse lying flat.",
+   "keys": [
+    "CP-PERI-002",
+    "CP-PERI-001"
+   ],
+   "quotes": {
+    "CP-PERI-002": [
+     "Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward"
+    ],
+    "CP-PERI-001": [
+     "If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.",
+     "If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away."
+    ]
+   },
+   "why": "Pericarditis almost word for word after a viral illness. No severe breathlessness and not getting worse, so the 'seek medical help right away' branch.",
+   "flags": [
+    "Follows your 2026-09-17 key for yellow-pleuritic. CP-PERI-001's first line offers '9-1-1 or seek medical help right away' for any chest pain."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE06",
+   "verdict": "yellow",
+   "condition": "CP-PLEU",
+   "profile": {
+    "age": 29,
+    "sex": "female",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "A sharp pain low on the left side of my chest whenever I breathe in deeply, since yesterday. I've had a chesty cold for a week. I'm not short of breath, my legs are fine and I haven't travelled.",
+   "timeline": "",
+   "keys": [
+    "CP-PLEU-001",
+    "CP-DIFF-001"
+   ],
+   "quotes": {
+    "CP-PLEU-001": [
+     "Pleurisy - inflammation of the pleura that causes sharp pain with breathing"
+    ],
+    "CP-DIFF-001": [
+     "Lung diseases, such as pneumonia , pleurisy , or pulmonary embolism",
+     "Some of these problems can be serious."
+    ]
+   },
+   "why": "Sharp pain on breathing after a chest infection, with no breathlessness and no clot risk: pleurisy, which needs assessing within hours to rule out pneumonia and a clot.",
+   "flags": [
+    "Viraj 2026-09-19: yellow stands, grounding marked thin. No chunk gives pleurisy a disposition; yellow is the clinical reading."
+   ],
+   "grounding": "thin"
+  },
+  {
+   "id": "HE07",
+   "verdict": "yellow",
+   "condition": "CP-PNA",
+   "profile": {
+    "age": 58,
+    "sex": "female",
+    "conditions": [
+     "asthma"
+    ],
+    "medications": [
+     "salbutamol inhaler"
+    ]
+   },
+   "symptoms": "What started as a head cold last week has turned into a cough with thick yellow mucus, a high temperature with shivering, and a stabbing pain under my right ribs whenever I cough. I've gone off my food and feel wiped out, but my breathing is okay.",
+   "timeline": "T+0:00 head cold began a week ago. T+96:00 cough with yellow mucus, fever and shivering. T+144:00 stabbing pain under the right ribs when coughing.",
+   "keys": [
+    "CP-PNA-001",
+    "CP-PNA-003",
+    "CP-PNA-002"
+   ],
+   "quotes": {
+    "CP-PNA-001": [
+     "Chest pain when you breathe or cough",
+     "Cough with or without mucus",
+     "Fever",
+     "Chills"
+    ],
+    "CP-PNA-003": [
+     "You may not realize that your condition is more serious until it lasts longer than these other conditions."
+    ],
+    "CP-PNA-002": [
+     "Lung diseases, such as asthma , bronchiectasis , cystic fibrosis , or COPD , also increase your pneumonia risk."
+    ]
+   },
+   "why": "Pneumonia symptoms from CP-PNA-001 in someone whose asthma raises her risk, with a cold that is getting worse rather than passing. Not breathless, so not red.",
+   "flags": [
+    "Rewritten 2026-09-19: the first wording sat at cosine 0.866 to PIPELINE-TEST pair P0053."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE08",
+   "verdict": "yellow",
+   "condition": "CP-PE",
+   "profile": {
+    "age": 52,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "My left calf is swollen, warm and sore to touch, and it hurts to walk on. I got back from a fourteen-hour flight three days ago. No chest pain and my breathing is normal.",
+   "timeline": "T+0:00 calf ache noticed the morning after the flight. T+72:00 swollen, warm, sore to touch.",
+   "keys": [
+    "CP-PE-001",
+    "CP-PE-003"
+   ],
+   "quotes": {
+    "CP-PE-001": [
+     "Call your healthcare provider right away if you think you may have symptoms of VTE.",
+     "Swollen and tender legs that are painful to the touch, if you have blood clots that block blood flow to your leg veins ( deep vein thrombosis or DVT )"
+    ],
+    "CP-PE-003": [
+     "Especially when combined with other risk factors, DVT can develop during a long flight (more than 4 hours) or when a person is on bed rest in a nursing home, hospital setting, or after surgery."
+    ]
+   },
+   "why": "A DVT picture after a long flight, with no breathing or chest symptoms: CP-PE-001 says to call your provider right away, and nothing points to a clot in the lungs.",
+   "flags": [
+    "Verdict differs from the chunk colour on purpose: CP-PE is labelled red, the right answer is yellow. It tests whether the model copies the chunk's category."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE09",
+   "verdict": "yellow",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 49,
+    "sex": "male",
+    "conditions": [],
+    "medications": [
+     "ibuprofen"
+    ]
+   },
+   "symptoms": "I've had heartburn most days for a couple of months, and for the last two days my stools have been black and tarry. I feel otherwise okay, no dizziness.",
+   "timeline": "",
+   "keys": [
+    "CP-GERD-001",
+    "CP-GERD-002",
+    "CP-GERD-003"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as"
+    ],
+    "CP-GERD-002": [
+     "stool that contains blood or looks black and tarry"
+    ],
+    "CP-GERD-003": [
+     "nonsteroidal anti-inflammatory drugs (NSAIDs)"
+    ]
+   },
+   "why": "Reflux with a sign of digestive bleeding, while taking an NSAID. GERD is labelled green, but this is the complication that CP-GERD-001 and CP-GERD-002 say needs a doctor.",
+   "flags": [
+    "Viraj 2026-09-19: yellow, consistent with the existing GERD pairs on black stool. The chunk says 'see a doctor'; yellow is the clinical reading of possible bleeding. Colour differs from the chunk's on purpose."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE10",
+   "verdict": "green",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 26,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "Burning behind my breastbone that rises toward my throat, about an hour after a big curry and a couple of beers. I can taste acid at the back of my mouth. I've had this before after heavy meals.",
+   "timeline": "T+0:00 burning began an hour after dinner. T+0:30 sour taste. T+1:00 easing while sitting up.",
+   "keys": [
+    "CP-GERD-001",
+    "CP-GERD-002"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat",
+     "regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid"
+    ],
+    "CP-GERD-002": [
+     "problems swallowing or pain while swallowing",
+     "unexplained weight loss"
+    ]
+   },
+   "why": "Heartburn and regurgitation as CP-GERD-001 describes them, after a heavy meal, with none of the complication signs CP-GERD-002 lists.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE11",
+   "verdict": "green",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 34,
+    "sex": "female",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "For two weeks I've had a burning feeling in my chest at night when I lie down after a late meal, and sometimes food comes back up into my mouth. Swallowing is fine and I'm eating normally.",
+   "timeline": "",
+   "keys": [
+    "CP-GERD-001",
+    "CP-GERD-002"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid",
+     "You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes."
+    ],
+    "CP-GERD-002": [
+     "problems swallowing or pain while swallowing",
+     "loss of appetite"
+    ]
+   },
+   "why": "Nighttime reflux with regurgitation and no complication signs: see a doctor in time, not within hours.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE12",
+   "verdict": "green",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 29,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "I've had a hoarse voice most mornings and a nagging cough for about a month, along with heartburn after meals. I feel fine otherwise.",
+   "timeline": "",
+   "keys": [
+    "CP-GERD-001"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness",
+     "Symptoms of GERD may include chronic cough.",
+     "You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes."
+    ]
+   },
+   "why": "GERD's throat and cough symptoms from CP-GERD-001, a month in, otherwise well: worth a routine doctor's visit, not urgent.",
+   "flags": [
+    "The least chest-like case. Check that it clears the scope floor."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE13",
+   "verdict": "green",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 42,
+    "sex": "female",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "When I bend over at work after lunch I get a burning in my chest and a sour taste. It goes when I stand up straight. No vomiting and I've no trouble swallowing.",
+   "timeline": "",
+   "keys": [
+    "CP-GERD-001",
+    "CP-GERD-002"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat"
+    ],
+    "CP-GERD-002": [
+     "persistent vomiting",
+     "problems swallowing or pain while swallowing"
+    ]
+   },
+   "why": "Positional heartburn after food that goes when upright, and she denies the CP-GERD-002 alarm signs.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE14",
+   "verdict": "green",
+   "condition": "CP-GERD",
+   "profile": {
+    "age": 37,
+    "sex": "male",
+    "conditions": [
+     "acid reflux"
+    ],
+    "medications": []
+   },
+   "symptoms": "Burning in my chest and a lot of burping after coffee on an empty stomach, same as my usual reflux. It's mild and I'm otherwise well.",
+   "timeline": "",
+   "keys": [
+    "CP-GERD-001",
+    "CP-GERD-002"
+   ],
+   "quotes": {
+    "CP-GERD-001": [
+     "heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat"
+    ],
+    "CP-GERD-002": [
+     "unexplained weight loss",
+     "persistent vomiting"
+    ]
+   },
+   "why": "His known reflux behaving as usual, mild, with no complication signs.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE15",
+   "verdict": "green",
+   "condition": "CP-PANIC",
+   "profile": {
+    "age": 22,
+    "sex": "female",
+    "conditions": [
+     "panic disorder"
+    ],
+    "medications": [
+     "sertraline"
+    ]
+   },
+   "symptoms": "In a crowded shop my heart suddenly started pounding, my hands went tingly and I was shaking and sure something awful was about to happen. It peaked within ten minutes and I've calmed down now, twenty minutes later. It felt like my usual panic attacks.",
+   "timeline": "T+0:00 sudden pounding heart in a crowded shop. T+0:10 peak. T+0:20 settled.",
+   "keys": [
+    "CP-PANIC-002",
+    "CP-PANIC-001"
+   ],
+   "quotes": {
+    "CP-PANIC-002": [
+     "Pounding or racing heart",
+     "Tingly or numb hands",
+     "A fear of death or impending doom during a panic attack",
+     "While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time."
+    ],
+    "CP-PANIC-001": [
+     "Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate."
+    ]
+   },
+   "why": "A typical attack in someone with diagnosed panic disorder, matching her usual pattern and already resolved: CP-PANIC-002 says panic attacks themselves are not life-threatening.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE16",
+   "verdict": "green",
+   "condition": "CP-PANIC",
+   "profile": {
+    "age": 27,
+    "sex": "male",
+    "conditions": [
+     "panic disorder"
+    ],
+    "medications": []
+   },
+   "symptoms": "Woke up at 3am with my heart racing, chills and a feeling that I was losing control. It lasted about fifteen minutes and I'm settled now. I've had attacks like this before, sometimes at night.",
+   "timeline": "T+0:00 woke with a racing heart. T+0:15 settling. T+0:30 calm.",
+   "keys": [
+    "CP-PANIC-001",
+    "CP-PANIC-002"
+   ],
+   "quotes": {
+    "CP-PANIC-001": [
+     "Panic attacks can occur at any time, sometimes even during sleep."
+    ],
+    "CP-PANIC-002": [
+     "Chills",
+     "A feeling of being out of control",
+     "While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time."
+    ]
+   },
+   "why": "A night-time attack, which CP-PANIC-001 says happens, in someone with known panic disorder, resolved in fifteen minutes.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE17",
+   "verdict": "green",
+   "condition": "CP-PANIC",
+   "profile": {
+    "age": 31,
+    "sex": "female",
+    "conditions": [
+     "panic disorder"
+    ],
+    "medications": []
+   },
+   "symptoms": "Before a presentation at work I started trembling, my hands went numb and my chest felt tight, and I felt totally out of control. Once I sat somewhere quiet it passed within about fifteen minutes, like my other attacks.",
+   "timeline": "",
+   "keys": [
+    "CP-PANIC-002",
+    "CP-PANIC-003"
+   ],
+   "quotes": {
+    "CP-PANIC-002": [
+     "Trembling",
+     "Tingly or numb hands",
+     "Chest pain",
+     "While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time."
+    ],
+    "CP-PANIC-003": [
+     "Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life."
+    ]
+   },
+   "why": "A panic attack with chest tightness, in someone with the diagnosis, matching her pattern and resolved.",
+   "flags": [
+    "The only panic case with a chest symptom. The tightness is kept apart from nausea, sweating, dizziness and breathlessness, because CP-DIFF-001 sends chest pain with any of those for immediate care whatever the cause."
+   ],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE18",
+   "verdict": "green",
+   "condition": "CP-PANIC",
+   "profile": {
+    "age": 20,
+    "sex": "male",
+    "conditions": [
+     "panic attacks"
+    ],
+    "medications": []
+   },
+   "symptoms": "A sudden wave of fear in a lecture, with my heart racing, stomach cramps and shaky legs. It passed in about ten minutes. It's happened a few times this term.",
+   "timeline": "",
+   "keys": [
+    "CP-PANIC-002",
+    "CP-PANIC-001"
+   ],
+   "quotes": {
+    "CP-PANIC-002": [
+     "Pounding or racing heart",
+     "Stomach pain or nausea",
+     "While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time."
+    ],
+    "CP-PANIC-001": [
+     "Panic disorder often begins in the late teens or early adulthood."
+    ]
+   },
+   "why": "Recurrent brief attacks at the age CP-PANIC-001 says panic disorder begins, resolved.",
+   "flags": [],
+   "grounding": "direct"
+  },
+  {
+   "id": "HE19",
+   "verdict": "green",
+   "condition": "CP-DIFF",
+   "profile": {
+    "age": 33,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "My chest has been sore across the front since a heavy bench-press session yesterday. It hurts when I stretch or twist and when I press on the muscles. My breathing is fine and I feel well otherwise.",
+   "timeline": "",
+   "keys": [
+    "CP-DIFF-001"
+   ],
+   "quotes": {
+    "CP-DIFF-001": [
+     "It does not always mean that you are having a heart attack .",
+     "Sore muscles"
+    ]
+   },
+   "why": "Muscle soreness after lifting, reproduced by moving and pressing, with none of CP-DIFF-001's immediate-care features.",
+   "flags": [
+    "Viraj 2026-09-19: stays, grounding marked thin. With HE20, the only greens outside GERD and panic; cutting them would narrow green to two conditions. CP-DIFF-001 only names sore muscles as a cause; palpation is the NEG-DISC gap."
+   ],
+   "grounding": "thin"
+  },
+  {
+   "id": "HE20",
+   "verdict": "green",
+   "condition": "CP-DIFF",
+   "profile": {
+    "age": 38,
+    "sex": "female",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "A sharp pain in one spot just beside my breastbone for about a week. It's sore when I press right on it and when I lift my arm. I feel fine otherwise, no breathlessness.",
+   "timeline": "",
+   "keys": [
+    "CP-DIFF-001"
+   ],
+   "quotes": {
+    "CP-DIFF-001": [
+     "It does not always mean that you are having a heart attack .",
+     "Costochondritis - an inflammation of joints in your chest"
+    ]
+   },
+   "why": "Point tenderness beside the breastbone, which is costochondritis, in a well woman with no immediate-care features.",
+   "flags": [
+    "Viraj 2026-09-19: stays, grounding marked thin, as HE19. CP-DIFF-001 only names costochondritis; a week of pain could be read as 'chest pain that does not go away'."
+   ],
+   "grounding": "thin"
+  },
+  {
+   "id": "HE21",
+   "verdict": "red",
+   "condition": "CP-PERI",
+   "grounding": "direct",
+   "profile": {
+    "age": 41,
+    "sex": "male",
+    "conditions": [],
+    "medications": []
+   },
+   "symptoms": "The sharp chest pain I've had since the flu last week is much worse today. I'm badly out of breath even sitting still, I can't lie flat at all and my heart is racing.",
+   "timeline": "T+0:00 sharp pain, easier leaning forward, began five days ago after flu. T+96:00 much worse. T+100:00 badly breathless at rest, cannot lie flat.",
+   "keys": [
+    "CP-PERI-001",
+    "CP-PERI-002",
+    "CP-DIFF-001"
+   ],
+   "quotes": {
+    "CP-PERI-001": [
+     "If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away."
+    ],
+    "CP-PERI-002": [
+     "Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward",
+     "Fast heartbeat"
+    ],
+    "CP-DIFF-001": [
+     "Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath."
+    ]
+   },
+   "why": "The pericarditis picture of HE05, now with severe breathlessness at rest and getting worse: the two triggers in CP-PERI-001's call-9-1-1 line. HE05 is the yellow half of this axis.",
+   "flags": [
+    "Viraj 2026-09-19: added as the CP-PERI red. CP-PERI-001's one line reads '9-1-1 or seek medical help right away'; red is the 9-1-1 branch because both of its triggers are present."
+   ]
+  },
+  {
+   "id": "HE22",
+   "verdict": "red",
+   "condition": "CP-PNA",
+   "grounding": "direct",
+   "profile": {
+    "age": 81,
+    "sex": "female",
+    "conditions": [
+     "high blood pressure"
+    ],
+    "medications": [
+     "amlodipine"
+    ]
+   },
+   "symptoms": "My mother has had a chesty cough for three days and since this morning she's muddled and not making sense. She's breathing fast and says she can't get enough air, and she feels cold rather than hot.",
+   "timeline": "T+0:00 chesty cough began three days ago. T+60:00 muddled and not making sense. T+62:00 breathing fast, cannot get enough air.",
+   "keys": [
+    "CP-PNA-001"
+   ],
+   "quotes": {
+    "CP-PNA-001": [
+     "Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.",
+     "Older adults who have pneumonia may feel weak or suddenly confused.",
+     "They may have a lower-than-normal temperature instead of a fever.",
+     "Shortness of breath"
+    ]
+   },
+   "why": "Pneumonia in an 81-year-old who has become suddenly confused and breathless: CP-PNA-001's older-adult pattern, and its line on life-threatening complications. HE07 is the yellow half of this axis.",
+   "flags": [
+    "Viraj 2026-09-19: added as the CP-PNA red. Written as a carer's words, which the demo also allows; the profile is the patient's."
+   ]
+  }
+ ]
+}
