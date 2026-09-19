@@ -9,22 +9,17 @@ import { icon } from "./icons.js";
 
 const $ = (s, el = document) => el.querySelector(s);
 
-// Demo presets. Numbered, because keys 1 to 5 pick them on a keyboard.
+// Demo presets. Numbered, because keys 1 to 3 pick them on a keyboard.
+// THREE PRESETS, THREE BEATS. Viraj's call 2026-09-19. "Burning after a meal"
+// was cut because it demos the green path, which is usually refused: the model
+// cites nothing when it is reassured. "Tight chest on the stairs" was cut
+// because it came back red like the first preset, so it duplicated it. Both
+// texts and what they taught are in the build-log if either is ever wanted
+// back; the stairs rewording of 2026-09-19 is recorded in claude.md.
 const PRESETS = [
   ["Crushing chest pressure",
    "Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.",
    "T+0:00 began while sitting watching television. T+0:04 spread to the jaw. T+0:11 sweating and nausea. T+0:26 unchanged after resting."],
-  ["Burning after a meal",
-   "Burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.",
-   "T+0:00 began about 40 minutes after a large late meal. T+0:15 worse lying down. T+0:35 eased sitting upright."],
-  // Stable angina. Reworded 2026-09-19 for the 35-chunk corpus: the old text,
-  // "going up the stairs ... sat down", matched a pneumonia chunk on "going"
-  // and "down" and the model cited it. This one retrieves CP-ANG-005,
-  // CP-ANG-009 and CP-ACS-005, all angina, and held 3 of 3 live, citing only
-  // those. 01-data/eval/runs/2026-09-19-stairs-and-pairing-screen.txt
-  ["Tight chest on the stairs",
-   "Tightness in my chest when I climb stairs or walk uphill. It goes away within a few minutes when I rest, same as the last few months.",
-   "T+0:00 began climbing two flights. T+0:03 stopped to rest. T+0:06 resolved completely."],
   // BEAT 3. Retrieval reliably supplies CP-PERI-002 here, and its
   // "Fast heartbeat / Fever" lines are the ones the model copies onto patients
   // who have neither, so the grounding guard has something real to catch. The

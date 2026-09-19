@@ -4774,6 +4774,58 @@ in O what the model wrote instead. An ungrounded red carries the not-grounded
 note in A. The header names the model, the corpus sha256 and the prompt sha256,
 and says plainly that it is not a clinical record. Four page checks cover it,
 and an example note is in `06-demo/results/2026-09-19-soap-note.txt`.
+
+### 2026-09-19 QLoRA attempt 1: attach passed, training OOMed on the first backward. Instance deleted.
+
+**Not trained. No adapter, no merged model, no loss.** Full record:
+`01-data/eval/runs/2026-09-19-brev-qlora-attempt1-oom.txt`.
+
+**Instance.** `massedcompute_A6000_base` no longer exists: Brev renamed the
+family, and the first create was refused with "not a recognized type", costing
+nothing. `massedcompute_A6000_plus` is the same $0.68/hr with 12 vCPUs instead
+of 6. Created 17:32:02, delete confirmed 17:56:00, about 24 minutes, about
+$0.27.
+
+**Step 3 passed.** transformers 5.17.0, trl 1.13.0, peft 0.21.0, bitsandbytes
+0.50.2, torch 2.14.0+cu130. Weights sha256 matched the known-good. 4-bit load
+3.22 GB on device. **LoRA matched 50 of 50**, q/k/v/o 4 each and up/down 17
+each, 10,119,168 trainable. The dataset built clean: 120 pairs to 124 examples,
+completion-only labels, 153,810 tokens per epoch, longest 1,633, 30 optimizer
+steps planned.
+
+**Step 4 failed:** `torch.OutOfMemoryError: Tried to allocate 18.00 GiB` in the
+first backward. 24.18 GiB allocated, **17.97 GiB reserved but unallocated**,
+4.92 GiB free of 47.40.
+
+**Two separable causes.** 24 GiB of activations for a 4B model at batch 1 and
+about 1,200 tokens is far more than a dense transformer needs, and the reason is
+that transformers 5.17's `nemotron_h` runs reference PyTorch fallbacks for every
+Mamba2 kernel; 21 of 42 blocks are Mamba2. On top of that, nearly 18 GiB was
+reserved and unused, which is fragmentation, and more than the failing
+allocation asked for.
+
+**The fix list, cheapest first, not tried:** `expandable_segments:True` for the
+fragmentation; `gradient_checkpointing_kwargs={"use_reentrant": False}`, since
+checkpointing was requested both ways but does nothing under PEFT with the
+reentrant default unless the inputs require grad, which is the likeliest single
+cause; then an 80 GB card at roughly three times the rate. **Not** shortening
+the prompts: their length is the retrieved context, and training on less than
+the app sends is train/serve skew.
+
+**One finding worth keeping from before the meter started.** The reasoning
+switch is part of the prompt. With `enable_thinking=False` the template ends the
+prompt `<|im_start|>assistant\n<think></think>`; without it, `<think>\n`.
+Training with the default would have taught a prompt the app never sends.
+`03-model/brev_train_qlora.py` renders every prompt with the switch off and
+refuses to run if the prompt does not end that way. Constraint 5, at training
+time. Also: this TRL's SFTConfig has no `warmup_ratio`, so the run had none;
+use `warmup_steps` next time.
+
+**My own waste, recorded.** About 11 of the 24 billed minutes went on two failed
+delete attempts: `brev delete --yes` is not a flag, and piping `yes` into the
+command did nothing. A plain `brev delete <name>` works and needs no
+confirmation. Both times I then sat in a wait loop while the meter ran.
+
 ### 2026-09-19 Regional add-on packs, frozen and built: india and africa-ssa
 
 **Add-ons, not swaps, and not wired into retrieval.** Two experimental overlay
@@ -4843,6 +4895,41 @@ stripping around those links, and **the frozen base corpus already has 24 of
 them**, so the regional chunks were left consistent with it. The extractor
 artefact is logged for after the hackathon.
 `07-distribute/results/2026-09-19-regional-packs.txt`.
+
+### 2026-09-19 QLoRA attempt 2: both fixes applied, probe did not fit, deleted in 5 minutes.
+
+**Not trained.** `01-data/eval/runs/2026-09-19-brev-qlora-attempt2-probe-oom.txt`.
+Created 18:07:42, delete confirmed 18:13:05, about $0.06. Viraj's probe is why
+that number is small: one forward and backward before the run, rather than
+finding out 30 steps in.
+
+**Both fixes were live and neither was enough.** `expandable_segments:True` set
+before torch imports, `use_reentrant: False` through
+`prepare_model_for_kbit_training`, and the run printed `gradient checkpointing:
+True`. LoRA still matched 50 of 50. The probe then OOMed on the longest example,
+1633 tokens: 47.29 GiB of 47.40 in use, 104 MiB free, and the failing allocation
+was only 168 MiB.
+
+**Attempt 1's diagnosis was half right.** The reentrant default was a real bug
+and is fixed. It was not the binding constraint, and neither was fragmentation:
+the allocator was mapping pages until the card was genuinely full.
+
+**The cause, named by the run itself:** `causal_conv1d_fn` and
+`mamba_chunk_scan_combined` both fell back to reference PyTorch because
+`causal_conv1d` and `mamba_ssm` are not installed. 21 of 42 blocks are Mamba2,
+and the reference chunked scan materialises per-chunk states the fused kernels
+never hold. Checkpointing frees activations between layers; this peak is inside
+one layer's recompute, so it does not help.
+
+**For attempt 3, cheapest first:** `chunk_size` at load, which config.json sets
+to 256 and which is an implementation detail of the chunked scan, equivalent at
+any value, with the fallback's largest intermediate scaling with it: probe 256,
+128, 64 and 32 and take the first that fits. Then installing mamba_ssm and
+causal_conv1d, which is the proper fix and also the fast path, at the risk of a
+CUDA build against torch 2.14+cu130. Then an 80 GB card, certain on memory and 2
+to 3 times the rate. The next probe should also time the step: the same warnings
+call the fallbacks "much slower", so speed may cost more than the card.
+
 ### 2026-09-19 The demo page on a phone over the wifi, behind --lan
 
 **`python 06-demo/server.py --lan` binds 0.0.0.0 and prints the wifi URL.**
@@ -4878,3 +4965,85 @@ its A/B tabs switch; and nothing overflows sideways before or after.
 **Not tested: a real handset browser.** This is Chrome's mobile emulation over
 the real wifi, which exercises the touch path, the viewport and the round trip.
 It is not iOS Safari on hardware.
+
+### 2026-09-19 Five presets cut to three, one per beat
+
+**Viraj's call.** "Burning after a meal" demos the green path, and the green
+path is usually refused: the model cites nothing when it is reassured, so a
+yellow or green is withheld (Current state). "Tight chest on the stairs" came
+back red like "Crushing chest pressure", so it duplicated the first beat rather
+than adding one. Both are gone from `06-demo/static/js/app.js`, with a comment
+saying why and pointing here.
+
+**What remains, numbered 1 to 3:** crushing chest pressure, sharp pain when
+breathing in, and Indigestion (You and Mum). One per beat: the red result, the
+guards firing, and the profile layer as a one-click comparison. The digit keys
+follow the list, so 1, 2 and 3 now select them.
+
+**The stairs rewording of earlier today still stands and is still recorded**, in
+claude.md and above: the old text matched a pneumonia chunk on "going" and
+"down", and the reworded text retrieves CP-ANG-005, CP-ANG-009 and CP-ACS-005.
+Cutting the preset does not retract the finding; it is there if the text is ever
+wanted back.
+
+**Tests that named a preset by index were updated**, not left to drift: the
+screen check now expects 3, the comparison uses preset 3, the phone check's
+compare tap follows it, and the finish review's live shot uses preset 2. The
+digit keys need nothing: the handler counts `PRESETS.length`. The direction
+contract in index.html says three numbered presets, because it says what the
+first viewport holds.
+
+**Running them found a check that was wrong, on the branch this beat takes two
+runs in three.** `ui_check.mjs compare` asserted constraint 16 on any raise it
+found. A raise lands on one of two branches, and only one of them has prose to
+replace. On a GROUNDED raise the model's steps and rationale are on screen, so
+they are struck out and the app's three red steps replace them. On a RESCUED
+raise the model cited nothing, so constraint 13 shows the urgency, says it is
+not grounded, and withholds every other field: there are no steps to replace
+and no rationale to strike. The check demanded both from a page that was
+behaving correctly, and failed three assertions.
+
+**It now branches, and both branches are proven live rather than argued.** The
+grounded branch keeps the three original assertions. The rescued branch asserts
+what constraint 16 is actually for there: the red bar, its disposition and the
+not-grounded line are shown, and none of the prose the model wrote for its own
+yellow reaches the screen. That last one reads the withheld text back out of
+`/api/conversations/<id>` and checks it is absent from the rendered side, rather
+than trusting a heading to be missing. Three compare runs: one that found the
+bug, one grounded, one rescued, 9 of 9 each after the fix.
+
+**Ran after the cut:** shots 8 of 8, flow 17 of 17 with the follow-up and the
+SOAP note, compare 9 of 9 on both branches, and the phone check over the wifi
+22 of 22. `06-demo/results/2026-09-19-presets-three-ui-check.txt`.
+
+**One flaky assertion is recorded and NOT fixed, because it is a real thing to
+see.** The phone check's "a source chip was there to open" failed once: preset 1
+on Mum came back urgency red with `citations: []`, the documented empty-citation
+red, so it rendered as a flagged red with no source chips and there was no chip
+to tap. The same script passed on the next run with the model citing CP-ACS.
+Viraj's call whether that assertion should learn the branch the way the compare
+one did.
+
+### 2026-09-19 The UI check had filled the disk, the night before judging
+
+**Found by a tool call dying with ENOSPC**, not by looking: the Data volume was
+at 100%, 1.1 GiB free, while llama-server was loaded and the demo server was
+writing every assessment to disk.
+
+**Two things were filling it at once, and only one of them is a bug.** The other
+session was pulling a merged 120-pair model into `03-model/merged-120pairs/`,
+which is an 8 GB-class download and is supposed to be there. The rest was litter.
+
+**`ui_check.mjs` was the leak.** `launch()` makes a throwaway Chrome profile
+with `mkdtempSync` and nothing ever removed it. 73 of them had piled up over the
+day, at about 45 MB each: 3.4 GB. Removed, and the script now deletes its own
+profile in the `finally` block, after a 500 ms pause so Chrome can finish
+writing as it exits. Verified by running `shots` again: zero `ui-check-*`
+directories left behind, where before there was one per run. The Data volume
+went to 4.6 GiB free straight after the delete and 16 GiB a few minutes later,
+so the merge had room.
+
+**Worth saying because of what else is on that volume:** the base GGUF, the
+conversation store the demo writes to on every turn, and llama-server's own
+working set. A full disk on Saturday morning is a demo that does not start, and
+the cause would have been a test script.

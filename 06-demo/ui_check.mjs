@@ -18,7 +18,7 @@
 // Every check prints PASS or FAIL; the exit code is the number of failures.
 
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync, mkdtempSync } from "node:fs";
+import { mkdirSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -36,11 +36,13 @@ function check(name, ok, detail = "") {
 }
 
 async function launch() {
+  // Thrown away in the finally below. Left behind, these are about 45 MB each,
+  // and 73 of them filled the disk on 2026-09-19, the night before judging.
   const profile = mkdtempSync(join(tmpdir(), "ui-check-"));
   const proc = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`,
     "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
   for (let i = 0; i < 100; i++) {
-    try { await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json(); return proc; }
+    try { await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json(); proc.profile = profile; return proc; }
     catch { await sleep(100); }
   }
   throw new Error("Chrome did not start");
@@ -119,7 +121,7 @@ async function shots(out) {
   for (const [name, d] of [["desktop", DESKTOP], ["phone", PHONE]]) {
     await p.size(d);
     await p.go("/");
-    check(`${name}: new assessment shows presets`, await p.count("[data-preset]") === 5);
+    check(`${name}: new assessment shows presets`, await p.count("[data-preset]") === 3);
     await p.shot(join(out, `${name}-new.png`));
     await p.go("/people");
     check(`${name}: people list shows the household`, await p.count(".people li") >= 6);
@@ -227,16 +229,16 @@ async function oneLeftEdge(p, where) {
 async function compare(out) {
   const p = await tab();
   await p.size(DESKTOP);
-  // Beat 3 is one click: from Dad, with Compare off, preset 5 alone turns Compare
-  // on, sets You against Mum and sends.
+  // Beat 3 is one click: from Dad, with Compare off, preset 3 alone turns Compare
+  // on, sets You against Mum and sends. It is preset 3 of 3 since the cut.
   await p.go("/?p=dad");
   const t0 = Date.now();
-  await p.click('[data-preset="4"]');
+  await p.click('[data-preset="2"]');
   await p.until("location.pathname.startsWith('/c/') && document.querySelector('[data-live]')", 30000);
-  check("preset 5 turns Compare on by itself", await p.eval("document.querySelector('#chips [data-compare]').getAttribute('aria-pressed')") === "true");
-  check("preset 5 sets You against Mum", /^You\s*A\s*Mum\s*B$/.test(
+  check("preset 3 turns Compare on by itself", await p.eval("document.querySelector('#chips [data-compare]').getAttribute('aria-pressed')") === "true");
+  check("preset 3 sets You against Mum", /^You\s*A\s*Mum\s*B$/.test(
     (await p.eval("[...document.querySelectorAll('#chips .chip[aria-pressed=true]:not([data-compare])')].map(c => c.innerText).join(' ')")).trim()));
-  check("preset 5 sends by itself", /^\/c\//.test(await p.eval("location.pathname")));
+  check("preset 3 sends by itself", /^\/c\//.test(await p.eval("location.pathname")));
   await p.until(`document.querySelectorAll("#thread .bar, #thread .err-panel").length >= 2 && !document.querySelector("[data-live] .steps4")`, 300000, 300);
   await sleep(700);
   console.log(`      compare, both sides, one click: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
@@ -247,7 +249,36 @@ async function compare(out) {
     const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
     return side ? side.innerText.replace(/\\s+/g, " ") : null;
   })()`);
-  if (raised) {
+  // A raise lands on one of TWO branches and this preset takes both, so the
+  // check has to know which it is looking at. A GROUNDED raise has the model's
+  // prose on screen, so constraint 16 strikes it out and replaces the steps. A
+  // RESCUED raise has none: the model cited nothing, so constraint 13 shows the
+  // urgency, says it is not grounded and withholds everything else, and there
+  // is nothing left to strike. Asserting constraint 16 on a rescued raise fails
+  // a page that is behaving correctly. Measured 2026-09-19 on the 35-chunk
+  // corpus: Mum is raised every run, and about two runs in three are rescued.
+  const rescued = raised !== null && await p.eval(`(() => {
+    const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+    return !!side.querySelector(".ungrounded");
+  })()`) === true;
+  if (rescued) {
+    console.log("      the raise came through the refusal rescue: the not-grounded branch");
+    check("a rescued red shows the urgency, its disposition and the not-grounded line",
+      /\bRED\b/.test(raised) && raised.includes("Call emergency services now")
+      && raised.includes("Not grounded in sources"), raised.slice(0, 300));
+    // The same thing constraint 16 is for, on the branch that has no prose to
+    // strike: nothing the model wrote for its yellow may sit under the red bar.
+    check("a rescued red shows none of the prose the model wrote for its own verdict", await p.eval(`(async () => {
+      const conv = await (await fetch("/api/conversations/" + location.pathname.split("/")[2])).json();
+      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+      const held = conv.sides.flatMap(s => s.turns)
+        .map(t => ((t.event || {}).ungrounded || {}).withheld || {})
+        .flatMap(w => [w.rationale || "", ...(w.next_steps || []), ...(w.follow_up_questions || [])])
+        .filter(Boolean);
+      return held.length > 0 && held.every(x => !side.innerText.includes(x)) &&
+        !/What to do/.test(side.innerText) && !/Sources/.test(side.innerText);
+    })()`) === true);
+  } else if (raised) {
     check("a raised red shows the app's steps",
       ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raised.includes(t)), raised.slice(0, 300));
     check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raised), raised.slice(0, 300));
@@ -541,7 +572,7 @@ async function phone(out, base) {
 
   // Compare: one tap makes the beat, and on a phone the two sides are tabs.
   await p.go("/");
-  await p.click('[data-preset="4"]');
+  await p.click('[data-preset="2"]');
   await p.until(`document.querySelectorAll("#thread .bar, #thread .err-panel").length >= 2
     && !document.querySelector("[data-live] .steps4")`, 300000, 300);
   await sleep(600);
@@ -594,7 +625,7 @@ async function review(out, ids) {
   await p.until("document.querySelector('.preview .w-rule')");
   await p.shot(join(out, "desktop-person.png"), true);
   await p.go("/?p=aunt");
-  await p.click('[data-preset="3"]');
+  await p.click('[data-preset="1"]');
   await p.click("#send");
   await p.until("/tokens/.test(document.querySelector('[data-live] .steps4')?.innerText || '')", 180000);
   await p.shot(join(out, "desktop-live.png"));
@@ -637,6 +668,9 @@ try {
   console.log(`FAIL  ${e.message}`);
 } finally {
   chrome.kill();
+  // Chrome writes its profile out as it exits, so give it a moment first.
+  await sleep(500);
+  if (chrome.profile) rmSync(chrome.profile, { recursive: true, force: true });
 }
 console.log(`${failures ? `${failures} failed` : "all passed"}`);
 process.exit(failures);

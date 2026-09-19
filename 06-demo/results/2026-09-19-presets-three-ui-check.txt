@@ -1,0 +1,215 @@
+2026-09-19  UI checks after cutting the demo presets from five to three
+Config: llama-server -m 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192 --port 8080
+        python 06-demo/server.py on 127.0.0.1:8770, 35-chunk corpus
+Build:  06-demo/static/js/app.js with three presets, numbered 1 to 3:
+        1 Crushing chest pressure, 2 Sharp pain when breathing in,
+        3 Indigestion (You and Mum).
+Cut:    "Burning after a meal" (green path, usually refused) and
+        "Tight chest on the stairs" (came back red, duplicated preset 1).
+Checks run: shots, flow, compare. Screenshots in /tmp/uicheck-presets.
+
+=== shots ===
+PASS  desktop: new assessment shows presets
+      saved /tmp/uicheck-presets/desktop-new.png
+PASS  desktop: people list shows the household
+      saved /tmp/uicheck-presets/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-presets/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-presets/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved /tmp/uicheck-presets/phone-new.png
+PASS  phone: people list shows the household
+      saved /tmp/uicheck-presets/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-presets/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-presets/phone-maya.png
+all passed
+
+=== flow (preset 1, live, with a follow-up and the SOAP note) ===
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved /tmp/uicheck-presets/desktop-streaming.png
+PASS  a verdict bar is shown
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved /tmp/uicheck-presets/desktop-answer.png
+PASS  the checked line opens its details
+      saved /tmp/uicheck-presets/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved /tmp/uicheck-presets/desktop-source.png
+      follow-up: 38.3 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved /tmp/uicheck-presets/desktop-followup.png
+      saved /tmp/uicheck-presets/phone-answer.png
+      saved /tmp/uicheck-presets/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved /tmp/uicheck-presets/phone-drawer.png
+all passed
+
+=== compare (preset 3, one click: Compare on, You against Mum, sent) ===
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 50.4 s
+PASS  both sides answered
+FAIL  a raised red shows the app's steps  (B Mum RED Call emergency services now Raised to red: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.” CP-ACS-002 rule R1 Not grounded in sources We couldn't match thi)
+FAIL  the model's own steps are shown as removed  (B Mum RED Call emergency services now Raised to red: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.” CP-ACS-002 rule R1 Not grounded in sources We couldn't match thi)
+FAIL  the model's rationale is struck out, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+      saved /tmp/uicheck-presets/desktop-compare.png
+      saved /tmp/uicheck-presets/phone-compare-a.png
+      saved /tmp/uicheck-presets/phone-compare-b.png
+3 failed
+
+=== compare, re-run after the check was taught both raise branches ===
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 62.4 s
+PASS  both sides answered
+PASS  a raised red shows the app's steps
+PASS  the model's own steps are shown as removed
+PASS  the model's rationale is struck out, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+      saved /tmp/uicheck-presets/desktop-compare.png
+      saved /tmp/uicheck-presets/phone-compare-a.png
+      saved /tmp/uicheck-presets/phone-compare-b.png
+all passed
+
+=== compare, run 3: looking for the rescued branch, the one that failed before ===
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 34.8 s
+PASS  both sides answered
+      the raise came through the refusal rescue: the not-grounded branch
+PASS  a rescued red shows the urgency, its disposition and the not-grounded line
+PASS  a rescued red shows none of the prose the model wrote for its own verdict
+PASS  compare: record, answers and composer share one left edge
+      saved /tmp/uicheck-presets/desktop-compare.png
+      saved /tmp/uicheck-presets/phone-compare-a.png
+      saved /tmp/uicheck-presets/phone-compare-b.png
+all passed
+
+=== phone over the wifi (http://10.6.13.168:8770), presets 1 and 3 on the touch path ===
+PASS  the page loads over the network, not loopback
+PASS  the browser reports a coarse pointer, so the page takes the touch path
+PASS  it says the model runs on the laptop, not on this phone
+PASS  that line is on the first screen, not below the composer
+PASS  nothing overflows sideways at 390px
+      saved /tmp/uicheck-presets/phone-new.png
+PASS  the drawer opens on the menu button
+PASS  the drawer covers the page rather than squeezing it
+      saved /tmp/uicheck-presets/phone-drawer.png
+PASS  it closes again on the scrim
+PASS  the chip row scrolls sideways instead of wrapping
+PASS  Compare stays pinned in the bar at this width
+PASS  a chip selects the person it names
+PASS  a preset fills the composer
+PASS  the composer sits at the bottom of the screen, in reach
+      phone, one answer: 36.1 s
+PASS  the answer came back on the phone
+      saved /tmp/uicheck-presets/phone-answer.png
+FAIL  a source chip was there to open  (this answer cited nothing)
+PASS  compare answers both sides on the phone too
+PASS  the two sides are A/B tabs at this width
+PASS  side A is the one showing
+      saved /tmp/uicheck-presets/phone-compare-a.png
+PASS  tapping B switches to the other person
+PASS  still nothing overflowing sideways
+      saved /tmp/uicheck-presets/phone-compare-b.png
+1 failed
+
+=== phone, run 2: the source-chip assertion depends on the model citing something ===
+PASS  the page loads over the network, not loopback
+PASS  the browser reports a coarse pointer, so the page takes the touch path
+PASS  it says the model runs on the laptop, not on this phone
+PASS  that line is on the first screen, not below the composer
+PASS  nothing overflows sideways at 390px
+      saved /tmp/uicheck-presets/phone-new.png
+PASS  the drawer opens on the menu button
+PASS  the drawer covers the page rather than squeezing it
+      saved /tmp/uicheck-presets/phone-drawer.png
+PASS  it closes again on the scrim
+PASS  the chip row scrolls sideways instead of wrapping
+PASS  Compare stays pinned in the bar at this width
+PASS  a chip selects the person it names
+PASS  a preset fills the composer
+PASS  the composer sits at the bottom of the screen, in reach
+      phone, one answer: 57.3 s
+PASS  the answer came back on the phone
+      saved /tmp/uicheck-presets/phone-answer.png
+PASS  a source opens as a bottom sheet, full width
+PASS  the sheet shows the chunk and its source
+      saved /tmp/uicheck-presets/phone-sheet.png
+PASS  the sheet closes
+PASS  compare answers both sides on the phone too
+PASS  the two sides are A/B tabs at this width
+PASS  side A is the one showing
+      saved /tmp/uicheck-presets/phone-compare-a.png
+PASS  tapping B switches to the other person
+PASS  still nothing overflowing sideways
+      saved /tmp/uicheck-presets/phone-compare-b.png
+all passed
+
+=== Summary ===
+
+shots     8 of 8 passed. Desktop and phone both count three presets.
+flow      17 of 17 passed. Preset 1 on Mum, live, 38.3 s follow-up, SOAP note.
+compare   Three runs of the one-click beat 3, 34.8 to 62.4 s.
+            run 1: 3 FAILED, and the check was wrong, not the page. It asserted
+              constraint 16 on a RESCUED raise. On that branch the model cited
+              nothing, so constraint 13 shows the urgency, says it is not
+              grounded and withholds every other field: there are no steps to
+              replace and no rationale to strike, so the assertions could not
+              hold on a page that was behaving correctly. Conversation
+              20260919-183645-5a83c0: You refused (green withheld), Mum yellow
+              raised to red by R1 through rescue_refusal.
+            The check now branches. A grounded raise keeps the three original
+            constraint 16 assertions. A rescued raise asserts what constraint 16
+            is for on that branch: the red bar, its disposition and the
+            not-grounded line are shown, and NONE of the prose the model wrote
+            for its own yellow reaches the screen. That one reads the withheld
+            text back out of /api/conversations/<id> and checks it is absent
+            from the rendered side, rather than trusting a heading.
+            run 2: grounded branch, 9 of 9 passed.
+            run 3: rescued branch, 9 of 9 passed.
+          Both branches proven live, which is why it took three runs.
+phone     Over the wifi at http://10.6.13.168:8770, 390x844 with touch.
+            run 1: 22 of 23, one FAIL, "a source chip was there to open".
+              Not the preset cut and not the page: preset 1 on Mum came back
+              urgency red with citations: [] from the model, the documented
+              empty-citation red (constraint 13), so it rendered as a flagged
+              red with no source chips and there was no chip to tap.
+              Conversation 20260919-184200-f178e3.
+            run 2: 22 of 22 passed, the same script, the model cited CP-ACS
+              that time. The assertion is left strict on purpose: an ungrounded
+              red is worth seeing when it happens. Flagged for Viraj, not fixed.
+
+Not re-run, because the cut does not reach them: guards, people, two-tabs,
+drop, regions (all use preset index 0, whose meaning is unchanged) and review
+(needs six saved ids; its live shot moved from index 3 to index 1, which is
+"Sharp pain when breathing in" before and after).
+
+Screenshots kept beside this file, because /tmp does not survive:
+  2026-09-19-presets-three-new.png              the empty screen, three presets
+  2026-09-19-presets-three-compare-rescued.png  beat 3 on the rescued branch:
+    You OUT OF SCOPE, Mum RED raised by R1 with CP-ACS-002 quoted, the
+    not-grounded panel, and no steps, rationale or sources panel under it.
+
+=== The disk filled up while these ran ===
+
+The Data volume hit 100%, 1.1 GiB free, and a tool call died with ENOSPC.
+Cause: ui_check.mjs makes a throwaway Chrome profile with mkdtempSync on every
+launch and never removes it. 73 of them had accumulated over the day, 3.4 GB.
+Removed, and the script now deletes its own profile in the finally block, after
+a 500 ms pause so Chrome can finish writing on exit. Verified: a shots run
+leaves zero ui-check-* directories behind. Data volume back to 4.6 GiB free.
