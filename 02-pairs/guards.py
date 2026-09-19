@@ -69,12 +69,12 @@ def parse_model_json(raw: str) -> dict:
 MEDICATION = re.compile(
     r"\b(aspirin|nitroglycerin|nitroglycerine|nitro|glyceryl\s+trinitrate|gtn|"
     r"paracetamol|acetaminophen|tylenol|ibuprofen|advil|nurofen|naproxen|"
-    r"antacid|antacids|omeprazole|ranitidine|famotidine|h2\s*blocker|ppi|"
-    r"proton\s+pump\s+inhibitor|analgesia|analgesic|painkiller|pain\s+reliever|"
-    r"medication|medicine|medicines|meds|drug|drugs|tablet|tablets|pill|pills|"
-    r"capsule|capsules|inhaler|epipen|epinephrine|adrenaline|insulin|"
-    r"antihistamine|benadryl|apixaban|warfarin|statin|metformin|lisinopril|"
-    r"atorvastatin|beta\s*blocker|anticoagulant)\b", re.IGNORECASE)
+    r"antacid|antacids|omeprazole|ranitidine|famotidine|h2\s*blockers?|ppis?|"
+    r"proton\s+pump\s+inhibitors?|analgesia|analgesics?|painkillers?|"
+    r"pain\s+relievers?|medications?|medicines?|meds|drug|drugs|tablet|tablets|"
+    r"pill|pills|capsule|capsules|inhalers?|epipens?|epinephrine|adrenaline|"
+    r"insulin|antihistamines?|benadryl|apixaban|warfarin|statins?|metformin|"
+    r"lisinopril|atorvastatin|beta\s*blockers?|anticoagulants?)\b", re.IGNORECASE)
 
 DOSE = re.compile(
     r"\b\d+\s*(mg|mcg|ml|g|units?|tablets?|pills?|capsules?|puffs?|sprays?)\b",
@@ -91,20 +91,40 @@ NON_ADMIN_LEAD = re.compile(
     r"give\s+the\s+(paramedics?|clinician|doctor|nurse))\b", re.IGNORECASE)
 
 
+# ONE LINE CAN BOTH INSTRUCT AND PROHIBIT, and the prohibition used to rescue
+# the whole line. Measured live 2026-09-19: "Take medication as prescribed; do
+# not stop unless directed by provider" was flagged and KEPT, because "do not"
+# appears in it. Constraint 12 says the instruction half is what has to go, so
+# each clause is now judged on its own and any clause that instructs drops the
+# whole step. Clauses split on ; and . only: a comma or "and" separates a lead
+# from its object ("Bring your medications and your inhaler"), and splitting
+# there would drop the second half of a line that is fine.
+#
+# Still escapes, knowingly: a clause whose object is a pronoun. "Do not stop
+# your medication; take it as prescribed" names no medication in its second
+# clause, so the lexicon cannot see it.
+STEP_CLAUSE = re.compile(r"[;.]+")
+
+
 def screen_next_steps(steps):
     """(kept, dropped, flagged). Flagged entries are kept for a human to judge."""
     kept, dropped, flagged = [], [], []
     for raw in steps or []:
         s = str(raw or "")
-        if not MEDICATION.search(s) and not DOSE.search(s):
-            kept.append(s)
-        elif PROHIBITION.search(s):
-            flagged.append(s)
-            kept.append(s)
-        elif NON_ADMIN_LEAD.search(s):
-            kept.append(s)
-        else:
+        drop = flag = False
+        for clause in STEP_CLAUSE.split(s):
+            if not MEDICATION.search(clause) and not DOSE.search(clause):
+                continue
+            if PROHIBITION.search(clause):
+                flag = True          # a prohibition is a clinical call, not a dose
+            elif not NON_ADMIN_LEAD.search(clause):
+                drop = True          # fails closed
+        if drop:
             dropped.append(s)
+        else:
+            if flag:
+                flagged.append(s)
+            kept.append(s)
     return kept, dropped, flagged
 
 

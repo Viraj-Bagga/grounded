@@ -174,6 +174,21 @@ async function flow(out) {
   const lines = await p.eval("[...document.querySelectorAll('.checked')].map(e => e.innerText)");
   check("the follow-up reports its cache reuse", /cached, read/.test(lines[lines.length - 1] || ""), lines.join(" | "));
   check("the allowance counts down", /3 follow-ups left|1 follow-up left/.test(await p.text(".allow")));
+  // The clinical export reads the saved assessment: four sections, a header
+  // that names the model, corpus and prompt, and the patient's own words.
+  check("a finished assessment offers a SOAP note", await p.count(".export .link-a") === 1);
+  const note = JSON.parse(await p.eval(`fetch(document.querySelector(".export .link-a").href)
+    .then(r => r.text()).then(t => JSON.stringify({
+      len: t.length,
+      sections: ["S  SUBJECTIVE", "O  OBJECTIVE", "A  ASSESSMENT", "P  PLAN"].every(x => t.includes(x)),
+      header: /NOT A CLINICAL RECORD/.test(t) && /sha256/.test(t) && /^Model /m.test(t),
+      said: t.includes("It has not gone away, it has been an hour now."),
+      keys: /CP-[A-Z]+-\\d{3}/.test(t),
+      wide: t.split("\\n").some(l => l.length > 78)
+    }))`));
+  check("the note has its four sections and its header", note.sections && note.header, JSON.stringify(note));
+  check("the note quotes the follow-up and carries citation keys", note.said && note.keys, JSON.stringify(note));
+  check("the note wraps for a printed page", !note.wide && note.len > 1500, JSON.stringify(note));
   await p.shot(join(out, "desktop-followup.png"), true);
   const path = await p.eval("location.pathname");
   await p.size(PHONE);

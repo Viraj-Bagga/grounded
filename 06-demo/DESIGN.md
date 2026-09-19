@@ -333,6 +333,14 @@ A full-width text button above a hairline: check icon, "Checked", total time, re
 ### Source Sheet
 A native dialog: a bottom sheet up to 85dvh on narrow screens, a full-height 28rem right panel from 60rem. Sticky header with the key in blue mono at 1.0625rem, token count and a close button; the chunk text at line-height 1.6; a footer with publisher, URL, retrieval date and source line in meta.
 
+### Clinical Export
+
+Under the last answer, above the composer: a hairline rule, then one action link in the action blue and a
+muted line of explanation beside it, wrapping under it on a phone. It is the only link in the conversation
+that leaves the page, and it downloads rather than navigates. Added 2026-09-19. Its copy, "Download the SOAP
+note" and "Plain text, for a clinician. It shows what the guards removed and why.", is surface copy for
+Viraj to put in his own voice.
+
 ## Do's and Don'ts
 
 ### Do:

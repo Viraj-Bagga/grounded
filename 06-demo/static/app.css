@@ -321,6 +321,12 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .link-btn { border: 0; background: transparent; color: var(--action); font-weight: 700; font-size: var(--t-14);
   padding: .25rem 0; cursor: pointer; justify-self: start; }
 .link-btn:hover { text-decoration: underline; text-underline-offset: .18em; }
+/* The clinical export, under the last answer. */
+.export { display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: baseline;
+  border-top: 1px solid var(--rule); padding-top: .75rem; margin: 0 0 1.5rem; }
+.export .link-a { color: var(--action); font-weight: 700; text-decoration: none; }
+.export .link-a:hover { text-decoration: underline; text-underline-offset: .18em; }
+.export .muted { font-size: var(--t-14); }
 
 /* ---------------------------------------------------------------- empty state */
 

@@ -4739,3 +4739,38 @@ to the screen.
 returns for the pair's own text: the 80 new pairs are 28 exact, 38 partial, 14
 with no overlap, against 12/12/16 for the older 40. That is the review README's
 open question 3, and it is a train-serve choice rather than a bug.
+
+### 2026-09-19 The medication guard's prohibition escape, and the SOAP note export
+
+**"Take medication as prescribed; do not stop unless directed by provider" was
+flagged and KEPT.** The guard tested the whole line for a prohibition, "do not"
+matched, and the escape that exists for "Do not take nitroglycerin" rescued the
+instruction half with it. It reached the screen with a "flagged, kept" tag,
+which constraint 12 says it must not. Viraj's call: that reads like an
+instruction to take a medication, so it drops. Each clause is now judged on its
+own and any clause that instructs drops the whole step. Clauses split on `;` and
+`.` only, because a comma or "and" separates a lead from its object: "Bring your
+medications and your inhaler" must not lose its second half.
+
+**A second gap in the same pass: the lexicon had no plurals.** "Continue current
+medications and follow up with cardiology as per routine plan" passed untouched,
+because the pattern held `medication` and not `medications`. Plurals are in now.
+Both measured lines are fixtures, with a third that pins the prohibition branch
+that must stay. Python 87 of 87 and `guards.ts` 48 of 48 pass, both ports
+changed, fixtures synced to `05-app/spike-load`. Still escapes, knowingly: a
+clause whose object is a pronoun. `06-demo/results/2026-09-19-medication-guard-clause-fix.txt`.
+
+**SOAP note export, `06-demo/soap.py`.** A clinician-readable note from a saved
+assessment, plain text, downloaded from `GET /api/conversations/<id>/soap.txt`
+and linked under the last answer. It reads the saved JSON and the registry:
+no model call, no retrieval, nothing on the triage path, no new dependency.
+S is the patient's own words with the profile the model read; O is what the
+system did, the chunks with their keys, publishers and retrieval dates, the
+rules that fired with their quoted lines, and **every guard removal with its
+reason**; A is the urgency shown with its disposition, the rationale if it
+survived the raise, red flags and the citations behind them; P is the steps and
+questions as shown. A raised verdict says in P that the steps are the app's, and
+in O what the model wrote instead. An ungrounded red carries the not-grounded
+note in A. The header names the model, the corpus sha256 and the prompt sha256,
+and says plainly that it is not a clinical record. Four page checks cover it,
+and an example note is in `06-demo/results/2026-09-19-soap-note.txt`.

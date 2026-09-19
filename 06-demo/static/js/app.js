@@ -406,6 +406,11 @@ function renderConversation() {
   if (Object.keys(S.live).length) {
     h += `<div id="live">${turnHTML(conv.sides.map((s, k) => `<div data-live="${k}">${liveHTML(k)}</div>`), pair, conv)}</div>`;
   }
+  if (n && !Object.keys(S.live).length) {
+    h += `<div class="export"><a class="link-a" href="/api/conversations/${encodeURIComponent(conv.id)}/soap.txt"` +
+      ` download>Download the SOAP note</a><span class="muted">Plain text, for a clinician. ` +
+      `It shows what the guards removed and why.</span></div>`;
+  }
   const busyOther = (conv.busy || []).filter(k => !S.live[k]);
   if (busyOther.length) {
     h += `<div class="notice" id="busy-note">${icon("info")}<span>` +

@@ -161,6 +161,46 @@
       ],
       "dropped": [],
       "flagged": []
+    },
+    {
+      "name": "measured 2026-09-19: an instruction and a prohibition in one line, flagged and kept until then",
+      "source": "06-demo/results/2026-09-19-copy-and-one-click.txt",
+      "steps": [
+        "Take medication as prescribed; do not stop unless directed by provider.",
+        "Monitor symptoms; if chest pain, pressure, or discomfort develops, seek immediate care."
+      ],
+      "kept": [
+        "Monitor symptoms; if chest pain, pressure, or discomfort develops, seek immediate care."
+      ],
+      "dropped": [
+        "Take medication as prescribed; do not stop unless directed by provider."
+      ],
+      "flagged": []
+    },
+    {
+      "name": "measured 2026-09-19: plural medications, which the lexicon did not match at all",
+      "source": "06-demo/results/2026-09-19-copy-and-one-click.txt",
+      "steps": [
+        "Continue current medications and follow up with cardiology as per routine plan."
+      ],
+      "kept": [],
+      "dropped": [
+        "Continue current medications and follow up with cardiology as per routine plan."
+      ],
+      "flagged": []
+    },
+    {
+      "name": "a prohibition on its own is still kept and flagged, not dropped",
+      "steps": [
+        "Do not stop your anticoagulant without speaking to your doctor"
+      ],
+      "kept": [
+        "Do not stop your anticoagulant without speaking to your doctor"
+      ],
+      "dropped": [],
+      "flagged": [
+        "Do not stop your anticoagulant without speaking to your doctor"
+      ]
     }
   ],
   "citations": [

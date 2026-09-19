@@ -104,7 +104,7 @@ export function parseModelJson(raw: string): Triage {
  *     not make silently.
  */
 const MEDICATION =
-  /\b(aspirin|nitroglycerin|nitroglycerine|nitro|glyceryl\s+trinitrate|gtn|paracetamol|acetaminophen|tylenol|ibuprofen|advil|nurofen|naproxen|antacid|antacids|omeprazole|ranitidine|famotidine|h2\s*blocker|ppi|proton\s+pump\s+inhibitor|analgesia|analgesic|painkiller|pain\s+reliever|medication|medicine|medicines|meds|drug|drugs|tablet|tablets|pill|pills|capsule|capsules|inhaler|epipen|epinephrine|adrenaline|insulin|antihistamine|benadryl|apixaban|warfarin|statin|metformin|lisinopril|atorvastatin|beta\s*blocker|anticoagulant)\b/i;
+  /\b(aspirin|nitroglycerin|nitroglycerine|nitro|glyceryl\s+trinitrate|gtn|paracetamol|acetaminophen|tylenol|ibuprofen|advil|nurofen|naproxen|antacid|antacids|omeprazole|ranitidine|famotidine|h2\s*blockers?|ppis?|proton\s+pump\s+inhibitors?|analgesia|analgesics?|painkillers?|pain\s+relievers?|medications?|medicines?|meds|drug|drugs|tablet|tablets|pill|pills|capsule|capsules|inhalers?|epipens?|epinephrine|adrenaline|insulin|antihistamines?|benadryl|apixaban|warfarin|statins?|metformin|lisinopril|atorvastatin|beta\s*blockers?|anticoagulants?)\b/i;
 
 // A dose pattern is itself enough: "5mg twice daily" is dosing whatever the
 // noun turns out to be.
@@ -118,6 +118,15 @@ const PROHIBITION = /\b(do\s+not|don't|never|avoid|refrain\s+from|should\s+not|m
 const NON_ADMIN_LEAD =
   /^\s*(bring|tell|inform|report|show|carry|list|mention|note|give\s+the\s+(paramedics?|clinician|doctor|nurse))\b/i;
 
+// ONE LINE CAN BOTH INSTRUCT AND PROHIBIT, and the prohibition used to rescue
+// the whole line. Measured live 2026-09-19: "Take medication as prescribed; do
+// not stop unless directed by provider" was flagged and KEPT, because "do not"
+// appears in it. Constraint 12 says the instruction half is what has to go, so
+// each clause is judged on its own and any clause that instructs drops the
+// whole step. Clauses split on ; and . only: a comma or "and" separates a lead
+// from its object ("Bring your medications and your inhaler").
+const STEP_CLAUSE = /[;.]+/;
+
 export function screenNextSteps(steps: string[]): {
   kept: string[];
   dropped: string[];
@@ -128,20 +137,26 @@ export function screenNextSteps(steps: string[]): {
   const flagged: string[] = [];
   for (const raw of steps ?? []) {
     const s = String(raw ?? '');
-    if (!MEDICATION.test(s) && !DOSE.test(s)) {
-      kept.push(s); // says nothing about a medication at all
-      continue;
+    let drop = false;
+    let flag = false;
+    for (const clause of s.split(STEP_CLAUSE)) {
+      if (!MEDICATION.test(clause) && !DOSE.test(clause)) {
+        continue; // says nothing about a medication at all
+      }
+      if (PROHIBITION.test(clause)) {
+        flag = true; // a prohibition is a clinical call, not a dose
+      } else if (!NON_ADMIN_LEAD.test(clause)) {
+        drop = true; // fails closed
+      }
     }
-    if (PROHIBITION.test(s)) {
-      flagged.push(s);
+    if (drop) {
+      dropped.push(s);
+    } else {
+      if (flag) {
+        flagged.push(s);
+      }
       kept.push(s);
-      continue;
     }
-    if (NON_ADMIN_LEAD.test(s)) {
-      kept.push(s);
-      continue;
-    }
-    dropped.push(s); // fails closed
   }
   return {kept, dropped, flagged};
 }

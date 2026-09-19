@@ -1,0 +1,173 @@
+2026-09-19 22:25 UTC SOAP note export, 06-demo/soap.py
+what: a clinician-readable note from a SAVED assessment, as plain text, downloaded from
+      GET /api/conversations/<id>/soap.txt and linked under the last answer in the page.
+      It reads the saved JSON and the registry. No model call, no retrieval, no change to the triage path,
+      no new dependency. One SOAP block per person, so a comparison gives two, each complete on its own.
+rules it keeps: every clinical claim carries its citation key; anything a guard dropped is written into O
+      with its reason rather than left out; a raised verdict records the rule, its chunk, and that the
+      model's rationale and steps were replaced; an ungrounded red carries the not-grounded note in A;
+      the header names the model, the corpus sha and the prompt sha and says it is not a clinical record.
+
+page checks (node 06-demo/ui_check.mjs flow), all passed:
+  PASS  a finished assessment offers a SOAP note
+  PASS  the note has its four sections and its header
+  PASS  the note quotes the follow-up and carries citation keys
+  PASS  the note wraps for a printed page
+
+Below: the note for 20260919-171437-783ea6, the one-click comparison, verbatim. It covers every branch that matters:
+a side refused post-flight with its verdict withheld, and a side whose yellow a profile rule raised to red,
+with the rationale and steps the raise removed, the questions the red cleared, and the rule's quoted chunk.
+
+==================================================================================================
+SOAP NOTE, GENERATED OFFLINE BY AN EXPERIMENTAL SYSTEM
+==============================================================================
+NOT A CLINICAL RECORD. No clinician has reviewed this. The urgency was
+produced by a small language model running on the device, with no internet,
+constrained by app-side guards, from a corpus of public government pages about
+chest pain and nothing else. Anything outside that subject is refused rather
+than answered.
+
+Assessment   20260919-171437-783ea6, compare, for You and Mum
+Generated    2026-09-19 21:28 UTC
+Started      2026-09-19 21:14 UTC
+Model        NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf, llama.cpp b10809-5266f24da
+             CPU, reasoning off, schema-constrained output, no network
+Corpus       35 chunks, 01-data/citations.csv sha256 68363c032c9f
+Prompt       02-pairs/system_prompt.txt sha256 26e4f4ff3e30, 3066 chars
+
+==============================================================================
+PATIENT  You
+         age 29; female
+==============================================================================
+
+S  SUBJECTIVE
+   The patient's own words, in the order they were given.
+
+   21:14 UTC  first: "A bit of indigestion after lunch, nothing much."
+
+   Profile, as the model read it:
+      age: 29, sex: female
+      conditions: none
+      medications: none
+
+O  OBJECTIVE
+   What the system did, and what it removed.
+
+   Retrieved on the first turn, 3 chunks, 523 tokens, reused unchanged on
+   every follow-up, with no re-retrieval:
+      CP-ACS-003  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-attack/symptoms
+      CP-PE-003  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes
+      CP-ANG-003  NHLBI, National Institutes of Health  retrieved 2026-09-19
+         https://www.nhlbi.nih.gov/health/angina/symptoms
+
+   Turn 1 (21:14 UTC): REFUSED, no verdict given.
+      Reason: the model cited nothing, so it had no grounded source to reason
+         from
+      Shown to the patient: This is outside what this system covers. It can
+         only assess chest pain, and it found nothing relevant to what you
+         described. Please seek medical advice.
+
+A  ASSESSMENT
+   No triage category was given. The system refused this as outside
+   what it covers, and withheld the verdict the model produced (green).
+   Reason: the model cited nothing, so it had no grounded source to reason
+      from
+
+P  PLAN
+   None. No verdict was given, so the system gave no steps.
+   The refusal message it showed is in O.
+
+==============================================================================
+PATIENT  Mum
+         age 64; female; conditions type 2 diabetes, coronary artery disease;
+         medications metformin, atorvastatin
+==============================================================================
+
+S  SUBJECTIVE
+   The patient's own words, in the order they were given.
+
+   21:14 UTC  first: "A bit of indigestion after lunch, nothing much."
+
+   Profile, as the model read it:
+      age: 64, sex: female
+      conditions: type 2 diabetes, coronary artery disease
+      medications: metformin, atorvastatin
+
+O  OBJECTIVE
+   What the system did, and what it removed.
+
+   Retrieved on the first turn, 3 chunks, 523 tokens, reused unchanged on
+   every follow-up, with no re-retrieval:
+      CP-ACS-003  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-attack/symptoms
+      CP-PE-003  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes
+      CP-ANG-003  NHLBI, National Institutes of Health  retrieved 2026-09-19
+         https://www.nhlbi.nih.gov/health/angina/symptoms
+
+   Turn 1 (21:14 UTC):
+      Rule R1: RAISED yellow to red. Profile fact: type 2 diabetes. In the
+         case text: "indigestion", described as "A bit".
+         CP-ACS-002: "Silent heart attacks are more common in older adults and
+            in people who have high blood sugar or diabetes."
+         CP-ACS-002: "Heart attacks can happen without any symptoms or with
+            very mild symptoms."
+      Removed follow up question: "Any chest discomfort, pressure, or
+            heaviness in the center or left side of the chest?"
+         why: no questions on a red (constraint 4)
+      Removed follow up question: "Any shortness of breath at rest or with
+            minimal activity?"
+         why: no questions on a red (constraint 4)
+      Removed next step: "Monitor symptoms; if chest pain, pressure, or
+            discomfort develops, seek immediate care."
+         why: written for the model's yellow, and a rule raised the verdict
+            (constraint 16); replaced by the app's own steps, see P
+      Removed next step: "Take medication as prescribed; do not stop unless
+            directed by provider."
+         why: written for the model's yellow, and a rule raised the verdict
+            (constraint 16); replaced by the app's own steps, see P
+      Removed rationale: "Indigestion is a common symptom of angina and can
+            occur in patients with coronary artery disease. However, no chest
+            pain, shortness of breath, or other red-flag symptoms are present.
+            Risk modifiers from profile (diabetes, CAD) increase concern but
+            do not meet emergency criteria."
+         why: written for the model's yellow, and a rule raised the verdict
+            (constraint 16); not replaced, see the rule in O
+
+A  ASSESSMENT
+   Urgency shown: RED (WHO Interagency Integrated Triage Tool).
+   Disposition: Call emergency services now. The app's words, not the model's.
+   The model gave yellow. Profile rule R1 raised it to red; the rule and its
+   source line are in O.
+
+   Rationale: withheld. The model wrote it for its own yellow and a rule
+   raised the verdict, so it argues against the urgency above. It is quoted in
+   full in O.
+
+   Red flags: none stated.
+
+   Citations behind this answer. Every key resolves in the registry:
+      CP-PE-003  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes
+      CP-ANG-003  NHLBI, National Institutes of Health  retrieved 2026-09-19
+         https://www.nhlbi.nih.gov/health/angina/symptoms
+
+P  PLAN
+   Next steps, as shown to the patient:
+      1. Call emergency services now.
+      2. Do not drive yourself.
+      3. Stay where you are.
+
+   These are the app's own steps, not the model's, because a profile rule
+   raised the verdict. They carry no citation for the same reason the
+   disposition does not. What the model wrote is in O.
+
+   Follow-up questions: none. A red asks none, and the ones the model
+   wrote are in O.
+
+==============================================================================
+Everything above is read from the saved assessment. Citation keys resolve in
+01-data/citations.csv, whose sha256 is in the header. The system has no
+knowledge outside that corpus, and this note is not a diagnosis.

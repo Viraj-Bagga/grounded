@@ -1,0 +1,30 @@
+2026-09-19 22:20 UTC the medication guard: one line that both instructs and prohibits, and the plural gap
+source: two steps the model produced on the demo path today, in 06-demo/results/2026-09-19-copy-and-one-click.txt
+rule: constraint 12, the app drops any next_steps entry directing someone to take, administer, give, apply or dose
+      a medication. Viraj's call 2026-09-19: "Take medication as prescribed" reads like one, so it must drop.
+
+before
+  "Take medication as prescribed; do not stop unless directed by provider."
+      FLAGGED AND KEPT. The whole line was tested for a prohibition, "do not" matched, and the prohibition
+      escape rescued the instruction half with it. On screen it rendered with a "flagged, kept" tag.
+  "Continue current medications and follow up with cardiology as per routine plan."
+      KEPT, untouched. The lexicon held `medication` and not `medications`, so nothing matched at all.
+
+after
+  Each clause is judged on its own and any clause that instructs drops the whole step. Clauses split on ; and .
+  only: a comma or "and" separates a lead from its object ("Bring your medications and your inhaler"), and
+  splitting there would drop the second half of a line that is fine. Plurals added across the lexicon.
+  Both lines now DROP. A prohibition on its own is still kept and flagged, which was the point of that branch.
+
+still escapes, knowingly
+  A clause whose object is a pronoun: "Do not stop your medication; take it as prescribed" names no medication
+  in its second clause, and a lexicon cannot see it.
+
+fixtures added to 02-pairs/guard_fixtures.json, shared with 05-app/spike-load via `npm run sync-fixtures`
+  - measured 2026-09-19: an instruction and a prohibition in one line, flagged and kept until then
+  - measured 2026-09-19: plural medications, which the lexicon did not match at all
+  - a prohibition on its own is still kept and flagged, not dropped
+
+both ports changed, both suites pass
+  python 02-pairs/guards.py   -> 87/87 self-tests passed (fixtures shared with guards.ts).
+  npx jest (05-app/spike-load) -> Tests:       48 passed, 48 total

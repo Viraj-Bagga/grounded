@@ -58,7 +58,8 @@ from urllib.request import urlopen
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import pipeline  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
+import pipeline  # noqa: E402
+import soap  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
 from guards import is_child_profile, load_registry  # noqa: E402
 from escalation import verify_grounding  # noqa: E402
 from store import (SEED_PEOPLE, ConversationStore, PeopleStore,  # noqa: E402
@@ -158,6 +159,16 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
+    def _text(self, text, filename):
+        payload = text.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(payload)
+
     def _json(self, obj, code=200):
         payload = json.dumps(obj).encode()
         self.send_response(code)
@@ -204,6 +215,15 @@ class Handler(SimpleHTTPRequestHandler):
             conv = CONVERSATIONS.get(m.group(1))
             return self._json(conversation_view(conv)) if conv else \
                 self._json({"error": "no such assessment"}, 404)
+        # The clinical export. Reads a saved assessment and nothing else: no
+        # model call, no retrieval, no change to the triage path.
+        m = re.match(r"^/api/conversations/([\w-]+)/soap\.txt$", path)
+        if m:
+            conv = CONVERSATIONS.get(m.group(1))
+            if not conv:
+                return self._json({"error": "no such assessment"}, 404)
+            text = soap.note(conv, ENGINE.chunk_meta, soap.version_info(pipeline.LLAMA))
+            return self._text(text, f"soap-{conv['id']}.txt")
         if path.startswith("/api/chunk/"):
             key = path.rsplit("/", 1)[-1]
             # Constraint 9 again, at the expander. A key that does not resolve
