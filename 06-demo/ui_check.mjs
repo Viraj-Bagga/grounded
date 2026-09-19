@@ -10,6 +10,7 @@
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
+//   node 06-demo/ui_check.mjs phone OUTDIR URL      a phone on the wifi: over the network, touch, 390x844
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
 //   node 06-demo/ui_check.mjs review OUTDIR IDS     the finish review's screenshots (six ids, comma-separated)
 //
@@ -22,7 +23,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const APP = "http://127.0.0.1:8770";
+let APP = "http://127.0.0.1:8770";
 const PORT = 9333;
 const DESKTOP = { width: 1440, height: 900, mobile: false, deviceScaleFactor: 1 };
 const PHONE = { width: 390, height: 844, mobile: true, deviceScaleFactor: 2 };
@@ -65,6 +66,15 @@ async function tab() {
   const page = {
     send,
     async size(d) { await send("Emulation.setDeviceMetricsOverride", d); await send("Emulation.setTouchEmulationEnabled", { enabled: d.mobile }); },
+    // A real handset, as far as the page can tell: touch events from taps and
+    // a phone's user agent, not a narrow desktop window.
+    async handset() {
+      await send("Emulation.setEmitTouchEventsForMouse", { enabled: true, configuration: "mobile" });
+      await send("Emulation.setUserAgentOverride", {
+        userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 "
+          + "(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+        platform: "iPhone" });
+    },
     async go(path) { await send("Page.navigate", { url: APP + path }); await page.until("document.readyState === 'complete' && !document.querySelector('.loading')"); await sleep(350); },
     async eval(expr) {
       const r = await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true });
@@ -455,6 +465,102 @@ async function drop(out) {
   await p.close();
 }
 
+// A PHONE ON THE SAME WIFI, over the network rather than loopback, with touch
+// and a handset user agent. The phone is a SCREEN: the model runs on the
+// laptop, and the page has to say so rather than let "this device" be read as
+// the phone. Everything here is what a thumb actually does.
+async function phone(out, base) {
+  if (base) APP = base.replace(/\/+$/, "");
+  const p = await tab();
+  await p.size(PHONE);
+  await p.handset();
+  await p.go("/");
+  check("the page loads over the network, not loopback", !/127\.0\.0\.1|localhost/.test(APP), APP);
+  check("the browser reports a coarse pointer, so the page takes the touch path",
+    await p.eval('matchMedia("(pointer: coarse)").matches'));
+  const scope = await p.text(".scope");
+  check("it says the model runs on the laptop, not on this phone",
+    /the model runs on the laptop, not on this phone/i.test(scope)
+    && !/runs on this device/.test(scope), scope);
+  check("that line is on the first screen, not below the composer", await p.eval(`(() => {
+    const r = document.querySelector(".scope").getBoundingClientRect();
+    const c = document.querySelector(".composer").getBoundingClientRect();
+    return r.top > 0 && r.bottom <= c.top + 1;
+  })()`));
+  check("nothing overflows sideways at 390px",
+    await p.eval("document.documentElement.scrollWidth <= window.innerWidth + 1"),
+    await p.eval("document.documentElement.scrollWidth + ' vs ' + window.innerWidth"));
+  await p.shot(join(out, "phone-new.png"));
+
+  await p.click("#menu");
+  await sleep(350);
+  check("the drawer opens on the menu button",
+    await p.eval("document.querySelector('#side').classList.contains('open') && !document.querySelector('#scrim').hidden"));
+  check("the drawer covers the page rather than squeezing it",
+    await p.eval("document.querySelector('#side').getBoundingClientRect().left <= 0"));
+  await p.shot(join(out, "phone-drawer.png"));
+  await p.click("#scrim");
+  await sleep(350);
+  check("it closes again on the scrim",
+    await p.eval("!document.querySelector('#side').classList.contains('open')"));
+
+  check("the chip row scrolls sideways instead of wrapping", await p.eval(
+    "(c => c.scrollWidth > c.clientWidth + 4)(document.querySelector('#chips'))"));
+  check("Compare stays pinned in the bar at this width", await p.eval(
+    "getComputedStyle(document.querySelector('#compare-narrow')).display !== 'none'"));
+  await p.click('#chips [data-person="mum"]');
+  await sleep(250);
+  check("a chip selects the person it names", /Mum/.test(await p.text("#chips [aria-pressed=true]")));
+
+  await p.click('[data-preset="0"]');
+  check("a preset fills the composer", (await p.eval("document.querySelector('#ta').value")).length > 20);
+  check("the composer sits at the bottom of the screen, in reach", await p.eval(
+    "(r => Math.abs(r.bottom - window.innerHeight) < 2)(document.querySelector('.composer').getBoundingClientRect())"));
+  await sendAndWait(p, "phone, one answer");
+  check("the answer came back on the phone", await p.count("#thread .bar") === 1);
+  await p.shot(join(out, "phone-answer.png"), true);
+
+  if (await p.count("#thread .cite")) {
+    await p.click("#thread .cite");
+    await p.until("document.querySelector('#sheet[open]')", 10000);
+    await sleep(300);
+    check("a source opens as a bottom sheet, full width", await p.eval(`(() => {
+      const r = document.querySelector("#sheet").getBoundingClientRect();
+      return Math.abs(r.width - window.innerWidth) < 2 && Math.abs(r.bottom - window.innerHeight) < 2
+        && r.height > 200;
+    })()`));
+    check("the sheet shows the chunk and its source", (await p.text("#sheet-body")).length > 80
+      && /http/.test(await p.text("#sheet-foot")));
+    await p.shot(join(out, "phone-sheet.png"));
+    await p.click("#sheet-x");
+    await sleep(250);
+    check("the sheet closes", await p.eval("!document.querySelector('#sheet').open"));
+  } else {
+    check("a source chip was there to open", false, "this answer cited nothing");
+  }
+
+  // Compare: one tap makes the beat, and on a phone the two sides are tabs.
+  await p.go("/");
+  await p.click('[data-preset="4"]');
+  await p.until(`document.querySelectorAll("#thread .bar, #thread .err-panel").length >= 2
+    && !document.querySelector("[data-live] .steps4")`, 300000, 300);
+  await sleep(600);
+  check("compare answers both sides on the phone too", await p.count(".turn.pair .side-ans .bar") === 2);
+  check("the two sides are A/B tabs at this width", await p.count(".turn.pair .tabs [data-tab]") === 2
+    && await p.eval("getComputedStyle(document.querySelector('.turn.pair .tabs')).display !== 'none'"));
+  check("side A is the one showing", await p.eval(
+    "!document.querySelectorAll('.turn.pair .side-ans')[0].hidden && document.querySelectorAll('.turn.pair .side-ans')[1].hidden"));
+  await p.shot(join(out, "phone-compare-a.png"));
+  await p.click('.turn.pair .tabs [data-tab="1"]');
+  await sleep(300);
+  check("tapping B switches to the other person", await p.eval(
+    "document.querySelectorAll('.turn.pair .side-ans')[0].hidden && !document.querySelectorAll('.turn.pair .side-ans')[1].hidden"));
+  check("still nothing overflowing sideways",
+    await p.eval("document.documentElement.scrollWidth <= window.innerWidth + 1"));
+  await p.shot(join(out, "phone-compare-b.png"));
+  await p.close();
+}
+
 // The finish review's screenshots: the surface as a visitor meets it, and every
 // state the reviewer asked to see. IDs are saved assessments in data/.
 async function review(out, ids) {
@@ -522,7 +628,8 @@ const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const chrome = await launch();
 try {
-  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop, regions }[mode];
+  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
+                regions, phone }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

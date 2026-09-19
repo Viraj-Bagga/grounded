@@ -1,0 +1,76 @@
+2026-09-19 23:40 UTC a phone on the same wifi, over the network, 390x844 with touch
+what: the demo server binds 0.0.0.0 behind --lan and prints the wifi URL. 127.0.0.1 stays the default.
+      THE PHONE IS A SCREEN. The model runs on the laptop, and the page says so in its own words when it
+      is opened from another machine. Nothing was added that implies inference on the phone.
+config: python 06-demo/server.py --lan; llama-server on the laptop as usual; Chrome headless driven over the
+      DevTools protocol at 390x844, deviceScaleFactor 2, touch emulation on, taps emitted as touch events,
+      and an iPhone Safari user agent, loading http://10.6.13.168:8770 over the wifi rather than loopback.
+
+== what the server prints on startup
+  warming up: registry, index, encoder, people ...
+  demo on http://127.0.0.1:8770
+    on this wifi: http://10.6.13.168:8770
+    bound to 0.0.0.0: anyone on this network can open the page, read every
+      assessment and add or delete people. There is no password. The model
+      still runs on this laptop; a phone that opens the page is a screen.
+    llama-server expected at http://127.0.0.1:8080, 2 slots of 4096 tokens
+    retrieval: top-3, blend alpha=0.5
+    registry: 35 citation keys, topics chest_pain
+    data: /Users/virajbagga/Coding/steel26/06-demo/data
+    10.6.13.168 "GET / HTTP/1.1" 200 -
+    10.6.13.168 "GET /fonts/atkinson-hyperlegible-next-latin.woff2 HTTP/1.1" 200 -
+    10.6.13.168 "GET /app.css HTTP/1.1" 200 -
+    10.6.13.168 "GET /js/app.js HTTP/1.1" 200 -
+    10.6.13.168 "GET /js/api.js HTTP/1.1" 200 -
+    10.6.13.168 "GET /js/answer.js HTTP/1.1" 200 -
+    10.6.13.168 "GET /js/icons.js HTTP/1.1" 200 -
+    10.6.13.168 "GET /js/people.js HTTP/1.1" 200 -
+    10.6.13.168 "GET /fonts/atkinson-hyperlegible-mono-latin.woff2 HTTP/1.1" 200 -
+    10.6.13.168 code 404, message File not found
+    10.6.13.168 "GET /favicon.ico HTTP/1.1" 404 -
+    10.6.13.168 "GET / HTTP/1.1" 3
+
+== how the page words itself when the request does not come from loopback
+  /api/health carries "remote": true for a client that is not 127.0.0.1 or ::1, and the page uses it:
+    the empty screen says "Chest pain only - 35 government sources - the model runs on the laptop, not on
+      this phone, no internet - up to 4 follow-ups in each assessment", on the first screen, above the composer
+    the sidebar lamp says "Model on the laptop, ready" instead of "Model loaded, ready"
+    the SOAP note header says the model ran "on the machine that wrote this note"
+  From loopback all of it reads as before: "runs on this device".
+
+== node 06-demo/ui_check.mjs phone, over the wifi address
+  PASS  the page loads over the network, not loopback
+  PASS  the browser reports a coarse pointer, so the page takes the touch path
+  PASS  it says the model runs on the laptop, not on this phone
+  PASS  that line is on the first screen, not below the composer
+  PASS  nothing overflows sideways at 390px
+  PASS  the drawer opens on the menu button
+  PASS  the drawer covers the page rather than squeezing it
+  PASS  it closes again on the scrim
+  PASS  the chip row scrolls sideways instead of wrapping
+  PASS  Compare stays pinned in the bar at this width
+  PASS  a chip selects the person it names
+  PASS  a preset fills the composer
+  PASS  the composer sits at the bottom of the screen, in reach
+        phone, one answer: 26.4 s
+  PASS  the answer came back on the phone
+  PASS  a source opens as a bottom sheet, full width
+  PASS  the sheet shows the chunk and its source
+  PASS  the sheet closes
+  PASS  compare answers both sides on the phone too
+  PASS  the two sides are A/B tabs at this width
+  PASS  side A is the one showing
+  PASS  tapping B switches to the other person
+  PASS  still nothing overflowing sideways
+  all passed
+== exit 0
+
+reading: everything the thumb touches works at 390 wide over the network: the drawer opens over the page and
+closes on the scrim, the chip row scrolls with Compare pinned, a preset fills the composer and sends, the
+source opens as a full-width bottom sheet and closes, and a comparison answers both sides with A/B tabs that
+switch. Nothing overflows sideways before or after. The one answer took 19.8 s and the comparison ran both
+sides, on the laptop, as always.
+
+not tested: a real handset browser. This is Chrome's mobile emulation over the real network, which exercises
+the touch path, the viewport and the wifi round trip, but it is not iOS Safari on hardware. The URL to try is
+in the banner above.

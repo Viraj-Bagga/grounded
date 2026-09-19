@@ -107,7 +107,8 @@ def _header(conv, version, now):
         "SOAP NOTE, GENERATED OFFLINE BY AN EXPERIMENTAL SYSTEM",
         "=" * WIDTH,
         _wrap("NOT A CLINICAL RECORD. No clinician has reviewed this. The urgency "
-              "was produced by a small language model running on the device, with "
+              "was produced by a small language model running on the machine that "
+              "wrote this note, with "
               "no internet, constrained by app-side guards, from a corpus of public "
               "government pages about chest pain and nothing else. Anything outside "
               "that subject is refused rather than answered.", indent=""),

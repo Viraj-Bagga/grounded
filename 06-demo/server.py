@@ -46,8 +46,10 @@ assessments can be open at once in two tabs, and a turn keeps running and is
 saved even if its tab closes. See pipeline.py and store.py.
 """
 
+import argparse
 import json
 import os
+import socket
 import re
 import sys
 import threading
@@ -217,7 +219,11 @@ class Handler(SimpleHTTPRequestHandler):
                     r.read()
             except Exception as e:
                 ok, detail = False, f"llama-server unreachable: {e}"
-            return self._json({"ok": ok, "detail": detail, "slots": ENGINE.slots.n,
+            # A page opened from another machine is a SCREEN: the model runs
+            # here. The page words itself from this.
+            remote = not str(self.client_address[0]).startswith(("127.", "::1"))
+            return self._json({"ok": ok, "detail": detail, "remote": remote,
+                               "slots": ENGINE.slots.n,
                                "n_ctx": ENGINE.n_ctx, "sources": _indexed,
                                "registry": len(registry()),
                                "topics": _topics,
@@ -348,15 +354,62 @@ class Handler(SimpleHTTPRequestHandler):
             self._json({"error": "no such person"}, 404)
 
 
-def main():
+def lan_addresses():
+    """The IPv4 addresses this machine answers on, best effort and offline.
+
+    The UDP socket sends nothing: connect() on a datagram socket only picks
+    the route, which is what names the interface a phone on the same wifi
+    would reach. It works with no internet as long as there is a route.
+    """
+    found = []
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("192.0.2.1", 9))          # TEST-NET-1, never routed anywhere
+        found.append(s.getsockname()[0])
+    except OSError:
+        pass
+    finally:
+        s.close()
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            found.append(info[4][0])
+    except OSError:
+        pass
+    return [a for i, a in enumerate(found)
+            if not a.startswith("127.") and a not in found[:i]]
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="The demo server for 06-demo.")
+    ap.add_argument("--lan", action="store_true",
+                    help="bind 0.0.0.0 so a phone on the same wifi can open the page. "
+                         "The default is loopback only.")
+    ap.add_argument("--host", default=None, help="bind this address instead")
+    ap.add_argument("--port", type=int, default=PORT)
+    args = ap.parse_args(argv)
+    host = args.host or ("0.0.0.0" if args.lan else "127.0.0.1")
+
     print("warming up: registry, index, encoder, people ...")
     slots, n_ctx = warm_up()
-    print(f"demo on http://127.0.0.1:{PORT}")
+    print(f"demo on http://127.0.0.1:{args.port}")
+    if host not in ("127.0.0.1", "localhost"):
+        addrs = lan_addresses()
+        for a in addrs:
+            print(f"  on this wifi: http://{a}:{args.port}")
+        if not addrs:
+            print("  on this wifi: no non-loopback address found, so nothing to print")
+        # Said plainly because it is a real exposure, and because the phone is
+        # only ever a screen: the model runs here, on this laptop.
+        print(f"  bound to {host}: anyone on this network can open the page, read every")
+        print("    assessment and add or delete people. There is no password. The model")
+        print("    still runs on this laptop; a phone that opens the page is a screen.")
     print(f"  llama-server expected at {pipeline.LLAMA}, {slots} slots of {n_ctx} tokens")
     print(f"  retrieval: top-{pipeline.TOP_K}, blend alpha={pipeline.ALPHA}")
     print(f"  registry: {len(registry())} citation keys, topics {', '.join(_topics)}")
-    print(f"  data: {CONVERSATIONS.root.parent}")
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    # flush: stdout is block-buffered when this is piped to a log, and the
+    # address a phone needs is the one line you cannot afford to lose.
+    print(f"  data: {CONVERSATIONS.root.parent}", flush=True)
+    ThreadingHTTPServer((host, args.port), Handler).serve_forever()
 
 
 if __name__ == "__main__":

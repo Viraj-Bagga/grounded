@@ -4843,3 +4843,38 @@ stripping around those links, and **the frozen base corpus already has 24 of
 them**, so the regional chunks were left consistent with it. The extractor
 artefact is logged for after the hackathon.
 `07-distribute/results/2026-09-19-regional-packs.txt`.
+### 2026-09-19 The demo page on a phone over the wifi, behind --lan
+
+**`python 06-demo/server.py --lan` binds 0.0.0.0 and prints the wifi URL.**
+127.0.0.1 stays the default, so nothing changes unless the flag is passed. The
+banner also says, in plain words, that anyone on the network can open the page,
+read every assessment and add or delete people, because there is no password.
+The address comes from a UDP socket that sends nothing: connect() on a datagram
+socket only picks the route, which works offline as long as there is one. The
+banner is flushed, because stdout is block-buffered when it is piped to a log
+and the address is the one line you cannot afford to lose.
+
+**The phone is a screen, and the page now says so itself.** `/api/health`
+carries `remote` for a client that is not 127.0.0.1 or ::1. From another
+machine the empty screen reads "the model runs on the laptop, not on this
+phone", on the first screen above the composer rather than a scroll away; the
+lamp reads "Model on the laptop, ready"; and the SOAP note header says the
+model ran "on the machine that wrote this note". From loopback every one of
+those reads as before. **This proves nothing about on-device inference and must
+never be presented as if it does:** the phone screenshot is still the only
+claim this project makes about running on a phone.
+
+**Checked over the network, not in a resized desktop window.** A new
+`ui_check.mjs phone OUTDIR URL` mode loads the wifi address at 390x844 with
+touch emulation, taps emitted as touch events and an iPhone user agent, so the
+page takes its touch path. 22 checks, all passed: the drawer opens over the
+page and closes on the scrim; the chip row scrolls sideways with Compare
+pinned; a chip selects its person; a preset fills the composer, which sits at
+the bottom in reach, and sends, with the answer back in 19.8 s; a source opens
+as a full-width bottom sheet and closes; a comparison answers both sides and
+its A/B tabs switch; and nothing overflows sideways before or after.
+`06-demo/results/2026-09-19-phone-over-wifi.txt`.
+
+**Not tested: a real handset browser.** This is Chrome's mobile emulation over
+the real wifi, which exercises the touch path, the viewport and the round trip.
+It is not iOS Safari on hardware.

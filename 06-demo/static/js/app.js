@@ -167,7 +167,7 @@ function renderStatus() {
   const el = $("#status");
   el.classList.toggle("down", !(h && h.ok));
   el.innerHTML = `<span class="lamp"></span>` + (h && h.ok
-    ? `Model loaded, ready`
+    ? (h.remote ? `Model on the laptop, ready` : `Model loaded, ready`)
     : `Model not running. Start llama-server.`);
 }
 
@@ -195,6 +195,11 @@ function whoCard(p, big) {
   </div>`;
 }
 
+// True when this page was opened from another machine. The model runs on the
+// laptop either way; a phone on the wifi is a screen, and the page says so
+// rather than leave "this device" to be read as the phone.
+const remoteViewer = () => !!(S.health && S.health.remote);
+
 function showNew() {
   const q = new URLSearchParams(location.search).get("p");
   if (q && byId(q)) { S.picked = [q]; S.compare = false; history.replaceState(null, "", "/"); }
@@ -215,7 +220,9 @@ function showNew() {
     <div class="try"><h2>Try one</h2><ol>${PRESETS.map((p, i) =>
       `<li><button type="button" data-preset="${i}"><span class="key">${i + 1}</span>` +
       `<span><span class="lbl">${esc(p[0])}</span><span class="snip">${esc(p[1])}</span></span></button></li>`).join("")}</ol></div>
-    <p class="scope">Chest pain only · ${src} · runs on this device, no internet · up to
+    <p class="scope">Chest pain only · ${src} · ${remoteViewer()
+      ? "the model runs on the laptop, not on this phone"
+      : "runs on this device"}, no internet · up to
       ${S.health ? S.health.max_followups : 4} follow-ups in each assessment</p>
   </div>` + composerHTML({ first: true });
   $("#main").querySelectorAll("[data-preset]").forEach(b => b.onclick = () => usePreset(+b.dataset.preset));
