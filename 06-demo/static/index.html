@@ -202,6 +202,14 @@ const PRESETS = [
   ["Guards firing",
    "Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.",
    "T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion."],
+  // PROFILE ESCALATION. Picks Mum, because her diabetes is what raises it: R1,
+  // CP-ACS-002. Measured 2026-09-19 at temperature 0.2: the model said yellow,
+  // with citations, in 3 of 3 runs and R1 raised each to red. In the sweep the
+  // same text was refused twice, and the refusal rescue now raises those too.
+  // In compare mode it sets You against Mum. 06-demo/results/2026-09-19-rescue-preset-live.txt
+  ["Sick and sweaty (Mum)",
+   "Feeling a bit sick and sweaty after dinner, probably something I ate.",
+   "", "mum"],
 ];
 
 const DISPOSITION = {
@@ -212,10 +220,14 @@ const DISPOSITION = {
 
 function renderPresets(){
   $('#presets').innerHTML = '';
-  PRESETS.forEach(([label, sym, tl]) => {
+  PRESETS.forEach(([label, sym, tl, who]) => {
     const b = document.createElement('button');
     b.textContent = label;
-    b.onclick = () => { $('#sym').value = sym; $('#tl').value = tl; };
+    b.onclick = () => {
+      $('#sym').value = sym; $('#tl').value = tl;
+      // A preset that needs a profile picks it: alone, or against You to compare.
+      if (who){ picked = mode === 'compare' ? ['self', who] : [who]; renderProfiles(); }
+    };
     $('#presets').appendChild(b);
   });
 }

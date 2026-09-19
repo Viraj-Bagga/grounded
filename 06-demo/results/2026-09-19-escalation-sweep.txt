@@ -1,0 +1,183 @@
+# ESCALATION SWEEP, 2026-09-19: does a profile rule ever RAISE the model's verdict, and how reliably?
+# 18 mild or vague presentations, each on the profiles whose escalating rule it targets,
+# 3 repeats each, back to back. Temperature 0.2, as the demo runs. llama-server -np 2 -c 8192.
+# escalation.py sha 7db8c4ca, server.py sha a2c384f9, prompt sha 26e4f4ff
+# Per run: the model's urgency, what was shown, the rules and their status. For a post-flight
+# refusal the layer does not run, so the line also says what it WOULD have done to the withheld
+# verdict, computed with the same escalate() on the same text and profile.
+
+-- S01  Bit of a niggle in my chest, honestly it is nothing.
+   mum      run 1  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R1    38s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002']    20s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002']    21s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002']    39s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002']    23s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002']    23s
+   grandpa  run 1  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R2    36s
+   grandpa  run 2  model yellow shown red    RAISED  rules R2:raised                  cites ['CP-ACS-003', 'CP-PLEU-001', 'CP-PERI-002']    36s
+   grandpa  run 3  model red    shown red            rules R2:supports                cites []    23s
+-- S02  Chest has not been right today.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']    42s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']    21s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']    24s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']    43s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']    27s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ANG-001', 'CP-PERI-001']    24s
+-- S03  I just feel a bit off today, slightly tired, nothing I can put my finger on.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    41s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    22s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    31s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    41s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    32s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    31s
+-- S04  A bit of indigestion after lunch, nothing much.
+   mum      run 1  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R1    44s
+   mum      run 2  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: green -> yellow via R1    14s
+   mum      run 3  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: green -> yellow via R1    15s
+   dad      run 1  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: green -> yellow via R2    33s
+   dad      run 2  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R2    25s
+   dad      run 3  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: green -> yellow via R2    17s
+-- S05  Slight heaviness in my chest this morning, probably just slept funny.
+   mum      run 1  model red    shown red            rules R1:supports                cites []    34s
+   mum      run 2  model red    shown red            rules R1:supports                cites []    16s
+   mum      run 3  model red    shown red            rules R1:supports                cites []    19s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-DIFF-001']    42s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-DIFF-001']    28s
+   dad      run 3  model red    shown red            rules R2:supports                cites []    52s
+-- S06  I have been a bit more tired than usual this week and slightly out of breath on the stairs.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-PERI-001', 'CP-ACS-003']    41s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-PERI-001', 'CP-ACS-003']    27s
+   mum      run 3  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R1    36s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PNA-001']    42s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PNA-001']    23s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-PERI-001']    18s
+-- S07  A mild ache in my left arm on and off today, no chest pain as such.
+   mum      run 1  model yellow shown red    RAISED  rules R1:raised                  cites ['CP-ACS-003', 'CP-ANG-002', 'CP-ANG-001']    51s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-ANG-002', 'CP-ANG-001']    21s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-ANG-002', 'CP-ANG-001']    16s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-ANG-002', 'CP-ANG-001']    55s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-ANG-001', 'CP-ANG-002']    41s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-ANG-001', 'CP-ANG-002']    26s
+-- S08  Just a vague discomfort across my chest now and then, it comes and goes.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ANG-002', 'CP-ANG-001']    67s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ANG-002', 'CP-ANG-001']    28s
+   mum      run 3  model red    shown red            rules R1:supports                cites []    30s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-001', 'CP-ANG-002', 'CP-ANG-001']    54s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ANG-002', 'CP-ACS-001', 'CP-ANG-001']    32s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ANG-002', 'CP-ACS-001']    19s
+-- S09  Feeling a bit sick and sweaty after dinner, probably something I ate.
+   mum      run 1  model yellow shown red    RAISED  rules R1:raised                  cites ['CP-ACS-003']    58s
+   mum      run 2  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R1    34s
+   mum      run 3  REFUSED (the model cited nothing, so it had no grounded s)  layer WOULD have: yellow -> red via R1    39s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003']    49s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PNA-001', 'CP-GERD-001']    24s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003']    26s
+-- S10  I am a little light-headed today and my chest feels slightly tight, probably the heat.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-ANG-002']    38s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    25s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-ANG-002']    36s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    43s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    29s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-002', 'CP-ANG-002']    25s
+-- S11  I get a bit breathless walking to the shops lately, no pain.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-ACS-001']    42s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-001']    18s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ACS-003', 'CP-PERI-001']    20s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PERI-002']    43s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-001']    21s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ACS-003', 'CP-PERI-001']    19s
+-- S12  Something feels not quite right in my chest, hard to describe.
+   mum      run 1  model red    shown red            rules R1:supports                cites ['CP-ANG-002', 'CP-ANG-001', 'CP-PERI-002']    43s
+   mum      run 2  model red    shown red            rules R1:supports                cites ['CP-ANG-002', 'CP-ANG-001']    18s
+   mum      run 3  model red    shown red            rules R1:supports                cites ['CP-ANG-002', 'CP-ANG-001']    24s
+   dad      run 1  model red    shown red            rules R2:supports                cites ['CP-ANG-002', 'CP-ANG-001']    41s
+   dad      run 2  model red    shown red            rules R2:supports                cites ['CP-ANG-002', 'CP-ANG-001', 'CP-PERI-002']    21s
+   dad      run 3  model red    shown red            rules R2:supports                cites ['CP-ANG-002', 'CP-ANG-001']    17s
+-- S13  A bit of tightness in my chest when I walk up the hill, it goes when I stop.
+   mum      run 1  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ANG-002', 'CP-DIFF-001']    46s
+   mum      run 2  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ANG-002', 'CP-DIFF-001']    22s
+   mum      run 3  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ANG-002', 'CP-ACS-003', 'CP-DIFF-001']    22s
+-- S14  My chest feels slightly tight when I climb the stairs, same as it has been for months.
+   mum      run 1  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ACS-001', 'CP-ANG-002']    39s
+   mum      run 2  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ACS-001', 'CP-ANG-002']    20s
+   mum      run 3  model red    shown red            rules R1:supports R3:at_least    cites ['CP-ACS-001', 'CP-ANG-002']    19s
+-- S15  A slight twinge in my chest when I take a deep breath, started this morning.
+   aunt     run 1  model red    shown red            rules R4:supports                cites ['CP-PERI-001', 'CP-ACS-005', 'CP-PE-001']    38s
+   aunt     run 2  model red    shown red            rules R4:supports                cites ['CP-ACS-005', 'CP-PERI-001']    19s
+   aunt     run 3  model red    shown red            rules R4:supports                cites ['CP-PERI-001', 'CP-ACS-005']    21s
+   grandpa  run 1  model red    shown red            rules R2:supports R5:supports    cites ['CP-PERI-001', 'CP-ACS-005']    37s
+   grandpa  run 2  model red    shown red            rules R2:supports R5:supports    cites ['CP-ACS-005', 'CP-PERI-001', 'CP-PE-001']    20s
+   grandpa  run 3  model red    shown red            rules R2:supports R5:supports    cites ['CP-ACS-005', 'CP-PERI-001']    22s
+-- S16  It catches a little on the right side of my chest when I breathe in deeply, since yesterday.
+   aunt     run 1  model red    shown red            rules R4:supports                cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PLEU-001']    35s
+   aunt     run 2  model red    shown red            rules R4:supports                cites ['CP-PERI-001', 'CP-ACS-003']    17s
+   aunt     run 3  model red    shown red            rules R4:supports                cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PLEU-001']    25s
+   grandpa  run 1  model red    shown red            rules R2:supports R5:supports    cites ['CP-ACS-003', 'CP-PERI-001']    37s
+   grandpa  run 2  model red    shown red            rules R2:supports R5:supports    cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PLEU-001']    21s
+   grandpa  run 3  model red    shown red            rules R2:supports R5:supports    cites ['CP-ACS-003', 'CP-PERI-001', 'CP-PLEU-001']    21s
+-- S17  My calf is a bit sore and puffy since yesterday and I feel slightly short of breath.
+   grandpa  run 1  model red    shown red            rules R2:supports R5:supports    cites ['CP-PERI-001', 'CP-DIFF-001']    33s
+   grandpa  run 2  model red    shown red            rules R2:supports R5:supports    cites ['CP-PERI-001', 'CP-DIFF-001']    14s
+   grandpa  run 3  model red    shown red            rules R2:supports R5:supports    cites ['CP-PERI-001', 'CP-DIFF-001']    20s
+-- S18  My leg is a little swollen since the operation and there is a slight ache in my chest when I breathe in.
+   grandpa  run 1  model red    shown red            rules R2:supports R5:supports    cites ['CP-PE-001', 'CP-PE-003']    39s
+   grandpa  run 2  model red    shown red            rules R2:supports R5:supports    cites ['CP-PE-003', 'CP-PE-001']    19s
+   grandpa  run 3  model red    shown red            rules R2:supports R5:supports    cites ['CP-PE-001', 'CP-PE-003']    21s
+
+=== SUMMARY: raises out of runs, per presentation and profile
+   S01 mum      raised 0/3   model said ['refused(yellow)', 'red', 'red']
+   S01 dad      raised 0/3   model said ['red', 'red', 'red']
+   S01 grandpa  raised 1/3   model said ['refused(yellow)', 'yellow', 'red']  <-- raised
+   S02 mum      raised 0/3   model said ['red', 'red', 'red']
+   S02 dad      raised 0/3   model said ['red', 'red', 'red']
+   S03 mum      raised 0/3   model said ['red', 'red', 'red']
+   S03 dad      raised 0/3   model said ['red', 'red', 'red']
+   S04 mum      raised 0/3   model said ['refused(yellow)', 'refused(green)', 'refused(green)']
+   S04 dad      raised 0/3   model said ['refused(green)', 'refused(yellow)', 'refused(green)']
+   S05 mum      raised 0/3   model said ['red', 'red', 'red']
+   S05 dad      raised 0/3   model said ['red', 'red', 'red']
+   S06 mum      raised 0/3   model said ['red', 'red', 'refused(yellow)']
+   S06 dad      raised 0/3   model said ['red', 'red', 'red']
+   S07 mum      raised 1/3   model said ['yellow', 'red', 'red']  <-- raised
+   S07 dad      raised 0/3   model said ['red', 'red', 'red']
+   S08 mum      raised 0/3   model said ['red', 'red', 'red']
+   S08 dad      raised 0/3   model said ['red', 'red', 'red']
+   S09 mum      raised 1/3   model said ['yellow', 'refused(yellow)', 'refused(yellow)']  <-- raised
+   S09 dad      raised 0/3   model said ['red', 'red', 'red']
+   S10 mum      raised 0/3   model said ['red', 'red', 'red']
+   S10 dad      raised 0/3   model said ['red', 'red', 'red']
+   S11 mum      raised 0/3   model said ['red', 'red', 'red']
+   S11 dad      raised 0/3   model said ['red', 'red', 'red']
+   S12 mum      raised 0/3   model said ['red', 'red', 'red']
+   S12 dad      raised 0/3   model said ['red', 'red', 'red']
+   S13 mum      raised 0/3   model said ['red', 'red', 'red']
+   S14 mum      raised 0/3   model said ['red', 'red', 'red']
+   S15 aunt     raised 0/3   model said ['red', 'red', 'red']
+   S15 grandpa  raised 0/3   model said ['red', 'red', 'red']
+   S16 aunt     raised 0/3   model said ['red', 'red', 'red']
+   S16 grandpa  raised 0/3   model said ['red', 'red', 'red']
+   S17 grandpa  raised 0/3   model said ['red', 'red', 'red']
+   S18 grandpa  raised 0/3   model said ['red', 'red', 'red']
+   model verdicts over all 99 runs: red 85, refused(green) 4, refused(yellow) 7, yellow 3
+   runs raised: 3 of 99
+done
+
+=== WHAT EACH REFUSAL POLICY WOULD HAVE MADE OF THESE SAME 99 RUNS
+# Computed from the runs above. For each refusal, the line's "WOULD have" is escalate() on the
+# withheld urgency; nothing was re-run. "raised" counts a run whose final urgency is above the model's.
+#
+#   case          as built   override to red only   override always
+#   S01 mum        0/3        1/3                    1/3
+#   S01 grandpa    1/3        2/3                    2/3
+#   S04 mum        0/3        1/3                    3/3   (1 to red, 2 green to yellow)
+#   S04 dad        0/3        1/3                    3/3   (1 to red, 2 green to yellow)
+#   S06 mum        0/3        1/3                    1/3
+#   S07 mum        1/3        1/3                    1/3
+#   S09 mum        1/3        3/3                    3/3   (all three to red)
+#   totals         3 of 99    10 of 99               14 of 99
+#
+# As built, no presentation raises 3 of 3; the best is 1 of 3. The model said red in 85 of 99 runs.
+# Of the 14 non-red verdicts, 11 cited nothing and were refused before the layer ran, and the 3 that
+# were shown were all raised. The limit is the refusal gate, not the phrasing.
+# Under "override to red only", S09 on Mum would be 3 of 3, but 2 of those 3 would render as the
+# flagged "not grounded" red, because the model cited nothing in them.

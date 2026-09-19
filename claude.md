@@ -225,7 +225,13 @@ Violating any of these silently breaks something downstream. They are not prefer
 
     **When the model already said red, a rule whose conditions hold is still shown, as "supports this red",** Viraj's call. That matters because of the model's red bias. **Measured live 2026-09-19: the model said red in 6 of 6 rule cases, so every line read "supports", and a live raise happened once in 3 runs of the best candidate** (Grandpa, "Bit of a niggle in my chest": yellow raised to red by R2). The raising path is proven by fixtures and that one run, not by a reliable demo.
 
-    **The layer leaves refusals alone.** It runs only on verdicts that are shown. Measured: Mum, a diabetic, with "A bit of indigestion after lunch" was refused post-flight because nothing was cited, and R1 never ran on it. Whether a profile rule should override a refusal is an open call.
+    **The layer leaves refusals alone, and that is its main limit.** It runs only on verdicts that are shown. **The 2026-09-19 sweep** was 18 mild or vague presentations on the profiles whose rules they target, 3 repeats each at temperature 0.2, 99 runs in all. The model said red in 85 of them. Of the 14 non-red verdicts, **11 cited nothing and were refused before the layer ran**. The 3 that were shown were all raised, and **no presentation raised 3 of 3**; the best was 1 of 3. The limit is the refusal gate, not the phrasing. Results: `06-demo/results/2026-09-19-escalation-sweep.txt`.
+
+    **BUILT 2026-09-19, Viraj's call: a rule overrides a post-flight refusal only when its result is red.** It is `rescue_refusal` in `escalation.py`. A refused yellow that a rule raises goes out as a red through the never-withhold-red path: flagged as not grounded, with the rule's quoted line. A refused green that would only become yellow stays refused. **His reason: a refusal that hides a yellow the rules would raise is the same failure class as withholding a red.** None of the 7 recorded out-of-scope texts fires a rule on any adult profile, so the breadth risk is constructed rather than measured. It is recorded as an accepted fixture: Dad with "My shoulder aches a bit after the gym" is rescued if the model withholds a yellow. On the sweep's 99 runs the rescue takes raises from 3 to 10. **Verified live, both branches:** the S04 phrasing gave 3 withheld yellows that were rescued to red and 3 withheld greens that stayed refused.
+
+    **The demo preset: "Sick and sweaty (Mum)",** which is "Feeling a bit sick and sweaty after dinner, probably something I ate" on Mum. It fired **5 of 5 live**: 3 of 3 through the API as three distinct outputs, and 2 in the page. It fires either as a shown yellow raised by R1 or, when the model cites nothing, as a rescued red. The preset selects Mum; in compare mode it sets You against Mum. **In the page's comparison, You came back YELLOW and Mum RED: the first side-by-side with two different verdicts.** Results: `06-demo/results/2026-09-19-rescue-preset-live.txt`, with screenshots beside it.
+
+    **Observed, not changed:** that compare run was rescued only because the model cited `"RETRIEVED CONTEXT: CP-ACS-003 (…)"`, a label in front of the key. The leading-key rule of constraint 9 drops it, as specified.
 
     **Symptom matching is lexical.** A miss means no escalation, and the model's verdict stands. Profile facts are structured. Python and demo only; `guards.ts` has no port.
 
@@ -247,6 +253,8 @@ The corpus is redistributed inside the app, so this is distribution, not linking
 
 Every source needs publisher, URL, retrieval date and licence recorded. A citation without a retrieval date is not reproducible.
 
+**The model licence needs legal review before any real distribution.** NVIDIA Nemotron Open Model License, clause 7: "You will indemnify and hold harmless NVIDIA from and against any claim by any third party arising out of or related to your use or distribution of the Works, Derivative Works thereof, or output from the Works or Derivative Works." In this app the output is a triage verdict. Accepted for the hackathon on 2026-09-19, not beyond it. Clause 3a requires giving recipients a copy of the licence; the model pack in `07-distribute/` ships it. NVIDIA's own LICENSE file on Hugging Face is empty; the text is from nvidia.com.
+
 ---
 
 ## Epics and dependency order
@@ -262,7 +270,7 @@ Every source needs publisher, URL, retrieval date and licence recorded. A citati
    3. **The guards firing, and profile escalation (constraint 15).** Family cards, a rule line under the verdict, and a side-by-side of two profiles, which takes about 2 minutes on CPU because the two generations run back to back. The guards beat replaced "family profile changes the answer", which was cut on 2026-09-17 because it did not work: both profiles returned red, since the base model returns red for everything. This beat shows three things that do work and are all real: a fabricated red flag dropped, follow-up questions cleared off a red, and an invented citation key refused by the expander.
    4. **Citation expander.** Click a key, get the real chunk text, publisher, URL and retrieval date.
 
-   Built at `06-demo/`. Run `llama-server` on 8080, then `python 06-demo/server.py`, then open 127.0.0.1:8770.
+   Built at `06-demo/`. Run `llama-server -m 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192 --port 8080`, then `python 06-demo/server.py`, then open 127.0.0.1:8770. **`-np 2` since 2026-09-19** so the side-by-side's two generations decode together: 86 s against 112 s sequential at `-np 1`. `-c 8192` keeps 4096 tokens per slot. **Turn macOS Low Power Mode off for the demo:** it was on during that measurement, and turns on that contended with other load ran at 4 to 7 tok/s, against 8.8 on an uncontended one.
 
 Epic 5's llama.rn spike does **not** depend on epic 1 and should run in parallel.
 

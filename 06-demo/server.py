@@ -3,7 +3,10 @@
 
     # terminal 1
     llama-server -m 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf \
-      --jinja -np 1 -ngl 0 -c 4096 --port 8080
+      --jinja -np 2 -ngl 0 -c 8192 --port 8080
+    # -np 2 since 2026-09-19: the side-by-side's two requests decode together,
+    # 86 s against 112 at -np 1. -c 8192 keeps 4096 per slot, as before.
+    # 06-demo/results/2026-09-19-compare-timing.txt
     # terminal 2
     python 06-demo/server.py          # then open http://127.0.0.1:8770
 
@@ -51,7 +54,8 @@ from guards import (PAEDIATRIC_REFUSAL, REFUSAL,  # noqa: E402
                     excluded_subject, is_child_profile, load_registry,
                     parse_model_json, post_flight, scope_check,
                     screen_follow_ups)
-from escalation import escalate, verify_grounding  # noqa: E402
+from escalation import (escalate, rescue_refusal,  # noqa: E402
+                        verify_grounding)
 from pair_format import (ASSISTANT_SCHEMA, SYSTEM_PROMPT,  # noqa: E402
                          build_human_turn)
 
@@ -386,11 +390,25 @@ class Handler(SimpleHTTPRequestHandler):
             # green is refused. A red is never withheld: it goes out as the
             # urgency alone, flagged, and the page shows UNGROUNDED_NOTE with it.
             action, why, shown = post_flight(result)
+            escalation = None
             if action == "refuse":
-                send("refused", {"message": REFUSAL, "reason": why,
-                                 "urgency_withheld": result.get("urgency"),
-                                 "gen_ms": gen_ms})
-                return
+                # UNLESS a profile rule raises the withheld verdict to RED. Then
+                # it goes out flagged, through the never-withhold-red path, with
+                # the rule's line. A withheld green that would only become
+                # yellow stays refused. Viraj's call 2026-09-19: a refusal that
+                # hides a yellow the rules would raise is the same failure class
+                # as withholding a red. See rescue_refusal.
+                escalation = rescue_refusal(result.get("urgency"), prof,
+                                            case_present)
+                if escalation is None:
+                    send("refused", {"message": REFUSAL, "reason": why,
+                                     "urgency_withheld": result.get("urgency"),
+                                     "gen_ms": gen_ms})
+                    return
+                action, why, shown = post_flight(dict(result, urgency="red"))
+                why += (f"; a profile rule raised the withheld "
+                        f"{escalation['original']} to red, so it is shown, not "
+                        f"refused")
             ungrounded = None
             if action == "flag":
                 ungrounded = {"note": UNGROUNDED_NOTE, "reason": why,
@@ -402,8 +420,9 @@ class Handler(SimpleHTTPRequestHandler):
             # ESCALATION. Profile rules, deterministic, only ever raising, each
             # quoting its chunk. The case text is symptoms and timeline, never
             # the chunks. See 02-pairs/escalation.py.
-            escalation = escalate(result.get("urgency"), prof, case_present)
-            if escalation["changed"]:
+            if escalation is None:      # a rescued refusal arrives escalated
+                escalation = escalate(result.get("urgency"), prof, case_present)
+            if result.get("urgency") != escalation["final"]:
                 result = dict(result, urgency=escalation["final"])
                 # Constraint 4 again: a verdict raised to red asks no questions.
                 kept_q, cleared = screen_follow_ups(

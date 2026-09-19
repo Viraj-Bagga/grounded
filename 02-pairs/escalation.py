@@ -126,8 +126,12 @@ EXERTION_NULL = re.compile(
 
 BREATHING = _words(r"breathe[sd]?", r"breathing", r"deep breaths?",
                    r"breath in", r"inhal\w*", r"inspiration")
+# "It catches when I breathe in" is the classic patient phrasing, and missing it
+# was found by the 2026-09-19 sweep's offline pre-check. "catch my breath" does
+# not trip it: BREATHING needs breathe, breathing, a deep breath or breath in.
 PAIN_OR_WORSE = _words(r"pain\w*", r"hurts?|hurting", r"sharp", r"stab\w*",
-                       r"ache|aching", r"sore", r"worse")
+                       r"ache|aching", r"sore", r"worse", r"twinge\w*",
+                       r"catch(?:es|ing)?")
 LEG = _words(r"legs?", r"calf|calves", r"thigh")
 LEG_SIGN = _words(r"swollen", r"swell\w*", r"fatter", r"bigger", r"puffy",
                   r"tender\w*", r"pain\w*", r"sore", r"ach\w*", r"hurts?",
@@ -309,6 +313,25 @@ def escalate(urgency, profile, case_text):
                 fired=fired)
 
 
+def rescue_refusal(withheld, profile, case_text):
+    """The escalation to show INSTEAD of a post-flight refusal, or None.
+
+    Only when a rule raises the withheld verdict to RED. It then goes out through
+    the never-withhold-red path: flagged as not grounded, with the rule's quoted
+    line. A withheld green that a rule would only raise to yellow stays refused,
+    because a non-red that cites nothing is still refused.
+
+    Viraj's call 2026-09-19: a refusal that hides a yellow the rules would raise
+    is the same failure class as withholding a red. Measured the same day, on the
+    sweep's 99 runs, 11 of the model's 14 non-red verdicts were refused before
+    the layer ran. This takes raises from 3 of 99 to 10. None of the 7 recorded
+    out-of-scope phrasings fires a rule on any adult profile, so the risk of
+    triaging an out-of-scope complaint this way is constructed, not measured.
+    """
+    e = escalate(withheld, profile, case_text)
+    return e if e["changed"] and e["final"] == "red" else None
+
+
 if __name__ == "__main__":
     import json
     import sys
@@ -343,6 +366,12 @@ if __name__ == "__main__":
         check(f"escalation: {c['name']}",
               out["final"] == c["final"] and status == c["status"],
               f"got final={out['final']} status={status}")
+
+    for c in fx.get("rescue", []):
+        got = rescue_refusal(c["withheld"], P[c["profile"]], c["text"])
+        check(f"rescue: {c['name']}",
+              (got is not None) == c["rescued"] and (got is None or got["final"] == "red"),
+              f"got {got and (got['original'], got['final'])}")
 
     # The principle, over every fixture at every starting urgency.
     lowered = [(c["name"], u) for c in fx["fires"] + fx["escalation"]

@@ -54,7 +54,7 @@ if the original turns up, merge this into it rather than the other way round.
 # terminal 1
 cd ~/Coding/steel26
 llama-server -m 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf \
-  --jinja -np 1 -ngl 0 -c 4096 --port 8080
+  --jinja -np 2 -ngl 0 -c 8192 --port 8080    # -np 2 since 2026-09-19, see below
 
 # terminal 2
 cd ~/Coding/steel26 && .venv/bin/python 06-demo/server.py
@@ -3960,3 +3960,281 @@ session asserted a unique marker before cutting.
 
 The refusal copy and the rule-line copy on the page are mine. Flagged for Viraj
 to put in his own voice.
+
+### 2026-09-19 Side-by-side timing, the escalation sweep, and whether rules may override a refusal
+
+Viraj's message was cut off. Item 3 ended mid-sentence and item 4 never arrived.
+
+**1. Side-by-side timing.** The page already sent both requests at once, so the
+131 s was concurrent requests serialized by `-np 1`. Measured with a fresh
+symptom text per trial, so no prompt-cache hits:
+
+| config | wall clock |
+|---|---|
+| `-np 1`, sequential | 101 and 123 s |
+| `-np 1`, concurrent | 130 and 136 s: no help, slightly worse |
+| **`-np 2 -c 8192`, concurrent** | **86 s twice.** Both panels finish together |
+
+That is 23% faster than sequential at `-np 1`, with no single-request penalty
+seen: 45.8 s, n=1. **Adopted: the documented launch command is now
+`-np 2 -c 8192`**, and no code changed. The startup cache of one side was not
+built, since concurrency helped. It would bring a preset comparison to about 45
+s. `06-demo/results/2026-09-19-compare-timing.txt`.
+
+**Measured along the way: macOS Low Power Mode is ON.** Contended runs managed
+4 to 7 tok/s and one uncontended run 8.8. Turn it off for the demo; that is
+Viraj's to change.
+
+**2. The sweep: no presentation raises 3 of 3, as built.** 18 mild or vague
+presentations, each on the profiles whose escalating rule it targets, 3
+repeats each, 99 runs.
+- The model said red in 85 of the 99 runs.
+- There were 14 non-red verdicts. **11 of them cited nothing and were refused
+  before the layer ran.** The 3 that were shown were all raised, each once in
+  its three runs:
+  - S01 on Grandpa: "Bit of a niggle in my chest, honestly it is nothing."
+  - S07 on Mum: "A mild ache in my left arm on and off today, no chest pain as such."
+  - S09 on Mum: "Feeling a bit sick and sweaty after dinner, probably something I ate."
+
+Before the sweep, its offline pre-check caught a gap in my R4 and R5 matcher:
+"twinge" and "it catches when I breathe in" did not count as pain on breathing.
+Both are fixed, with a fixture proving "cannot catch my breath" still does not
+count. Escalation is at 28/28.
+`06-demo/results/2026-09-19-escalation-sweep.txt`.
+
+**3. Decided, not implemented: override a refusal only when the rule's result
+is red.** The red renders flagged, with the rule's quote, through the existing
+never-withhold-red path. A withheld green that would only rise to yellow stays
+refused.
+- **For overriding:** a refusal can hide exactly the risk the rule encodes. Mum
+  with "a bit of indigestion" was refused while withholding a yellow, and R1's
+  line is verbatim CP-ACS-002, so the rule brings its own source.
+- **Against:** the verdict being raised is ungrounded. And the rules' lexicon
+  fires on non-chest complaints ("shoulder aches a bit after the gym"), which an
+  override would turn into triaged verdicts.
+- **Measured both ways:** none of the 7 recorded out-of-scope texts fires a rule
+  on any adult profile. The constructed ones do.
+
+On the sweep's own runs:
+
+| policy | raises in 99 runs | at 3/3 |
+|---|---|---|
+| as built | 3 | none |
+| override to red only | 10 | S09 on Mum, all three to red, two of them flagged |
+| override always | 14 | but it shows yellows that cite nothing |
+
+The red-only version is the only one consistent with both principles already
+in force: never withhold a red, and refuse a non-red that cites nothing.
+
+### 2026-09-19 Refusal rescue built, and the escalation preset holds
+
+**Viraj's call:** a rule overrides a post-flight refusal only when its result is
+red. A refused yellow that a rule raises becomes a red with the not-grounded
+note; a refused green that would only become yellow stays refused. His reason:
+hiding a yellow the rules would raise is the same failure class as withholding a
+red, and the out-of-scope risk is constructed, not measured.
+
+**Built** as `rescue_refusal` in `02-pairs/escalation.py`, with six fixtures
+(escalation 34/34). The server reuses `post_flight` on the red for the bare
+result, so there is one path for every flagged red. The one piece of new
+patient-facing text is the reason line: "...; a profile rule raised the withheld
+yellow to red, so it is shown, not refused".
+
+**Verified live, with the documented `-np 2 -c 8192`.**
+- Both branches, on S04 ("A bit of indigestion after lunch"), which the sweep
+  had refused 6 of 6: 3 withheld yellows were rescued to red (R2 on Dad, R1 on
+  Mum twice) and 3 withheld greens stayed refused.
+- The preset "Sick and sweaty after dinner" on Mum fired **3 of 3** through the
+  API. The three outputs were distinct, and all were yellow with citations and
+  raised by R1. Then 2 of 2 more in headless Chrome, by clicking the new preset.
+  In compare mode You came back YELLOW and Mum RED, via the rescue that time.
+  **5 of 5 live.**
+
+**Added as a demo preset, "Sick and sweaty (Mum)".** A preset can now carry a
+profile: alone it selects Mum, and in compare mode it sets You against Mum.
+
+**Observed, not changed:** the rescued compare run cited
+`"RETRIEVED CONTEXT: CP-ACS-003 (…)"`, a label before the key, which the
+leading-key rule drops as specified.
+
+`06-demo/results/2026-09-19-rescue-preset-live.txt`, with
+`2026-09-19-preset-mum.png` and `2026-09-19-preset-compare.png`.
+
+### 2026-09-19 Distribution node built, 07-distribute/
+
+**What it is.** How the model and the corpus reach a phone that has no internet
+after install. A node on the local network serves versioned packs, and a client
+pulls them and re-hashes every file from disk before calling a pack installed.
+Stdlib Python, 3.9 or later. Built in a parallel session that owned
+`07-distribute/` and nothing else. `07-distribute/README.md` has the design and
+the commands.
+
+**Committed to main as `060f528`.**
+
+| pack | version | files | bytes | pack_sha256 |
+|---|---|---|---|---|
+| `model-nemotron3-nano-4b-q4km` | `2026.09.15-base` | model.gguf, LICENSE.txt, LICENSE.pdf | 2,837,146,782 | `b31bb9e6fabbd5d8...` |
+| `corpus-base` | `2026.09.15` | citations.csv, corpus.db | 1,656,848 | `a702255bb2adb63d...` |
+
+**The model pack is the shipped GGUF,** `NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf`,
+because it is what the demo runs and what llama.rn loaded. Viraj's call. The
+spec pins its sha256 to `be5d9a65...`, the value recorded here on 2026-09-15,
+and the build refuses any other file. **Its origin repo is not known,** and the
+manifest says so rather than guessing one. The pack's copy is an APFS clone, so
+it cost no disk, but deleting the source GGUF will not free 2.84 GB while the
+pack exists.
+
+**Demonstrated on loopback only,** node and client both on the M4, under the
+system Python. The model moved in 6.26 s at 453 MB/s and hashed from disk in
+2.6 s, matching the manifest. That rate is the software path on one machine,
+not Wi-Fi. The system `shasum` on the pulled file gave `be5d9a65...`, the same
+as the 2026-09-15 record, and both pack digests reproduce with `shasum`. The
+pulled copy was deleted. `07-distribute/results/2026-09-19-distribute-demo.txt`.
+
+**Self-test 51/51,** about 3 s, `07-distribute/results/2026-09-19-selftest.txt`:
+- a bit flipped in transit exits 2 and installs nothing
+- a transfer cut mid-file resumes with a 206 and verifies
+- a pack dropped into a running node is listed without a restart
+- a file altered on the node is withdrawn, and listed again once restored
+- ten traversal and unlisted paths all get 404
+- a manifest path that escapes the destination is refused by the client
+- a wrong `--expect` is refused before any download
+- a built version cannot be rebuilt with different content
+- the corpus checks pass on the real registry and index, and refuse a
+  licence-red row, a key reused across packs, and drifted chunk text
+
+**Findings.**
+- NVIDIA's `LICENSE` file in `nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16` is 0 bytes
+  at revision `dfaf35de`. The licence text exists only on nvidia.com. The pack
+  ships the page text and NVIDIA's own PDF, which agree word for word apart
+  from the page's "Last Modified" line.
+- The licence defines Work by reference to an Appendix that neither the page
+  nor the PDF contains.
+- **Clause 7 needs legal review before any real distribution.** It has whoever
+  uses or distributes the model indemnify NVIDIA against third-party claims
+  related to its output, and here the output is a triage verdict. Accepted for
+  the hackathon, Viraj's call. The clause is verbatim in the model manifest,
+  the build checks it word for word against `LICENSE.txt`, and claude.md's
+  licensing section now carries it.
+- The model licence is amber in the `sources.yaml` scheme, usable with
+  conditions. Clause 3a requires a copy of the licence to go with the model,
+  and the pack ships one.
+- Neither Q4_K_M carries licence metadata in its GGUF header, and their embedded
+  chat templates differ only by 7 blank lines.
+- **For the regional pack work: the base corpus is US-sourced, and CP-ACS-004
+  and CP-ACS-005 tell the user to call 9-1-1.** The emergency number is the
+  first thing a regional pack has to replace. Not changed here.
+
+**Not built.** Signed manifests: sha256 proves integrity, not authenticity, and
+a hostile node can rewrite a file and its manifest together, so `--expect` pins
+a digest out of band until then. The phone side: the RN port, the iOS Local
+Network permission and ATS exception, cleartext on Android. The query embedder
+in a pack. Multi-corpus handling in the app, whose scope floor and registry
+assume these 22 chunks.
+
+### 2026-09-19 Corpus expansion: 11 pages fetched and chunked, NOT frozen, awaiting Viraj's review
+
+**Pages.** The seven Viraj asked for (heart-attack/causes,
+coronary-heart-disease/causes, venous-thromboembolism/diagnosis,
+pneumonia/causes, pneumonia/diagnosis, heart-inflammation/diagnosis,
+heart-inflammation/treatment) plus four he picked from the sub-page inventory
+(angina/symptoms, angina/types, heart-attack/women,
+heart-inflammation/pericarditis). All NHLBI, licence green, fetched
+2026-09-19 18:14 UTC, all 200, page titles match the manifest. CP-BRONCH left
+out, his call. Inventory: `01-data/review/SUBPAGE-INVENTORY-2026-09-19.txt`.
+
+**Manifest.** The 11 sources are at the bottom of `sources.yaml` under an
+EXPANSION header, each continuing an existing prefix: CP-ACS 2, CP-ANG 3,
+CP-PE 1, CP-PNA 2, CP-PERI 3. They sit below every source that holds keys
+because a full freeze numbers in manifest order. `expected_category` is
+inherited from the prefix, as it was for nhlbi-vte-causes.
+
+**Untouched, checked by hash.** The 13 existing raw files, their 13 fetch-log
+entries, the 13 existing review files, the registry and the 22 chunk files.
+Before starting, a full freeze of the current review files in a scratch copy
+reproduced today's registry byte for byte, so the review files and the frozen
+corpus agree.
+
+**71 candidates, 3 over 256.** Review sheet with one suggestion per chunk:
+`01-data/review/REVIEW-SHEET-2026-09-19.txt`. Findings for Viraj:
+- **Unstable angina under a yellow label.** angina/types says it "is a medical
+  emergency"; the category is per source, so it freezes yellow unless cut or
+  the review format gets a per-chunk override. The label shows in the demo's
+  chunk list.
+- **Paediatric text** in chd/causes and pneumonia/causes. Freezing any of it
+  falsifies the "only paediatric content is CP-PNA-001" line in server.py,
+  guards.py and claude.md.
+- **pericarditis #003 holds 83% of CP-PERI-002** (4-gram overlap), fever line
+  included, and an NHLBI error: a friction rub described as a heartbeat.
+- **Green stays at 6 chunks.** Its share of the corpus falls from 27% to between
+  16% and 7% depending on what is kept. None of the 11 pages is green.
+- **Where the triage text is:** by my reading 15 of the 16 candidates that
+  describe symptoms or when to get help come from the four added pages. The
+  original seven are causes, risk factors, prevention and hospital tests.
+- Extraction faults: a nested list extracted twice (heart-attack/causes
+  #006), NHLBI boilerplate the filter does not know, and five angina lists
+  whose type name is only in the heading, the CP-PERI-002 shape.
+
+**`freeze --append` built** in `01-data/build_corpus.py`, since a plain freeze
+rebuilds and renumbers. It appends only, continues each prefix from its
+highest key, reads only `--only` sources, and refuses: over 256, an
+already-frozen source, text identical to a frozen or another new chunk, no
+retrieval date, `--only` without `--append`, `--append --force`. It checks
+after writing that the old registry bytes and chunk files are unchanged.
+`--dry-run` prints the keys and writes nothing. **28/28 on scratch copies**,
+including that a full rebuild of the same manifest gives the identical
+registry: `01-data/eval/runs/2026-09-19-freeze-append-selftest.txt`. First
+keys will be CP-ACS-006, CP-ANG-003, CP-PE-005, CP-PNA-002, CP-PERI-003.
+The first real run found something: heart-inflammation diagnosis #001 and
+treatment #001 are the same navigation line, and the append refuses the
+pair as identical.
+
+**Next, on Viraj's word.** His review, dry run, append, index rebuild with the
+22-chunk corpus.db kept as corpus-22.db, recall against today's keys (can only
+hold or fall, since those keys name old chunks only), an answer-key sheet for
+the new keys, the rescore, calibrate_scope, and a demo re-check, since this
+lands on judging day. 07-distribute serves corpus-base 2026.09.15 as a
+snapshot and is unaffected until someone builds a new pack version.
+
+### 2026-09-19 Expansion reviewed: 8 of 71 kept, unstable angina red, dry run clean. NOT frozen.
+
+**Viraj's calls.** Cut every paediatric chunk, so the "only paediatric content
+is CP-PNA-001" line behind the child guard stays true. Unstable angina frozen
+red, because at-rest angina is the ACS pattern and yellow would be wrong on
+screen. Cut pericarditis #003, which repeats CP-PERI-002. Everything else by
+my sheet's suggestions under his rule: keep symptoms and when to seek help,
+cut causes, prevention and hospital tests.
+
+**Result: 8 kept, 63 cut.** Kept: heart attack symptoms in women; angina
+common symptoms, angina in women, the stable and unstable criteria lists with
+the page's own heading written in as line 1, the stable and unstable prose;
+and pneumonia/diagnosis #001, a "cold" that lasts longer may be pneumonia,
+the one when-to-seek-help line on the seven pages first requested. **Seven of
+the 11 pages keep nothing**, including heart-attack/causes, chd/causes and
+pericarditis. They stay in the manifest, unfrozen. Every candidate is kept
+verbatim in `01-data/review/candidates-2026-09-19/`; section E of
+`01-data/review/REVIEW-SHEET-2026-09-19.txt` has every cut and its reason.
+
+**One judgment of mine he can reverse:** microvascular and vasospastic
+angina, 4 chunks, are symptoms, but both describe pain at rest. Under CP-ANG's
+yellow that is what he said reads wrong on screen, and freezing them red would
+extend his call, so they are cut. Also cut under his rule: pneumonia/causes
+#010, which was a KEEP on my sheet (chemotherapy and diabetes as risk factors).
+
+**Per-chunk category override built** in `build_corpus.py`:
+`category=red|yellow|green` before `heading=` on a chunk's `---` line. Both
+freeze paths use it. A bad value or a misplaced `category=` is refused, never
+read as the page's colour. **29/29 on scratch copies**, including that the
+09-15 registry still reproduces byte for byte with the changed script:
+`01-data/eval/runs/2026-09-19-freeze-append-selftest-reviewed.txt`.
+
+**Dry run on the real corpus, nothing written** (hashed before and after),
+`01-data/eval/runs/2026-09-19-freeze-append-dryrun.txt`: CP-ACS-006 red,
+CP-ANG-003/004/005 yellow, CP-ANG-006 red, CP-ANG-007 yellow, CP-ANG-008 red,
+CP-PNA-002 yellow. Corpus would go to 30: red 12, yellow 11, green 6, none 1.
+Green is 20%, down from 27%. The kept eight have no child or pregnancy text.
+
+**Waiting on Viraj's word for the real append.** After it: corpus-22.db kept,
+index rebuilt, recall on today's keys, an answer-key sheet for the new keys,
+the scope floor and the demo beats re-checked before switching over, and his
+question on which conditions have no green chunk.
