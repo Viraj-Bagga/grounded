@@ -25,7 +25,7 @@ openers, body-part words a clinician would not use. That is the point. A
 calibration sample written in corpus language measures how well the corpus
 matches itself.
 
-Scores are max cosine over all 22 chunks, the same number `scope_check` sees.
+Scores are max cosine over all chunks, the same number `scope_check` sees.
 """
 
 import argparse
@@ -63,7 +63,7 @@ IN_SCOPE = [
      "calm down."),
 ]
 
-# Out of scope: nothing the 22 chest-pain chunks can speak to.
+# Out of scope: nothing the chest-pain chunks can speak to.
 OUT_SCOPE = [
     ("original best out-of-scope",
      "My toddler has a fever and is pulling at her ear"),

@@ -89,5 +89,82 @@
     "status": 200,
     "bytes": 49586,
     "sha256": "05b62f6af9e8f3f7"
+  },
+  "nhlbi-ha-women": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-attack/women",
+    "retrieved": "2026-09-19T18:14:23+00:00",
+    "status": 200,
+    "bytes": 67932,
+    "sha256": "e2c7bd72ee210921"
+  },
+  "nhlbi-ha-causes": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-attack/causes",
+    "retrieved": "2026-09-19T18:14:23+00:00",
+    "status": 200,
+    "bytes": 81832,
+    "sha256": "4e3f186662c8e193"
+  },
+  "nhlbi-angina-symptoms": {
+    "url": "https://www.nhlbi.nih.gov/health/angina/symptoms",
+    "retrieved": "2026-09-19T18:14:24+00:00",
+    "status": 200,
+    "bytes": 66433,
+    "sha256": "43d3b90b689654ad"
+  },
+  "nhlbi-angina-types": {
+    "url": "https://www.nhlbi.nih.gov/health/angina/types",
+    "retrieved": "2026-09-19T18:14:24+00:00",
+    "status": 200,
+    "bytes": 68395,
+    "sha256": "30670d5e7c99b8e9"
+  },
+  "nhlbi-chd-causes": {
+    "url": "https://www.nhlbi.nih.gov/health/coronary-heart-disease/causes",
+    "retrieved": "2026-09-19T18:14:24+00:00",
+    "status": 200,
+    "bytes": 82681,
+    "sha256": "ccaa8c12f1e38562"
+  },
+  "nhlbi-vte-diagnosis": {
+    "url": "https://www.nhlbi.nih.gov/health/venous-thromboembolism/diagnosis",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 71156,
+    "sha256": "d77ec20a3ce29d1e"
+  },
+  "nhlbi-pneumonia-causes": {
+    "url": "https://www.nhlbi.nih.gov/health/pneumonia/causes",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 72046,
+    "sha256": "a79020d3f83a7b96"
+  },
+  "nhlbi-pneumonia-diagnosis": {
+    "url": "https://www.nhlbi.nih.gov/health/pneumonia/diagnosis",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 69019,
+    "sha256": "9478899d2d7f6816"
+  },
+  "nhlbi-heart-inflammation-pericarditis": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/pericarditis",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 71219,
+    "sha256": "48cc59342055733f"
+  },
+  "nhlbi-heart-inflammation-diagnosis": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/diagnosis",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 65139,
+    "sha256": "1f15021c061ead4d"
+  },
+  "nhlbi-heart-inflammation-treatment": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/treatment",
+    "retrieved": "2026-09-19T18:14:25+00:00",
+    "status": 200,
+    "bytes": 64680,
+    "sha256": "ca47f167c9625b9a"
   }
 }

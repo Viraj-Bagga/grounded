@@ -1,0 +1,17 @@
+# 2026-09-19 green chunks by condition, from the frozen registry after the append (35 chunks).
+# Condition = key prefix. Category = expected_category in 01-data/citations.csv.
+
+prefix    condition                                 red  yel  grn  none  green?
+CP-GERD   acid reflux (GERD)                          0    0    3     0  yes
+CP-PANIC  panic disorder                              0    0    3     0  yes
+CP-ACS    heart attack                                6    0    0     0  NO GREEN CHUNK
+CP-ANG    angina and coronary heart disease           6    6    0     0  NO GREEN CHUNK
+CP-DIFF   chest pain overview (the differential)      0    0    0     1  NO GREEN CHUNK
+CP-PE     blood clots (VTE, PE)                       4    0    0     0  NO GREEN CHUNK
+CP-PERI   heart inflammation (pericarditis)           0    2    0     0  NO GREEN CHUNK
+CP-PLEU   pleural disorders (pleurisy)                0    1    0     0  NO GREEN CHUNK
+CP-PNA    pneumonia                                   0    3    0     0  NO GREEN CHUNK
+
+7 of 9 conditions have no green chunk: CP-ACS, CP-ANG, CP-DIFF, CP-PE, CP-PERI, CP-PLEU, CP-PNA
+totals: red 16, yellow 12, green 6, uncategorised 1, of 35
+single-colour conditions: 8 of 9; mixed: ['CP-ANG']

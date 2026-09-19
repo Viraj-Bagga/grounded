@@ -1,0 +1,37 @@
+# REVIEW: nhlbi-heart-inflammation-diagnosis
+# Heart Inflammation - Diagnosis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-inflammation/diagnosis
+# key_prefix: CP-PERI   expected_category: yellow
+# role: How heart inflammation is diagnosed. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=18 heading=(intro)
+Types of Heart Inflammation Endocarditis Myocarditis Pericarditis
+
+--- chunk 002 [short] tokens=37 heading=Heart Inflammation Diagnosis
+Because symptoms vary by type and from one person to the next, heart inflammation may be hard to diagnose. Your healthcare provider may do a physical exam and order tests.
+
+--- chunk 003 [short] tokens=116 heading=History and physical exam
+To help diagnose heart inflammation, your healthcare provider may ask some basic questions.
+
+Have you had endocarditis, myocarditis, or pericarditis in the past?
+Have you had a recent illness or injury to the chest?
+Have you had any symptoms such as fever, chest pain, or shortness of breath?
+Do you have any other medical conditions or risk factors for heart inflammation, including exposure to certain medicines or toxins or a travel history that may be significant?
+
+They may also examine you and do one or more of the following:
+
+--- chunk 004 [ok   ] tokens=139 heading=History and physical exam
+Check your legs for swelling, a sign of heart failure
+Check your skin for any changes that endocarditis can cause
+Check your temperature for fever
+Check for a spleen that is larger than normal due to an infection or for abdominal pain, which can be a symptom of endocarditis
+Listen to your heart for a new murmur that may be heard with endocarditis, a pericardial friction rub (a grating sound) that may be heard with pericarditis, or a heart rhythm that is not normal
+Listen to your lungs
+Perform an electrocardiogram (EKG or ECG) to measure electrical signals from your heart and your heart rhythm.

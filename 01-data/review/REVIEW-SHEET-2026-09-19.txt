@@ -1,0 +1,548 @@
+CORPUS EXPANSION REVIEW SHEET, 2026-09-19
+==============================================================================
+
+Nothing is frozen. The registry is still the 22 chunks of 2026-09-15, byte for
+byte, and so are chunks/, raw/ and the twelve older review files.
+
+WHAT IS HERE
+  11 NHLBI pages, fetched 2026-09-19 18:14 UTC, all 200, all licence green:
+    your seven:  heart-attack/causes, coronary-heart-disease/causes,
+                 venous-thromboembolism/diagnosis, pneumonia/causes,
+                 pneumonia/diagnosis, heart-inflammation/diagnosis,
+                 heart-inflammation/treatment
+    your four:   angina/symptoms, angina/types, heart-attack/women,
+                 heart-inflammation/pericarditis
+  CP-BRONCH left out, as you chose.
+  71 candidate chunks in review/<source id>.txt, one file per page.
+
+HOW TO REVIEW
+  Edit the 11 review files in place, same as 09-15: delete, merge, split.
+  A deleted chunk is simply not frozen. Section C has one suggestion per
+  chunk; every one is your call. Sections A and B explain the codes.
+
+  When you are done, I run the dry run, which prints every key it would
+  assign and writes nothing:
+    python 01-data/build_corpus.py freeze --append --only \
+      nhlbi-ha-women,nhlbi-ha-causes,nhlbi-angina-symptoms,nhlbi-angina-types,\
+      nhlbi-chd-causes,nhlbi-vte-diagnosis,nhlbi-pneumonia-causes,\
+      nhlbi-pneumonia-diagnosis,nhlbi-heart-inflammation-pericarditis,\
+      nhlbi-heart-inflammation-diagnosis,nhlbi-heart-inflammation-treatment \
+      --dry-run
+  You check it, then the same command without --dry-run on your word.
+
+  --append is new today. It keeps the 22 rows and chunk files byte-identical,
+  continues each prefix from its highest key, and reads only the named
+  sources. It refuses: anything over 256, a source already frozen, text
+  identical to a frozen chunk or to another new one, a chunk with no retrieval
+  date, and --only without --append. 28 of 28 checks on scratch copies,
+  01-data/eval/runs/2026-09-19-freeze-append-selftest.txt, including that a
+  full rebuild of the same manifest gives the identical registry.
+
+  First keys: CP-ACS-006, CP-ANG-003, CP-PE-005, CP-PNA-002, CP-PERI-003.
+  The new sources sit at the bottom of sources.yaml on purpose: a full freeze
+  numbers in manifest order, so anything inserted above would shift a key.
+
+SUGGESTION CODES
+  KEEP       text a triage answer can use
+  KEEP?      no problem with it, low triage value; your call on token cost
+  FIX        keep after a hand edit, the edit is named
+  CUT        navigation, site boilerplate, or a fragment with nothing of its own
+  SPLIT/CUT  over 256 word pieces; the freeze refuses until it is split or cut
+  FLAG       a clinical question, section A
+
+  Tally: KEEP 6, KEEP? 25, FIX 10, FLAG 8, CUT 19, SPLIT/CUT 3.
+
+WHERE THE TRIAGE TEXT IS
+  My reading: 16 of the 71 describe symptoms or when to get help, and 15 of
+  those 16 come from the four pages you added from the inventory. The seven on
+  the original list are causes, risk factors, prevention and hospital tests.
+  Only pneumonia/diagnosis #001 touches symptoms, to say pneumonia can look
+  like a cold. The risk-factor chunks are not wasted: they are what the
+  profiles and escalation rules lean on (chemotherapy, diabetes, age 65+). But
+  retrieval is driven by symptom text, so they mostly compete for the three
+  slots rather than win them.
+
+==============================================================================
+A. CLINICAL QUESTIONS. Yours.
+==============================================================================
+
+A1  UNSTABLE ANGINA UNDER A YELLOW LABEL
+    angina/types #003: "Unstable angina is a medical emergency because it can
+    progress to a heart attack." angina/symptoms #005 lists its criteria: pain
+    over 20 minutes, not relieved by rest or medicines, during rest or sleep.
+    Both inherit CP-ANG's yellow, because expected_category is set per source.
+    The label shows in the demo's retrieved-chunk list, so a judge would see
+    "CP-ANG-0xx (82t, yellow)" beside the emergency sentence. generate_pairs.py
+    also plans the pair mix from it.
+    These two, with the stable angina list (#004), are also the most useful
+    new text for yellow-angina. Its reviewed key says the call that case turns
+    on is stable versus unstable angina.
+    Options: (a) freeze as yellow and accept the label; (b) I add a per-chunk
+    category override to the review format, a small parser change, so these
+    two freeze red; (c) cut them.
+
+A2  PAEDIATRIC TEXT
+    coronary-heart-disease/causes #008, #009: screening children aged 9 to 11,
+    familial hypercholesterolemia, and statins, weight-loss surgery and GLP-1 RA
+    for children. pneumonia/causes #003 (RSV in young children) and #006
+    (babies 2 and under; the same chunk covers adults 65 and older).
+    The child scope notice in 06-demo/server.py, the comment in guards.py and
+    claude.md all say the only paediatric content is one passage in CP-PNA-001.
+    Freezing any of these makes that sentence false, and I would update all
+    three. I suggest cutting #008 and #009, which are prevention with no triage
+    content. #006 is mixed.
+
+A3  PREGNANCY TEXT
+    heart-attack/women #004, #005 are about heart attack in pregnancy.
+    heart-attack/causes #003 and #006 and pneumonia/causes #010 mention it in
+    passing. The app refuses pregnancy before generating anything, so these
+    are only ever retrieved for a query the exclusion missed. I suggest
+    cutting #004 and #005.
+
+A4  MEDICINE TEXT (constraint 12)
+    None of these instructs a dose, but each names a medicine near a symptom:
+      heart-attack/causes #008  "Talk to your doctor about whether taking
+                                aspirin can help you prevent blood clots"
+      angina/types #002         "or take your angina medicine"
+      chd/causes #009           statins, GLP-1 RA (children)
+      heart-inflammation/treatment #003  antibiotics, antifungals
+      pericarditis #004         "after you start taking medicine"
+    The next_steps guard drops instructions whatever the chunks say. The
+    reviewed red-acs key leaves out CP-ACS-004 for exactly this reason, its
+    aspirin line, and the aspirin line in #008 is the same shape.
+
+A5  THE PERICARDITIS SYMPTOM CHUNK REPEATS CP-PERI-002
+    pericarditis #003 contains 83% of frozen CP-PERI-002 by 4-gram overlap,
+    including the "Fever" and fast heartbeat lines the model copied onto a
+    patient who had neither (constraint 11), plus CP-PERI-001's 9-1-1 sentence.
+    It is what CP-PERI-002 should have been: it names pericarditis and says it
+    can feel like a heart attack. But CP-PERI-002 is frozen and stays, so a
+    pleuritic query will likely retrieve both: 130 tokens, about 4 s of prompt
+    eval, with most of CP-PERI-002 in context twice, fever line included.
+    It also carries an NHLBI error: "Irregular, fast heartbeat called
+    pericardial friction rub". A rub is a sound, as the same page's #004 says.
+    #004 has NHLBI's typo "your CPR level" for CRP. Freezing reproduces both.
+    Options: cut #003; keep it; or keep only its new lines (neck or shoulder
+    pain, shortness of breath, "can feel like a heart attack").
+
+A6  GREEN STAYS AT 6 CHUNKS WHILE EVERYTHING ELSE GROWS
+    None of the 11 pages is green, so green's share falls whatever you keep:
+      today                              22 chunks  red  9  yellow  6  green 6  27%
+      only KEEP and FIX kept             38 chunks  red 14  yellow 17  green 6  16%
+      CUT, SPLIT/CUT and FLAG all taken  63 chunks  red 18  yellow 38  green 6  10%
+      every CUT and SPLIT/CUT taken      71 chunks  red 20  yellow 44  green 6   8%
+    (each total includes CP-DIFF-001, uncategorised.) Real use is about 59%
+    green, and the freeze prints its own red-skew warning past 2 red to 1.
+    claude.md has corpus composition as narrowed, not cleared, as a
+    contributor to the all-red verdicts, and a green-rich corpus has never been
+    tested. This expansion moves the other way. Not a reason to stop, but it
+    should be a choice. Green text in the inventory, never pulled: CP-BRONCH,
+    already reviewed; NIDDK GERD definition-facts, diagnosis, eating-diet-
+    nutrition and treatment; the MedlinePlus gerd, heartburn and panicdisorder
+    summaries. GERD treatment is antacid text, the exact example in
+    constraint 12.
+
+==============================================================================
+B. MECHANICAL FAULTS. Pipeline artefacts; I can make these edits on your word.
+==============================================================================
+
+B1  THREE CHUNKS OVER 256. The freeze refuses until each is split or cut.
+      heart-attack/causes #003          312  four MINOCA causes
+      venous-thromboembolism/diag #005  302  CTPA, D-dimer, V/Q: hospital tests
+      pneumonia/diagnosis #004          302  blood gas to thoracentesis: tests
+
+B2  NAVIGATION AND SITE BOILERPLATE
+    Whole chunks: vte-diagnosis #001; pericarditis #001; heart-inflammation
+    diagnosis #001 and treatment #001, which are identical, so the append
+    refuses the pair; heart-attack/causes #009, #010; chd/causes #007, #010;
+    pneumonia/diagnosis #005.
+    Tails inside chunks worth keeping:
+      heart-attack/causes #007   "Watch our video ... COVID-19 ..." (twice)
+      heart-attack/causes #008   from "Research for your health" to the end
+      chd/causes #006            from "Preventing heart disease View some" on
+      chd/causes #009            from "Research for your health" on
+      pneumonia/causes #001      "Learn about how the lungs work."
+      pneumonia/causes #003      "Our video about how SARS-CoV-2 ..."
+    The extractor's boilerplate filter does not know these NHLBI phrasings.
+    Hand edits are cheaper than regenerating the files now.
+
+B3  heart-attack/causes #006, NESTED LIST EXTRACTED TWICE
+    The parent item runs its sub-items together with no punctuation ("...high
+    in saturated fat or sodium Lack of regular physical activity Smoking"),
+    then the sub-items repeat on their own lines. Sub-items that are links
+    (Smoking, High blood cholesterol, High blood triglycerides, Overweight and
+    obesity) appear only inside the run-on line. Needs rewriting as one clean
+    list in the page's own words.
+
+B4  BARE LISTS WHOSE CONDITION IS ONLY IN THE HEADING
+    angina/symptoms #004 to #008: stable, unstable, microvascular,
+    vasospastic, refractory. A heading becomes the registry's subtopic but is
+    neither embedded nor shown to the model, so #005 reaches it as "Pain
+    during rest or sleep / Intense pain" with nothing saying unstable angina.
+    CP-PERI-002 has this shape, its text never says pericarditis, and in the
+    blend baseline it is returned for 4 of 5 cases, 2 where it must not be.
+    Fix: write the heading into the text as a first line ("Unstable angina
+    symptoms:"), or merge the five into one or two chunks, which also keeps
+    stable and unstable side by side.
+
+B5  LEAD-INS CUT OFF FROM THEIR LISTS
+    heart-attack/causes #002 -> #003; heart-inflammation/diagnosis #003 ->
+    #004; pneumonia/causes #009 -> #010. heart-attack/women #005 says "during
+    these tests" about tests it never names.
+
+==============================================================================
+C. EVERY CANDIDATE, in file order. Numbers are the chunk numbers in the files.
+==============================================================================
+
+nhlbi-ha-women   CP-ACS, labelled red   https://www.nhlbi.nih.gov/health/heart-attack/women
+  #001   23t  CUT       Heart Attack Heart Attacks in Women
+                    fragment, one sentence; merge into #003 if you want the framing
+  #002  119t  KEEP?     Causes and risk factors
+                    risk factors in women; no symptoms
+  #003  174t  KEEP      Symptoms of a heart attack in women
+                    the chunk this page was picked for: shoulder/back/arm pain, breathlessness,
+                    unusual tiredness, upset stomach, anxiety, with or without chest pain, then
+                    call 9-1-1
+  #004  185t  FLAG      Pregnancy and heart attacks
+                    pregnancy (A3)
+  #005   65t  FLAG      Pregnancy and heart attacks
+                    pregnancy (A3); also 'during these tests' refers to tests never introduced
+
+nhlbi-ha-causes   CP-ACS, labelled red   https://www.nhlbi.nih.gov/health/heart-attack/causes
+  #001  184t  KEEP?     What causes a heart attack?
+                    plaque and clot mechanism; no symptoms
+  #002   97t  FIX       Other causes of a heart attack
+                    ends 'Conditions that can cause MINOCA have different effects on the heart.'
+                    and the list it introduces is #003
+  #003  312t  SPLIT/CUT Other causes of a heart attack
+                    312 tokens, freeze refuses. Four MINOCA causes; a clean cut is small plaques +
+                    spasm / embolism + SCAD. Mentions pregnancy twice (A3)
+  #004   28t  CUT       Other causes of a heart attack
+                    fragment
+  #005   23t  CUT       What raises the risk of a heart attack?
+                    fragment, a heading sentence
+  #006  152t  FIX       Risk factors you can control
+                    nested-list extraction fault, see B3
+  #007  160t  FIX       Risk factors you can’t control
+                    the 'Watch our video ... COVID-19' line appears twice, cut both
+  #008  219t  FIX       Can you prevent a heart attack?
+                    cut the tail from 'Research for your health' on; aspirin line (A4)
+  #009   49t  CUT       Can you prevent a heart attack?
+                    site boilerplate, research blurb
+  #010   19t  CUT       Self-care Tips for Heart Health
+                    site boilerplate, fact sheet link
+
+nhlbi-angina-symptoms   CP-ANG, labelled yellow   https://www.nhlbi.nih.gov/health/angina/symptoms
+  #001   50t  KEEP?     Angina (Chest Pain) Symptoms
+                    says symptoms vary by type and by sex; could lead #002
+  #002  212t  KEEP      Common symptoms
+                    core angina symptom list, and 'Call 9-1-1 if you feel chest discomfort that
+                    does not go away with rest or medicine'
+  #003   96t  KEEP      Angina in women
+                    angina in women: arms, neck, back, jaw; breathlessness, nausea,
+                    light-headedness
+  #004   38t  FIX       Stable angina
+                    bare list, heading not in text (B4): stable angina criteria
+  #005   43t  FIX       Unstable angina
+                    bare list, heading not in text (B4): unstable angina criteria; category (A1)
+  #006   33t  FIX       Microvascular angina
+                    bare list, heading not in text (B4): microvascular
+  #007   34t  FIX       Vasospastic angina
+                    bare list, heading not in text (B4): vasospastic
+  #008   19t  FIX       Refractory angina
+                    bare list, heading not in text (B4): refractory; low triage value
+
+nhlbi-angina-types   CP-ANG, labelled yellow   https://www.nhlbi.nih.gov/health/angina/types
+  #001   33t  CUT       Angina (Chest Pain) Types
+                    fragment
+  #002  179t  KEEP      Stable angina
+                    stable angina pattern, and 'Tell your healthcare provider right away if you
+                    notice changes in the pattern'; medicine line (A4)
+  #003   82t  KEEP      Unstable angina
+                    'Unstable angina is a medical emergency because it can progress to a heart
+                    attack'; category (A1)
+  #004   77t  KEEP?     Microvascular angina
+                    microvascular: at rest or on exertion, medicine may not relieve
+  #005  104t  KEEP?     Vasospastic angina
+                    vasospastic: at rest, midnight to early morning
+  #006   29t  CUT       Refractory angina
+                    fragment; refractory angina and stents, no triage content
+
+nhlbi-chd-causes   CP-ANG, labelled yellow   https://www.nhlbi.nih.gov/health/coronary-heart-disease/causes
+  #001   50t  KEEP?     Coronary Heart Disease Causes and Prevention
+                    intro; no triage content
+  #002   54t  KEEP?     What causes coronary heart disease?
+                    causes; no triage content
+  #003   67t  KEEP?     Plaque buildup
+                    atherosclerosis; no triage content
+  #004  156t  KEEP?     Problems with how the blood vessels work
+                    vessel dysfunction and vasospasm; the closest this page gets to triage
+  #005   83t  CUT       How can you assess your progress toward a he
+                    points to the American Heart Association's Life's Essential 8 measures; no
+                    triage content
+  #006  125t  KEEP?     How can you prevent coronary heart disease?
+                    prevention; if kept, cut the tail from 'Preventing heart disease View some
+                    resources'
+  #007   11t  CUT       Preventing heart disease
+                    site boilerplate
+  #008  157t  FLAG      Why is it important to start prevention earl
+                    paediatric (A2): screening children aged 9 to 11, familial
+                    hypercholesterolemia
+  #009  151t  FLAG      Why is it important to start prevention earl
+                    paediatric (A2) and medicines (A4): statins, weight-loss surgery and GLP-1 RA
+                    for children; boilerplate tail
+  #010   46t  CUT       Research for your health
+                    site boilerplate
+
+nhlbi-vte-diagnosis   CP-PE, labelled red   https://www.nhlbi.nih.gov/health/venous-thromboembolism/diagnosis
+  #001   21t  CUT       (intro)
+                    navigation: 'Types Deep Vein Thrombosis (DVT) Pulmonary Embolism (PE)'
+  #002   64t  KEEP?     Venous Thromboembolism Diagnosis
+                    how VTE is diagnosed, in general terms
+  #003   81t  KEEP?     Medical history and physical exam
+                    history questions; restates immobility, surgery and cancer, which CP-PE-003
+                    and CP-PE-004 already carry
+  #004   36t  CUT       Diagnostic tests and procedures
+                    fragment
+  #005  302t  SPLIT/CUT Diagnostic tests and procedures
+                    302 tokens, freeze refuses. CTPA, D-dimer, V/Q, angiography: hospital tests
+
+nhlbi-pneumonia-causes   CP-PNA, labelled yellow   https://www.nhlbi.nih.gov/health/pneumonia/causes
+  #001  122t  KEEP?     Pneumonia Causes and Risk Factors
+                    mechanism; ends with link text 'Learn about how the lungs work.'
+  #002  132t  KEEP?     Bacteria
+                    bacteria; 'can develop on its own or after you have a cold or the flu'
+  #003  103t  FLAG      Viruses
+                    paediatric (A2): RSV in young children; ends with a video line to cut
+  #004   52t  KEEP?     Fungi
+                    fungi
+  #005   24t  CUT       Risk factors
+                    fragment
+  #006  128t  FLAG      Age
+                    paediatric (A2): babies and children 2 or younger; the same chunk has adults
+                    65 and older, which matters for Dad and Grandpa
+  #007  112t  KEEP?     Environment or occupation
+                    crowded places, fumes, birds
+  #008   55t  KEEP?     Lifestyle habits
+                    smoking, drugs, alcohol
+  #009   20t  FIX       Other medical conditions
+                    one-line lead-in to #010; merge
+  #010  238t  KEEP      Other medical conditions
+                    chemotherapy, steroids, diabetes, heart failure raise pneumonia risk: Aunt Sue
+                    and Mum's profiles. Mentions pregnancy (A3)
+
+nhlbi-pneumonia-diagnosis   CP-PNA, labelled yellow   https://www.nhlbi.nih.gov/health/pneumonia/diagnosis
+  #001   64t  KEEP?     Pneumonia Diagnosis
+                    'symptoms may be the same as a cold or flu', 'more serious until it lasts
+                    longer'
+  #002  103t  KEEP?     Medical history and physical exam
+                    history questions
+  #003  150t  KEEP?     Diagnostic tests and procedures
+                    chest X-ray, blood count, pulse oximetry: clinic tests
+  #004  302t  SPLIT/CUT Diagnostic tests and procedures
+                    302 tokens, freeze refuses. Blood gas, sputum, culture, PCR, bronchoscopy, CT,
+                    thoracentesis: hospital tests
+  #005   25t  CUT       Diagnostic tests and procedures
+                    site boilerplate, clinical trials
+
+nhlbi-heart-inflammation-pericarditis   CP-PERI, labelled yellow   https://www.nhlbi.nih.gov/health/heart-inflammation/pericarditis
+  #001   26t  CUT       (intro)
+                    navigation: 'Pericarditis Pericarditis Types of Heart Inflammation ...'
+  #002  192t  KEEP?     What is Pericarditis?
+                    what pericarditis is; effusion and tamponade 'can be life-threatening'
+  #003  105t  FLAG      Symptoms
+                    near-duplicate of frozen CP-PERI-002 and a source error (A5)
+  #004  175t  KEEP?     Diagnosis
+                    ECG, echo, CRP: clinic tests. Source typo 'your CPR level' for CRP (A5)
+
+nhlbi-heart-inflammation-diagnosis   CP-PERI, labelled yellow   https://www.nhlbi.nih.gov/health/heart-inflammation/diagnosis
+  #001   18t  CUT       (intro)
+                    navigation, identical to treatment #001; the append refuses identical text
+  #002   37t  CUT       Heart Inflammation Diagnosis
+                    fragment
+  #003  116t  KEEP?     History and physical exam
+                    history questions; ends 'do one or more of the following:' and the list is
+                    #004
+  #004  139t  KEEP?     History and physical exam
+                    exam list: legs, skin, temperature, spleen, murmur, rub
+
+nhlbi-heart-inflammation-treatment   CP-PERI, labelled yellow   https://www.nhlbi.nih.gov/health/heart-inflammation/treatment
+  #001   18t  CUT       (intro)
+                    navigation, identical to diagnosis #001
+  #002   26t  CUT       Heart Inflammation Treatment
+                    fragment
+  #003   16t  FLAG      Medications
+                    medicines (A4): 'Antibiotics treat bacterial infections. Antifungal medicines
+                    treat fungal infections.'
+  #004   33t  KEEP?     Procedures
+                    valve surgery for endocarditis; no triage content
+
+==============================================================================
+D. AFTER THE FREEZE. What I run, in this order. None of it before your go.
+==============================================================================
+  1. Back up 04-retrieval/corpus.db as corpus-22.db, then rebuild the index.
+     Freeze and rebuild go together: until the index is rebuilt, the
+     registry has rows the index lacks, and the 07-distribute self-test
+     (T16) fails on exactly that.
+  2. score_keys.py against today's keys, as asked. These keys can only name
+     the 22 old chunks, so a new chunk can never count as a hit, only push a
+     keyed one out of the top 3. Expect it to hold or fall. Baseline, blend:
+     6/9 = 67%, 2 must-not violations (04-retrieval/results/2026-09-19-
+     baseline-22-chunks.txt).
+  3. An answer-key sheet for the new keys, same format as 04-retrieval/
+     results/ANSWER-KEY-REVIEW.txt, for you to mark. Then the rescore against
+     the extended keys. That is the number that can show whether this helped.
+  4. calibrate_scope.py. The 0.25 floor was set on 22 chunks; more chunks
+     means more near misses for out-of-scope text.
+  5. The demo, because this lands on judging day. The four beats, the Mum
+     preset (5 of 5 on 22 chunks) and the fabricated-red-flag beat, which
+     rests on CP-PERI-002 being retrieved. If anything regresses, the demo
+     can stay on corpus-22.db.
+  6. If a paediatric chunk was kept (A2): the child notice in server.py, the
+     comment in guards.py and claude.md.
+  Not mine to do: 07-distribute serves corpus-base 2026.09.15 as a snapshot,
+  so it is unaffected. Shipping the new corpus means a new pack version.
+
+==============================================================================
+E. APPLIED 2026-09-19. What was kept and cut, and why.
+==============================================================================
+
+Viraj's calls: cut every paediatric chunk (A2); unstable angina frozen red
+through a new per-chunk override (A1); cut pericarditis #003 (A5). The rest
+are my sheet's suggestions under his rule: keep symptoms and when to seek
+help; cut causes, prevention and hospital tests. (V) marks his calls.
+
+Result: 8 kept, 63 cut. Seven pages keep nothing and stay unfrozen, so a
+later append can still add from them. Every candidate is kept verbatim in
+review/candidates-2026-09-19/.
+
+NOTE, a judgment he can reverse: microvascular and vasospastic angina, list and
+prose, 4 chunks, are symptoms, which his rule keeps. But both describe pain at
+rest, and under CP-ANG's yellow label that is what he said reads wrong on
+screen. Freezing them red would extend his unstable-angina call, so they are
+cut instead. Each can come back with category=red.
+
+nhlbi-ha-women
+  #001   23t  CUT       fragment
+  #002  119t  CUT       risk factors
+  #003  174t  KEEP      symptoms in women, then call 9-1-1
+  #004  185t  CUT       pregnancy (A3)
+  #005   65t  CUT       pregnancy (A3); 'these tests' never named
+
+nhlbi-ha-causes
+  #001  184t  CUT       causes
+  #002   97t  CUT       causes; lead-in to #003
+  #003  312t  CUT       causes; 312 tokens
+  #004   28t  CUT       fragment
+  #005   23t  CUT       fragment
+  #006  152t  CUT       risk factors; nested-list fault
+  #007  160t  CUT       risk factors; video line twice
+  #008  219t  CUT       prevention; aspirin line; boilerplate tail
+  #009   49t  CUT       boilerplate
+  #010   19t  CUT       boilerplate
+
+nhlbi-angina-symptoms
+  #001   50t  CUT       generic lead-in; merged into #002 it would pass 256
+  #002  212t  KEEP      core symptoms; 9-1-1 if not relieved by rest or medicine
+  #003   96t  KEEP      angina in women
+  #004   38t  KEEP+FIX  stable angina criteria; 'Stable angina:' written in as line 1
+  #005   43t  KEEP+FIX  unstable angina criteria; 'Unstable angina:' written in; category=red (V, A1)
+  #006   33t  CUT       microvascular: pain at rest under a yellow label, see note
+  #007   34t  CUT       vasospastic: pain at rest or sleep under a yellow label, see note
+  #008   19t  CUT       refractory: defined by treatment failure
+
+nhlbi-angina-types
+  #001   33t  CUT       fragment
+  #002  179t  KEEP      stable pattern; 'tell your provider right away' if it changes
+  #003   82t  KEEP      'Unstable angina is a medical emergency'; category=red (V, A1)
+  #004   77t  CUT       microvascular: pain at rest under a yellow label, see note
+  #005  104t  CUT       vasospastic: pain at rest under a yellow label, see note
+  #006   29t  CUT       refractory: stents, treatment
+
+nhlbi-chd-causes
+  #001   50t  CUT       causes
+  #002   54t  CUT       causes
+  #003   67t  CUT       causes
+  #004  156t  CUT       causes
+  #005   83t  CUT       AHA measures, no triage content
+  #006  125t  CUT       prevention
+  #007   11t  CUT       boilerplate
+  #008  157t  CUT       paediatric (V, A2)
+  #009  151t  CUT       paediatric and medicines (V, A2)
+  #010   46t  CUT       boilerplate
+
+nhlbi-vte-diagnosis
+  #001   21t  CUT       navigation
+  #002   64t  CUT       diagnosis process
+  #003   81t  CUT       diagnosis questions; risk factors CP-PE-003/004 already carry
+  #004   36t  CUT       fragment
+  #005  302t  CUT       hospital tests; 302 tokens
+
+nhlbi-pneumonia-causes
+  #001  122t  CUT       causes
+  #002  132t  CUT       causes
+  #003  103t  CUT       paediatric (V, A2)
+  #004   52t  CUT       causes
+  #005   24t  CUT       fragment
+  #006  128t  CUT       paediatric (V, A2)
+  #007  112t  CUT       risk factors
+  #008   55t  CUT       risk factors
+  #009   20t  CUT       lead-in to #010
+  #010  238t  CUT       risk factors. Was KEEP on my sheet (chemotherapy, diabetes); your rule cuts it
+
+nhlbi-pneumonia-diagnosis
+  #001   64t  KEEP      a 'cold' that lasts longer may be pneumonia: the one when-to-seek-help line on your original seven
+  #002  103t  CUT       diagnosis questions
+  #003  150t  CUT       clinic tests
+  #004  302t  CUT       hospital tests; 302 tokens
+  #005   25t  CUT       boilerplate
+
+nhlbi-heart-inflammation-pericarditis
+  #001   26t  CUT       navigation
+  #002  192t  CUT       definition and complications, no symptoms or action
+  #003  105t  CUT       repeats CP-PERI-002; friction-rub error (V, A5)
+  #004  175t  CUT       tests; 'CPR' typo
+
+nhlbi-heart-inflammation-diagnosis
+  #001   18t  CUT       navigation
+  #002   37t  CUT       fragment
+  #003  116t  CUT       diagnosis questions
+  #004  139t  CUT       exam list
+
+nhlbi-heart-inflammation-treatment
+  #001   18t  CUT       navigation
+  #002   26t  CUT       fragment
+  #003   16t  CUT       medicines
+  #004   33t  CUT       surgery
+
+Totals: 8 kept, 63 cut.
+
+==============================================================================
+F. REVERSED BY VIRAJ, then frozen. Final 2026-09-19.
+==============================================================================
+
+He reversed both of the calls section E flagged as mine:
+  angina/symptoms #006, #007 and angina/types #004, #005, microvascular and
+    vasospastic angina: restored, category=red. His reason: both describe
+    pain at rest, which is the reason unstable angina is red, so cutting them
+    contradicted that call. The two lists got their page heading as line 1.
+  pneumonia/causes #010: restored, yellow. His reason: chemotherapy and
+    diabetes are the profile facts R1 and R4 rest on, so it is
+    profile-relevant, not epidemiology.
+
+Result: 13 kept, 58 cut. Frozen with freeze --append on his go:
+  CP-ACS-006  red     heart attack symptoms in women
+  CP-ANG-003  yellow  angina, common symptoms
+  CP-ANG-004  yellow  angina in women
+  CP-ANG-005  yellow  stable angina, criteria list
+  CP-ANG-006  red     unstable angina, criteria list
+  CP-ANG-007  red     microvascular angina, list
+  CP-ANG-008  red     vasospastic angina, list
+  CP-ANG-009  yellow  stable angina, prose
+  CP-ANG-010  red     unstable angina, prose
+  CP-ANG-011  red     microvascular angina, prose
+  CP-ANG-012  red     vasospastic angina, prose
+  CP-PNA-002  yellow  pneumonia risk: other medical conditions
+  CP-PNA-003  yellow  pneumonia can look like a cold, until it lasts longer
+Records: 01-data/eval/runs/2026-09-19-freeze-append-real.txt, and the dry run
+before it, 2026-09-19-freeze-append-dryrun-final.txt.

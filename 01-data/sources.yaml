@@ -181,6 +181,160 @@ sources:
     # older copy of the fetcher will fail on this source and only this source.
     selectors: ["main.cdc-main", "main", "#content"]
 
+  # -------------------------------------------------------------------------
+  # EXPANSION, added 2026-09-19. Sub-pages of topics already in the corpus,
+  # seven requested by Viraj plus four symptom pages he added from the
+  # inventory in review/SUBPAGE-INVENTORY-2026-09-19.txt.
+  #
+  # Every one continues an existing key_prefix, so they sit AFTER every source
+  # that already holds keys. A full freeze numbers in manifest order, and a
+  # source inserted above these would shift a frozen key. Freeze them with
+  # `freeze --append --only ...`, which never renumbers, not with --force.
+  #
+  # expected_category is inherited from the prefix, the same call made for
+  # nhlbi-vte-causes. It is set per source, so one chunk that argues a
+  # different category, unstable angina on the types page, cannot carry its
+  # own label.
+  #
+  # Reviewed 2026-09-19 on Viraj's rule, symptoms and when to seek help kept,
+  # causes, prevention and hospital tests cut: 8 of 71 candidates kept, from
+  # four of these pages. The other seven keep no chunks and stay unfrozen, so
+  # a later append can still take from them. Unstable angina is frozen red
+  # through the per-chunk override; see review/REVIEW-SHEET-2026-09-19.txt.
+  # -------------------------------------------------------------------------
+
+  - id: nhlbi-ha-women
+    key_prefix: CP-ACS
+    title: "Heart Attack - Heart Attacks in Women"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-attack/women
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "How heart attack shows up in women. Picked 2026-09-19 as ground for the atypical presentations R6 flags."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-ha-causes
+    key_prefix: CP-ACS
+    title: "Heart Attack - Causes and Risk Factors"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-attack/causes
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "Causes and risk factors for heart attack. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-angina-symptoms
+    key_prefix: CP-ANG
+    title: "Angina (Chest Pain) - Symptoms"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/angina/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "The angina symptoms page, never pulled before. Picked 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-angina-types
+    key_prefix: CP-ANG
+    title: "Angina (Chest Pain) - Types"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/angina/types
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Stable, unstable and other types of angina. Unstable angina is an emergency, so a chunk from this page can argue red under a yellow source label. Picked 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-chd-causes
+    key_prefix: CP-ANG
+    title: "Coronary Heart Disease - Causes and Prevention"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/coronary-heart-disease/causes
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Causes and prevention of coronary heart disease. Continues CP-ANG, as the frozen symptoms page does. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-vte-diagnosis
+    key_prefix: CP-PE
+    title: "Venous Thromboembolism - Diagnosis"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/venous-thromboembolism/diagnosis
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "How VTE is diagnosed. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-pneumonia-causes
+    key_prefix: CP-PNA
+    title: "Pneumonia - Causes and Risk Factors"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/pneumonia/causes
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Causes and risk factors for pneumonia. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-pneumonia-diagnosis
+    key_prefix: CP-PNA
+    title: "Pneumonia - Diagnosis"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/pneumonia/diagnosis
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "How pneumonia is diagnosed. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-heart-inflammation-pericarditis
+    key_prefix: CP-PERI
+    title: "Heart Inflammation - Pericarditis"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-inflammation/pericarditis
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "The dedicated pericarditis page. Today the corpus holds only its three-line symptom chunk, CP-PERI-002. Picked 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-heart-inflammation-diagnosis
+    key_prefix: CP-PERI
+    title: "Heart Inflammation - Diagnosis"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-inflammation/diagnosis
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "How heart inflammation is diagnosed. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-heart-inflammation-treatment
+    key_prefix: CP-PERI
+    title: "Heart Inflammation - Treatment"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-inflammation/treatment
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "How heart inflammation is treated. Medicine text, so read it against constraint 12. Requested 2026-09-19."
+    selectors: ["main", "#main-content"]
+
 # ---------------------------------------------------------------------------
 # GAPS. These have no confirmed public-domain source yet.
 # ---------------------------------------------------------------------------

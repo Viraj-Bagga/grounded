@@ -1,0 +1,22 @@
+# REVIEW: nhlbi-pneumonia-diagnosis
+# Pneumonia - Diagnosis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/pneumonia/diagnosis
+# key_prefix: CP-PNA   expected_category: yellow
+# role: How pneumonia is diagnosed. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Kept: #001.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-pneumonia-diagnosis.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+#
+
+--- chunk 001 [short] tokens=64 heading=Pneumonia Diagnosis
+Your healthcare provider will diagnose pneumonia based on your medical history, a physical exam, and test results. Sometimes pneumonia is hard to diagnose because your symptoms may be the same as a cold or flu. You may not realize that your condition is more serious until it lasts longer than these other conditions.

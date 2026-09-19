@@ -1,0 +1,19 @@
+# REVIEW: nhlbi-heart-inflammation-pericarditis
+# Heart Inflammation - Pericarditis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-inflammation/pericarditis
+# key_prefix: CP-PERI   expected_category: yellow
+# role: The dedicated pericarditis page. Today the corpus holds only its three-line symptom chunk, CP-PERI-002. Picked 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Nothing kept.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-heart-inflammation-pericarditis.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+#

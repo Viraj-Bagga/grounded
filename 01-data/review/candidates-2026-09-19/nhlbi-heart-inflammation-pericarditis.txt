@@ -1,0 +1,41 @@
+# REVIEW: nhlbi-heart-inflammation-pericarditis
+# Heart Inflammation - Pericarditis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-inflammation/pericarditis
+# key_prefix: CP-PERI   expected_category: yellow
+# role: The dedicated pericarditis page. Today the corpus holds only its three-line symptom chunk, CP-PERI-002. Picked 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=26 heading=(intro)
+Pericarditis
+Pericarditis
+Types of Heart Inflammation Endocarditis Myocarditis Pericarditis
+
+--- chunk 002 [ok   ] tokens=192 heading=What is Pericarditis?
+Pericarditis is inflammation of the pericardium — the sac surrounding the heart. This sac is made of two thin layers of tissue with a small amount of fluid between them. The fluid keeps the layers from rubbing against each other and causing friction. The pericardium holds the heart in its position in the chest and protects it from infection. Based on how long you have had pericarditis, your healthcare provider may label your pericarditis as acute , subacute (it occurs within weeks or a few months after the initial event that caused it), chronic , or recurrent.
+
+Some people who have pericarditis also develop a pericardial effusion, which is a buildup of fluid in the sac around the heart. If too much fluid builds up, the heart may not be able to pump normally. This is a condition called cardiac tamponade , which can be life-threatening.
+
+--- chunk 003 [short] tokens=105 heading=Symptoms
+Symptoms of pericarditis can feel like a heart attack or other serious health problem. If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away. Pericarditis symptoms include:
+
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Irregular, fast heartbeat called pericardial friction rub
+Shortness of breath
+Pain in the neck or shoulders that can be mild or severe
+Fever
+
+--- chunk 004 [ok   ] tokens=175 heading=Diagnosis
+Your healthcare provider may perform these procedures and tests to help diagnose pericarditis.
+
+A physical exam to listen to your heart for a sound called “pericardial friction rub.” This sound is caused by the inflamed pieces of the pericardium rubbing against each other.
+An ECG (EKG)
+Heart imaging tests such echocardiography and chest x-ray
+Blood tests such as C-reactive protein (CRP). If you have pericarditis, your CPR level will be higher than normal because of the inflammation in the pericardium. Your healthcare provider can perform this test after you start taking medicine to see how well the medicine works at treating your pericarditis.
+
+Once pericarditis is diagnosed, your healthcare provider may need to run more tests to find the cause and treat it.

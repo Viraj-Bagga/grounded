@@ -1,0 +1,43 @@
+# REVIEW: nhlbi-angina-types
+# Angina (Chest Pain) - Types
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/angina/types
+# key_prefix: CP-ANG   expected_category: yellow
+# role: Stable, unstable and other types of angina. Unstable angina is an emergency, so a chunk from this page can argue red under a yellow source label. Picked 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Kept: #002, #003, #004, #005.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-angina-types.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+# REVERSED by Viraj 2026-09-19: #004 and #005 restored, category=red, like unstable angina.
+#
+
+--- chunk 002 [ok   ] tokens=179 heading=Stable angina
+Stable angina is the most common type of angina in the United States. It follows a pattern that has been consistent for at least 2 months. That means the following factors have not changed:
+
+How often your angina events occur
+What causes or triggers your angina
+How long your angina events last
+How well your angina responds to rest or medicines
+
+If you have stable angina, you can learn its pattern and predict when an event will occur, such as during physical activity or mental stress. The pain usually goes away after you rest for a few minutes or take your angina medicine.
+
+Tell your healthcare provider right away if you notice changes in the pattern of your angina, such as when pain lasts longer or happens more often. Pattern changes may be a sign that the condition causing your angina is getting worse. If this happens, stable angina can become unstable angina.
+
+--- chunk 003 [short] tokens=82 category=red heading=Unstable angina
+Unstable angina does not follow a pattern. It may be new or occur more often and be more painful than stable angina. Unstable angina can occur with or without physical exertion. Rest or medicine may not relieve the pain.
+
+Unstable angina is a medical emergency because it can progress to a heart attack . You may need medical attention right away to restore blood flow to your heart muscle.
+
+--- chunk 004 [short] tokens=77 category=red heading=Microvascular angina
+Microvascular angina can be a sign of coronary microvascular disease, a type of coronary heart disease affecting the tiny arteries of the heart. Microvascular angina events can be stable or unstable, and they can be more painful and last longer than other types of angina. Symptoms can occur during exercise or rest. Medicine may not relieve the pain.
+
+--- chunk 005 [short] tokens=104 category=red heading=Vasospastic angina
+Vasospastic angina, also known as Prinzmetal angina or variant angina, is not very common. It occurs when a spasm — a sudden tightening of the muscles within the arteries of your heart — causes the arteries to narrow temporarily. A spasm of the coronary arteries can block blood flow to the heart and cause serious pain. This type of angina usually happens while you are at rest, between midnight and early morning, and in a pattern. Medicine can ease symptoms.

@@ -1,0 +1,62 @@
+# REVIEW: nhlbi-pneumonia-causes
+# Pneumonia - Causes and Risk Factors
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/pneumonia/causes
+# key_prefix: CP-PNA   expected_category: yellow
+# role: Causes and risk factors for pneumonia. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [ok   ] tokens=122 heading=Pneumonia Causes and Risk Factors
+Most of the time your body filters germs out of the air that you breathe. Sometimes germs, such as bacteria, viruses, or fungi, get into your lungs and cause infections.
+
+When these germs get into your lungs, your immune system, which is your body's natural defense against germs, goes into action. Immune cells attack the germs and may cause inflammation of your air sacs, or alveoli. Inflammation can cause your air sacs to fill up with fluid and pus and cause pneumonia symptoms . Learn about how the lungs work.
+
+--- chunk 002 [ok   ] tokens=132 heading=Bacteria
+Bacteria are a common cause of pneumonia in adults. Many types of bacteria can cause pneumonia, but Streptococcus pneumoniae (also called pneumococcus bacteria) is the most common cause in the United States.
+
+Some bacteria cause pneumonia with different symptoms or other characteristics than the usual pneumonia. This infection is called atypical pneumonia. For example, Mycoplasma pneumoniae causes a mild form of pneumonia often called “walking pneumonia.” Legionella pneumophila causes a severe type of pneumonia called Legionnaires’ disease . Bacterial pneumonia can develop on its own or after you have a cold or the flu.
+
+--- chunk 003 [short] tokens=103 heading=Viruses
+Viruses that infect your lungs and airways can cause pneumonia. The flu (influenza virus) and the common cold (rhinovirus) are the most common causes of viral pneumonia in adults. Respiratory syncytial virus (RSV) is the most common cause of viral pneumonia in young children.
+
+Many other viruses can cause pneumonia, including SARS-CoV-2, the virus that causes COVID-19. Our video about how SARS-CoV-2 affects the lungs talks about this.
+
+--- chunk 004 [short] tokens=52 heading=Fungi
+Fungi such as Pneumocystis jirovecii may cause pneumonia, especially for people who have weakened immune systems. Some fungi found in the soil in the southwestern United States and in the Ohio and Mississippi River valleys can also cause pneumonia.
+
+--- chunk 005 [short] tokens=24 heading=Risk factors
+Your risk for pneumonia may be higher because of your age, environment, lifestyle habits, and other medical conditions.
+
+--- chunk 006 [ok   ] tokens=128 heading=Age
+Pneumonia can affect people of all ages. However, two age groups are at higher risk of developing pneumonia and having more serious pneumonia.
+
+Babies and children, 2 years old or younger, are at higher risk because their immune systems are still developing. This risk is higher for premature babies.
+Older adults, age 65 or older, are also at higher risk because their immune systems generally weaken as people age. Older adults are also more likely to have other chronic (long-term) health conditions that raise the risk of pneumonia.
+
+Babies, children, and older adults who do not get the recommended vaccines to prevent pneumonia have an even higher risk.
+
+--- chunk 007 [short] tokens=112 heading=Environment or occupation
+Most people get pneumonia when they catch an infection from someone else in their community. Your chance of getting pneumonia is higher if you live or spend a lot of time in a crowded place such as military barracks, prison, homeless shelters, or nursing homes.
+
+Your risk is also higher if you regularly breathe in air pollution or toxic fumes.
+
+Some germs that cause pneumonia can infect birds and other animals. You are most likely to encounter these germs if you work in a chicken or turkey processing center, pet shop, or veterinary clinic.
+
+--- chunk 008 [short] tokens=55 heading=Lifestyle habits
+Smoking cigarettes can make you less able to clear mucus from your airways.
+Using drugs or alcohol can weaken your immune system. You are also more likely to accidentally breathe in saliva or vomit into your windpipe if you are sedated or unconscious from an overdose.
+
+--- chunk 009 [short] tokens=20 heading=Other medical conditions
+You may have an increased risk of pneumonia if you have any of the following medical conditions.
+
+--- chunk 010 [ok   ] tokens=238 heading=Other medical conditions
+Brain disorders, such as a stroke , a head injury, dementia, or Parkinson’s disease can affect your ability to cough or swallow. This can lead to food, drink, vomit, or saliva going down your windpipe instead of your esophagus and getting into your lungs.
+Conditions that weaken your immune system may also increase your risk. These include pregnancy, HIV/AIDS, or an organ or bone marrow transplant . Chemotherapy, which is used to treat cancer, and long-term use of steroid medicines can also weaken your immune system.
+Critical diseases that require hospitalization, including receiving treatment in a hospital intensive care unit, can raise your risk of hospital-acquired pneumonia. Your risk is higher if you cannot move around much or are sedated or unconscious. Using a ventilator raises the risk of a type called ventilator-associated pneumonia.
+Lung diseases, such as asthma , bronchiectasis , cystic fibrosis , or COPD , also increase your pneumonia risk.
+Other serious conditions, such as malnutrition, diabetes , heart failure , sickle cell disease , or liver or kidney disease, are additional risk factors.

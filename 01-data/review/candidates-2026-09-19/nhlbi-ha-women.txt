@@ -1,0 +1,48 @@
+# REVIEW: nhlbi-ha-women
+# Heart Attack - Heart Attacks in Women
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-attack/women
+# key_prefix: CP-ACS   expected_category: red
+# role: How heart attack shows up in women. Picked 2026-09-19 as ground for the atypical presentations R6 flags.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=23 heading=Heart Attack Heart Attacks in Women
+The causes, risk factors, and symptoms of a heart attack can be different in women compared with men.
+
+--- chunk 002 [short] tokens=119 heading=Causes and risk factors
+Risk factors such as age, lifestyle habits, and other health conditions affect men and women differently.
+
+Women may get heart attacks at older ages than men do.
+Smoking, high blood pressure, high blood cholesterol, high blood sugar, obesity, and stress raise the risk of a heart attack more in women than in men.
+Women are more likely than men to have heart attacks that are not caused by coronary artery disease . This can make it more difficult for healthcare providers to diagnose heart attacks in women.
+Women have more health problems after having a heart attack than men do.
+
+--- chunk 003 [ok   ] tokens=174 heading=Symptoms of a heart attack in women
+Both women and men who have a heart attack often have chest pain. However, in addition to chest pain, women are more likely to have these symptoms:
+
+Pain in the shoulder, back, or arm
+Shortness of breath
+Unusual tiredness and weakness
+Upset stomach
+Anxiety
+
+These symptoms can happen together with chest pain or without any chest pain.
+
+Many women may not recognize that these are symptoms of a heart attack. Women may not get emergency treatment right away if they downplay their symptoms and delay going to the hospital, or if the usual initial screening tests performed at the hospital may not detect an early or atypical heart attack. Because of this, women have a higher risk of serious health problems after a heart attack.
+
+It is important to call 9-1-1 if you have these symptoms. Early treatment can limit damage to your heart and can save your life.
+
+--- chunk 004 [ok   ] tokens=185 heading=Pregnancy and heart attacks
+Heart attacks are not common among pregnant women, but they are possible both during and soon after delivery. Normal changes to your body during pregnancy can raise your risk of a heart attack. Your age, lifestyle habits, and other health conditions, such as bleeding disorders, obesity, preeclampsia (high blood pressure during pregnancy), and diabetes, can also raise your risk.
+
+If you already have coronary artery disease, being pregnant can raise your risk of a heart attack. Coronary artery disease is a major cause of heart attacks during pregnancy. Ask your doctor whether it is safe for you to get pregnant and what steps you need to take to keep your heart healthy during your pregnancy.
+
+Heart attacks caused by spontaneous coronary artery dissection (SCAD) , a coronary artery embolus, or a coronary artery spasm are more common in pregnant women than in people who are not pregnant.
+
+--- chunk 005 [short] tokens=65 heading=Pregnancy and heart attacks
+If you have symptoms of a heart attack during your pregnancy, or at any time, call 9-1-1 right away . Your healthcare team will take steps to protect your baby during these tests. Your healthcare team will also make sure that any treatment you take for a heart attack is safe to use during pregnancy.

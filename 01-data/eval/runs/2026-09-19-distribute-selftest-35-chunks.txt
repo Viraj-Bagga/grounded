@@ -1,0 +1,372 @@
+# 2026-09-19 07-distribute/selftest.py run after the corpus append, to check the 35-chunk registry and index
+# pass the corpus-pack checks (T16). Temp dir only; the real packs/ were not touched.
+
+07-distribute self-test, 2026-09-19T18:57:32Z, Python 3.14.7
+temp directory $TMP = /private/var/folders/cm/5n71s0ss7tz6m7vmqhlr3nc40000gn/T/distribute-selftest-3lqwdyzy
+
+T01  build a pack from a spec
+    $ build_pack.py $TMP/spec-a.json --packs $TMP/packs
+    | build test-alpha@1 (test) from $TMP/spec-a.json
+    |   payload.bin       3.15 MB  clone  sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f  0.0 s
+    |   NOTICE.txt           50 B  clone  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s
+    |   size 3.15 MB (3,150,099 bytes)  pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    | built $TMP/packs/test-alpha/1 in 0.0 s
+    exit 0
+  PASS  builder exits 0 and writes packs/test-alpha/1/manifest.json
+  PASS  manifest carries version, size, sha256 per file, pack_sha256 and licence
+    node| hashed test-alpha@1/NOTICE.txt, 50 B in 0.0 s: matches the manifest
+    node| hashed test-alpha@1/payload.bin, 3.15 MB in 0.0 s: matches the manifest
+    node| serving test-alpha@1: 2 files, 3.15 MB, pack_sha256 e7f93f3c0771478f...
+    node on http://127.0.0.1:56817, fault proxy on http://127.0.0.1:56818
+
+T02  GET /packs lists what is available
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+  PASS  GET /packs is 200 and lists test-alpha@1
+  PASS  each entry carries the manifest, its URL and a URL per file
+    $ client.py list --node http://127.0.0.1:56817
+    | node http://127.0.0.1:56817: 1 pack(s)
+    | 
+    |   id          version  kind  size     files  licence                                pack_sha256
+    |   test-alpha  1        test  3.15 MB  2      Self-test payload, no licence [green]  e7f93f3c0771478f...
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+  PASS  client list shows it
+
+T03  pull over loopback, then verify from disk
+    $ client.py pull test-alpha --node http://127.0.0.1:56817 --dest $TMP/dest1
+    | pull test-alpha@1 (test) from http://127.0.0.1:56817
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    |   NOTICE.txt  50 B
+    |     transferred 50 B in 0.00 s
+    |     sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab
+    |       hashed from disk in 0.0 s: matches the manifest
+    |   payload.bin  3.15 MB
+    |     transferred 3.15 MB in 0.01 s, 462 MB/s
+    |     sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f
+    |       hashed from disk in 0.0 s: matches the manifest
+    | INSTALLED test-alpha@1 at $TMP/dest1/test-alpha/1
+    |   transferred 3.15 MB in 0.0 s including hashing
+    |   every file hashed from disk and matched its manifest entry
+    |   pack_sha256 recomputed from the files on disk: e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/NOTICE.txt 200 50 B: sent 50 B in 0.00 s
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 2601 MB/s
+  PASS  pull exits 0 and says INSTALLED
+  PASS  installed payload is byte-identical to the source
+  PASS  manifest.json written, no .part left
+    $ client.py verify $TMP/dest1/test-alpha/1
+    | verify test-alpha@1 at $TMP/dest1/test-alpha/1
+    |   NOTICE.txt           50 B  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s  ok
+    |   payload.bin       3.15 MB  sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f  0.0 s  ok
+    | VERIFIED test-alpha@1: every file matches, pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    exit 0
+  PASS  verify re-hashes it and exits 0
+    $ client.py pull test-alpha --node http://127.0.0.1:56817 --dest $TMP/dest1
+    | pull test-alpha@1 (test) from http://127.0.0.1:56817
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    | already installed at $TMP/dest1/test-alpha/1. Run verify to re-hash it.
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+  PASS  pulling again is a no-op
+
+T04  pack_sha256 reproduces with the system shasum tool, no project code
+    $ cd files && shasum -a 256 NOTICE.txt payload.bin | shasum -a 256
+    | e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+  PASS  equals the manifest's pack_sha256
+
+T05  Range semantics on the node
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 206 10 B, bytes 10-19 of 3150049: sent 10 B in 0.00 s
+  PASS  bytes=10-19 gives 206 and exactly those bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 206 5 B, bytes 3150044-3150048 of 3150049: sent 5 B in 0.00 s
+  PASS  a suffix range gives the last 5 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 2523 MB/s
+  PASS  If-Range with a stale ETag gives 200 and the whole file
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 206 3.15 MB, bytes 10-3150048 of 3150049: sent 3.15 MB in 0.00 s, 1793 MB/s
+  PASS  If-Range with the current ETag honours the range
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 416 range 'bytes=3150049-' is past 3150049 bytes
+  PASS  a range past the end gives 416
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 2634 MB/s
+  PASS  multiple ranges are ignored: 200, whole file
+    node| 127.0.0.1 HEAD /packs/test-alpha/1/files/payload.bin 200 3.15 MB
+  PASS  HEAD gives the size and ETag with no body
+
+T06  a bit flipped in transit is refused
+    $ client.py pull test-alpha --node http://127.0.0.1:56818 --dest $TMP/dest2
+    | pull test-alpha@1 (test) from http://127.0.0.1:56818
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    |   NOTICE.txt  50 B
+    |     transferred 50 B in 0.00 s
+    |     sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab
+    |       hashed from disk in 0.0 s: matches the manifest
+    |   payload.bin  3.15 MB
+    |     transferred 3.15 MB in 0.00 s, 1052 MB/s
+    | INTEGRITY FAILURE: payload.bin: the sha256 of the bytes on disk does not match the manifest
+    |     expected 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f
+    |     got      59d3d7587f742bb5ca6841501bde0db1505c1833288a496a55d2fc3520e11bd8
+    |   Deleted the download. Nothing installed.
+    exit 2
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/NOTICE.txt 200 50 B: sent 50 B in 0.00 s
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 2508 MB/s
+  PASS  client exits 2 with INTEGRITY FAILURE
+  PASS  no manifest.json, so the pack is not installed
+  PASS  the bad download is deleted: no payload.bin, no .part
+
+T07  a transfer cut mid-file resumes with a 206 and verifies
+    $ client.py pull test-alpha --node http://127.0.0.1:56818 --dest $TMP/dest3
+    | pull test-alpha@1 (test) from http://127.0.0.1:56818
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    |   NOTICE.txt  50 B
+    |     transferred 50 B in 0.00 s
+    |     sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab
+    |       hashed from disk in 0.0 s: matches the manifest
+    |   payload.bin  3.15 MB
+    |     transferred 1.58 MB in 0.00 s, 1246 MB/s
+    |     interrupted at 1.58 MB: ConnectionError: connection closed after 1.58 MB of 3.15 MB. Retry 1 of 3.
+    |     resuming at 1.58 MB: the node answered 206 Partial Content, bytes 1575024-3150048
+    |     transferred 1.58 MB in 0.00 s, 1400 MB/s
+    |     sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f
+    |       hashed from disk in 0.0 s: matches the manifest
+    | INSTALLED test-alpha@1 at $TMP/dest3/test-alpha/1
+    |   transferred 3.15 MB in 0.5 s including hashing
+    |   every file hashed from disk and matched its manifest entry
+    |   pack_sha256 recomputed from the files on disk: e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/NOTICE.txt 200 50 B: sent 50 B in 0.00 s
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 1781 MB/s
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 206 1.58 MB, bytes 1575024-3150048 of 3150049: sent 1.58 MB in 0.00 s, 2803 MB/s
+  PASS  client exits 0 after the drop
+  PASS  the retry asked for the rest with Range and got 206
+  PASS  the resumed file is byte-identical to the source
+
+T08  --expect pins the pack out of band
+    $ client.py pull test-alpha --node http://127.0.0.1:56817 --dest $TMP/dest4 --expect 0000000000000000000000000000000000000000000000000000000000000000
+    | pull test-alpha@1 (test) from http://127.0.0.1:56817
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    | INTEGRITY FAILURE: pack_sha256 is not the expected 0000000000000000000000000000000000000000000000000000000000000000. Refused before downloading anything.
+    exit 2
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+  PASS  a wrong digest exits 2 before downloading anything
+    $ client.py pull test-alpha --node http://127.0.0.1:56817 --dest $TMP/dest4 --expect e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    | pull test-alpha@1 (test) from http://127.0.0.1:56817
+    |   2 files, 3.15 MB (3,150,099 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    |   pack_sha256 matches --expect
+    |   NOTICE.txt  50 B
+    |     transferred 50 B in 0.00 s
+    |     sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab
+    |       hashed from disk in 0.0 s: matches the manifest
+    |   payload.bin  3.15 MB
+    |     transferred 3.15 MB in 0.00 s, 1797 MB/s
+    |     sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f
+    |       hashed from disk in 0.0 s: matches the manifest
+    | INSTALLED test-alpha@1 at $TMP/dest4/test-alpha/1
+    |   transferred 3.15 MB in 0.0 s including hashing
+    |   every file hashed from disk and matched its manifest entry
+    |   pack_sha256 recomputed from the files on disk: e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/NOTICE.txt 200 50 B: sent 50 B in 0.00 s
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 2237 MB/s
+  PASS  the right digest installs
+
+T09  a manifest path that escapes the destination is refused by the client
+    $ client.py pull test-alpha --node http://127.0.0.1:56818 --dest $TMP/dest5
+    | INTEGRITY FAILURE: manifest refused:
+    |   - files[0] path '../escaped.bin': component '..' must match [A-Za-z0-9][A-Za-z0-9._-]*
+    exit 2
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/manifest.json 200 980 bytes
+  PASS  client exits 2 and names the bad path
+  PASS  nothing named escaped.bin exists anywhere under $TMP
+
+T10  the node serves only paths listed in a valid manifest
+    GET /packs/test-alpha/1/files/unlisted.bin  ->  404
+    GET /packs/test-alpha/1/files/../manifest.json  ->  404
+    GET /packs/test-alpha/1/files/%2e%2e/manifest.json  ->  404
+    GET /packs/test-alpha/1/files/NOTICE.txt/../payload.bin  ->  404
+    GET /packs/test-alpha/1/files/  ->  404
+    GET /packs/test-alpha/1  ->  404
+    GET /packs/../../etc/passwd  ->  404
+    GET /packs/test-alpha/../../../etc/passwd  ->  404
+    GET /etc/passwd  ->  404
+    GET /  ->  404
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/unlisted.bin 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/../manifest.json 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/%2e%2e/manifest.json 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/NOTICE.txt/../payload.bin 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/ 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/1 404 not found
+    node| 127.0.0.1 GET /packs/../../etc/passwd 404 not found
+    node| 127.0.0.1 GET /packs/test-alpha/../../../etc/passwd 404 not found
+    node| 127.0.0.1 GET /etc/passwd 404 not found
+    node| 127.0.0.1 GET / 404 not found
+  PASS  every probe gets 404
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 200 3.15 MB: sent 3.15 MB in 0.00 s, 1955 MB/s
+  PASS  the listed file still gets 200
+
+T11  the node refuses packs that point outside themselves
+    node| NOT SERVING test-evil/1: invalid manifest: files[0] path '../../src/NOTICE.txt': component '..' must match [A-Za-z0-9][A-Za-z0-9._-]*
+    node| NOT SERVING test-link/1: payload.bin: resolves outside the pack
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+  PASS  a manifest with ../ in a path is not listed
+  PASS  a symlink out of the pack is not listed
+  PASS  the node log says why for both
+    node| 127.0.0.1 GET /packs/test-link/1/files/payload.bin 404 not found
+  PASS  their files get 404
+
+T12  a pack dropped into a running node's directory is listed, no restart
+    $ build_pack.py $TMP/spec-b.json --packs $TMP/elsewhere
+    | build test-regional-zz@1 (test) from $TMP/spec-b.json
+    |   NOTICE.txt           50 B  clone  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s
+    |   size 50 B (50 bytes)  pack_sha256 d6ba82b5b11a02e923ecfca0de85a71e47df63c7953e6dcaa2db97d1c84e5cc6
+    | built $TMP/elsewhere/test-regional-zz/1 in 0.0 s
+    exit 0
+    node| 127.0.0.1 GET /packs 200 1 packs, 1393 bytes
+    node| hashed test-regional-zz@1/NOTICE.txt, 50 B in 0.0 s: matches the manifest
+    node| serving test-regional-zz@1: 1 files, 50 B, pack_sha256 d6ba82b5b11a02e9...
+    node| 127.0.0.1 GET /packs 200 2 packs, 2368 bytes
+  PASS  not listed before the copy, listed after
+    $ client.py pull test-regional-zz --node http://127.0.0.1:56817 --dest $TMP/dest6
+    | pull test-regional-zz@1 (test) from http://127.0.0.1:56817
+    |   1 files, 50 B (50 bytes), licence Self-test payload, no licence [green]
+    |   pack_sha256 d6ba82b5b11a02e923ecfca0de85a71e47df63c7953e6dcaa2db97d1c84e5cc6
+    |   NOTICE.txt  50 B
+    |     transferred 50 B in 0.00 s
+    |     sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab
+    |       hashed from disk in 0.0 s: matches the manifest
+    | INSTALLED test-regional-zz@1 at $TMP/dest6/test-regional-zz/1
+    |   transferred 50 B in 0.0 s including hashing
+    |   every file hashed from disk and matched its manifest entry
+    |   pack_sha256 recomputed from the files on disk: d6ba82b5b11a02e923ecfca0de85a71e47df63c7953e6dcaa2db97d1c84e5cc6
+    exit 0
+    node| 127.0.0.1 GET /packs 200 2 packs, 2368 bytes
+    node| 127.0.0.1 GET /packs/test-regional-zz/1/manifest.json 200 734 bytes
+    node| 127.0.0.1 GET /packs/test-regional-zz/1/files/NOTICE.txt 200 50 B: sent 50 B in 0.00 s
+  PASS  and it pulls and verifies
+
+T13  a file altered on the node is withdrawn, and restored when it is fixed
+    node| hashed test-alpha@1/payload.bin, 3.15 MB in 0.0 s: DOES NOT MATCH the manifest
+    node| withdrawn test-alpha@1
+    node| NOT SERVING test-alpha/1: payload.bin: sha256 on disk does not match the manifest
+    node| 127.0.0.1 GET /packs 200 1 packs, 1081 bytes
+    node| 127.0.0.1 GET /packs/test-alpha/1/files/payload.bin 404 not found
+  PASS  altered in place, same size: withdrawn from /packs
+  PASS  and its file gets 404
+    node| hashed test-alpha@1/payload.bin, 3.15 MB in 0.0 s: matches the manifest
+    node| serving test-alpha@1: 2 files, 3.15 MB, pack_sha256 e7f93f3c0771478f...
+    node| 127.0.0.1 GET /packs 200 2 packs, 2368 bytes
+  PASS  bytes restored: listed again
+
+T14  a version is immutable
+    $ build_pack.py $TMP/spec-a.json --packs $TMP/packs
+    | build test-alpha@1 (test) from $TMP/spec-a.json
+    |   payload.bin       3.15 MB  clone  sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f  0.0 s
+    |   NOTICE.txt           50 B  clone  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s
+    | already built, identical: $TMP/packs/test-alpha/1, pack_sha256 e7f93f3c0771478fd58a8ad2905f9d833f11a1fc07ba2d92447fddd328931197
+    exit 0
+  PASS  rebuilding identical content is a no-op
+    $ build_pack.py $TMP/spec-a.json --packs $TMP/packs
+    | build test-alpha@1 (test) from $TMP/spec-a.json
+    |   payload.bin       3.15 MB  clone  sha256 dd6c7b4b4ce5cee178437d67c70aaee2d349e6cee7ff4546dae19b853322cbfe  0.0 s
+    |   NOTICE.txt           50 B  clone  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s
+    | REFUSED: test-alpha@1 is already built with different files. A version is immutable: bump the version in the spec.
+    exit 1
+  PASS  different content under the same version is refused
+    $ build_pack.py $TMP/spec-a2.json --packs $TMP/packs
+    | build test-alpha@1 (test) from $TMP/spec-a2.json
+    |   payload.bin       3.15 MB  clone  sha256 5ee575c14654a2564d4ef29ac3545d935eb7988fa2ff33d1ee188b493a70e01f  0.0 s
+    |   NOTICE.txt           50 B  clone  sha256 812bb8e087f55b2c34704a8288cc62a3f2f9a290f34481812bf4a44571a819ab  0.0 s
+    | REFUSED: test-alpha@1 is already built with the same files but a different manifest. A version is immutable: bump the version in the spec.
+    exit 1
+  PASS  a different manifest under the same version is refused
+
+T15  model packs: GGUF header, pinned hash, licence file, verbatim quotes
+    $ build_pack.py $TMP/m-ok.json --packs $TMP/model-packs
+    | build test-model@1 (model) from $TMP/m-ok.json
+    |   model.gguf          232 B  clone  sha256 542f7d2efd245e10b2a9d839a4a4b84b5433f880feedc39c5bd5e8ffd3029717  0.0 s  matches the spec pin
+    |   LICENSE.txt          52 B  clone  sha256 7005d85abdc096162faeab90625dbec87c9a5cdde81c7222abc86558cc3010b7  0.0 s
+    |   check: 1 licence quote(s) marked verbatim appear word for word in LICENSE.txt
+    |   check: model.gguf: GGUF v3, testarch, Q4_K_M, 0 tensors, imatrix none recorded
+    |   size 284 B (284 bytes)  pack_sha256 27629df486f86fc9ce4105b14aa879a9c126c6c7bf8c0589ef8b7780eb5d5fed
+    | built $TMP/model-packs/test-model/1 in 0.0 s
+    exit 0
+  PASS  a good spec builds, header read into the manifest
+    $ build_pack.py $TMP/m-arch.json --packs $TMP/model-packs
+    | build test-model@arch (model) from $TMP/m-arch.json
+    |   model.gguf          232 B  clone  sha256 542f7d2efd245e10b2a9d839a4a4b84b5433f880feedc39c5bd5e8ffd3029717  0.0 s  matches the spec pin
+    |   LICENSE.txt          52 B  clone  sha256 7005d85abdc096162faeab90625dbec87c9a5cdde81c7222abc86558cc3010b7  0.0 s
+    | REFUSED: model.gguf is architecture 'testarch', spec expects 'nemotron_h'
+    exit 1
+  PASS  the wrong architecture is refused
+    $ build_pack.py $TMP/m-pin.json --packs $TMP/model-packs
+    | build test-model@pin (model) from $TMP/m-pin.json
+    | REFUSED: model.gguf: sha256 542f7d2efd245e10b2a9d839a4a4b84b5433f880feedc39c5bd5e8ffd3029717 is not the ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff the spec pins. Refusing to pack a different file.
+    exit 1
+  PASS  a hash that is not the pinned one is refused
+    $ build_pack.py $TMP/m-nolicence.json --packs $TMP/model-packs
+    | build test-model@nolicence (model) from $TMP/m-nolicence.json
+    |   model.gguf          232 B  clone  sha256 542f7d2efd245e10b2a9d839a4a4b84b5433f880feedc39c5bd5e8ffd3029717  0.0 s  matches the spec pin
+    | REFUSED: a model pack must ship its licence text: license.file must name one of its files
+    exit 1
+  PASS  no licence file in the pack is refused
+    $ build_pack.py $TMP/m-quote.json --packs $TMP/model-packs
+    | build test-model@quote (model) from $TMP/m-quote.json
+    |   model.gguf          232 B  clone  sha256 542f7d2efd245e10b2a9d839a4a4b84b5433f880feedc39c5bd5e8ffd3029717  0.0 s  matches the spec pin
+    |   LICENSE.txt          52 B  clone  sha256 7005d85abdc096162faeab90625dbec87c9a5cdde81c7222abc86558cc3010b7  0.0 s
+    | REFUSED: quoted as verbatim but not in LICENSE.txt: '7. Clause seven says something else.'
+    exit 1
+  PASS  a 'verbatim' quote that is not in the licence file is refused
+
+T16  corpus packs: the real registry and index pass; damaged copies do not
+    $ build_pack.py $TMP/c-a.json --packs $TMP/packs
+    | build test-corpus-a@1 (corpus) from $TMP/c-a.json
+    |   citations.csv     9.42 kB  clone  sha256 0defe83a4c61bddef519c74a2ce6800e2413fe2d8f86718da4197ef2cb5b18bf  0.0 s
+    |   corpus.db         1.66 MB  clone  sha256 3c2072752a16aa79c7fe2dd829e758cf4f3bbc747a96d52266d0eef71eb9cb9b  0.0 s
+    |   check: citations.csv: 35 keys, 16 sources, all licence green, all with a retrieval date
+    |   check: corpus.db: integrity ok, keys equal the registry, 35/35 chunk texts match their frozen chunk_sha256, float[384] vectors for 35 keys
+    |   check: no key collision with the 0 other corpus pack(s) in $TMP/packs
+    |   size 1.67 MB (1,672,397 bytes)  pack_sha256 bf5c61660d9b35d9942ca2a19f12d3fd5b1bcd24d3f960c67f90e793e879e1c7
+    | built $TMP/packs/test-corpus-a/1 in 0.0 s
+    exit 0
+  PASS  the real citations.csv and corpus.db pass every corpus check
+    $ build_pack.py $TMP/c-b.json --packs $TMP/packs
+    | build test-corpus-b@1 (corpus) from $TMP/c-b.json
+    |   citations.csv     9.42 kB  clone  sha256 0defe83a4c61bddef519c74a2ce6800e2413fe2d8f86718da4197ef2cb5b18bf  0.0 s
+    |   corpus.db         1.66 MB  clone  sha256 3c2072752a16aa79c7fe2dd829e758cf4f3bbc747a96d52266d0eef71eb9cb9b  0.0 s
+    | REFUSED: corpus checks failed:
+    |     - keys must resolve to one chunk across packs (hard constraint 9): test-corpus-a@1 already uses CP-ACS-001, CP-ACS-002, CP-ACS-003, CP-ACS-004, CP-ACS-005 ...
+    exit 1
+  PASS  a second corpus pack reusing those keys is refused (constraint 9)
+    $ build_pack.py $TMP/c-red.json --packs $TMP/corpus-packs
+    | build test-corpus-red@1 (corpus) from $TMP/c-red.json
+    |   citations.csv     9.38 kB  clone  sha256 3e608e010813abda3507624bb3d425cf13e09e4a1ccf46bd309fc57db207311f  0.0 s
+    |   corpus.db         1.66 MB  clone  sha256 3c2072752a16aa79c7fe2dd829e758cf4f3bbc747a96d52266d0eef71eb9cb9b  0.0 s
+    | REFUSED: corpus checks failed:
+    |     - not licence-cleared (hard constraint 6): CP-DIFF-001 (red)
+    exit 1
+  PASS  a registry row with licence red is refused (constraint 6)
+    $ build_pack.py $TMP/c-drift.json --packs $TMP/corpus-packs
+    | build test-corpus-drift@1 (corpus) from $TMP/c-drift.json
+    |   citations.csv     9.42 kB  clone  sha256 0defe83a4c61bddef519c74a2ce6800e2413fe2d8f86718da4197ef2cb5b18bf  0.0 s
+    |   corpus.db         1.66 MB  clone  sha256 13e3c3f8c9d8b54c356adc1ea97fc0f4ef51215e7599705efa948dd2e54024ba  0.0 s
+    | REFUSED: corpus checks failed:
+    |     - chunk text no longer matches its frozen chunk_sha256 (hard constraint 1): ['CP-ACS-001']
+    exit 1
+  PASS  an index whose chunk text drifted from the freeze is refused (constraint 1)
+
+51/51 checks passed
+exit 0

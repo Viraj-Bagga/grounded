@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""BM25 over the 22 frozen chunks, and a blend with the vector score.
+"""BM25 over the frozen chunks, and a blend with the vector score.
 
     python 04-retrieval/hybrid.py "sharp pain worse when I breathe in"
     python 04-retrieval/hybrid.py --alpha 0.0 "..."      # pure BM25
@@ -18,7 +18,7 @@ Nothing is re-chunked, re-frozen, or re-keyed, so hard constraint 1 is untouched
 
 BLENDING TWO SCORES THAT ARE NOT ON THE SAME SCALE. Cosine here sits roughly in
 0.0 to 0.8; BM25 is unbounded and depends on corpus statistics. Blending them raw
-would make alpha meaningless, so both are min-max normalized across the 22 chunks
+would make alpha meaningless, so both are min-max normalized across all chunks
 PER QUERY before mixing. That makes alpha a real mixing weight and makes a result
 at alpha 0.5 mean "half each", but it also means the scores are ranks within one
 query and are not comparable across queries. Do not display them as confidence.
@@ -79,7 +79,7 @@ def tokenize(text: str):
 
 
 class BM25:
-    """Standard Okapi BM25. 22 documents, so everything is computed eagerly."""
+    """Standard Okapi BM25. A few dozen documents, so everything is computed eagerly."""
 
     def __init__(self, docs, k1=1.5, b=0.75):
         self.k1, self.b = k1, b
@@ -93,7 +93,7 @@ class BM25:
             for t in set(d):
                 df[t] += 1
         # +1 inside the log keeps idf non-negative for terms in every document,
-        # which matters here: with 22 documents a common term like "chest"
+        # which matters here: with a few dozen documents a common term like "chest"
         # otherwise goes negative and actively penalises a good match.
         self.idf = {t: math.log(1 + (self.n - c + 0.5) / (c + 0.5))
                     for t, c in df.items()}
@@ -159,7 +159,7 @@ class HybridRetriever:
             self.model.encode([query], normalize_embeddings=True,
                               convert_to_numpy=True)[0].tolist())
         # Ask for every chunk so the blend sees the whole corpus, not a
-        # pre-filtered top-k. With 22 chunks that is free.
+        # pre-filtered top-k. With a few dozen chunks that is free.
         with self._lock:
             rows = self.db.execute(
                 "select key, distance from chunk_vec where embedding match ? and k = ?",

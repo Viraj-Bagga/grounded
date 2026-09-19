@@ -1,0 +1,36 @@
+# REVIEW: nhlbi-vte-diagnosis
+# Venous Thromboembolism - Diagnosis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/venous-thromboembolism/diagnosis
+# key_prefix: CP-PE   expected_category: red
+# role: How VTE is diagnosed. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=21 heading=(intro)
+Types Deep Vein Thrombosis (DVT) Pulmonary Embolism (PE)
+
+--- chunk 002 [short] tokens=64 heading=Venous Thromboembolism Diagnosis
+Your healthcare provider will diagnose deep vein thrombosis (DVT) with or without pulmonary embolism (PE) based on your medical history, a physical exam, and various imaging or blood test results. Your provider will identify your risk factors and rule out other causes of your symptoms .
+
+--- chunk 003 [short] tokens=81 heading=Medical history and physical exam
+Your provider may ask you about your risk factors and your symptoms. Your provider may examine your heart rate and the area that is affected and ask about your overall health, including:
+
+Your recent medical history, especially any paralysis or long periods without movement
+Medicines you are taking
+Whether you have been hospitalized recently, especially if you have had any surgeries, injuries, or infections
+Whether you have been treated for cancer
+
+--- chunk 004 [short] tokens=36 heading=Diagnostic tests and procedures
+Your provider may first do blood tests and imaging tests to diagnose a VTE. The tests your provider runs will depend on your specific medical history and risk factors.
+
+--- chunk 005 [OVER ] tokens=302 heading=Diagnostic tests and procedures
+Computed tomography pulmonary angiography (CTPA) takes pictures of your blood vessels and looks for blood clots in the lungs. It is the main test to diagnose pulmonary embolism.
+Blood tests measure substances in the blood that may be signs of a blood clot. D-dimer tests measure a substance in the blood that is released when the fibrin proteins (proteins that help stop bleeding) in a clot dissolve. If the test shows high levels of the substance, you may have DVT. These tests may be used as a first step to look for signs of a blood clot in otherwise healthy people. Your provider can also check the oxygen levels in your blood. Low blood oxygen can be a sign of a blood clot.
+Ventilation perfusion (V/Q) scan measures air flow (ventilation) and blood flow (perfusion) in the lungs. If your lungs do not get the right amount of air or blood, you may have pulmonary embolism.
+Pulmonary angiography confirms pulmonary embolism if, after other testing, your healthcare provider suspects you have one. This test requires inserting a tube into your blood vessel. It also uses X-rays to create video of the blood flow to your lung so your provider can identify any blood clots.
+Other imaging tests look at heart function , lung function , and how well blood flows through your veins, if the results of previous tests could not diagnose or rule out VTE.

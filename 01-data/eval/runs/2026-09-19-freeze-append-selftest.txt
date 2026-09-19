@@ -1,0 +1,176 @@
+# 2026-09-19 self-test of build_corpus.py freeze --append
+# Runs only on scratch copies of 01-data. The real registry, chunks/ and review/ were not touched.
+# Scenario: the 11 expansion sources as chunked (3 OVER), then a simulated review that deletes the
+# OVER blocks and the four '(intro)' navigation blocks. Every other candidate is kept, so the
+# 64-chunk / 86-total figures below are a test fixture, not a proposal.
+# Check 4 is the order check: a plain full freeze of the same manifest (CP-BRONCH removed) must
+# give the identical registry and chunk files.
+# Result: 28 passed, 0 failed.
+
+== 1. candidates as chunked, 3 OVER: must refuse and write nothing
+REFUSING TO APPEND. Nothing was written:
+   nhlbi-ha-causes :: Other causes of a heart attack :: 312 tokens
+   nhlbi-vte-diagnosis :: Diagnostic tests and procedures :: 302 tokens
+   nhlbi-pneumonia-diagnosis :: Diagnostic tests and procedures :: 302 tokens
+   nhlbi-heart-inflammation-treatment :: (intro) :: identical to nhlbi-heart-inflammation-diagnosis :: (intro), which would be CP-PERI-007
+PASS  refuses with OVER chunks
+PASS  names all 3 OVER chunks
+PASS  nothing written
+== 2. dry run after the OVER blocks are removed: prints keys, writes nothing
+PASS  dry run exits 0
+PASS  dry run writes nothing
+PASS  first new key in its prefix is CP-ACS-006
+PASS  first new key in its prefix is CP-ANG-003
+PASS  first new key in its prefix is CP-PE-005
+PASS  first new key in its prefix is CP-PNA-002
+PASS  first new key in its prefix is CP-PERI-003
+PASS  no key reuses a frozen number
+PASS  CP-BRONCH not swept in
+== 3. real append on the scratch copy
+APPENDED 2026-09-19: 64 chunks -> /private/tmp/claude-501/-Users-virajbagga-Coding-steel26/06f8a499-99bb-4390-baf0-facdea28bd66/scratchpad/append-test/t2/citations.csv
+The 22 frozen rows and 22 chunk files are byte-identical.
+distribution by expected category: {'none': 1, 'red': 26, 'yellow': 53, 'green': 6}
+mean tokens: 103
+
+WARNING: red chunks outnumber green 26:6. A real triage distribution is closer to 7 red / 34 yellow / 59 green. A red-skewed corpus biases every retrieval toward red.
+
+The new keys are now immutable too. Rebuild the index: python 04-retrieval/build_index.py
+PASS  append exits 0
+PASS  registry starts with the real frozen registry, byte for byte
+PASS  all 22 frozen chunk files byte-identical
+PASS  row count equals chunk file count (86)
+PASS  every new chunk file hashes to its registry sha
+== 4. a full rebuild of the same manifest gives the same registry (order check)
+PASS  full rebuild registry == append registry
+PASS  full rebuild chunk files == append chunk files
+== 5. refusals
+PASS  re-running the same append refuses: already frozen
+PASS  --append without --only refuses
+PASS  a source frozen on 09-15 refuses
+PASS  an unknown id refuses
+PASS  --only without --append refuses instead of rebuilding
+PASS  --append --force refuses
+PASS  none of the refusals wrote anything
+== 6. a chunk identical to a frozen one, and a source with no retrieval date
+PASS  no retrieval date refuses
+PASS  text identical to CP-PERI-002 refuses
+
+28 passed, 0 failed
+
+# ---------------------------------------------------------------- the script, verbatim
+#!/bin/bash
+# Self-test for build_corpus.py freeze --append. Runs only on scratch copies of 01-data.
+PY=/Users/virajbagga/Coding/steel26/.venv/bin/python
+REAL=/Users/virajbagga/Coding/steel26/01-data
+SP=/private/tmp/claude-501/-Users-virajbagga-Coding-steel26/06f8a499-99bb-4390-baf0-facdea28bd66/scratchpad/append-test
+NEW="nhlbi-ha-women,nhlbi-ha-causes,nhlbi-angina-symptoms,nhlbi-angina-types,nhlbi-chd-causes,nhlbi-vte-diagnosis,nhlbi-pneumonia-causes,nhlbi-pneumonia-diagnosis,nhlbi-heart-inflammation-pericarditis,nhlbi-heart-inflammation-diagnosis,nhlbi-heart-inflammation-treatment"
+pass=0; fail=0
+check() { if eval "$2"; then echo "PASS  $1"; pass=$((pass+1)); else echo "FAIL  $1"; fail=$((fail+1)); fi; }
+fresh() { rm -rf "$1" && mkdir -p "$1" && cp "$REAL"/build_corpus.py "$REAL"/sources.yaml "$REAL"/fetch_log.json "$REAL"/citations.csv "$1"/ && cp -R "$REAL"/review "$REAL"/chunks "$1"/; }
+state() { (cd "$1" && shasum citations.csv chunks/*.txt | shasum | cut -c1-16); }
+drop_over() {  # simulate review: delete the OVER blocks and the (intro) nav blocks from the new review files only
+  $PY - "$1" <<'PYEOF'
+import sys, re, pathlib
+d = pathlib.Path(sys.argv[1]) / "review"
+for p in d.glob("nhlbi-*.txt"):
+    out, skip = [], False
+    for line in p.read_text(encoding="utf-8").splitlines():
+        if line.startswith("--- chunk "):
+            skip = "[OVER ]" in line or "heading=(intro)" in line
+        if not skip:
+            out.append(line)
+    p.write_text("\n".join(out), encoding="utf-8")
+PYEOF
+}
+rm -rf "$SP"; mkdir -p "$SP"
+echo "== 1. candidates as chunked, 3 OVER: must refuse and write nothing"
+fresh "$SP/t1"; s0=$(state "$SP/t1")
+out=$(cd "$SP/t1" && $PY build_corpus.py freeze --append --only "$NEW" 2>&1); rc=$?
+echo "$out" | sed -n '/REFUSING/,$p'
+check "refuses with OVER chunks" '[ $rc -ne 0 ] && echo "$out" | grep -q "REFUSING TO APPEND"'
+check "names all 3 OVER chunks" '[ $(echo "$out" | grep -c " tokens$") -eq 3 ]'
+check "nothing written" '[ "$(state "$SP/t1")" = "$s0" ]'
+
+echo "== 2. dry run after the OVER blocks are removed: prints keys, writes nothing"
+fresh "$SP/t2"; drop_over "$SP/t2"; s0=$(state "$SP/t2")
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --only "$NEW" --dry-run 2>&1); rc=$?
+check "dry run exits 0" '[ $rc -eq 0 ]'
+check "dry run writes nothing" '[ "$(state "$SP/t2")" = "$s0" ]'
+for k in CP-ACS-006 CP-ANG-003 CP-PE-005 CP-PNA-002 CP-PERI-003; do
+  check "first new key in its prefix is $k" 'echo "$out" | grep -q "^  $k "'
+done
+check "no key reuses a frozen number" '! echo "$out" | grep -Eq "^  (CP-ACS-00[1-5]|CP-ANG-00[12]|CP-PE-00[1-4]|CP-PNA-001|CP-PERI-00[12]) "'
+check "CP-BRONCH not swept in" '! echo "$out" | grep -q "CP-BRONCH"'
+
+echo "== 3. real append on the scratch copy"
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --only "$NEW" 2>&1); rc=$?
+echo "$out" | tail -8
+check "append exits 0" '[ $rc -eq 0 ]'
+check "registry starts with the real frozen registry, byte for byte" 'head -c $(wc -c < "$REAL/citations.csv") "$SP/t2/citations.csv" | cmp -s - "$REAL/citations.csv"'
+check "all 22 frozen chunk files byte-identical" 'for f in "$REAL"/chunks/*.txt; do cmp -s "$f" "$SP/t2/chunks/$(basename "$f")" || exit 1; done'
+nrows=$(( $(wc -l < "$SP/t2/citations.csv") - 1 )); nfiles=$(ls "$SP/t2/chunks" | wc -l | tr -d ' ')
+check "row count equals chunk file count ($nrows)" '[ "$nrows" -eq "$nfiles" ]'
+check "every new chunk file hashes to its registry sha" '$PY -c "
+import csv,hashlib,sys
+for r in csv.DictReader(open(\"$SP/t2/citations.csv\",encoding=\"utf-8\")):
+    t=open(\"$SP/t2/chunks/\"+r[\"key\"]+\".txt\",encoding=\"utf-8\").read()
+    assert hashlib.sha256(t.encode()).hexdigest()[:16]==r[\"chunk_sha256\"], r[\"key\"]
+"'
+
+echo "== 4. a full rebuild of the same manifest gives the same registry (order check)"
+fresh "$SP/t4"; drop_over "$SP/t4"; rm -rf "$SP/t4/chunks" "$SP/t4/citations.csv"
+$PY - "$SP/t4" <<'PYEOF'
+import sys, yaml, pathlib
+p = pathlib.Path(sys.argv[1]) / "sources.yaml"
+m = yaml.safe_load(p.read_text())
+m["sources"] = [s for s in m["sources"] if s["id"] != "cdc-acute-bronchitis"]
+p.write_text(yaml.safe_dump(m, sort_keys=False))
+PYEOF
+(cd "$SP/t4" && $PY build_corpus.py freeze >/dev/null 2>&1)
+check "full rebuild registry == append registry" 'cmp -s "$SP/t4/citations.csv" "$SP/t2/citations.csv"'
+check "full rebuild chunk files == append chunk files" 'diff -rq "$SP/t4/chunks" "$SP/t2/chunks" >/dev/null'
+
+echo "== 5. refusals"
+s0=$(state "$SP/t2")
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --only "$NEW" 2>&1); rc=$?
+check "re-running the same append refuses: already frozen" '[ $rc -ne 0 ] && echo "$out" | grep -q "already frozen"'
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append 2>&1); rc=$?
+check "--append without --only refuses" '[ $rc -ne 0 ] && echo "$out" | grep -q "needs --only"'
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --only nhlbi-ha-symptoms 2>&1); rc=$?
+check "a source frozen on 09-15 refuses" '[ $rc -ne 0 ] && echo "$out" | grep -q "nhlbi-ha-symptoms: already frozen"'
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --only no-such-source 2>&1); rc=$?
+check "an unknown id refuses" '[ $rc -ne 0 ] && echo "$out" | grep -q "not in sources.yaml"'
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --only nhlbi-ha-women --force 2>&1); rc=$?
+check "--only without --append refuses instead of rebuilding" '[ $rc -ne 0 ] && echo "$out" | grep -q "only apply with --append"'
+out=$(cd "$SP/t2" && $PY build_corpus.py freeze --append --force --only cdc-acute-bronchitis 2>&1); rc=$?
+check "--append --force refuses" '[ $rc -ne 0 ]'
+check "none of the refusals wrote anything" '[ "$(state "$SP/t2")" = "$s0" ]'
+
+echo "== 6. a chunk identical to a frozen one, and a source with no retrieval date"
+fresh "$SP/t6"
+$PY - "$SP/t6" <<'PYEOF'
+import sys, pathlib
+d = pathlib.Path(sys.argv[1])
+m = (d / "sources.yaml").read_text()
+extra = """
+  - id: test-dup
+    key_prefix: CP-PERI
+    title: "test"
+    publisher: "test"
+    url: https://example.invalid/
+    license_status: green
+    attribution: "test"
+    expected_category: yellow
+    selectors: ["main"]
+"""
+(d / "sources.yaml").write_text(m.replace("\ngaps:", extra + "\ngaps:", 1))
+frozen = (d / "chunks" / "CP-PERI-002.txt").read_text(encoding="utf-8")
+(d / "review" / "test-dup.txt").write_text("# REVIEW: test-dup\n--- chunk 001 [short] tokens=25 heading=x\n" + frozen + "\n", encoding="utf-8")
+PYEOF
+out=$(cd "$SP/t6" && $PY build_corpus.py freeze --append --only test-dup 2>&1); rc=$?
+check "no retrieval date refuses" '[ $rc -ne 0 ] && echo "$out" | grep -q "no retrieval date"'
+$PY -c "import json; p='$SP/t6/fetch_log.json'; d=json.load(open(p)); d['test-dup']={'retrieved':'2026-09-19T00:00:00+00:00'}; json.dump(d,open(p,'w'))"
+out=$(cd "$SP/t6" && $PY build_corpus.py freeze --append --only test-dup 2>&1); rc=$?
+check "text identical to CP-PERI-002 refuses" '[ $rc -ne 0 ] && echo "$out" | grep -q "identical to CP-PERI-002"'
+
+echo; echo "$pass passed, $fail failed"

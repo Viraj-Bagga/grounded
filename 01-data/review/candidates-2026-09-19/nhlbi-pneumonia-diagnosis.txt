@@ -1,0 +1,49 @@
+# REVIEW: nhlbi-pneumonia-diagnosis
+# Pneumonia - Diagnosis
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/pneumonia/diagnosis
+# key_prefix: CP-PNA   expected_category: yellow
+# role: How pneumonia is diagnosed. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=64 heading=Pneumonia Diagnosis
+Your healthcare provider will diagnose pneumonia based on your medical history, a physical exam, and test results. Sometimes pneumonia is hard to diagnose because your symptoms may be the same as a cold or flu. You may not realize that your condition is more serious until it lasts longer than these other conditions.
+
+--- chunk 002 [short] tokens=103 heading=Medical history and physical exam
+Your provider will ask about your symptoms and when they began. They will also ask whether you have any risk factors for pneumonia. You may also be asked about:
+
+Exposure to sick people at home, school, or work or in a hospital
+Flu or pneumonia vaccinations
+Medicines you take
+Past and current medical conditions and whether any have gotten worse recently
+Recent travel
+Exposure to birds and other animals
+Smoking
+
+During your physical exam, your provider will check your temperature and listen to your lungs with a stethoscope.
+
+--- chunk 003 [ok   ] tokens=150 heading=Diagnostic tests and procedures
+If your provider thinks you have pneumonia, he or she may do one or more of the following tests.
+
+A chest X-ray looks for inflammation in your lungs. A chest X-ray is often used to diagnose pneumonia.
+Blood tests , such as a complete blood count (CBC) see whether your immune system is fighting an infection.
+Pulse oximetry measures how much oxygen is in your blood. Pneumonia can keep your lungs from getting enough oxygen into your blood. To measure the levels, a small sensor called a pulse oximeter is attached to your finger or ear.
+
+If you are in the hospital, have serious symptoms, are older, or have other health problems, your provider may do other tests to diagnose pneumonia.
+
+--- chunk 004 [OVER ] tokens=302 heading=Diagnostic tests and procedures
+A blood gas test may be done if you are very sick. For this test, your provider measures your blood oxygen levels using a blood sample from an artery, usually in your wrist. This is called an arterial blood gas test.
+A sputum test, using a sample of sputum (spit) or mucus from your cough, may be used to find out what germ is causing your pneumonia.
+A blood culture test can identify the germ causing your pneumonia and also show whether a bacterial infection has spread to your blood.
+A polymerase chain reaction (PCR) test quickly checks your blood or sputum sample to find the DNA of germs that cause pneumonia.
+A bronchoscopy looks inside your airways. If your treatment is not working well, this procedure may be needed. At the same time, your doctor may also collect samples of your lung tissue and fluid from your lungs to help find the cause of your pneumonia.
+A chest computed tomography (CT) scan can show how much of your lungs are affected by pneumonia. It can also show whether you have complications such as lung abscesses or pleural disorders. A CT scan shows more detail than a chest X-ray.
+A pleural fluid culture can be taken using a procedure called thoracentesis , which is when a doctor uses a needle to take a sample of fluid from the pleural space between your lungs and chest wall. The fluid is then tested for bacteria.
+
+--- chunk 005 [short] tokens=25 heading=Diagnostic tests and procedures
+We lead or sponsor many trials and studies on pneumonia. See if you or someone you love is eligible to join.

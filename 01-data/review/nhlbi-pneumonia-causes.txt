@@ -1,0 +1,26 @@
+# REVIEW: nhlbi-pneumonia-causes
+# Pneumonia - Causes and Risk Factors
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/pneumonia/causes
+# key_prefix: CP-PNA   expected_category: yellow
+# role: Causes and risk factors for pneumonia. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Kept: #010.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-pneumonia-causes.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+# REVERSED by Viraj 2026-09-19: #010 restored, profile-relevant risk factors.
+#
+--- chunk 010 [ok   ] tokens=238 heading=Other medical conditions
+Brain disorders, such as a stroke , a head injury, dementia, or Parkinson’s disease can affect your ability to cough or swallow. This can lead to food, drink, vomit, or saliva going down your windpipe instead of your esophagus and getting into your lungs.
+Conditions that weaken your immune system may also increase your risk. These include pregnancy, HIV/AIDS, or an organ or bone marrow transplant . Chemotherapy, which is used to treat cancer, and long-term use of steroid medicines can also weaken your immune system.
+Critical diseases that require hospitalization, including receiving treatment in a hospital intensive care unit, can raise your risk of hospital-acquired pneumonia. Your risk is higher if you cannot move around much or are sedated or unconscious. Using a ventilator raises the risk of a type called ventilator-associated pneumonia.
+Lung diseases, such as asthma , bronchiectasis , cystic fibrosis , or COPD , also increase your pneumonia risk.
+Other serious conditions, such as malnutrition, diabetes , heart failure , sickle cell disease , or liver or kidney disease, are additional risk factors.

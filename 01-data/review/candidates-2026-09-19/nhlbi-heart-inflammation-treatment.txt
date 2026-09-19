@@ -1,0 +1,25 @@
+# REVIEW: nhlbi-heart-inflammation-treatment
+# Heart Inflammation - Treatment
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-inflammation/treatment
+# key_prefix: CP-PERI   expected_category: yellow
+# role: How heart inflammation is treated. Medicine text, so read it against constraint 12. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=18 heading=(intro)
+Types of Heart Inflammation Endocarditis Myocarditis Pericarditis
+
+--- chunk 002 [short] tokens=26 heading=Heart Inflammation Treatment
+Your healthcare provider may prescribe one or more medicines or procedures to treat heart inflammation, depending on the type and cause .
+
+--- chunk 003 [short] tokens=16 heading=Medications
+Antibiotics treat bacterial infections.
+Antifungal medicines treat fungal infections.
+
+--- chunk 004 [short] tokens=33 heading=Procedures
+Heart surgery can repair damage to valves or nearby heart tissue from endocarditis. It may involve removing infected tissues or repairing or replacing the affected valve.

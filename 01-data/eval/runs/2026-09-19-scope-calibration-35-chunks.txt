@@ -1,0 +1,69 @@
+# scope floor re-check at 0.25, 2026-09-19, after the append: 35 chunks, max cosine, SYMPTOMS ONLY
+# 04-retrieval/calibrate_scope.py, unchanged sample (12 in, 12 out). Previous: 2026-09-18-scope-recalibration.txt (22 chunks).
+
+floor under test: 0.25
+
+IN SCOPE (must pass; a refusal here is the catastrophic direction)
+  0.314  radiation, no 'chest' framing          There is a heaviness across my front and my le
+  0.386  original worst, kept for continuity    Burning behind my breastbone at night
+  0.422  the classic idiom                      Feels like an elephant sitting on my chest.
+  0.446  exertional, colloquial                 My chest goes tight when I walk up hills and s
+  0.489  the live refusal that started this     Chest got tight walking up the hill to my car,
+  0.517  reflux idiom, the GERD side            Bad indigestion that will not shift and I feel
+  0.535  squeezing plus autonomic               Got a squeezing feeling in my chest and I have
+  0.545  vague, which is how people actually open Something is not right in my chest and it has 
+  0.546  pleuritic, colloquial                  Sharp stabbing in my side when I take a deep b
+  0.594  woke with it                           Woke up with a dull ache in the middle of my c
+  0.613  musculoskeletal, the green side        My chest hurts when I press on it.
+  0.663  panic side                             My heart is pounding and my chest feels tight 
+
+OUT OF SCOPE (must refuse; a pass here costs 45 s, not a life)
+  0.450  ENT, the near miss                     I have a sore throat and a cough.  <-- PASSED
+  0.367  mental health                          I have been feeling really down and cannot sle  <-- PASSED
+  0.364  gastro                                 I have had diarrhoea since yesterday and my st  <-- PASSED
+  0.341  original best out-of-scope             My toddler has a fever and is pulling at her e  <-- PASSED
+  0.301  headache                               I have had a bad headache for three days.  <-- PASSED
+  0.291  dental                                 My tooth is killing me and the side of my face  <-- PASSED
+  0.265  knee                                   My knee has been sore since I started running.  <-- PASSED
+  0.252  ankle                                  I rolled my ankle playing football and it is s  <-- PASSED
+  0.221  eye                                    My eye is red and watery and it feels gritty.
+  0.220  rash                                   I have got a rash on my arm that itches.
+  0.217  wrist                                  I sprained my wrist falling off my bike.
+  0.211  urinary                                I keep needing to pee and it stings when I go.
+
+======================================================================
+  worst in-scope   0.314  (radiation, no 'chest' framing)
+  best out-scope   0.450  (ENT, the near miss)
+  gap              -0.136
+  n                12 in, 12 out
+  at floor 0.25: 0 in-scope refused, 8 out-of-scope passed
+  NOT SEPARABLE on this sample. No single floor works; the post-flight empty-citations check has to carry it.
+======================================================================
+exit 0
+
+# ---- per query, 22-chunk index vs 35-chunk index, with the chunk that sets the max
+IN  0.386 CP-GERD-001  -> 0.386 CP-GERD-001  original worst, kept for continuit
+IN  0.489 CP-PERI-002  -> 0.489 CP-PERI-002  the live refusal that started this
+IN  0.422 CP-PERI-002  -> 0.422 CP-PERI-002  the classic idiom
+IN  0.446 CP-PERI-002  -> 0.446 CP-PERI-002  exertional, colloquial
+IN  0.535 CP-PERI-002  -> 0.535 CP-PERI-002  squeezing plus autonomic
+IN  0.314 CP-ACS-003   -> 0.314 CP-ACS-003   radiation, no 'chest' framing
+IN  0.517 CP-GERD-001  -> 0.517 CP-GERD-001  reflux idiom, the GERD side
+IN  0.545 CP-PERI-002  -> 0.545 CP-PERI-002  vague, which is how people actuall
+IN  0.546 CP-PERI-002  -> 0.546 CP-PERI-002  pleuritic, colloquial
+IN  0.613 CP-DIFF-001  -> 0.613 CP-DIFF-001  musculoskeletal, the green side
+IN  0.594 CP-PERI-002  -> 0.594 CP-PERI-002  woke with it
+IN  0.663 CP-PERI-002  -> 0.663 CP-PERI-002  panic side
+OUT 0.341 CP-PNA-001   -> 0.341 CP-PNA-001   original best out-of-scope
+OUT 0.252 CP-PE-001    -> 0.252 CP-PE-001    ankle
+OUT 0.294 CP-ACS-003   -> 0.301 CP-ANG-008   headache
+OUT 0.265 CP-ACS-005   -> 0.265 CP-ACS-005   knee
+OUT 0.220 CP-ACS-003   -> 0.220 CP-ACS-003   rash
+OUT 0.367 CP-PERI-002  -> 0.367 CP-PERI-002  mental health
+OUT 0.291 CP-PERI-002  -> 0.291 CP-PERI-002  dental
+OUT 0.211 CP-GERD-003  -> 0.211 CP-GERD-003  urinary
+OUT 0.364 CP-GERD-002  -> 0.364 CP-GERD-002  gastro
+OUT 0.176 CP-PERI-002  -> 0.221 CP-ANG-008   eye
+OUT 0.217 CP-ACS-004   -> 0.217 CP-ACS-004   wrist
+OUT 0.450 CP-GERD-001  -> 0.450 CP-GERD-001  ENT, the near miss
+old 22 chunks score identically in both indexes: True

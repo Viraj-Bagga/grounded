@@ -4238,3 +4238,157 @@ Green is 20%, down from 27%. The kept eight have no child or pregnancy text.
 index rebuilt, recall on today's keys, an answer-key sheet for the new keys,
 the scope floor and the demo beats re-checked before switching over, and his
 question on which conditions have no green chunk.
+
+### 2026-09-19 Corpus appended to 35 chunks. Recall, scope floor and demo re-checked.
+
+**Committed first, on Viraj's word mid-task:** `c48e67b`, 02-pairs/, 06-demo/
+and the docs, so the other instance could rebuild 06-demo from a clean base.
+Its own `06-demo/.impeccable/` state (a live process heartbeat) and
+`06-demo/PRODUCT.md` were left untracked for it. The corpus files are not
+committed.
+
+**His two reversals, applied before the freeze.** Microvascular and vasospastic
+angina back, list and prose, frozen red like unstable angina because all three
+describe pain at rest. pneumonia/causes #010 back, because chemotherapy and
+diabetes are the profile facts R1 and R4 rest on. 13 kept, 58 cut.
+
+**Frozen with `freeze --append`: 35 chunks, 16 red / 12 yellow / 6 green / 1
+none, mean 128.** CP-ACS-006; CP-ANG-003 to 012 (006, 007, 008, 010, 011, 012
+red through the per-chunk override); CP-PNA-002, 003. Checked independently:
+the old registry is a byte-exact prefix of the new one, the 22 chunk files are
+unchanged, all 35 hash to their registry sha, and a full rebuild of the same
+review files gives the identical registry. The 22-row registry is kept as
+`01-data/citations.frozen-22.csv`, the 22-chunk index as
+`04-retrieval/corpus-22.db` (byte-identical to git HEAD's). Index rebuilt:
+widest chunk CP-PNA-002 at 238/256. 07-distribute self-test 51/51 on the new
+registry and index, T16 included.
+
+**Recall against today's keys: blend 6/9 = 67%, unchanged.** Violations 2 to
+1: CP-ANG-003 pushed CP-PERI-002 out of red-acs; green-gerd still gets it.
+Tokens up 78 a case, about 2.5 s of prompt eval, because CP-ANG-003 (212
+tokens) now sits in 3 of 5 blend contexts. Dense top 3 unchanged for all five
+cases. Only 2 of the 13 new chunks reach any top 3 in any mode: CP-ANG-003,
+and CP-ANG-006 once, BM25 only. The short criteria lists do not over-retrieve
+the way CP-PERI-002 does. `04-retrieval/results/2026-09-19-after-append-35-chunks.txt`.
+Answer-key sheet for the new keys: `04-retrieval/results/ANSWER-KEY-EXTENSION-2026-09-19.txt`.
+
+**Scope floor: no change at 0.25.** All 12 in-scope queries score exactly as on
+22 chunks, since an old chunk still sets every maximum. Two out-of-scope ones
+rose through CP-ANG-008 (headache 0.294 to 0.301, eye 0.176 to 0.221) and
+neither crossed. 0 in-scope refused, 8 of 12 out-of-scope passed, as before.
+The old 22 score identically in both indexes. CP-PERI-002 sets the maximum for
+8 of the 12 in-scope queries, so the floor leans on the chunk that also
+over-retrieves. `01-data/eval/runs/2026-09-19-scope-calibration-35-chunks.txt`.
+
+**Demo beats, live, on the committed demo in an isolated scratch copy on ports
+8081/8771**, so the other instance's rebuild was never touched:
+- Crushing chest pressure: red 3/3, all citing the new CP-ANG-003.
+- Guards: fabricated red flags dropped on "Burning after a meal" (fast
+  heartbeat) and on a Mum run (unusually tired, copied from CP-ACS-003);
+  follow-ups cleared off both stairs reds; "take an antacid" next steps
+  dropped twice by the constraint 12 guard. The "Guards firing" preset has a
+  byte-identical prompt to 22 chunks, so its behaviour is unchanged.
+- Expander: CP-ANG-010 and CP-PNA-002 resolve with real text, URL and the
+  09-19 date; CP-RISK-014 and MED-ANTICOAG-007 get 404.
+- Mum preset: red 6/6 across both batches, R1 shown every time, a raise in 5
+  (3 grounded, 2 through the refusal rescue).
+- Side-by-side: You refused 2/3, yellow 1/3; **the same on 22 chunks**, so that
+  is not the append. The 09-19 screenshot's yellow was the 1-in-3.
+Runs: `01-data/eval/runs/2026-09-19-demo-check-35-chunks.txt`, `-compare.txt`,
+and `2026-09-19-demo-check-22-chunk-baseline.txt`.
+
+**One regression: "Tight chest on the stairs".** On 22 chunks it retrieved
+CP-ANG-001, CP-ACS-005, CP-PE-003 and came back red 3/3 citing CP-ACS-005. On
+35 it retrieves CP-PNA-002, CP-ANG-001, CP-PE-003, came back red 2/3 **citing
+the pneumonia chunk both times**, and refused once. Cause: BM25. The query
+shares only "going" and "down" with CP-PNA-002 ("going down your windpipe"),
+and both words occur in no other chunk, so they carry the top BM25 score; its
+cosine is the lowest of the top six. Stopping "down" removes it and moves
+nothing else in the five presets or the eval cases, recall still 6/9, but it
+does not bring CP-ACS-005 back: the new angina chunks lowered the weight of
+the words CP-ACS-005 shares with the query, and CP-PLEU-001 takes the slot.
+Not applied: a retrieval change fitted to one preset, on judging day, is
+Viraj's call.
+
+**Rollback caveat.** If the demo index goes back to corpus-22.db while the
+registry keeps 35 rows, the expander answers 200 with an empty body for the 13
+new keys, because they pass the registry check but are not in that index. Seen
+in the baseline run. Retrieval cannot return them in that set-up, so it only
+matters for an invented key that happens to be real.
+
+**Green, his finding, recorded in claude.md:** 7 of 9 conditions have no green
+chunk. Only GERD and panic do, and they are all green. Every condition is one
+colour except CP-ANG, now 6 red and 6 yellow.
+`01-data/eval/runs/2026-09-19-green-by-condition.txt`.
+
+### 2026-09-19 LOGGED, NOT FIXED: the red-flag guard drops nausea when the patient says "a bit sick"
+
+**Seen live** on the Mum preset, 35-chunk demo check: the model's red flag
+"feeling sick to the stomach" was dropped as "not in the case: nausea", on a
+case that reads "Feeling a bit sick and sweaty after dinner". She does report
+nausea. `01-data/eval/runs/2026-09-19-demo-check-35-chunks.txt`, Mum run 3.
+
+**Cause, reproduced offline.** `ungrounded_findings` in
+`02-pairs/validate_pairs.py` matches the nausea synonyms in
+`finding_lexicon.json` ("nausea", "nauseated", "nauseous", "queasy", "feel
+sick", "feeling sick") as whole phrases. A word between "feeling" and "sick"
+breaks the match:
+- "Feeling sick and sweaty": nausea supported.
+- "Feeling a bit sick", "I feel a little sick", "Feeling really sick": nausea
+  unsupported, so the red flag is dropped.
+It drops the plain entry "nausea" on the preset text too, so any nausea red flag
+on the Mum preset is removed on screen as "not in the case". The other entry
+dropped in the same run, "feeling unusually tired for no reason", was a correct
+drop: she says nothing about tiredness, and the line is CP-ACS-003's.
+
+**Direction:** it fails closed, removing a real finding rather than passing a
+fabricated one, which is the side this guard is built to err on. But a judge
+can read the case and the "removed" line side by side. **Scope, checked:** it
+is specific to nausea. "feel sick" and "feeling sick" are the only synonyms
+built on feel, and the qualifier lands inside them. "A bit short of breath",
+"a bit faint", "a little dizzy" and "a bit light-headed" all still count as
+stated. Viraj's call: log it, fix later.
+
+### 2026-09-19 Stairs preset reworded, not the index rolled back. The side-by-side has no reliable pairing.
+
+**Viraj's call: keep the 35-chunk index.** Rolling back to protect one preset
+would cost the expander on 13 keys and the red angina chunks.
+
+**The stairs preset, reworded.** Seven phrasings screened offline on the
+35-chunk index. Two retrieve only angina text. The chosen one, C3: "Tightness
+in my chest when I climb stairs or walk uphill. It goes away within a few
+minutes when I rest, same as the last few months." Same timeline, with "sat
+down" changed to "stopped". It retrieves CP-ANG-005, CP-ANG-009 and CP-ACS-005:
+the stable angina list, the stable angina prose and the angina-versus-heart
+attack line. That is 306 tokens against the old 574. "Same as the last few
+months" is the unchanged-pattern half of the NHLBI stable angina definition,
+so the case is the same case. **Live, 3 of 3:** red each time, citing only
+CP-ACS-005 and CP-ANG-005, no refusal, and the contradicted-finding guard
+dropped "does not go away with rest" once. Swapped into
+`06-demo/static/js/app.js`. That file is new and uncommitted, part of the
+other session's rebuild (steel26-c1). It confirmed the entry is intact and
+will go into its 06-demo commit on Viraj's go. Nothing in 06-demo is
+committed from this session.
+
+**You versus Mum: no pairing gives two different shown verdicts reliably.**
+Six mild or vague texts, 3 runs each on You, 35-chunk index:
+- indigestion: refused 3/3
+- "chest has not been right": red 3/3
+- slight ache: red 2/3, refused 1/3
+- mild heartburn: refused 3/3
+- chest heavy and tired: red 3/3
+- tightness after the shopping: red 3/3
+The Mum preset text itself: refused 2/3, yellow 1/3, on both 22 and 35
+chunks. Mum was not run on the six, because rules only raise: where R1 fires,
+Mum cannot come out below You, so a red or refused You means no pair. **The
+mechanism:** when the model is reassured it usually cites nothing. Recorded
+raw outputs show `"citations": []` on 5 of 6 reassured answers; the sixth put
+a label in front of the key, which constraint 9 drops by design. A yellow or
+green that cites nothing is refused. So You is red when the model is alarmed
+and refused when it is not. Viraj is reframing the beat.
+`01-data/eval/runs/2026-09-19-stairs-and-pairing-screen.txt`.
+
+**Timing caveat, from steel26-c1:** its 06-demo latency runs from 16:05 on
+probably overlapped these test servers, which ran on ports 8081 and 8771, and
+mine overlapped its runs. Treat timings from either session after 16:05 as
+contended.

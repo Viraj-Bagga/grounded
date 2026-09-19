@@ -1,0 +1,34 @@
+# REVIEW: nhlbi-ha-women
+# Heart Attack - Heart Attacks in Women
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-attack/women
+# key_prefix: CP-ACS   expected_category: red
+# role: How heart attack shows up in women. Picked 2026-09-19 as ground for the atypical presentations R6 flags.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Kept: #003.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-ha-women.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+#
+
+--- chunk 003 [ok   ] tokens=174 heading=Symptoms of a heart attack in women
+Both women and men who have a heart attack often have chest pain. However, in addition to chest pain, women are more likely to have these symptoms:
+
+Pain in the shoulder, back, or arm
+Shortness of breath
+Unusual tiredness and weakness
+Upset stomach
+Anxiety
+
+These symptoms can happen together with chest pain or without any chest pain.
+
+Many women may not recognize that these are symptoms of a heart attack. Women may not get emergency treatment right away if they downplay their symptoms and delay going to the hospital, or if the usual initial screening tests performed at the hospital may not detect an early or atypical heart attack. Because of this, women have a higher risk of serious health problems after a heart attack.
+
+It is important to call 9-1-1 if you have these symptoms. Early treatment can limit damage to your heart and can save your life.

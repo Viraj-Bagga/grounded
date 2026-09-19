@@ -9,6 +9,12 @@ before the next is allowed to touch anything.
     python build_corpus.py chunk     # split into candidate chunks for review
     python build_corpus.py freeze    # promote reviewed chunks, assign keys, write registry
 
+Once a registry exists, new sources are added with
+
+    python build_corpus.py freeze --append --only id[,id...] [--dry-run]
+
+which appends rows and never renumbers. See freeze_append.
+
 Design rules baked in:
   * Chunks are CANDIDATES until you review them. The script will not freeze a
     corpus you have not looked at.
@@ -406,6 +412,8 @@ def cmd_chunk(args):
             "# Merge or split by hand where the boundary is wrong. A red-flag list must",
             "# never be split across two chunks: the citation breaks if it is.",
             "# Chunks marked OVER must be cut down. They are not truncated for you.",
+            "# A chunk that needs a different category from its page gets",
+            "# category=red|yellow|green before heading= on its --- line.",
             "#",
             "",
         ]
@@ -425,14 +433,22 @@ def cmd_chunk(args):
         print(f"  {src['id']}: {len(candidates)} candidates -> {out.name}")
 
     print(f"\n{total} candidate chunks, {flagged} over the {MINILM_LIMIT} token limit.")
-    print(f"Review and edit the files in {REVIEW}, then run: python build_corpus.py freeze")
+    if REGISTRY.exists():
+        # A plain freeze here would rebuild every key, which is the one thing
+        # that must not happen once pairs cite them.
+        print(f"Review and edit the files in {REVIEW}. A registry exists, so add them with:\n"
+              f"  python build_corpus.py freeze --append --only <source ids> --dry-run")
+    else:
+        print(f"Review and edit the files in {REVIEW}, then run: python build_corpus.py freeze")
 
 
 # --------------------------------------------------------------------------
 # freeze
 # --------------------------------------------------------------------------
 
-CHUNK_RE = re.compile(r"^--- chunk (\d+) \[(.*?)\] tokens=(\d+) heading=(.*)$")
+CHUNK_RE = re.compile(r"^--- chunk (\d+) \[(.*?)\] tokens=(\d+)"
+                      r"(?: category=(\S*))? heading=(.*)$")
+CATEGORIES = ("red", "yellow", "green")
 
 
 def parse_review(path: Path):
@@ -442,7 +458,7 @@ def parse_review(path: Path):
         if m:
             if cur:
                 blocks.append(cur)
-            cur = {"heading": m.group(4).strip(), "lines": []}
+            cur = {"heading": m.group(5).strip(), "category": m.group(4), "lines": []}
         elif cur is not None and not line.startswith("#"):
             cur["lines"].append(line)
     if cur:
@@ -452,10 +468,40 @@ def parse_review(path: Path):
     return [b for b in blocks if b["text"]]
 
 
+def chunk_category(src: dict, block: dict):
+    """The chunk's category and an error, exactly one of which is None.
+
+    expected_category is set per source, so a chunk that argues a different
+    category than its page, unstable angina on a yellow angina page, needs its
+    own. The reviewer writes category=red|yellow|green before heading= on the
+    chunk's --- line. Anything else is refused, never read as the default: a
+    typo that silently froze the page's colour would put the wrong one on screen.
+    """
+    cat = block.get("category")
+    if cat is None:
+        if "category=" in block["heading"]:
+            return None, "category= must come before heading= on the --- line"
+        return src.get("expected_category") or "", None
+    if cat not in CATEGORIES:
+        return None, f"category={cat!r} is not one of {', '.join(CATEGORIES)}"
+    return cat, None
+
+
 def cmd_freeze(args):
     manifest = load_manifest()
     counter = TokenCounter()
     print(counter.banner())
+
+    # Without this, `freeze --only x --force` would quietly be a full rebuild.
+    if (args.only or args.dry_run) and not args.append:
+        sys.exit("\n--only and --dry-run only apply with --append.")
+
+    if args.append:
+        if args.force:
+            sys.exit("\n--append never overwrites anything, so --force means nothing with it.")
+        if not counter.exact:
+            sys.exit("\nRefusing to freeze on estimated token counts.\n  pip install transformers")
+        return freeze_append(args, manifest, counter)
 
     if not counter.exact and not args.force:
         sys.exit("\nRefusing to freeze on estimated token counts.\n"
@@ -485,6 +531,10 @@ def cmd_freeze(args):
             if n > MINILM_LIMIT:
                 errors.append(f"{src['id']} :: {block['heading'][:40]} :: {n} tokens")
                 continue
+            category, problem = chunk_category(src, block)
+            if problem:
+                errors.append(f"{src['id']} :: {block['heading'][:40]} :: {problem}")
+                continue
 
             counters[prefix] = counters.get(prefix, 0) + 1
             key = f"{prefix}-{counters[prefix]:03d}"
@@ -494,7 +544,7 @@ def cmd_freeze(args):
                 "key": key,
                 "topic": manifest["topic"],
                 "subtopic": slug(block["heading"]),
-                "expected_category": src.get("expected_category") or "",
+                "expected_category": category,
                 "source_id": src["id"],
                 "publisher": src["publisher"],
                 "url": src["url"],
@@ -506,11 +556,11 @@ def cmd_freeze(args):
             })
 
     if errors:
-        print("\nREFUSING TO FREEZE. These chunks exceed the embedding limit:")
+        print("\nREFUSING TO FREEZE:")
         for e in errors:
             print("  ", e)
-        print("\nCut them down in the review file and run freeze again. "
-              "They are not truncated for you, because truncation is silent data loss.")
+        print("\nFix them in the review file and run freeze again. Oversized chunks are "
+              "not truncated for you, because truncation is silent data loss.")
         sys.exit(1)
 
     if not rows:
@@ -521,14 +571,163 @@ def cmd_freeze(args):
         w.writeheader()
         w.writerows(rows)
 
+    print(f"\nFROZEN {date.today().isoformat()}: {len(rows)} chunks -> {REGISTRY}")
+    print_distribution(rows)
+    print("\nKeys are now immutable. Record the freeze date in build-log.md section 5 step 3.")
+
+
+def freeze_append(args, manifest, counter):
+    """Add reviewed sources to a frozen registry without touching a frozen key.
+
+    A plain freeze rebuilds the registry from every review file and numbers
+    each prefix from 001, so it can only ever be run once pairs cite keys.
+    This mode only appends:
+      * existing rows stay byte-identical, and that is checked after writing;
+      * numbering continues from the highest frozen key in each prefix;
+      * only the sources named in --only are read, so a review file sitting in
+        review/ unfrozen, cdc-acute-bronchitis today, is never swept in;
+      * a source that already has rows is refused, and so is a chunk whose text
+        is identical to a frozen one or to another chunk in the same append;
+      * a chunk file is never overwritten, and a chunk with no retrieval date
+        is refused, because a citation without one is not reproducible.
+    Named sources are taken in manifest order, not --only order, which is the
+    order a full freeze numbers them in. New sources therefore belong below
+    every source that already holds keys in the same prefix.
+    """
+    if not REGISTRY.exists():
+        sys.exit("\n--append adds to an existing registry and there is none. "
+                 "The first freeze is a plain freeze.")
+    only = [s.strip() for s in (args.only or "").split(",") if s.strip()]
+    if not only:
+        sys.exit("\n--append needs --only id[,id...]. It never freezes every "
+                 "source that happens to have a review file.")
+
+    with REGISTRY.open(encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        fields = reader.fieldnames
+        existing = list(reader)
+
+    by_id = {s["id"]: s for s in manifest["sources"]}
+    frozen_sources = {r["source_id"] for r in existing}
+    problems = [f"{i}: not in sources.yaml" for i in only if i not in by_id]
+    problems += [f"{i}: already frozen, its keys exist" for i in only if i in frozen_sources]
+    if problems:
+        sys.exit("\nREFUSING TO APPEND.\n  " + "\n  ".join(problems))
+
+    top = {}
+    for r in existing:
+        prefix, _, n = r["key"].rpartition("-")
+        top[prefix] = max(top.get(prefix, 0), int(n))
+    known = {r["chunk_sha256"]: r["key"] for r in existing}
+    log = json.loads(FETCH_LOG.read_text()) if FETCH_LOG.exists() else {}
+
+    rows, texts, errors = [], {}, []
+    for src in manifest["sources"]:
+        if src["id"] not in only:
+            continue
+        if not shippable(src):
+            errors.append(f"{src['id']}: license_status={src['license_status']}, not shippable")
+            continue
+        retrieved = log.get(src["id"], {}).get("retrieved", "")[:10]
+        if not retrieved:
+            errors.append(f"{src['id']}: no retrieval date in {FETCH_LOG.name}")
+            continue
+        review = REVIEW / f"{src['id']}.txt"
+        if not review.exists():
+            errors.append(f"{src['id']}: no review file")
+            continue
+
+        prefix = src["key_prefix"]
+        for block in parse_review(review):
+            n = counter.count(block["text"])
+            if n > MINILM_LIMIT:
+                errors.append(f"{src['id']} :: {block['heading'][:40]} :: {n} tokens")
+                continue
+            category, problem = chunk_category(src, block)
+            if problem:
+                errors.append(f"{src['id']} :: {block['heading'][:40]} :: {problem}")
+                continue
+            digest = sha256(block["text"])
+            if digest in known:
+                errors.append(f"{src['id']} :: {block['heading'][:40]} :: "
+                              f"identical to {known[digest]}")
+                continue
+
+            top[prefix] = top.get(prefix, 0) + 1
+            key = f"{prefix}-{top[prefix]:03d}"
+            if (CHUNKS / f"{key}.txt").exists():
+                errors.append(f"{key}: chunk file exists with no registry row")
+                continue
+            known[digest] = f"{src['id']} :: {block['heading'][:40]}, which would be {key}"
+            texts[key] = block["text"]
+            rows.append({
+                "key": key,
+                "topic": manifest["topic"],
+                "subtopic": slug(block["heading"]),
+                "expected_category": category,
+                "source_id": src["id"],
+                "publisher": src["publisher"],
+                "url": src["url"],
+                "retrieval_date": retrieved,
+                "license_status": src["license_status"],
+                "attribution": src["attribution"],
+                "token_count": n,
+                "chunk_sha256": digest,
+            })
+
+    if errors:
+        print("\nREFUSING TO APPEND. Nothing was written:")
+        for e in errors:
+            print("  ", e)
+        sys.exit(1)
+    if not rows:
+        sys.exit("\nNothing to append: the named review files hold no chunks.")
+    if list(rows[0].keys()) != fields:
+        sys.exit(f"\nRegistry columns {fields} do not match the rows this would write.")
+
+    print(f"\n{'DRY RUN, nothing written' if args.dry_run else 'APPENDING'}: "
+          f"{len(rows)} chunks after the {len(existing)} frozen\n")
+    # A reviewed page can keep no chunks at all. Say so, rather than let it
+    # vanish from the listing: it stays unfrozen and can be appended later.
+    for sid in [s["id"] for s in manifest["sources"] if s["id"] in only]:
+        print(f"  {sid:<42} {sum(r['source_id'] == sid for r in rows)} chunks")
+    print()
+    for r in rows:
+        print(f"  {r['key']:<14} {r['token_count']:>4}  {r['expected_category'] or '-':<7} "
+              f"{r['source_id']}  {r['subtopic'][:40]}")
+    if args.dry_run:
+        return
+
+    before = REGISTRY.read_bytes()
+    chunks_before = {p.name: p.read_bytes() for p in CHUNKS.glob("*.txt")}
+
+    for key, text in texts.items():
+        with (CHUNKS / f"{key}.txt").open("x", encoding="utf-8") as f:
+            f.write(text)
+    with REGISTRY.open("a", newline="", encoding="utf-8") as f:
+        csv.DictWriter(f, fieldnames=fields).writerows(rows)
+
+    drifted = [name for name, b in chunks_before.items()
+               if (CHUNKS / name).read_bytes() != b]
+    if not REGISTRY.read_bytes().startswith(before) or drifted:
+        sys.exit(f"\nFROZEN CONTENT CHANGED. This should be impossible. "
+                 f"Registry prefix intact: {REGISTRY.read_bytes().startswith(before)}; "
+                 f"chunk files changed: {drifted}")
+
+    print(f"\nAPPENDED {date.today().isoformat()}: {len(rows)} chunks -> {REGISTRY}")
+    print(f"The {len(existing)} frozen rows and {len(chunks_before)} chunk files are byte-identical.")
+    print_distribution(existing + rows)
+    print("\nThe new keys are now immutable too. Rebuild the index: "
+          "python 04-retrieval/build_index.py")
+
+
+def print_distribution(rows):
     by_cat = {}
     for r in rows:
         by_cat[r["expected_category"] or "none"] = by_cat.get(r["expected_category"] or "none", 0) + 1
 
-    print(f"\nFROZEN {date.today().isoformat()}: {len(rows)} chunks -> {REGISTRY}")
     print("distribution by expected category:", by_cat)
-    print(f"mean tokens: {sum(r['token_count'] for r in rows) // len(rows)}")
-    print("\nKeys are now immutable. Record the freeze date in build-log.md section 5 step 3.")
+    print(f"mean tokens: {sum(int(r['token_count']) for r in rows) // len(rows)}")
 
     red = by_cat.get("red", 0)
     green = by_cat.get("green", 0)
@@ -550,6 +749,11 @@ def main():
     f = sub.add_parser("fetch"); f.add_argument("--force", action="store_true")
     c = sub.add_parser("chunk"); c.add_argument("--force", action="store_true")
     z = sub.add_parser("freeze"); z.add_argument("--force", action="store_true")
+    z.add_argument("--append", action="store_true",
+                   help="add the --only sources to the existing registry, never renumbering")
+    z.add_argument("--only", help="comma-separated source ids, required with --append")
+    z.add_argument("--dry-run", action="store_true",
+                   help="with --append: print the keys it would assign and write nothing")
 
     args = ap.parse_args()
     {"fetch": cmd_fetch, "chunk": cmd_chunk, "freeze": cmd_freeze}[args.cmd](args)

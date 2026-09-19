@@ -1,0 +1,56 @@
+# REVIEW: nhlbi-chd-causes
+# Coronary Heart Disease - Causes and Prevention
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/coronary-heart-disease/causes
+# key_prefix: CP-ANG   expected_category: yellow
+# role: Causes and prevention of coronary heart disease. Continues CP-ANG, as the frozen symptoms page does. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=50 heading=Coronary Heart Disease Causes and Prevention
+Coronary heart disease may have more than one cause, including plaque buildup or problems that affect how the heart's blood vessels work . Taking steps to keep your heart and blood vessels healthy early in life can prevent risk factors from developing.
+
+--- chunk 002 [short] tokens=54 heading=What causes coronary heart disease?
+Plaque buildup in the large arteries on the heart’s surface is the leading cause of coronary heart disease. Some people may have coronary heart disease if the blood vessels in their heart do not respond correctly when the heart needs more oxygen-rich blood.
+
+--- chunk 003 [short] tokens=67 heading=Plaque buildup
+Plaque buildup in the arteries is called atherosclerosis . The buildup causes the arteries to harden and become narrower over time. This can lower or block blood flow to the heart muscle.
+
+Small amounts of plaque can also build up inside the small blood vessels in the heart, causing coronary microvascular disease.
+
+--- chunk 004 [ok   ] tokens=156 heading=Problems with how the blood vessels work
+Sometimes, the heart’s blood vessels do not respond to signals that the heart needs more oxygen-rich blood. Coronary arteries typically widen to allow more blood flow to the heart when a person is physically active or under stress. In coronary heart disease, the size of these arteries may not change, or they may even narrow.
+
+The cause of these problems is unclear, but it may involve damage or injury to the walls of the arteries or tiny blood vessels from long-term inflammation , high blood pressure , or diabetes .
+
+Damage to the inner walls of the larger coronary arteries can cause them to spasm (suddenly tighten), which is called a vasospasm. The spasm causes the arteries to narrow temporarily, which blocks blood flow to the heart.
+
+--- chunk 005 [short] tokens=83 heading=How can you assess your progress toward a heart-healthy lifestyle?
+The American Heart Association's Life's Essential 8 TM are key measures for improving and maintaining the health of your heart and blood vessels. Your healthcare provider can set up a plan that works for you based on your lifestyle, your home and neighborhood environments, and your culture. This may mean taking steps to improve your diet, be physically active, manage other medical conditions, and help you quit smoking.
+
+--- chunk 006 [ok   ] tokens=125 heading=How can you prevent coronary heart disease?
+Coronary heart disease is largely preventable. Studies show that heart-healthy living — quitting smoking or never starting, eating healthy foods, and being physically active — throughout life can prevent or delay coronary heart disease and its complications in most people. A heart-healthy lifestyle is important for people of all ages, but it is especially important for anyone who has other risk factors for coronary heart disease.
+
+Preventing heart disease View some resources to help keep you healthy. View some tips for preventing heart disease Therapeutic Lifestyle Changes (TLC) To Lower Cholesterol Take Action for Your Heart: Get Started! Fact Sheet
+
+--- chunk 007 [short] tokens=11 heading=Preventing heart disease
+View some resources to help keep you healthy.
+
+--- chunk 008 [ok   ] tokens=157 heading=Why is it important to start prevention early?
+Risk factors for coronary heart disease begin in childhood. Therefore, it’s important to develop healthy living habits in childhood, including good nutrition and physical activity, to prevent risk factors from developing.
+
+Because overweight and obesity are becoming more common at young ages, children between ages 9 to 11 should be screened for unhealthy cholesterol levels. Your child’s healthcare provider may suggest screening your child at a younger age if a parent or grandparent had coronary heart disease, a heart attack or stroke, at age 55 or earlier if male, or at age 65 or earlier if female .
+
+Some children can develop atherosclerosis or even have a heart attack or stroke if they have a genetic condition called familial hypercholesterolemia.
+
+--- chunk 009 [ok   ] tokens=151 heading=Why is it important to start prevention early?
+Treatments for children who have plaque buildup in their coronary arteries may include heart-healthy lifestyle changes and medicines such as statins . If your child has severe obesity, their healthcare provider may discuss options such as weight-loss surgery and — maybe in the future — GLP-1 RA (glucagon-like peptide-1 receptor agonists) medicines. GLP-1 RA medicines are for treating diabetes, but some providers also prescribe them for weight loss.
+
+Research for your health We are committed to advancing science and translating discoveries into clinical practice to help prevent and treat heart, lung, blood, and sleep disorders. Learn about current and future NHLBI efforts to improve health through research and scientific innovation. Learn about our research
+
+--- chunk 010 [short] tokens=46 heading=Research for your health
+We are committed to advancing science and translating discoveries into clinical practice to help prevent and treat heart, lung, blood, and sleep disorders. Learn about current and future NHLBI efforts to improve health through research and scientific innovation.

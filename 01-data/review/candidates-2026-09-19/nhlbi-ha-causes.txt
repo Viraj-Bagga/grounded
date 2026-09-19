@@ -1,0 +1,66 @@
+# REVIEW: nhlbi-ha-causes
+# Heart Attack - Causes and Risk Factors
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-attack/causes
+# key_prefix: CP-ACS   expected_category: red
+# role: Causes and risk factors for heart attack. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [ok   ] tokens=184 heading=What causes a heart attack?
+The most common cause of a heart attack is coronary artery disease , which is the most common type of heart disease. This is when your coronary artery cannot carry enough oxygen-rich blood to your heart muscle. Most of the time, coronary artery disease happens when a waxy substance called plaque builds up inside your arteries, causing the arteries to narrow. The buildup of this plaque is called atherosclerosis . This can happen over many years, and it can block blood flow to parts of your heart muscle. Plaques that narrow arteries slowly over time cause angina .
+
+Eventually, an area of plaque can break open inside your artery. This causes a blood clot to form on the plaque’s surface. If the clot becomes large enough, it can block blood flow to your heart. If the blockage isn’t treated quickly, a part of your heart muscle begins to die.
+
+--- chunk 002 [short] tokens=97 heading=Other causes of a heart attack
+Not all heart attacks are caused by blockages from atherosclerosis. When other heart and blood vessel conditions cause a heart attack, it is called myocardial infarction in the absence of obstructive coronary artery disease (MINOCA). MINOCA is more common in women, younger people, and racial and ethnic minorities, including Black, Hispanic/Latino, and Asian people.
+
+Conditions that can cause MINOCA have different effects on the heart.
+
+--- chunk 003 [OVER ] tokens=312 heading=Other causes of a heart attack
+Small plaques in your arteries may not block your blood vessels, but they can break open or their outer layer can wear away. This can cause blood clots to form on these plaques. The blood clots can then block blood flow through your coronary arteries. The formation of small plaques is more common in women, people who smoke, and people who have other blood vessel conditions.
+A sudden and serious spasm (tightening) of your coronary artery can block blood flow through your artery, even if there isn’t a buildup of plaque. Smoking is a risk factor for a coronary spasm. If you smoke, you may be more likely to have a spasm triggered by extreme cold or very stressful situations. Drugs like cocaine may also cause coronary spasm.
+A coronary artery embolism occurs when a blood clot travels through your bloodstream and gets stuck in your coronary artery. This can block blood flow through your artery. This is more common in people who have atrial fibrillation or conditions that raise the risk of blood clots, such as thrombocytopenia or pregnancy.
+Spontaneous coronary artery dissection (SCAD) occurs when a tear forms inside your coronary artery. A blood clot can then form at the tear, or the torn tissue itself can block your artery. SCAD can be caused by stress, extreme physical activity, and pregnancy. This condition is more common in women who are under 50 years old or pregnant and in people who have Marfan syndrome .
+
+--- chunk 004 [short] tokens=28 heading=Other causes of a heart attack
+Other conditions may cause symptoms similar to a heart attack. Your doctor will look at all of your test results to rule them out.
+
+--- chunk 005 [short] tokens=23 heading=What raises the risk of a heart attack?
+Certain risk factors make it more likely that you will develop coronary artery disease and have a heart attack.
+
+--- chunk 006 [ok   ] tokens=152 heading=Risk factors you can control
+Lifestyle habits, such as: An unhealthy diet, including eating too many foods high in saturated fat or sodium Lack of regular physical activity Smoking
+An unhealthy diet, including eating too many foods high in saturated fat or sodium
+Lack of regular physical activity
+Other medical conditions, such as: High blood cholesterol High blood pressure or preeclampsia (high blood pressure during pregnancy) High blood sugar or diabetes High blood triglycerides Overweight and obesity
+High blood pressure or preeclampsia (high blood pressure during pregnancy)
+High blood sugar or diabetes
+
+If you have three or more of these conditions that raise your risk for heart disease, it is called metabolic syndrome . This greatly increases your risk of a heart attack.
+
+--- chunk 007 [ok   ] tokens=160 heading=Risk factors you can’t control
+Age: The risk of heart disease increases for men after age 45 and for women after age 55 (or after menopause).
+Family history of early heart disease: You have a higher risk if your father or a brother was diagnosed with coronary artery disease before 55 years of age or if your mother or a sister was diagnosed with coronary artery disease before 65 years of age.
+Infections from bacteria and viruses
+
+Watch our video on how SARS-CoV-2, the virus that causes COVID-19, may affect your heart. Learn about how we support COVID-19 research .
+
+Watch our video on how SARS-CoV-2, the virus that causes COVID-19, may affect your heart. Learn about how we support COVID-19 research .
+
+--- chunk 008 [ok   ] tokens=219 heading=Can you prevent a heart attack?
+You can lower your risk of a heart attack by changing behaviors that can raise your risks or treating any known coronary artery disease. Healthy lifestyle changes , including heart-healthy eating, staying active, quitting smoking, managing stress, and maintaining a healthy weight, can help prevent heart disease. Even if you already have coronary artery disease, these changes can lower your risk of a heart attack.
+
+It is also important for you to get treatment for other health conditions that raise your risk of a heart attack. Talk to your doctor about whether taking aspirin can help you prevent blood clots that can lead to a heart attack.
+
+Research for your health Learn about current and future NHLBI research to advance treatment and improve our scientific understanding of the causes of heart attacks. Research on this topic is part of the NHLBI’s broader commitment to advancing scientific discovery for heart and vascular diseases. Learn more about our latest research on heart attacks. FACT SHEET Self-care Tips for Heart Health Learn about how and why to make heart health part of your self-care routine. View the fact sheet
+
+--- chunk 009 [short] tokens=49 heading=Can you prevent a heart attack?
+Learn about current and future NHLBI research to advance treatment and improve our scientific understanding of the causes of heart attacks. Research on this topic is part of the NHLBI’s broader commitment to advancing scientific discovery for heart and vascular diseases.
+
+--- chunk 010 [short] tokens=19 heading=Self-care Tips for Heart Health
+Learn about how and why to make heart health part of your self-care routine.

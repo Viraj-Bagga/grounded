@@ -1,0 +1,41 @@
+# 2026-09-19 REAL freeze --append, run on Viraj's go after his two reversals.
+# Registry before: 01-data/citations.frozen-22.csv (the 22-row 2026-09-15 registry, kept as a copy).
+
+token counts: EXACT (transformers word-piece)
+
+APPENDING: 13 chunks after the 22 frozen
+
+  nhlbi-ha-women                             1 chunks
+  nhlbi-ha-causes                            0 chunks
+  nhlbi-angina-symptoms                      6 chunks
+  nhlbi-angina-types                         4 chunks
+  nhlbi-chd-causes                           0 chunks
+  nhlbi-vte-diagnosis                        0 chunks
+  nhlbi-pneumonia-causes                     1 chunks
+  nhlbi-pneumonia-diagnosis                  1 chunks
+  nhlbi-heart-inflammation-pericarditis      0 chunks
+  nhlbi-heart-inflammation-diagnosis         0 chunks
+  nhlbi-heart-inflammation-treatment         0 chunks
+
+  CP-ACS-006      174  red     nhlbi-ha-women  symptoms-of-a-heart-attack-in-women
+  CP-ANG-003      212  yellow  nhlbi-angina-symptoms  common-symptoms
+  CP-ANG-004       96  yellow  nhlbi-angina-symptoms  angina-in-women
+  CP-ANG-005       42  yellow  nhlbi-angina-symptoms  stable-angina
+  CP-ANG-006       47  red     nhlbi-angina-symptoms  unstable-angina
+  CP-ANG-007       39  red     nhlbi-angina-symptoms  microvascular-angina
+  CP-ANG-008       41  red     nhlbi-angina-symptoms  vasospastic-angina
+  CP-ANG-009      179  yellow  nhlbi-angina-types  stable-angina
+  CP-ANG-010       82  red     nhlbi-angina-types  unstable-angina
+  CP-ANG-011       77  red     nhlbi-angina-types  microvascular-angina
+  CP-ANG-012      104  red     nhlbi-angina-types  vasospastic-angina
+  CP-PNA-002      238  yellow  nhlbi-pneumonia-causes  other-medical-conditions
+  CP-PNA-003       64  yellow  nhlbi-pneumonia-diagnosis  pneumonia-diagnosis
+
+APPENDED 2026-09-19: 13 chunks -> /Users/virajbagga/Coding/steel26/01-data/citations.csv
+The 22 frozen rows and 22 chunk files are byte-identical.
+distribution by expected category: {'none': 1, 'red': 16, 'yellow': 12, 'green': 6}
+mean tokens: 128
+
+WARNING: red chunks outnumber green 16:6. A real triage distribution is closer to 7 red / 34 yellow / 59 green. A red-skewed corpus biases every retrieval toward red.
+
+The new keys are now immutable too. Rebuild the index: python 04-retrieval/build_index.py

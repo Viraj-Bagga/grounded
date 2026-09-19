@@ -1,0 +1,28 @@
+# 2026-09-19 dry run of freeze --append on the REAL 01-data, after the review was applied. Nothing written:
+# registry and chunk files hashed identical before and after. Build: build_corpus.py with --append and the
+# per-chunk category override. Command: freeze --append --only <the 11 expansion ids> --dry-run
+
+token counts: EXACT (transformers word-piece)
+
+DRY RUN, nothing written: 8 chunks after the 22 frozen
+
+  nhlbi-ha-women                             1 chunks
+  nhlbi-ha-causes                            0 chunks
+  nhlbi-angina-symptoms                      4 chunks
+  nhlbi-angina-types                         2 chunks
+  nhlbi-chd-causes                           0 chunks
+  nhlbi-vte-diagnosis                        0 chunks
+  nhlbi-pneumonia-causes                     0 chunks
+  nhlbi-pneumonia-diagnosis                  1 chunks
+  nhlbi-heart-inflammation-pericarditis      0 chunks
+  nhlbi-heart-inflammation-diagnosis         0 chunks
+  nhlbi-heart-inflammation-treatment         0 chunks
+
+  CP-ACS-006      174  red     nhlbi-ha-women  symptoms-of-a-heart-attack-in-women
+  CP-ANG-003      212  yellow  nhlbi-angina-symptoms  common-symptoms
+  CP-ANG-004       96  yellow  nhlbi-angina-symptoms  angina-in-women
+  CP-ANG-005       42  yellow  nhlbi-angina-symptoms  stable-angina
+  CP-ANG-006       47  red     nhlbi-angina-symptoms  unstable-angina
+  CP-ANG-007      179  yellow  nhlbi-angina-types  stable-angina
+  CP-ANG-008       82  red     nhlbi-angina-types  unstable-angina
+  CP-PNA-002       64  yellow  nhlbi-pneumonia-diagnosis  pneumonia-diagnosis

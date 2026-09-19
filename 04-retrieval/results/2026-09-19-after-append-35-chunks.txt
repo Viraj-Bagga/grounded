@@ -1,0 +1,118 @@
+# 2026-09-19 score_keys.py --k 3 after the append: 35 chunks (22 frozen 2026-09-15 + 13 appended 2026-09-19).
+# Index rebuilt from the appended registry; the 22-chunk index is kept as 04-retrieval/corpus-22.db.
+# Keys are TODAY'S reviewed keys (discrimination_test.py RETRIEVAL_KEYS), which name only the old 22 chunks,
+# so a new chunk can never count as a hit here. Baseline: 04-retrieval/results/2026-09-19-baseline-22-chunks.txt
+
+SCORED AGAINST THE FROZEN REVIEWED KEYS
+Approved by Viraj 2026-09-17. Changing one is a clinical decision.
+
+========================================================================
+DENSE ONLY, vector  (alpha=1.0, top-3, query=symptom+timeline)
+========================================================================
+
+  red-acs                PARTIAL 1/2
+     key      : ['CP-ACS-003', 'CP-ACS-005']
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-DIFF-001']
+     MUST-NOT-RETRIEVE VIOLATION: ['CP-PERI-002']
+     334 tokens, about 10.8 s of prompt eval
+
+  yellow-angina          PARTIAL 1/3
+     key      : ['CP-ANG-001', 'CP-ACS-005', 'CP-ANG-002']
+     returned : ['CP-PERI-002', 'CP-PERI-001', 'CP-ANG-001']
+     MUST-NOT-RETRIEVE VIOLATION: ['CP-PERI-002']
+     348 tokens, about 11.2 s of prompt eval
+
+  green-gerd             ALL 2/2
+     key      : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-GERD-002']
+     MUST-NOT-RETRIEVE VIOLATION: ['CP-PERI-002']
+     312 tokens, about 10.1 s of prompt eval
+
+  yellow-pleuritic       PARTIAL 1/2
+     key      : ['CP-PERI-002', 'CP-PERI-001']
+     returned : ['CP-PERI-002', 'CP-DIFF-001', 'CP-ANG-001']
+     359 tokens, about 11.6 s of prompt eval
+
+  probe-costo-unmatched  UNSCORED (empty key by design)
+     key      : (none)
+     returned : ['CP-DIFF-001', 'CP-PERI-002', 'CP-ANG-001']
+     359 tokens, about 11.6 s of prompt eval
+
+  scored recall: 5/9 = 56%
+  must-not-retrieve violations: [('red-acs', 'CP-PERI-002'), ('yellow-angina', 'CP-PERI-002'), ('green-gerd', 'CP-PERI-002')]
+  total 1712 tokens, mean 342 per case
+
+========================================================================
+BLEND, BM25 + vector  (alpha=0.5, top-3, query=symptom+timeline)
+========================================================================
+
+  red-acs                PARTIAL 1/2
+     key      : ['CP-ACS-003', 'CP-ACS-005']
+     returned : ['CP-ANG-003', 'CP-ACS-003', 'CP-DIFF-001']
+     521 tokens, about 16.8 s of prompt eval
+
+  yellow-angina          PARTIAL 2/3
+     key      : ['CP-ANG-001', 'CP-ACS-005', 'CP-ANG-002']
+     returned : ['CP-ANG-002', 'CP-ANG-003', 'CP-ANG-001']
+     630 tokens, about 20.3 s of prompt eval
+
+  green-gerd             PARTIAL 1/2
+     key      : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-ANG-003']
+     MUST-NOT-RETRIEVE VIOLATION: ['CP-PERI-002']
+     453 tokens, about 14.6 s of prompt eval
+
+  yellow-pleuritic       ALL 2/2
+     key      : ['CP-PERI-002', 'CP-PERI-001']
+     returned : ['CP-PERI-002', 'CP-ANG-001', 'CP-PERI-001']
+     348 tokens, about 11.2 s of prompt eval
+
+  probe-costo-unmatched  UNSCORED (empty key by design)
+     key      : (none)
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-PERI-001']
+     323 tokens, about 10.4 s of prompt eval
+
+  scored recall: 6/9 = 67%
+  must-not-retrieve violations: [('green-gerd', 'CP-PERI-002')]
+  total 2275 tokens, mean 455 per case
+
+========================================================================
+BM25 ONLY  (alpha=0.0, top-3, query=symptom+timeline)
+========================================================================
+
+  red-acs                PARTIAL 1/2
+     key      : ['CP-ACS-003', 'CP-ACS-005']
+     returned : ['CP-ANG-003', 'CP-ACS-003', 'CP-DIFF-001']
+     521 tokens, about 16.8 s of prompt eval
+
+  yellow-angina          PARTIAL 2/3
+     key      : ['CP-ANG-001', 'CP-ACS-005', 'CP-ANG-002']
+     returned : ['CP-ANG-003', 'CP-ANG-002', 'CP-ANG-001']
+     630 tokens, about 20.3 s of prompt eval
+
+  green-gerd             PARTIAL 1/2
+     key      : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-ANG-003', 'CP-PERI-002']
+     MUST-NOT-RETRIEVE VIOLATION: ['CP-PERI-002']
+     453 tokens, about 14.6 s of prompt eval
+
+  yellow-pleuritic       PARTIAL 1/2
+     key      : ['CP-PERI-002', 'CP-PERI-001']
+     returned : ['CP-PERI-002', 'CP-PLEU-001', 'CP-ANG-006']
+     228 tokens, about 7.4 s of prompt eval
+
+  probe-costo-unmatched  UNSCORED (empty key by design)
+     key      : (none)
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-PE-001']
+     367 tokens, about 11.8 s of prompt eval
+
+  scored recall: 5/9 = 56%
+  must-not-retrieve violations: [('green-gerd', 'CP-PERI-002')]
+  total 2199 tokens, mean 440 per case
+
+========================================================================
+SUMMARY, frozen keys
+config                         recall  violations   tokens
+DENSE ONLY, vector         5/9 =  56%            3     1712
+BLEND, BM25 + vector       6/9 =  67%            1     2275
+BM25 ONLY                  5/9 =  56%            1     2199

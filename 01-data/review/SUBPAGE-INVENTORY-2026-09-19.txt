@@ -1,0 +1,94 @@
+# SUB-PAGE INVENTORY, 2026-09-19: what exists per condition, before anything new is fetched
+# Discovered from each topic's own links, fetched with build_corpus.FETCH_HEADERS, NOT saved to raw/.
+# Words = body text of <main> (NHLBI, NIDDK, NIMH, CDC) or of #topic-summary (MedlinePlus: the cleared class).
+# REQUESTED = on Viraj's fetch list. All NHLBI, NIDDK, NIMH, CDC and MedlinePlus-summary text is in the
+# cleared publisher set (claude.md licensing). MedlinePlus: summary section ONLY, never /ency/.
+
+== heart-attack  (landing 200)
+   200  /health/heart-attack                                   353 words  fetched, not frozen               Heart Attack What Is a Heart Attack?
+   200  /health/heart-attack/causes                           1214 words  never pulled           REQUESTED  Heart Attack Causes and Risk Factors
+   200  /health/heart-attack/diagnosis                         320 words  never pulled                      Heart Attack Diagnosis
+   200  /health/heart-attack/recovery                          964 words  never pulled                      Heart Attack Recovery
+   200  /health/heart-attack/symptoms                          603 words  FROZEN                            Heart Attack Symptoms
+   200  /health/heart-attack/treatment                        1054 words  never pulled                      Heart Attack Treatment
+   200  /health/heart-attack/women                             568 words  never pulled                      Heart Attack Heart Attacks in Women
+== coronary-heart-disease  (landing 200)
+   200  /health/coronary-heart-disease                         731 words  never pulled                      Coronary Heart Disease What Is Coronary Heart Disease?
+   200  /health/coronary-heart-disease/causes                 1040 words  never pulled           REQUESTED  Coronary Heart Disease Causes and Prevention
+   200  /health/coronary-heart-disease/diagnosis              1569 words  never pulled                      Coronary Heart Disease Diagnosis
+   200  /health/coronary-heart-disease/living-with            1122 words  never pulled                      Coronary Heart Disease Living With
+   200  /health/coronary-heart-disease/risk-factors           1928 words  never pulled                      Coronary Heart Disease Risk Factors
+   200  /health/coronary-heart-disease/symptoms                590 words  FROZEN                            Coronary Heart Disease Symptoms
+   200  /health/coronary-heart-disease/treatment              1844 words  never pulled                      Coronary Heart Disease Treatment
+   200  /health/coronary-heart-disease/women                  1397 words  never pulled                      Coronary Heart Disease Women and Heart Disease
+== angina  (landing 200)
+   200  /health/angina                                         343 words  FROZEN                            Angina (Chest Pain) What Is Angina?
+   200  /health/angina/causes                                 1383 words  never pulled                      Angina (Chest Pain) Causes and Risk Factors
+   200  /health/angina/diagnosis                               732 words  never pulled                      Angina (Chest Pain) Diagnosis
+   200  /health/angina/living-with                            1247 words  never pulled                      Angina (Chest Pain) Living With
+   200  /health/angina/symptoms                                532 words  never pulled                      Angina (Chest Pain) Symptoms
+   200  /health/angina/treatment                               871 words  never pulled                      Angina (Chest Pain) Treatment
+   200  /health/angina/types                                   624 words  never pulled                      Angina (Chest Pain) Types
+== venous-thromboembolism  (landing 200)
+   200  /health/venous-thromboembolism                         434 words  never pulled                      Venous Thromboembolism What Is Venous Thromboembolism?
+   200  /health/venous-thromboembolism/causes                 1084 words  FROZEN                            Venous Thromboembolism Causes and Risk Factors
+   200  /health/venous-thromboembolism/diagnosis               596 words  never pulled           REQUESTED  Venous Thromboembolism Diagnosis
+   200  /health/venous-thromboembolism/preventing-blood-clots   493 words  never pulled                      Venous Thromboembolism Preventing Blood Clots
+   200  /health/venous-thromboembolism/recovery               1226 words  never pulled                      Venous Thromboembolism Recovery
+   200  /health/venous-thromboembolism/symptoms                216 words  FROZEN                            Venous Thromboembolism Symptoms
+   200  /health/venous-thromboembolism/treatment               507 words  never pulled                      Venous Thromboembolism Treatment
+   200  /health/venous-thromboembolism/women                   426 words  never pulled                      Venous Thromboembolism Women and venous thromboembolism
+== pneumonia  (landing 200)
+   200  /health/pneumonia                                      300 words  never pulled                      Pneumonia What Is Pneumonia?
+   200  /health/pneumonia/causes                               889 words  never pulled           REQUESTED  Pneumonia Causes and Risk Factors
+   200  /health/pneumonia/diagnosis                            619 words  never pulled           REQUESTED  Pneumonia Diagnosis
+   200  /health/pneumonia/prevention                           643 words  never pulled                      Pneumonia Prevention
+   200  /health/pneumonia/recovery                             849 words  never pulled                      Pneumonia Recovery
+   200  /health/pneumonia/symptoms                             243 words  FROZEN                            Pneumonia Symptoms
+   200  /health/pneumonia/treatment                            340 words  never pulled                      Pneumonia Treatment
+== heart-inflammation  (landing 200)
+   200  /health/heart-inflammation                             306 words  never pulled                      Heart Inflammation What Is Heart Inflammation?
+   200  /health/heart-inflammation/causes                     1045 words  never pulled                      Heart Inflammation Causes and Risk Factors
+   200  /health/heart-inflammation/diagnosis                   305 words  never pulled           REQUESTED  Heart Inflammation Diagnosis
+   200  /health/heart-inflammation/endocarditis                785 words  never pulled                      Heart Inflammation Endocarditis
+   200  /health/heart-inflammation/living-with                 448 words  never pulled                      Heart Inflammation Recovery
+   200  /health/heart-inflammation/myocarditis                 315 words  never pulled                      Heart Inflammation Myocarditis
+   200  /health/heart-inflammation/pericarditis                485 words  never pulled                      Heart Inflammation Pericarditis
+   200  /health/heart-inflammation/symptoms                    237 words  FROZEN                            Heart Inflammation Symptoms
+   200  /health/heart-inflammation/treatment                   133 words  never pulled           REQUESTED  Heart Inflammation Treatment
+   200  /health/heart-inflammation/types                        83 words  never pulled                      Heart Inflammation Types of Heart Inflammation
+
+== NIDDK, acid reflux (GER & GERD) in adults
+   200  /acid-reflux-ger-gerd-adults                                            1243 words  never pulled  Acid Reflux (GER & GERD) in Adults
+   200  /acid-reflux-ger-gerd-adults/all-content                                2461 words  never pulled  Acid Reflux (GER & GERD) in Adults
+   200  /acid-reflux-ger-gerd-adults/clinical-trials                             359 words  never pulled  Clinical Trials for GER & GERD
+   200  /acid-reflux-ger-gerd-adults/definition-facts                            561 words  never pulled  Definition & Facts for GER & GERD
+   200  /acid-reflux-ger-gerd-adults/diagnosis                                   528 words  never pulled  Diagnosis of GER & GERD
+   200  /acid-reflux-ger-gerd-adults/eating-diet-nutrition                       350 words  never pulled  Eating, Diet, & Nutrition for GER & GERD
+   200  /acid-reflux-ger-gerd-adults/symptoms-causes                             501 words  FROZEN        Symptoms & Causes of GER & GERD
+   200  /acid-reflux-ger-gerd-adults/treatment                                   782 words  never pulled  Treatment for GER & GERD
+== NIMH, panic disorder
+   200  /health/publications/panic-disorder-when-fear-overwhelms      1871 words  FROZEN        Panic Disorder: What You Need to Know
+   404  /health/topics/panic-disorder                                   71 words  never pulled  Page Not Found - National Institute of Mental Heal
+== MedlinePlus health topic SUMMARIES (the cleared class is the summary section only)
+   200  chestpain.html                     115 summary words  FROZEN        Chest Pain
+   200  pleuraldisorders.html              190 summary words  FROZEN        Pleural Disorders
+   200  heartattack.html                   704 summary words  never pulled  Heart Attack
+   200  coronaryarterydisease.html         816 summary words  never pulled  Coronary Artery Disease
+   200  angina.html                        209 summary words  never pulled  Angina
+   200  pulmonaryembolism.html             753 summary words  never pulled  Pulmonary Embolism
+   200  deepveinthrombosis.html            163 summary words  never pulled  Deep Vein Thrombosis
+   200  bloodclots.html                    706 summary words  never pulled  Blood Clots
+   200  pneumonia.html                    1034 summary words  never pulled  Pneumonia
+   200  pericardialdisorders.html          135 summary words  never pulled  Pericardial Disorders
+   200  gerd.html                          552 summary words  never pulled  GERD
+   200  heartburn.html                     112 summary words  never pulled  Heartburn
+   200  panicdisorder.html                 654 summary words  never pulled  Panic Disorder
+   200  acutebronchitis.html               209 summary words  never pulled  Acute Bronchitis
+   200  chestinjuriesanddisorders.html     330 summary words  never pulled  Chest Injuries and Disorders
+   404  costochondritis.html                 0 summary words  never pulled  We're sorry.  We can't find the page you
+== CDC, acute bronchitis
+   200  /acute-bronchitis/about/index.html                   795 words  fetched and reviewed, NOT frozen  Chest Cold (Acute Bronchitis) Basics
+        links to: /acute-bronchitis/about/index.html
+        links to: /acute-bronchitis/es/about/informacion-basica-sobre-el-resfriado-de-pecho-bronquitis-aguda.html
+        links to: /acute-bronchitis/media/pdfs/Bronchitis-508.pdf

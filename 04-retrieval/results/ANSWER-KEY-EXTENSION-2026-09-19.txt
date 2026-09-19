@@ -1,0 +1,290 @@
+ANSWER KEY EXTENSION SHEET, 2026-09-19
+==============================================================================
+
+The corpus is now 35 chunks: the 22 frozen 2026-09-15 plus 13 appended today.
+Today's reviewed keys name only the old 22, so no new chunk can count as a
+hit. Recall against them is 6/9 = 67% in the blend, the same as before the
+append. This sheet is for extending the keys so the rescore can credit a
+new chunk when it is the right one.
+
+HOW TO USE THIS. For each case, mark [x] under KEY for every new chunk the
+case SHOULD get, and under MUST-NOT for any it must never get. Leave both
+empty for the rest. The new chunks are listed in key order, not by retrieval
+score, so the marking is not anchored on what the retriever already does.
+What the blend returns today is at the end of each case, for the must-not
+column only. Changing a key is a clinical decision, as on 2026-09-17.
+
+probe-costo-unmatched is not listed: its key is empty by design and no new
+chunk describes costochondritis.
+
+==============================================================================
+THE 13 NEW CHUNKS, full text
+==============================================================================
+
+CP-ACS-006   red   174 tokens   nhlbi-ha-women   https://www.nhlbi.nih.gov/health/heart-attack/women
+    Both women and men who have a heart attack often have chest pain. However,
+    in addition to chest pain, women are more likely to have these symptoms:
+
+    Pain in the shoulder, back, or arm
+    Shortness of breath
+    Unusual tiredness and weakness
+    Upset stomach
+    Anxiety
+
+    These symptoms can happen together with chest pain or without any chest
+    pain.
+
+    Many women may not recognize that these are symptoms of a heart attack.
+    Women may not get emergency treatment right away if they downplay their
+    symptoms and delay going to the hospital, or if the usual initial
+    screening tests performed at the hospital may not detect an early or
+    atypical heart attack. Because of this, women have a higher risk of
+    serious health problems after a heart attack.
+
+    It is important to call 9-1-1 if you have these symptoms. Early treatment
+    can limit damage to your heart and can save your life.
+
+CP-ANG-003   yellow   212 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    The main symptom of angina is chest pain or discomfort. Angina can feel
+    like pain, pressure, tightness, discomfort, squeezing, heaviness, or
+    burning in the chest. It can be difficult to tell exactly where the pain
+    is coming from. Angina pain usually starts behind the breastbone and grows
+    more intense over a few minutes. The pain or discomfort can also be felt
+    in areas far from the source of the pain, such as the shoulders, arms,
+    neck, back, and jaw.
+
+    Aside from pain in the upper body, symptoms of angina may include:
+
+    Shortness of breath
+    Extreme tiredness
+    Light-headedness or fainting
+    Nausea, or feeling sick to the stomach
+    Heartburn or indigestion
+    Sweating
+    Weakness
+
+    It can be difficult to tell the difference between the symptoms of angina
+    and of a heart attack . Call 9-1-1 if you feel chest discomfort that does
+    not go away with rest or medicine. Angina can also lead to a heart attack
+    and other complications that can be life-threatening.
+
+CP-ANG-004   yellow   96 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    Symptoms of angina can be different for women and men. It is more common
+    for women to feel angina pain in the arms, neck, back, and jaw — areas far
+    from the source of the pain. Women also more often show other symptoms of
+    angina aside from chest pain, such as shortness of breath, nausea, and
+    light-headedness. Sometimes these are not recognized as symptoms of a
+    heart condition. This can cause delays in treatment for women.
+
+CP-ANG-005   yellow   42 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    Stable angina:
+    Pain that occurs during physical activity or mental stress
+    Pattern of symptoms that has not changed in the last 2 months
+    Pain that is relieved by rest or medicines
+    Symptoms that go away within 5 minutes
+
+CP-ANG-006   red   47 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    Unstable angina:
+    Changes in your stable angina symptoms
+    Pain that lasts longer than 20 minutes or goes away and then comes back
+    Pain that grows worse
+    Pain that is not relieved by rest or medicines
+    Pain during rest or sleep
+    Intense pain
+
+CP-ANG-007   red   39 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    Microvascular angina:
+    Intense pain
+    Pain that lasts a long time
+    Shortness of breath
+    Pain that is not easily relieved by medicines
+    Pain that happens during physical or emotional stress or during rest
+
+CP-ANG-008   red   41 tokens   nhlbi-angina-symptoms   https://www.nhlbi.nih.gov/health/angina/symptoms
+    Vasospastic angina:
+    Pain that starts at night or in the early morning hours
+    Pattern of symptoms that happen during rest or sleep
+    Pain that is relieved by medicines
+    Symptoms that last around 15 minutes
+
+CP-ANG-009   yellow   179 tokens   nhlbi-angina-types   https://www.nhlbi.nih.gov/health/angina/types
+    Stable angina is the most common type of angina in the United States. It
+    follows a pattern that has been consistent for at least 2 months. That
+    means the following factors have not changed:
+
+    How often your angina events occur
+    What causes or triggers your angina
+    How long your angina events last
+    How well your angina responds to rest or medicines
+
+    If you have stable angina, you can learn its pattern and predict when an
+    event will occur, such as during physical activity or mental stress. The
+    pain usually goes away after you rest for a few minutes or take your
+    angina medicine.
+
+    Tell your healthcare provider right away if you notice changes in the
+    pattern of your angina, such as when pain lasts longer or happens more
+    often. Pattern changes may be a sign that the condition causing your
+    angina is getting worse. If this happens, stable angina can become
+    unstable angina.
+
+CP-ANG-010   red   82 tokens   nhlbi-angina-types   https://www.nhlbi.nih.gov/health/angina/types
+    Unstable angina does not follow a pattern. It may be new or occur more
+    often and be more painful than stable angina. Unstable angina can occur
+    with or without physical exertion. Rest or medicine may not relieve the
+    pain.
+
+    Unstable angina is a medical emergency because it can progress to a heart
+    attack . You may need medical attention right away to restore blood flow
+    to your heart muscle.
+
+CP-ANG-011   red   77 tokens   nhlbi-angina-types   https://www.nhlbi.nih.gov/health/angina/types
+    Microvascular angina can be a sign of coronary microvascular disease, a
+    type of coronary heart disease affecting the tiny arteries of the heart.
+    Microvascular angina events can be stable or unstable, and they can be
+    more painful and last longer than other types of angina. Symptoms can
+    occur during exercise or rest. Medicine may not relieve the pain.
+
+CP-ANG-012   red   104 tokens   nhlbi-angina-types   https://www.nhlbi.nih.gov/health/angina/types
+    Vasospastic angina, also known as Prinzmetal angina or variant angina, is
+    not very common. It occurs when a spasm — a sudden tightening of the
+    muscles within the arteries of your heart — causes the arteries to narrow
+    temporarily. A spasm of the coronary arteries can block blood flow to the
+    heart and cause serious pain. This type of angina usually happens while
+    you are at rest, between midnight and early morning, and in a pattern.
+    Medicine can ease symptoms.
+
+CP-PNA-002   yellow   238 tokens   nhlbi-pneumonia-causes   https://www.nhlbi.nih.gov/health/pneumonia/causes
+    Brain disorders, such as a stroke , a head injury, dementia, or
+    Parkinson’s disease can affect your ability to cough or swallow. This can
+    lead to food, drink, vomit, or saliva going down your windpipe instead of
+    your esophagus and getting into your lungs.
+    Conditions that weaken your immune system may also increase your risk.
+    These include pregnancy, HIV/AIDS, or an organ or bone marrow transplant .
+    Chemotherapy, which is used to treat cancer, and long-term use of steroid
+    medicines can also weaken your immune system.
+    Critical diseases that require hospitalization, including receiving
+    treatment in a hospital intensive care unit, can raise your risk of
+    hospital-acquired pneumonia. Your risk is higher if you cannot move around
+    much or are sedated or unconscious. Using a ventilator raises the risk of
+    a type called ventilator-associated pneumonia.
+    Lung diseases, such as asthma , bronchiectasis , cystic fibrosis , or COPD
+    , also increase your pneumonia risk.
+    Other serious conditions, such as malnutrition, diabetes , heart failure ,
+    sickle cell disease , or liver or kidney disease, are additional risk
+    factors.
+
+CP-PNA-003   yellow   64 tokens   nhlbi-pneumonia-diagnosis   https://www.nhlbi.nih.gov/health/pneumonia/diagnosis
+    Your healthcare provider will diagnose pneumonia based on your medical
+    history, a physical exam, and test results. Sometimes pneumonia is hard to
+    diagnose because your symptoms may be the same as a cold or flu. You may
+    not realize that your condition is more serious until it lasts longer than
+    these other conditions.
+
+==============================================================================
+CASE: red-acs   expect=red
+  PROFILE : 58-year-old man. History of high blood pressure and high cholesterol. Takes a statin.
+  TIMELINE: T+0:00 central chest pressure began while sitting watching television. T+0:04 pain spread to the jaw. T+0:11 sweating and nausea. T+0:26 pain unchanged after resting.
+  SAYS    : Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.
+
+  CURRENT KEY (reviewed 2026-09-17): ['CP-ACS-003', 'CP-ACS-005']
+  CURRENT MUST-NOT:                  ['CP-PERI-002']
+
+  KEY  MUST-NOT  key          cat      tok  text
+  --------------------------------------------------------------------------
+  [ ]  [ ]       CP-ACS-006   red      174  Both women and men who have a heart attack o
+  [ ]  [ ]       CP-ANG-003   yellow   212  The main symptom of angina is chest pain or 
+  [ ]  [ ]       CP-ANG-004   yellow    96  Symptoms of angina can be different for wome
+  [ ]  [ ]       CP-ANG-005   yellow    42  Stable angina: Pain that occurs during physi
+  [ ]  [ ]       CP-ANG-006   red       47  Unstable angina: Changes in your stable angi
+  [ ]  [ ]       CP-ANG-007   red       39  Microvascular angina: Intense pain Pain that
+  [ ]  [ ]       CP-ANG-008   red       41  Vasospastic angina: Pain that starts at nigh
+  [ ]  [ ]       CP-ANG-009   yellow   179  Stable angina is the most common type of ang
+  [ ]  [ ]       CP-ANG-010   red       82  Unstable angina does not follow a pattern. I
+  [ ]  [ ]       CP-ANG-011   red       77  Microvascular angina can be a sign of corona
+  [ ]  [ ]       CP-ANG-012   red      104  Vasospastic angina, also known as Prinzmetal
+  [ ]  [ ]       CP-PNA-002   yellow   238  Brain disorders, such as a stroke , a head i
+  [ ]  [ ]       CP-PNA-003   yellow    64  Your healthcare provider will diagnose pneum
+
+  blend top 3 today (for must-not only): ['CP-ANG-003', 'CP-ACS-003', 'CP-DIFF-001']
+
+==============================================================================
+CASE: yellow-angina   expect=yellow
+  PROFILE : 61-year-old woman. Known coronary artery disease. Prescribed nitroglycerin.
+  TIMELINE: T+0:00 chest tightness began while climbing two flights of stairs. T+0:03 sat down to rest. T+0:06 tightness resolved completely. T+0:20 no further symptoms.
+  SAYS    : I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.
+
+  CURRENT KEY (reviewed 2026-09-17): ['CP-ANG-001', 'CP-ACS-005', 'CP-ANG-002']
+  CURRENT MUST-NOT:                  ['CP-PERI-002']
+
+  KEY  MUST-NOT  key          cat      tok  text
+  --------------------------------------------------------------------------
+  [ ]  [ ]       CP-ACS-006   red      174  Both women and men who have a heart attack o
+  [ ]  [ ]       CP-ANG-003   yellow   212  The main symptom of angina is chest pain or 
+  [ ]  [ ]       CP-ANG-004   yellow    96  Symptoms of angina can be different for wome
+  [ ]  [ ]       CP-ANG-005   yellow    42  Stable angina: Pain that occurs during physi
+  [ ]  [ ]       CP-ANG-006   red       47  Unstable angina: Changes in your stable angi
+  [ ]  [ ]       CP-ANG-007   red       39  Microvascular angina: Intense pain Pain that
+  [ ]  [ ]       CP-ANG-008   red       41  Vasospastic angina: Pain that starts at nigh
+  [ ]  [ ]       CP-ANG-009   yellow   179  Stable angina is the most common type of ang
+  [ ]  [ ]       CP-ANG-010   red       82  Unstable angina does not follow a pattern. I
+  [ ]  [ ]       CP-ANG-011   red       77  Microvascular angina can be a sign of corona
+  [ ]  [ ]       CP-ANG-012   red      104  Vasospastic angina, also known as Prinzmetal
+  [ ]  [ ]       CP-PNA-002   yellow   238  Brain disorders, such as a stroke , a head i
+  [ ]  [ ]       CP-PNA-003   yellow    64  Your healthcare provider will diagnose pneum
+
+  blend top 3 today (for must-not only): ['CP-ANG-002', 'CP-ANG-003', 'CP-ANG-001']
+
+==============================================================================
+CASE: green-gerd   expect=green
+  PROFILE : 29-year-old woman. No cardiac history. No regular medication.
+  TIMELINE: T+0:00 burning behind the breastbone began about 40 minutes after a large late meal. T+0:15 worse on lying down. T+0:22 sour taste in the mouth. T+0:35 eased after sitting upright.
+  SAYS    : Burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.
+
+  CURRENT KEY (reviewed 2026-09-17): ['CP-GERD-001', 'CP-GERD-002']
+  CURRENT MUST-NOT:                  ['CP-PERI-002']
+
+  KEY  MUST-NOT  key          cat      tok  text
+  --------------------------------------------------------------------------
+  [ ]  [ ]       CP-ACS-006   red      174  Both women and men who have a heart attack o
+  [ ]  [ ]       CP-ANG-003   yellow   212  The main symptom of angina is chest pain or 
+  [ ]  [ ]       CP-ANG-004   yellow    96  Symptoms of angina can be different for wome
+  [ ]  [ ]       CP-ANG-005   yellow    42  Stable angina: Pain that occurs during physi
+  [ ]  [ ]       CP-ANG-006   red       47  Unstable angina: Changes in your stable angi
+  [ ]  [ ]       CP-ANG-007   red       39  Microvascular angina: Intense pain Pain that
+  [ ]  [ ]       CP-ANG-008   red       41  Vasospastic angina: Pain that starts at nigh
+  [ ]  [ ]       CP-ANG-009   yellow   179  Stable angina is the most common type of ang
+  [ ]  [ ]       CP-ANG-010   red       82  Unstable angina does not follow a pattern. I
+  [ ]  [ ]       CP-ANG-011   red       77  Microvascular angina can be a sign of corona
+  [ ]  [ ]       CP-ANG-012   red      104  Vasospastic angina, also known as Prinzmetal
+  [ ]  [ ]       CP-PNA-002   yellow   238  Brain disorders, such as a stroke , a head i
+  [ ]  [ ]       CP-PNA-003   yellow    64  Your healthcare provider will diagnose pneum
+
+  blend top 3 today (for must-not only): ['CP-GERD-001', 'CP-PERI-002', 'CP-ANG-003']
+
+==============================================================================
+CASE: yellow-pleuritic   expect=yellow
+  PROFILE : 34-year-old woman. No cardiac history. Recent head cold, now resolved.
+  TIMELINE: T+0:00 sharp left-sided chest pain began at rest. T+0:10 clearly worse on deep breath. T+0:25 easier sitting forward, worse lying flat. T+1:30 unchanged, no relation to exertion.
+  SAYS    : Sharp pain in my left chest. It is much worse when I breathe in deeply and it eases if I sit up and lean forward. Walking around does not change it.
+
+  CURRENT KEY (reviewed 2026-09-17): ['CP-PERI-002', 'CP-PERI-001']
+  CURRENT MUST-NOT:                  []
+
+  KEY  MUST-NOT  key          cat      tok  text
+  --------------------------------------------------------------------------
+  [ ]  [ ]       CP-ACS-006   red      174  Both women and men who have a heart attack o
+  [ ]  [ ]       CP-ANG-003   yellow   212  The main symptom of angina is chest pain or 
+  [ ]  [ ]       CP-ANG-004   yellow    96  Symptoms of angina can be different for wome
+  [ ]  [ ]       CP-ANG-005   yellow    42  Stable angina: Pain that occurs during physi
+  [ ]  [ ]       CP-ANG-006   red       47  Unstable angina: Changes in your stable angi
+  [ ]  [ ]       CP-ANG-007   red       39  Microvascular angina: Intense pain Pain that
+  [ ]  [ ]       CP-ANG-008   red       41  Vasospastic angina: Pain that starts at nigh
+  [ ]  [ ]       CP-ANG-009   yellow   179  Stable angina is the most common type of ang
+  [ ]  [ ]       CP-ANG-010   red       82  Unstable angina does not follow a pattern. I
+  [ ]  [ ]       CP-ANG-011   red       77  Microvascular angina can be a sign of corona
+  [ ]  [ ]       CP-ANG-012   red      104  Vasospastic angina, also known as Prinzmetal
+  [ ]  [ ]       CP-PNA-002   yellow   238  Brain disorders, such as a stroke , a head i
+  [ ]  [ ]       CP-PNA-003   yellow    64  Your healthcare provider will diagnose pneum
+
+  blend top 3 today (for must-not only): ['CP-PERI-002', 'CP-ANG-001', 'CP-PERI-001']

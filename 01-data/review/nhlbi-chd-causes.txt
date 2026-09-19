@@ -1,0 +1,19 @@
+# REVIEW: nhlbi-chd-causes
+# Coronary Heart Disease - Causes and Prevention
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/coronary-heart-disease/causes
+# key_prefix: CP-ANG   expected_category: yellow
+# role: Causes and prevention of coronary heart disease. Continues CP-ANG, as the frozen symptoms page does. Requested 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+# A chunk that needs a different category from its page gets
+# category=red|yellow|green before heading= on its --- line.
+#
+# REVIEWED 2026-09-19 on Viraj's instruction: keep symptoms and when to
+# seek help; cut causes, prevention and hospital tests. Nothing kept.
+# Every candidate as chunked, verbatim: review/candidates-2026-09-19/nhlbi-chd-causes.txt
+# Why each was cut: review/REVIEW-SHEET-2026-09-19.txt, section E.
+#

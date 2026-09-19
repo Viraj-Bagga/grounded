@@ -1,0 +1,64 @@
+# REVIEW: nhlbi-angina-symptoms
+# Angina (Chest Pain) - Symptoms
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/angina/symptoms
+# key_prefix: CP-ANG   expected_category: yellow
+# role: The angina symptoms page, never pulled before. Picked 2026-09-19.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=50 heading=Angina (Chest Pain) Symptoms
+Symptoms vary based on the type of angina you have. Angina symptoms can differ in severity, location in the body, timing, and degree of relief you get from rest or medicines. Symptoms can also be different for men and women.
+
+--- chunk 002 [ok   ] tokens=212 heading=Common symptoms
+The main symptom of angina is chest pain or discomfort. Angina can feel like pain, pressure, tightness, discomfort, squeezing, heaviness, or burning in the chest. It can be difficult to tell exactly where the pain is coming from. Angina pain usually starts behind the breastbone and grows more intense over a few minutes. The pain or discomfort can also be felt in areas far from the source of the pain, such as the shoulders, arms, neck, back, and jaw.
+
+Aside from pain in the upper body, symptoms of angina may include:
+
+Shortness of breath
+Extreme tiredness
+Light-headedness or fainting
+Nausea, or feeling sick to the stomach
+Heartburn or indigestion
+Sweating
+Weakness
+
+It can be difficult to tell the difference between the symptoms of angina and of a heart attack . Call 9-1-1 if you feel chest discomfort that does not go away with rest or medicine. Angina can also lead to a heart attack and other complications that can be life-threatening.
+
+--- chunk 003 [short] tokens=96 heading=Angina in women
+Symptoms of angina can be different for women and men. It is more common for women to feel angina pain in the arms, neck, back, and jaw — areas far from the source of the pain. Women also more often show other symptoms of angina aside from chest pain, such as shortness of breath, nausea, and light-headedness. Sometimes these are not recognized as symptoms of a heart condition. This can cause delays in treatment for women.
+
+--- chunk 004 [short] tokens=38 heading=Stable angina
+Pain that occurs during physical activity or mental stress
+Pattern of symptoms that has not changed in the last 2 months
+Pain that is relieved by rest or medicines
+Symptoms that go away within 5 minutes
+
+--- chunk 005 [short] tokens=43 heading=Unstable angina
+Changes in your stable angina symptoms
+Pain that lasts longer than 20 minutes or goes away and then comes back
+Pain that grows worse
+Pain that is not relieved by rest or medicines
+Pain during rest or sleep
+Intense pain
+
+--- chunk 006 [short] tokens=33 heading=Microvascular angina
+Intense pain
+Pain that lasts a long time
+Shortness of breath
+Pain that is not easily relieved by medicines
+Pain that happens during physical or emotional stress or during rest
+
+--- chunk 007 [short] tokens=34 heading=Vasospastic angina
+Pain that starts at night or in the early morning hours
+Pattern of symptoms that happen during rest or sleep
+Pain that is relieved by medicines
+Symptoms that last around 15 minutes
+
+--- chunk 008 [short] tokens=19 heading=Refractory angina
+Symptoms that last more than 3 months
+Pain that cannot be managed with medicines or other treatments
