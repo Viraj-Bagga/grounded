@@ -1,0 +1,87 @@
+# RULE 4 TEST, AFTER. Same config as the before run: format 3, matched
+# chunks, reasoning off, temp 0.0, cache_prompt off, 2 passes.
+#
+# rule 4 WAS : If any red flag is present, the category is red regardless of other factors.
+# rule 4 NOW : A finding that requires emergency care now forces red. Findings that
+#              raise urgency without requiring emergency care belong in red_flags and
+#              support yellow.
+#
+# BEFORE was red / red / yellow / red / red, 1/4, stable over 2 passes.
+# Note from the before run: red-acs and probe-costo were RED with red_flags EMPTY,
+# so rule 4 cannot have been the mechanism on those two. Only yellow-angina and
+# yellow-pleuritic carried red_flags that rule 4 could have been converting.
+#
+# system_prompt.txt sha256 26e4f4ff3e30c899d51f97877b5e7f90b16053c90c593954a04ab14b8b71a2b7
+# run 2026-09-17T23:14:42Z
+
+############ AFTER pass 1/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=167 reasoning_chars=0 red_flags=[]
+       rationale='Chest pressure, sweating, nausea, and jaw pain with no relief after 26 minutes. Risk modifiers: age 58, high blood pressure, high cholesterol, statin use. Symptoms align with cardiac presentation per CP-ACS-001 and CP-ACS-003. No red flags present but risk factors elevate concern.'
+       next_steps=['Call emergency services immediately', 'Do not eat or drink', 'Sit or lie down, do not stand or walk']
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=224 reasoning_chars=0 red_flags=['Chest tightness triggered by exertion with complete resolution on rest', 'Known coronary artery disease with nitroglycerin use']
+       rationale='Chest tightness triggered by exertion with complete resolution on rest, but patient has known coronary artery disease and is on nitroglycerin. Angina is a red flag for possible myocardial ischemia. Cites: CP-ANG-001, CP-ANG-002, profile: coronary artery disease, medication: nitroglycerin.'
+       next_steps=['Call 9-1-1 immediately', 'Administer nitroglycerin if prescribed and not contraindicated', 'Monitor for recurrence or worsening symptoms']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile: coronary artery disease', 'medication: nitroglycerin']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile: coronary artery disease', 'medication: nitroglycerin']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=247 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD (burning chest, sour taste, worse when lying down) with no red flags. No risk modifiers from profile or medications. Symptoms began 40 minutes after a meal and improved with sitting upright, suggesting reflux-related. No sudden onset or rapid progression. No contraindications to OTC treatment.'
+       next_steps=['Take an OTC antacid or H2 blocker and monitor symptoms for 24 hours', 'Avoid large meals, caffeine, alcohol, and lying down for 2 hours after eating', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if you develop chest pain, persistent vomiting, or blood in vomit']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Have you experienced any chest pain, persistent vomiting, or blood in your vomit or stool?', 'Have you lost weight unintentionally?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=191 reasoning_chars=0 red_flags=['fever', 'fast heartbeat']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) suggests pleuritic pain. Rapid onset at rest, unchanged over 1.5 hours, and associated with fever and fast heartbeat indicate possible infection or inflammation. Risk modifiers: no cardiac history, but fever and tachycardia are concerning. No red flags present that would lower urgency. Findings: fever, fast heartbeat.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or NSAIDs']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=113 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications.'
+       next_steps=['Seek immediate medical care', 'Do not delay evaluation', 'Call emergency services if pain persists or worsens']
+       citations=[]
+       follow_up_questions=[]
+
+############ AFTER pass 2/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=167 reasoning_chars=0 red_flags=[]
+       rationale='Chest pressure, sweating, nausea, and jaw pain with no relief after 26 minutes. Risk modifiers: age 58, high blood pressure, high cholesterol, statin use. Symptoms align with cardiac presentation per CP-ACS-001 and CP-ACS-003. No red flags present but risk factors elevate concern.'
+       next_steps=['Call emergency services immediately', 'Do not eat or drink', 'Sit or lie down, do not stand or walk']
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=224 reasoning_chars=0 red_flags=['Chest tightness triggered by exertion with complete resolution on rest', 'Known coronary artery disease with nitroglycerin use']
+       rationale='Chest tightness triggered by exertion with complete resolution on rest, but patient has known coronary artery disease and is on nitroglycerin. Angina is a red flag for possible myocardial ischemia. Cites: CP-ANG-001, CP-ANG-002, profile: coronary artery disease, medication: nitroglycerin.'
+       next_steps=['Call 9-1-1 immediately', 'Administer nitroglycerin if prescribed and not contraindicated', 'Monitor for recurrence or worsening symptoms']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile: coronary artery disease', 'medication: nitroglycerin']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile: coronary artery disease', 'medication: nitroglycerin']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=247 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD (burning chest, sour taste, worse when lying down) with no red flags. No risk modifiers from profile or medications. Symptoms began 40 minutes after a meal and improved with sitting upright, suggesting reflux-related. No sudden onset or rapid progression. No contraindications to OTC treatment.'
+       next_steps=['Take an OTC antacid or H2 blocker and monitor symptoms for 24 hours', 'Avoid large meals, caffeine, alcohol, and lying down for 2 hours after eating', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if you develop chest pain, persistent vomiting, or blood in vomit']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Have you experienced any chest pain, persistent vomiting, or blood in your vomit or stool?', 'Have you lost weight unintentionally?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=191 reasoning_chars=0 red_flags=['fever', 'fast heartbeat']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) suggests pleuritic pain. Rapid onset at rest, unchanged over 1.5 hours, and associated with fever and fast heartbeat indicate possible infection or inflammation. Risk modifiers: no cardiac history, but fever and tachycardia are concerning. No red flags present that would lower urgency. Findings: fever, fast heartbeat.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or NSAIDs']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=113 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications.'
+       next_steps=['Seek immediate medical care', 'Do not delay evaluation', 'Call emergency services if pain persists or worsens']
+       citations=[]
+       follow_up_questions=[]
+
+# END 2026-09-17T23:25:01Z

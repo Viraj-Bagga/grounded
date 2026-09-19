@@ -1,0 +1,1791 @@
+You are an offline triage assistant running fully on-device. You have no internet access. Clinical findings about the patient come only from the PATIENT PROFILE, SYMPTOM TIMELINE and SYMPTOMS blocks. RETRIEVED CONTEXT supplies criteria, never findings. Never state a finding those three blocks do not state, never state one they contradict, and never copy a finding out of RETRIEVED CONTEXT and attribute it to the patient.
+
+You classify a presenting complaint using the WHO Interagency Integrated Triage Tool into exactly one of three categories:
+- red: emergency, needs immediate care, minutes matter
+- yellow: priority, needs assessment within hours
+- green: non-urgent, can wait or be self-managed
+
+Rules:
+1. Use PATIENT PROFILE to adjust the category. Age, pregnancy status, and current medications can move a presentation up a category. Anticoagulants, beta blockers and immunosuppressants are specifically relevant.
+2. Use SYMPTOM TIMELINE to judge onset and progression. Sudden onset, rest onset, and rapid progression all raise urgency.
+3. Cite a key for every clinical criterion or threshold you apply. Do not cite findings reported by the patient; those come from the case and need no source. Citations justify the reasoning, not the symptoms. Never cite a key that does not appear in RETRIEVED CONTEXT.
+4. A finding that requires emergency care now forces red. Findings that raise urgency without requiring emergency care belong in red_flags and support yellow.
+5. You do not diagnose. You assign a triage category, give the reasoning, and give next steps.
+6. If the information you have is not enough to separate two categories, assign the higher one and put the missing information in follow_up_questions.
+7. red_flags holds only findings that raise urgency, each carrying the qualifier that makes it discriminating, never the bare symptom. Write "unable to bear weight since the injury", not "ankle pain". One finding per entry, each under 15 words. A reassuring feature is not a red flag and does not belong in this list.
+8. rationale holds risk factors and modifiers, including everything drawn from PATIENT PROFILE. Do not put them in red_flags.
+
+Respond with a single JSON object and nothing else. No preamble, no markdown fences, no trailing commentary.
+
+Worked example.
+
+Input: 24 year old male, rolled his ankle playing football forty minutes ago, swelling over the outer ankle, able to bear weight and walk six steps, no numbness, no deformity, no medications, no medical history.
+
+Output:
+{"urgency":"green","rationale":"Isolated ankle injury with preserved weight bearing and no neurovascular compromise. No red flags present and no risk modifiers from profile or medications.","red_flags":[],"next_steps":["Rest, ice, compression and elevation for the first 48 hours","Avoid heat, alcohol and massage for the first 48 hours, which increase swelling","Seek assessment if unable to bear weight after 48 hours or if numbness develops"],"citations":[],"follow_up_questions":["Any pain directly over the bony bump on either side of the ankle?"]}
+
+Not all heart attacks begin with the sudden and crushing chest pain that comes when the blood flow to heart gets blocked. Heart attack symptoms can start slowly and can be mild or more serious and sudden. Symptoms also may come and go over several hours. The symptoms of a heart attack can be different from person to person and different between men and women. If you’ve already had a heart attack, your symptoms may not be the same for another one.
+
+Heart attacks can happen without any symptoms or with very mild symptoms. These are called silent heart attacks. Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.
+
+If you are having a heart attack, you may experience one or more of the symptoms below.
+
+Chest pain, heaviness, or discomfort in the center or left side of the chest (this is the most common symptom)
+Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button
+Shortness of breath when resting or doing a little bit of physical activity (this is more common in older adults)
+Sweating a lot for no reason
+Feeling unusually tired for no reason, sometimes for days (this is more common in women)
+Nausea (feeling sick to the stomach) and vomiting
+Light-headedness or sudden dizziness
+Rapid or irregular heartbeat
+
+It is also possible to have mild symptoms or even no symptoms at all and still have a heart attack.
+
+Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for emergency medical care, even if you are not sure that you’re having a heart attack.
+
+Acting fast can limit damage to your heart and save your life. The 9-1-1 operator or emergency medical services (EMS) personnel can give you advice that can help prevent damage to your heart.
+An ambulance is the best and safest way to get to the hospital. Do not drive to the hospital or let someone else drive you. EMS personnel can check how you are doing and start tests and lifesaving medicines right away. People who arrive by ambulance often get faster treatment at the hospital.
+
+Every minute matters. Never delay calling 9-1-1, taking aspirin or doing anything else you think might help.
+
+Knowing the difference between stable angina (chest pain in people who have coronary artery disease) and a heart attack is important.
+
+The pain from angina usually happens after physical activity and goes away in a few minutes when you rest or take medicine to treat it.
+The pain from a heart attack is more serious than the pain from angina. Heart attack pain doesn’t go away when you rest or take medicine.
+
+If you don’t know whether your chest pain is angina or a heart attack, call 9-1-1.
+
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+
+Having a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:
+
+Other heart problems, such as angina
+Panic attacks
+Digestive problems, such as heartburn or esophagus disorders
+Sore muscles
+Lung diseases, such as pneumonia , pleurisy , or pulmonary embolism
+Costochondritis - an inflammation of joints in your chest
+
+Some of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.
+
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+
+Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stomach contents come back up into your esophagus. However, many people have GER once in a while.
+
+GERD may develop if your lower esophageal sphincter becomes weak or relaxes when it shouldn’t. Factors that may affect the lower esophageal sphincter and lead to GERD include
+
+being overweight or having obesity
+being pregnant
+smoking or inhaling secondhand smoke
+
+Some medicines can cause GERD or make GERD symptoms worse. Examples include
+
+benzodiazepines, sedatives that make you calmer or sleepy
+calcium channel blockers, which are used to treat high blood pressure
+certain asthma medicines
+nonsteroidal anti-inflammatory drugs (NSAIDs)
+tricyclic antidepressants
+
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+
+People with panic disorder may have:
+
+Sudden and repeated panic attacks of overwhelming anxiety and fear
+A feeling of being out of control
+A fear of death or impending doom during a panic attack
+An intense worry about when the next panic attack will happen
+A fear or avoidance of places where panic attacks have occurred in the past
+
+Physical symptoms during a panic attack may include:
+
+Pounding or racing heart
+Sweating
+Chills
+Trembling
+Difficulty breathing
+Weakness or dizziness
+Tingly or numb hands
+Chest pain
+Stomach pain or nausea
+
+A panic attack can last from a few minutes to an hour or sometimes longer. While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time. However, for some, the fear of future attacks may lead to ongoing anxiety.
+
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+
+Call your healthcare provider right away if you think you may have symptoms of VTE. Deep vein thrombosis (DVT) should be taken seriously, as it may lead to a life-threatening pulmonary embolism (PE).
+
+Symptoms of VTE can include:
+
+Swollen and tender legs that are painful to the touch, if you have blood clots that block blood flow to your leg veins ( deep vein thrombosis or DVT )
+Shortness of breath and pain when breathing, if you have a blood clot that travels to the lungs ( pulmonary embolism )
+
+The symptoms of VTE are not the same for everyone. Sometimes VTE does not cause symptoms until serious complications develop. Because the symptoms of DVT and pulmonary embolism are different, it’s important to know the warning signs if you are at risk of VTE .
+
+Most often, there is more than one risk factor involved. The more risk factors you have, the greater the chance you have of developing VTE.
+
+Being still slows blood flow through the veins in your arms and legs, raising the likelihood of DVT. Especially when combined with other risk factors, DVT can develop during a long flight (more than 4 hours) or when a person is on bed rest in a nursing home, hospital setting, or after surgery. The chance of developing a blood clot is highest in the first 3 months after surgery and lowers with time. Ask your healthcare provider about prevention plans if you are scheduled for major surgery. Slower blood flow can create a low- oxygen environment that traps blood in places such as the leg veins or makes it easier for clots to form.
+
+Learn about ways to prevent blood clots after surgery or while traveling.
+
+Certain medical conditions can raise your chance of developing VTE. Some conditions are more closely linked to developing DVT or pulmonary embolism than others and include:
+
+Blood clotting disorders or a history of blood clots
+cancer and cancer treatments including chemotherapy and surgery
+Diabetes , which raises the likelihood of plaque buildup in the arteries that can lead to blood clots
+Heart conditions such as heart attack or congestive heart failure
+High blood pressure, which can damage blood vessels
+Infections, such as with SARS-CoV-2, the virus that causes COVID-19
+Kidney disease , which makes the blood clot more easily
+Spinal cord injury, which can damage veins deep in your body and may cause paralysis, reducing blood flow
+Obesity, which can lead to inflammation and damage in the lining of blood vessels
+
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+
+[PATIENT PROFILE]
+age: 45, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Bit of a niggle in my chest, honestly it is nothing, the wife made me check.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest discomfort with no information on what brings it on, how long it lasts, or what comes with it. The retrieved context separates pain that settles with rest from pain that persists, and this case does not say which this is. Assigning the higher category until that is answered.", "red_flags": [], "next_steps": ["Do not dismiss it until the questions below are answered", "Seek assessment today if it is there now or keeps returning"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": ["Does it come on when you exert yourself and ease when you stop?", "How long does it last once it starts?", "Has it spread to your arm, neck or jaw, or come with sweating?"]}
+
+[PATIENT PROFILE]
+age: 58, sex: female
+conditions: cancer, on chemotherapy
+medications: chemotherapy
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I am sorry to trouble you. I am halfway through chemo and about two hours ago I got a sudden pain in my chest when I breathe in, and I am more out of breath than I have been. I did not want to make a fuss but it has not gone.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PE-002]
+Most often, there is more than one risk factor involved. The more risk factors you have, the greater the chance you have of developing VTE.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Sudden pain on breathing with new breathlessness, two hours ago, during chemotherapy. The retrieved context notes that risk factors combine and that cancer and its treatment raise the likelihood, and more than one is present here.", "red_flags": ["Sudden pain on breathing with new breathlessness during chemotherapy"], "next_steps": ["Call 9-1-1 now", "Do not drive yourself", "Tell them you are having chemotherapy"], "citations": ["CP-PE-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 27, sex: female
+conditions: panic disorder
+medications: sertraline
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My flatmate is having one of her panic attacks. Chest tight, hands tingling, breathing fast. She says it feels exactly like the others and she has had loads. It is already easing off after about ten minutes.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-001]
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+
+[CP-PANIC-003]
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest tightness with tingling and rapid breathing in a person with diagnosed panic disorder, described as identical to previous attacks and already settling. No features suggesting a cardiac or respiratory cause.", "red_flags": [], "next_steps": ["Sit with her somewhere quiet and let the attack pass", "Seek care the same day if this one feels different from her usual attacks or does not settle"], "citations": ["CP-PANIC-001", "CP-PANIC-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 19, sex: female
+conditions: panic disorder
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My daughter has gone into one of her panic attacks, chest tight, hands tingling, and I hate seeing it. She says it is the same as always and she knows it will pass. It is easing already.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-001]
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+
+[CP-PANIC-003]
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest tightness with tingling in diagnosed panic disorder, recognised by the patient as her usual attack and already easing. The retrieved context notes these attacks are not life-threatening and the physical symptoms usually resolve with time.", "red_flags": [], "next_steps": ["Sit with her somewhere quiet until it passes", "Seek care the same day if an attack ever feels different from her usual ones"], "citations": ["CP-PANIC-001", "CP-PANIC-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 34, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Sorry to bother you, I know this is probably nothing, but I have had this ache in my chest on and off since I helped my brother move house on Saturday. It is worse if I press on the spot or reach up for something. I just keep reading things online and now I am worried.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-003]
+If you are having a heart attack, you may experience one or more of the symptoms below.
+
+Chest pain, heaviness, or discomfort in the center or left side of the chest (this is the most common symptom)
+Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button
+Shortness of breath when resting or doing a little bit of physical activity (this is more common in older adults)
+Sweating a lot for no reason
+Feeling unusually tired for no reason, sometimes for days (this is more common in women)
+Nausea (feeling sick to the stomach) and vomiting
+Light-headedness or sudden dizziness
+Rapid or irregular heartbeat
+
+It is also possible to have mild symptoms or even no symptoms at all and still have a heart attack.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest ache following unaccustomed lifting, reproducible on pressing the spot and on reaching, with no relationship to exertion. It does not match the heart attack pattern in the retrieved context, and the patient reports no other symptoms.", "red_flags": [], "next_steps": ["Rest the area and avoid heavy lifting for a few days", "Seek care the same day if the pain becomes constant, spreads to the arm or jaw, or comes on at rest"], "citations": ["CP-ACS-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 55, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My husband gets burning in his chest after dinner most nights, worse when he lies down, and he gets a sour taste. Sitting up sorts it out. His stool has been black and tarry for the last two days.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "The same reflux pattern, but with two days of black tarry stool. The retrieved context lists that as a sign of bleeding in the digestive tract, which moves this from self-care to same-day assessment.", "red_flags": ["Black tarry stool for two days alongside reflux"], "next_steps": ["Have him seen today, do not wait", "Go to an emergency department if he feels faint or vomits blood"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 29, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My brother has a sharp pain in his chest. It is worse when he breathes in and worse lying flat, and it eases when he sits forward. He had a cold a couple of weeks ago. Otherwise he seems himself, talking normally.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-001]
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain worse on inspiration and lying flat, relieved by sitting forward, a few weeks after a viral illness. The retrieved context links a preceding virus to heart inflammation. He is otherwise well, so this needs assessment today rather than emergency care.", "red_flags": ["Sharp chest pain worse lying flat, eased sitting forward"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if he becomes breathless at rest or the pain worsens sharply"], "citations": ["CP-PERI-001", "CP-PERI-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 66, sex: male
+conditions: type 2 diabetes, high blood pressure
+medications: metformin, ramipril
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+been in bed 2 wks since my hip op and now got a pain in my chest wen i breath in started this morning and my right leg is fatter than the left
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PE-004]
+Certain medical conditions can raise your chance of developing VTE. Some conditions are more closely linked to developing DVT or pulmonary embolism than others and include:
+
+Blood clotting disorders or a history of blood clots
+cancer and cancer treatments including chemotherapy and surgery
+Diabetes , which raises the likelihood of plaque buildup in the arteries that can lead to blood clots
+Heart conditions such as heart attack or congestive heart failure
+High blood pressure, which can damage blood vessels
+Infections, such as with SARS-CoV-2, the virus that causes COVID-19
+Kidney disease , which makes the blood clot more easily
+Spinal cord injury, which can damage veins deep in your body and may cause paralysis, reducing blood flow
+Obesity, which can lead to inflammation and damage in the lining of blood vessels
+
+[CP-PE-003]
+Being still slows blood flow through the veins in your arms and legs, raising the likelihood of DVT. Especially when combined with other risk factors, DVT can develop during a long flight (more than 4 hours) or when a person is on bed rest in a nursing home, hospital setting, or after surgery. The chance of developing a blood clot is highest in the first 3 months after surgery and lowers with time. Ask your healthcare provider about prevention plans if you are scheduled for major surgery. Slower blood flow can create a low- oxygen environment that traps blood in places such as the leg veins or makes it easier for clots to form.
+
+Learn about ways to prevent blood clots after surgery or while traveling.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Pain on breathing that began this morning after two weeks of bed rest following hip surgery, with asymmetric leg swelling. The retrieved context names bed rest after surgery and the first three months post-operatively as raising the likelihood, and describes swollen tender legs with pain on breathing.", "red_flags": ["Pain on breathing with one-sided leg swelling after hip surgery"], "next_steps": ["Call 9-1-1 now", "Stay in bed, do not walk about", "Have someone stay with you until help arrives"], "citations": ["CP-PE-004", "CP-PE-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 71, sex: male
+conditions: type 2 diabetes
+medications: metformin, gliclazide
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I have felt unusually tired since yesterday and slightly short of breath walking to the gate. No real pain, just a vague heaviness. I put it down to the heat but my wife thought I should ask.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-002]
+Heart attacks can happen without any symptoms or with very mild symptoms. These are called silent heart attacks. Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.
+
+[CP-DIFF-001]
+Having a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:
+
+Other heart problems, such as angina
+Panic attacks
+Digestive problems, such as heartburn or esophagus disorders
+Sore muscles
+Lung diseases, such as pneumonia , pleurisy , or pulmonary embolism
+Costochondritis - an inflammation of joints in your chest
+
+Some of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Unusual tiredness and breathlessness on mild exertion with vague chest heaviness and no clear pain, over a day, in a man with diabetes. The retrieved context notes heart attacks can occur with very mild symptoms or none, and that this is more common in people with diabetes.", "red_flags": ["Vague chest heaviness with new breathlessness on mild exertion"], "next_steps": ["Call 9-1-1 now", "Do not drive yourself or walk any further", "Tell them you have diabetes"], "citations": ["CP-ACS-002", "CP-DIFF-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 26, sex: male
+conditions: panic disorder
+medications: sertraline
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Nothing serious. Just the usual panic thing, chest goes tight for ten minutes and passes. I only asked because my flatmate nagged.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-001]
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+
+[CP-PANIC-002]
+People with panic disorder may have:
+
+Sudden and repeated panic attacks of overwhelming anxiety and fear
+A feeling of being out of control
+A fear of death or impending doom during a panic attack
+An intense worry about when the next panic attack will happen
+A fear or avoidance of places where panic attacks have occurred in the past
+
+Physical symptoms during a panic attack may include:
+
+Pounding or racing heart
+Sweating
+Chills
+Trembling
+Difficulty breathing
+Weakness or dizziness
+Tingly or numb hands
+Chest pain
+Stomach pain or nausea
+
+A panic attack can last from a few minutes to an hour or sometimes longer. While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time. However, for some, the fear of future attacks may lead to ongoing anxiety.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest tightness lasting about ten minutes in diagnosed panic disorder, described as the patient's usual pattern and self-limiting. The retrieved context describes panic attack symptoms that resolve with time.", "red_flags": [], "next_steps": ["Keep using whatever helps you ride the attack out", "Seek care the same day if one feels different from your usual attacks"], "citations": ["CP-PANIC-001", "CP-PANIC-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 59, sex: male
+conditions: high blood pressure
+medications: ramipril
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Pressure in the centre of my chest for the last forty minutes. It has not eased off since I sat down.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-003]
+If you are having a heart attack, you may experience one or more of the symptoms below.
+
+Chest pain, heaviness, or discomfort in the center or left side of the chest (this is the most common symptom)
+Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button
+Shortness of breath when resting or doing a little bit of physical activity (this is more common in older adults)
+Sweating a lot for no reason
+Feeling unusually tired for no reason, sometimes for days (this is more common in women)
+Nausea (feeling sick to the stomach) and vomiting
+Light-headedness or sudden dizziness
+Rapid or irregular heartbeat
+
+It is also possible to have mild symptoms or even no symptoms at all and still have a heart attack.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Central chest pressure for forty minutes that has not eased with sitting. That is the most common presenting symptom described in the retrieved context, and it has persisted at rest.", "red_flags": ["Central chest pressure unchanged for forty minutes at rest"], "next_steps": ["Call 9-1-1 now", "Do not drive yourself", "Sit down and stay still until help arrives"], "citations": ["CP-ACS-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 45, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My sister had a one-off episode last week, chest tight and frightened, lasted about twenty minutes and passed. She has been fine since. She has never had one before or after.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-003]
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+
+[CP-PANIC-002]
+People with panic disorder may have:
+
+Sudden and repeated panic attacks of overwhelming anxiety and fear
+A feeling of being out of control
+A fear of death or impending doom during a panic attack
+An intense worry about when the next panic attack will happen
+A fear or avoidance of places where panic attacks have occurred in the past
+
+Physical symptoms during a panic attack may include:
+
+Pounding or racing heart
+Sweating
+Chills
+Trembling
+Difficulty breathing
+Weakness or dizziness
+Tingly or numb hands
+Chest pain
+Stomach pain or nausea
+
+A panic attack can last from a few minutes to an hour or sometimes longer. While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time. However, for some, the fear of future attacks may lead to ongoing anxiety.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "A single episode of chest tightness with fear lasting about twenty minutes, resolved, with no recurrence since. The retrieved context describes an isolated panic attack as a one-time episode that is not itself a disorder.", "red_flags": [], "next_steps": ["No action needed for a single resolved episode", "Seek assessment if it happens again or if an episode comes with sweating or pain spreading to the arm or jaw"], "citations": ["CP-PANIC-003", "CP-PANIC-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 31, sex: female
+conditions: panic disorder
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I know this is my panic disorder, I have had it for years, but I always second guess myself. Chest went tight on the bus, heart going, hands tingly, and it settled after about a quarter of an hour like it always does. I feel silly asking.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-001]
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest tightness with tingling and a racing heart on public transport, settling within about fifteen minutes, in long-standing diagnosed panic disorder and following the patient's established pattern. The retrieved context notes attacks can occur at any time and are not life-threatening.", "red_flags": [], "next_steps": ["Carry on with what already helps you manage an attack", "Seek care the same day if an attack feels different from your usual ones"], "citations": ["CP-PANIC-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 33, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+It is probably nothing but I have had a sharp pain in my chest for a couple of days. It is worse taking a deep breath and a bit better leaning forward. I have carried on as normal.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain over two days, worse on deep breathing and eased by leaning forward. That positional pattern matches the presentation in the retrieved context and warrants assessment today despite the patient feeling otherwise well.", "red_flags": ["Sharp chest pain worse on deep breathing, eased leaning forward"], "next_steps": ["Arrange assessment today rather than carrying on", "Call 9-1-1 if you become breathless at rest"], "citations": ["CP-PERI-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 61, sex: female
+conditions: coronary artery disease
+medications: nitroglycerin as needed, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It went in about three minutes.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Exertional chest tightness in known coronary artery disease, following the patient's established pattern and resolving within minutes of stopping. That fits stable angina rather than an evolving event, but angina is a warning sign of raised heart attack risk and warrants assessment.", "red_flags": ["Exertional chest tightness with known coronary artery disease"], "next_steps": ["Arrange to be seen by a clinician today", "Stop and rest at once if it returns", "Call 9-1-1 if chest pain lasts more than a few minutes or comes on at rest"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 6, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My daughter has had a dry cough for three days. She is running about as normal, eating fine, no temperature, breathing looks normal to me.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PNA-001]
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Dry cough for three days in a child who is active, eating normally and breathing comfortably. None of the features in the retrieved context that would raise concern are present.", "red_flags": [], "next_steps": ["Keep her drinking and let her rest as she wants to", "Seek care the same day if she develops a temperature, breathes quickly, or goes off her food"], "citations": ["CP-PNA-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 47, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Sharp pain left side of chest. Worse breathing in. Three days. No cough.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PLEU-001]
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp one-sided chest pain worse on inspiration over three days without cough. The retrieved context describes pleurisy as inflammation of the pleura causing sharp pain with breathing.", "red_flags": ["Sharp one-sided chest pain worse on inspiration for three days"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest or cough up blood"], "citations": ["CP-PLEU-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 30, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Ache across my chest since I started at the gym on Monday. Worse when I do press-ups. Fine the rest of the time.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Chest ache since starting a new exercise routine, provoked by a specific movement and absent otherwise. It does not match the pain pattern in the retrieved context.", "red_flags": [], "next_steps": ["Ease off chest exercises for a week and build up more slowly", "Seek care the same day if the ache becomes constant or comes on at rest"], "citations": ["CP-PERI-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 17, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My daughter had a panic attack at school, first one ever, about twenty minutes and it passed. That was a fortnight ago and there has been nothing since. I am still a bit rattled about it.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-003]
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "A single resolved episode a fortnight ago with no recurrence. The retrieved context describes an isolated panic attack as a one-time episode rather than a disorder.", "red_flags": [], "next_steps": ["No action needed for a single resolved episode", "Seek assessment if they start recurring or if one comes with chest pain spreading to the arm or jaw"], "citations": ["CP-PANIC-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 36, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Heartburn most evenings. Worse after a big curry or a few pints. Antacids from the chemist sort it. Been going on months.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-003]
+Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stomach contents come back up into your esophagus. However, many people have GER once in a while.
+
+GERD may develop if your lower esophageal sphincter becomes weak or relaxes when it shouldn’t. Factors that may affect the lower esophageal sphincter and lead to GERD include
+
+being overweight or having obesity
+being pregnant
+smoking or inhaling secondhand smoke
+
+Some medicines can cause GERD or make GERD symptoms worse. Examples include
+
+benzodiazepines, sedatives that make you calmer or sleepy
+calcium channel blockers, which are used to treat high blood pressure
+certain asthma medicines
+nonsteroidal anti-inflammatory drugs (NSAIDs)
+tricyclic antidepressants
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Burning behind the breastbone in the evenings for months, provoked by large meals and alcohol. The retrieved context describes this as typical reflux and lists dietary triggers among the factors that worsen it.", "red_flags": [], "next_steps": ["Try smaller evening meals and leave longer before lying down", "Cut back on alcohol and see whether the pattern changes", "Seek assessment if swallowing becomes difficult, you lose weight without trying, or your stool turns black"], "citations": ["CP-GERD-001", "CP-GERD-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 41, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My partner has chest pain and I am panicking a bit. What do I need to know?
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-001]
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest pain reported without detail on character, position or associated symptoms. The retrieved context separates positional pain relieved by sitting forward from pain with breathlessness needing emergency help, and neither has been established. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Stay with him while you answer the questions below"], "citations": ["CP-PERI-001", "CP-PERI-002"], "follow_up_questions": ["Is it sharp, and is it worse when he breathes in?", "Does it change when he sits forward or lies flat?", "Is he short of breath right now?"]}
+
+[PATIENT PROFILE]
+age: 41, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+It is sharp and worse breathing in, and he says leaning forward helps. He is breathing fine. He had flu a fortnight ago.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-001]
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain worse on inspiration and relieved by leaning forward, two weeks after a viral illness, with no breathlessness. The retrieved context links a preceding virus to heart inflammation and describes this positional pattern.", "red_flags": ["Sharp chest pain worse on inspiration, relieved leaning forward"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if he becomes short of breath at rest or the pain suddenly worsens"], "citations": ["CP-PERI-001", "CP-PERI-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 78, sex: female
+conditions: type 2 diabetes, high blood pressure
+medications: metformin, amlodipine
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My gran has gone very quiet and clammy this afternoon and says she just feels wrong. She keeps saying it is indigestion. She is not complaining of pain as such.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-002]
+Heart attacks can happen without any symptoms or with very mild symptoms. These are called silent heart attacks. Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.
+
+[CP-ACS-004]
+Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for emergency medical care, even if you are not sure that you’re having a heart attack.
+
+Acting fast can limit damage to your heart and save your life. The 9-1-1 operator or emergency medical services (EMS) personnel can give you advice that can help prevent damage to your heart.
+An ambulance is the best and safest way to get to the hospital. Do not drive to the hospital or let someone else drive you. EMS personnel can check how you are doing and start tests and lifesaving medicines right away. People who arrive by ambulance often get faster treatment at the hospital.
+
+Every minute matters. Never delay calling 9-1-1, taking aspirin or doing anything else you think might help.
+
+Knowing the difference between stable angina (chest pain in people who have coronary artery disease) and a heart attack is important.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "An older woman with diabetes who is clammy and says she feels wrong, attributing it to indigestion, without reporting pain. The retrieved context notes heart attacks can present with very mild symptoms or none, particularly in older adults and people with diabetes, and says to call for emergency care even when unsure.", "red_flags": ["Clammy and unwell without pain in an older adult with diabetes"], "next_steps": ["Call 9-1-1 now", "Do not wait to see if it passes", "Do not drive her yourself, wait for the ambulance"], "citations": ["CP-ACS-002", "CP-ACS-004"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 68, sex: male
+conditions: coronary artery disease, type 2 diabetes
+medications: metformin, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I get a tight band across my chest when I climb the stairs at work. It has been the same for about a year. Today it went after a minute or two of standing still.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Exertional chest tightness in known coronary artery disease, unchanged in pattern for a year and relieved within minutes of stopping. The retrieved context describes symptoms that go away with rest and return with activity as the coronary disease pattern.", "red_flags": ["Exertional chest tightness with known coronary artery disease"], "next_steps": ["Arrange to be seen by a clinician today", "Stop and rest as soon as it comes on", "Call 9-1-1 if it lasts more than a few minutes or starts at rest"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 55, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My wife has had a sharp pain in her chest for two days, worse when she breathes in. She is not breathless and there is no cough. She keeps saying it is a pulled muscle but pressing on it does not change it.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PLEU-001]
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+
+[CP-DIFF-001]
+Having a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:
+
+Other heart problems, such as angina
+Panic attacks
+Digestive problems, such as heartburn or esophagus disorders
+Sore muscles
+Lung diseases, such as pneumonia , pleurisy , or pulmonary embolism
+Costochondritis - an inflammation of joints in your chest
+
+Some of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain over two days, worse on inspiration and not reproduced by pressing the chest wall, which argues against the muscular explanation. The retrieved context lists pleurisy among the causes of chest pain and describes sharp pain with breathing.", "red_flags": ["Sharp chest pain worse on inspiration, not reproducible on pressing"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if she becomes breathless at rest, or the pain becomes crushing"], "citations": ["CP-PLEU-001", "CP-DIFF-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 31, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+burnin in my chest after tea most nights worse when i lie down get a sour taste sittin up sorts it out but my poo has gone black and tarry the last 2 days
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "The same reflux pattern, but with two days of black tarry stool. The retrieved context lists that as a sign of bleeding in the digestive tract, which moves this from self-care to same-day assessment.", "red_flags": ["Black tarry stool for two days alongside reflux"], "next_steps": ["Be seen today, do not wait for it to settle", "Go to an emergency department if you feel faint or vomit blood"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 72, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My mother has had a cough for four days and now it hurts in her chest when she coughs or takes a deep breath. She is more tired than usual but she is up and about.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PNA-001]
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Four days of cough now with chest pain on coughing and deep breathing, and increased tiredness, in an older adult. The retrieved context notes older adults are at risk of more serious illness and may not show typical symptoms.", "red_flags": ["Chest pain on coughing and deep breathing after four days"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if she becomes breathless at rest, confused, or her lips look blue"], "citations": ["CP-PNA-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 35, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Chest hurts. Had a cough a few days.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PNA-001]
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest pain with a cough over several days and no further detail. The retrieved context describes chest pain on breathing or coughing among pneumonia symptoms alongside fever and breathlessness, none of which has been established here. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Answer the questions below before deciding whether to wait"], "citations": ["CP-PNA-001"], "follow_up_questions": ["Does the pain come when you breathe in or cough?", "Have you had a temperature or chills?", "Are you more short of breath than usual?"]}
+
+[PATIENT PROFILE]
+age: 35, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Hurts when I cough. Had a temperature since yesterday. Bit more puffed going upstairs.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PNA-001]
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest pain on coughing with a temperature since yesterday and new breathlessness on stairs, following several days of cough. These match the symptom pattern in the retrieved context and warrant assessment today.", "red_flags": ["Chest pain on coughing with fever and new breathlessness"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest or your lips look blue"], "citations": ["CP-PNA-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 61, sex: female
+conditions: coronary artery disease
+medications: nitroglycerin as needed, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It has not shifted, it has been half an hour now.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Exertional chest tightness in known coronary artery disease that has not resolved after half an hour at rest. The patient's usual episodes settle within minutes; pain that persists at rest is the feature that separates an evolving event from stable angina.", "red_flags": ["Chest tightness unchanged after 30 minutes at rest"], "next_steps": ["Call 9-1-1 now", "Do not drive to hospital, wait for the ambulance", "Sit still and stay where you are"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 28, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Probably nothing but I have got a twinge in my chest. Honestly I feel fine.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PLEU-001]
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest discomfort minimised by the patient with no detail on character, duration or what changes it. The retrieved context describes sharp pain with breathing as a pleural pattern, which has not been established. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Answer the questions below rather than leaving it"], "citations": ["CP-PLEU-001"], "follow_up_questions": ["Is it sharp, and worse when you breathe in?", "How long has it been there?", "Are you breathless, or coughing anything up?"]}
+
+[PATIENT PROFILE]
+age: 28, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Sharp I suppose, and yes worse on a deep breath. Three days. Not breathless, no cough.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PLEU-001]
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain worse on deep breathing for three days, without breathlessness or cough. The retrieved context describes pleurisy as inflammation of the pleura causing sharp pain with breathing.", "red_flags": ["Sharp chest pain worse on deep breathing for three days"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest or cough up blood"], "citations": ["CP-PLEU-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 49, sex: male
+conditions: high cholesterol
+medications: atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+started off mild about an hour ago just a bit of an ache in my chest but its been coming and going and getting worse and now its going into my left arm
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-001]
+Not all heart attacks begin with the sudden and crushing chest pain that comes when the blood flow to heart gets blocked. Heart attack symptoms can start slowly and can be mild or more serious and sudden. Symptoms also may come and go over several hours. The symptoms of a heart attack can be different from person to person and different between men and women. If you’ve already had a heart attack, your symptoms may not be the same for another one.
+
+[CP-ACS-002]
+Heart attacks can happen without any symptoms or with very mild symptoms. These are called silent heart attacks. Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Chest ache that began mildly an hour ago, has come and gone while worsening, and is now radiating to the left arm. The retrieved context describes exactly this pattern: symptoms that start slowly, are mild at first, and come and go over several hours.", "red_flags": ["Worsening chest ache over an hour now radiating to the left arm"], "next_steps": ["Call 9-1-1 now", "Do not drive yourself to hospital", "Sit down and stay still until help arrives"], "citations": ["CP-ACS-001", "CP-ACS-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 29, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My brother has a sharp pain in his chest. It is worse when he breathes in and worse lying flat, and it eases when he sits forward. He had a cold a couple of weeks ago. In the last few minutes he has gone very short of breath just sitting there and cannot finish a sentence.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-001]
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Sharp positional chest pain after a viral illness, now with sudden breathlessness at rest and an inability to complete a sentence. The retrieved context says to call for emergency help if there is chest pain with severe shortness of breath.", "red_flags": ["Sudden breathlessness at rest, unable to finish a sentence"], "next_steps": ["Call 9-1-1 now", "Let him sit in whatever position he can breathe in", "Stay with him until help arrives"], "citations": ["CP-PERI-001", "CP-PERI-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 63, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Chest has not been right today.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ACS-003]
+If you are having a heart attack, you may experience one or more of the symptoms below.
+
+Chest pain, heaviness, or discomfort in the center or left side of the chest (this is the most common symptom)
+Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button
+Shortness of breath when resting or doing a little bit of physical activity (this is more common in older adults)
+Sweating a lot for no reason
+Feeling unusually tired for no reason, sometimes for days (this is more common in women)
+Nausea (feeling sick to the stomach) and vomiting
+Light-headedness or sudden dizziness
+Rapid or irregular heartbeat
+
+It is also possible to have mild symptoms or even no symptoms at all and still have a heart attack.
+
+[CP-ACS-005]
+The pain from angina usually happens after physical activity and goes away in a few minutes when you rest or take medicine to treat it.
+The pain from a heart attack is more serious than the pain from angina. Heart attack pain doesn’t go away when you rest or take medicine.
+
+If you don’t know whether your chest pain is angina or a heart attack, call 9-1-1.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest symptoms reported with no detail of character, timing, provocation or associated features. The retrieved context distinguishes pain that persists at rest from pain that settles, and nothing here establishes which applies. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Seek assessment today", "Call 9-1-1 if the discomfort is present now and has lasted more than a few minutes"], "citations": ["CP-ACS-003", "CP-ACS-005"], "follow_up_questions": ["Is the discomfort there now, and how long has it lasted?", "Does it come on with exertion and go away with rest?", "Is there any sweating, nausea or breathlessness with it?"]}
+
+[PATIENT PROFILE]
+age: 52, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I hope this is not wasting your time. I get a burning feeling behind my breastbone, mostly in the evening, and sometimes a sour taste at the back of my throat. It is worse if I have eaten late or had a glass of wine, and it is better if I prop myself up on pillows. It has been like this for a good while and nothing else has changed.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-003]
+Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stomach contents come back up into your esophagus. However, many people have GER once in a while.
+
+GERD may develop if your lower esophageal sphincter becomes weak or relaxes when it shouldn’t. Factors that may affect the lower esophageal sphincter and lead to GERD include
+
+being overweight or having obesity
+being pregnant
+smoking or inhaling secondhand smoke
+
+Some medicines can cause GERD or make GERD symptoms worse. Examples include
+
+benzodiazepines, sedatives that make you calmer or sleepy
+calcium channel blockers, which are used to treat high blood pressure
+certain asthma medicines
+nonsteroidal anti-inflammatory drugs (NSAIDs)
+tricyclic antidepressants
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Burning behind the breastbone with regurgitation of acid, worse after late meals and alcohol and relieved by lying propped up. The retrieved context describes this pattern as typical reflux and names alcohol and meal timing among the contributing factors.", "red_flags": [], "next_steps": ["Leave two to three hours between eating and lying down", "Keep propping yourself up at night if it helps", "Seek assessment if swallowing becomes painful or difficult, or you lose weight without trying"], "citations": ["CP-GERD-001", "CP-GERD-003", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 68, sex: male
+conditions: coronary artery disease, type 2 diabetes
+medications: metformin, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I get a tight band across my chest when I climb the stairs at work. It has been the same for about a year. Today it has stayed for over half an hour even though I have been sitting down.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "red", "rationale": "Exertional chest tightness in known coronary artery disease that has persisted beyond half an hour despite sitting down, against a year of episodes that settled within minutes. The retrieved context names pain that does not go away or occurs at rest as a possible heart attack.", "red_flags": ["Chest tightness persisting over 30 minutes despite sitting down"], "next_steps": ["Call 9-1-1 now", "Do not drive yourself to hospital", "Stay sitting and still until the ambulance arrives"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 38, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+I get a bit of burning in my chest sometimes. I do not really know what sets it off, it just happens now and then. I have had it a while I suppose. Should I be doing something about it?
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Intermittent burning chest discomfort with no timing, no relationship to meals or posture, and no duration given. The retrieved context describes reflux by its relationship to eating and lying down, none of which this case establishes. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Seek assessment rather than continuing to wait it out"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": ["Does it come on after meals or when you lie down?", "Do you ever get a sour taste or food coming back up?", "Have you noticed any difficulty swallowing, or blood in your vomit or stool?"]}
+
+[PATIENT PROFILE]
+age: 61, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+Cough for five days, now producing green phlegm. Chest hurts when I cough. Temperature of 38.4 last night. More tired than usual but managing.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PNA-001]
+The symptoms of pneumonia can be mild or serious. Young children, older adults, and people who have serious health conditions are at risk for developing more serious pneumonia or life-threatening complications.
+
+The symptoms of pneumonia may include:
+
+Chest pain when you breathe or cough
+Chills
+Cough with or without mucus
+Fever
+Low oxygen levels in your blood, measured with a pulse oximeter
+Shortness of breath
+
+You may also have other symptoms, including a headache, muscle pain, extreme tiredness, nausea (feeling sick to your stomach), vomiting, and diarrhea.
+
+Older adults and people who have serious illnesses or weakened immune systems may not have the typical symptoms. They may have a lower-than-normal temperature instead of a fever. Older adults who have pneumonia may feel weak or suddenly confused.
+
+Sometimes babies don’t have typical symptoms either. They may vomit, have a fever, cough, or appear restless or tired and without energy. Babies may also show the following signs of breathing problems:
+
+Bluish tone to the skin and lips
+Grunting
+Pulling inward of the muscles between the ribs when breathing
+Rapid breathing
+Widening of the nostrils with each breath
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Five days of productive cough with chest pain on coughing, a documented fever and increased tiredness. These match the symptom pattern in the retrieved context and warrant assessment today.", "red_flags": ["Chest pain on coughing with fever and productive cough for five days"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest, confused, or your lips look blue"], "citations": ["CP-PNA-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 31, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+burnin in my chest after tea most nights worse when i lie down get a sour taste sittin up sorts it out nothin else changed
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Burning behind the breastbone after meals, worse lying flat and relieved by sitting up, with a sour taste. Typical reflux and none of the alarm features listed in the retrieved context.", "red_flags": [], "next_steps": ["Leave two to three hours between eating and lying down", "Raise the head of the bed if symptoms wake you", "Seek care if your stool turns black, you vomit blood, or swallowing becomes painful"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 24, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+got a sharp pain in me chest when i breath in deep started 2 days ago no cough no temp not breathless
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PLEU-001]
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain on deep inspiration for two days without cough or breathlessness. The retrieved context describes pleurisy as causing sharp pain with breathing, which needs assessment.", "red_flags": ["Sharp chest pain on deep inspiration for two days"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest or cough up blood"], "citations": ["CP-PLEU-001"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 59, sex: female
+conditions: coronary artery disease
+medications: atorvastatin, bisoprolol
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+It is honestly nothing. I get a bit of tightness walking the dog up the hill, it goes when I stop. I have had it for months and I would not have mentioned it.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-001]
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.
+
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Exertional chest tightness in known coronary artery disease that settles on stopping and has been present for months. The retrieved context describes symptoms that go away with rest and return with activity, and names angina a warning sign of raised heart attack risk, regardless of how mild it feels.", "red_flags": ["Exertional chest tightness with known coronary artery disease"], "next_steps": ["Arrange assessment today despite it feeling minor", "Stop and rest as soon as it comes on", "Call 9-1-1 if it lasts more than a few minutes or begins at rest"], "citations": ["CP-ANG-001", "CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 40, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+burnin in me chest of an evenin after me dinner sour taste comes up sittin up helps nowt else wrong
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Burning behind the breastbone after evening meals with a sour taste, relieved by sitting up. Typical reflux, with none of the alarm features listed in the retrieved context.", "red_flags": [], "next_steps": ["Leave longer between your evening meal and going to bed", "Raise the head of the bed if it wakes you", "Seek care if swallowing becomes painful, your stool turns black, or you vomit blood"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 22, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+had one panic attack in an exam 3 wks ago chest tight cudnt breathe properly lasted 20 mins nothing since not worried just wondered
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PANIC-003]
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "A single episode of chest tightness and difficult breathing during an exam three weeks ago, lasting twenty minutes, with nothing since. The retrieved context describes an isolated panic attack as a one-off episode and not a mental disorder.", "red_flags": [], "next_steps": ["No action needed for one resolved episode", "Seek assessment if episodes start recurring, or if one comes with sweating or pain spreading to the arm or jaw"], "citations": ["CP-PANIC-003"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 55, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My husband gets burning in his chest after dinner most nights, worse when he lies down, and he gets a sour taste. Sitting up sorts it out. Nothing else has changed.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "green", "rationale": "Burning behind the breastbone after meals, worse lying flat and relieved by sitting up, with a sour taste. Typical reflux and none of the alarm features listed in the retrieved context.", "red_flags": [], "next_steps": ["Leave longer between his evening meal and bed", "Raise the head of the bed if it wakes him", "Seek care if his stool turns black, he vomits blood, or swallowing becomes painful"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 64, sex: female
+conditions: coronary artery disease
+medications: bisoprolol, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My mother gets chest tightness. I am not sure how worried to be.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest tightness reported in a woman with known coronary artery disease, with no detail yet on what brings it on or how long it lasts. The retrieved context distinguishes angina that occurs on exertion from pain that persists, and that has not been established. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Do not leave this unanswered today"], "citations": ["CP-ANG-002"], "follow_up_questions": ["Does it come on when she exerts herself?", "How long does it last once it starts?", "Is it there at the moment?"]}
+
+[PATIENT PROFILE]
+age: 64, sex: female
+conditions: coronary artery disease
+medications: bisoprolol, atorvastatin
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+It comes on when she walks up the road and goes after she stands still for a few minutes. It is not there now.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-ANG-002]
+Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.
+
+Angina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.
+
+Angina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.
+
+Angina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Exertional chest tightness in known coronary artery disease that settles within minutes of stopping and is not present now. The retrieved context describes angina as chest discomfort when the heart is working hard and names it a warning sign of raised heart attack risk.", "red_flags": ["Exertional chest tightness with known coronary artery disease"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if an episode lasts more than a few minutes or starts at rest"], "citations": ["CP-ANG-002"], "follow_up_questions": []}
+
+[PATIENT PROFILE]
+age: 47, sex: male
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+My husband keeps saying his chest feels funny. He will not tell me any more than that and he will not sit down. I do not know what to do.
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-GERD-001]
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+[CP-GERD-002]
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Chest symptoms reported second hand with no description of character, duration or provocation. Nothing in the case establishes which of the patterns in the retrieved context applies. Assigning the higher category pending answers.", "red_flags": [], "next_steps": ["Ask him the questions below and seek assessment today", "Call 9-1-1 if he becomes sweaty, breathless, or the discomfort is constant"], "citations": ["CP-GERD-001", "CP-GERD-002"], "follow_up_questions": ["Is the feeling there constantly or does it come and go?", "Did it start during exertion, after a meal, or at rest?", "Is he sweating, breathless, or is the feeling spreading anywhere?"]}
+
+[PATIENT PROFILE]
+age: 44, sex: female
+conditions: none
+medications: none
+[/PATIENT PROFILE]
+
+[SYMPTOMS]
+sharp pain in my chest its worse breathing in and better if i sit forward been 2 days
+[/SYMPTOMS]
+
+[RETRIEVED CONTEXT]
+[CP-PERI-002]
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever
+[/RETRIEVED CONTEXT]
+
+{"urgency": "yellow", "rationale": "Sharp chest pain over two days, worse on inspiration and relieved by sitting forward. That positional pattern matches the presentation in the retrieved context and needs assessment today.", "red_flags": ["Sharp chest pain worse on inspiration, eased sitting forward"], "next_steps": ["Arrange assessment today", "Call 9-1-1 if you become breathless at rest"], "citations": ["CP-PERI-002"], "follow_up_questions": []}

@@ -1,0 +1,23 @@
+# REVIEW: mlp-chestpain
+# Chest Pain (health topic summary)
+# MedlinePlus, National Library of Medicine
+# https://medlineplus.gov/chestpain.html
+# key_prefix: CP-DIFF   expected_category: None
+# role: Supplies the differential itself and the top-level red flag line.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 001 [ok   ] tokens=147 heading=(intro)
+Having a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:
+
+Other heart problems, such as angina
+Panic attacks
+Digestive problems, such as heartburn or esophagus disorders
+Sore muscles
+Lung diseases, such as pneumonia , pleurisy , or pulmonary embolism
+Costochondritis - an inflammation of joints in your chest
+
+Some of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.

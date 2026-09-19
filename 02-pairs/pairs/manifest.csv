@@ -1,0 +1,46 @@
+id,split,target_category,exchanges,register,reference_keys
+P0002,train,yellow,1,minimising the symptom,CP-ANG-001 CP-ANG-002
+P0003,train,red,1,verbose and anxious,CP-PE-002
+P0004,train,green,1,describing a third person,CP-PANIC-001 CP-PANIC-003
+P0008,train,green,1,panicked caregiver,CP-PANIC-001 CP-PANIC-003
+P0009,train,green,1,verbose and anxious,CP-ACS-003
+P0011,train,yellow,1,panicked caregiver,CP-GERD-001 CP-GERD-002
+P0012,heldout,yellow,1,poor spelling and punctuation,CP-PERI-002
+P0013,train,yellow,1,describing a third person,CP-PERI-001 CP-PERI-002
+P0014,train,red,1,poor spelling and punctuation,CP-PE-004 CP-PE-003
+P0015,train,red,1,plain and factual,CP-ACS-002 CP-DIFF-001
+P0017,train,green,1,minimising the symptom,CP-PANIC-001 CP-PANIC-002
+P0018,heldout,yellow,2,describing a third person,CP-ANG-002
+P0021,train,red,1,plain and factual,CP-ACS-003
+P0022,train,green,1,describing a third person,CP-PANIC-003 CP-PANIC-002
+P0023,train,green,1,verbose and anxious,CP-PANIC-001
+P0024,train,yellow,1,minimising the symptom,CP-PERI-002
+P0025,heldout,green,1,poor spelling and punctuation,CP-PANIC-003
+P0026,train,yellow,1,terse adult,CP-ANG-001 CP-ANG-002
+P0027,train,green,1,describing a third person,CP-PNA-001
+P0028,train,yellow,1,terse adult,CP-PLEU-001
+P0029,train,green,1,terse adult,CP-PERI-002
+P0030,train,green,1,panicked caregiver,CP-PANIC-003
+P0031,train,green,1,terse adult,CP-GERD-001 CP-GERD-003
+P0034,train,yellow,2,panicked caregiver,CP-PERI-001 CP-PERI-002
+P0035,train,red,1,describing a third person,CP-ACS-002 CP-ACS-004
+P0036,train,yellow,1,plain and factual,CP-ANG-001 CP-ANG-002
+P0037,train,yellow,1,describing a third person,CP-PLEU-001 CP-DIFF-001
+P0039,train,yellow,1,poor spelling and punctuation,CP-GERD-001 CP-GERD-002
+P0040,train,yellow,1,panicked caregiver,CP-PNA-001
+P0041,train,yellow,2,terse adult,CP-PNA-001
+P0042,train,red,1,terse adult,CP-ANG-001 CP-ANG-002
+P0043,train,yellow,2,minimising the symptom,CP-PLEU-001
+P0044,train,red,1,poor spelling and punctuation,CP-ACS-001 CP-ACS-002
+P0045,train,red,1,describing a third person,CP-PERI-001 CP-PERI-002
+P0046,train,yellow,1,terse adult,CP-ACS-003 CP-ACS-005
+P0048,heldout,green,1,panicked caregiver,CP-GERD-001 CP-GERD-002
+P0049,train,green,1,verbose and anxious,CP-GERD-001 CP-GERD-003 CP-GERD-002
+P0050,train,red,1,plain and factual,CP-ANG-001 CP-ANG-002
+P0052,train,yellow,1,verbose and anxious,CP-GERD-001 CP-GERD-002
+P0053,train,yellow,1,plain and factual,CP-PNA-001
+P0054,train,green,1,poor spelling and punctuation,CP-GERD-001 CP-GERD-002
+P0055,heldout,yellow,1,panicked caregiver,CP-GERD-001 CP-GERD-002
+P0056,train,yellow,1,poor spelling and punctuation,CP-PLEU-001
+P0057,train,yellow,1,minimising the symptom,CP-ANG-001 CP-ANG-002
+P0059,train,green,1,poor spelling and punctuation,CP-GERD-001 CP-GERD-002

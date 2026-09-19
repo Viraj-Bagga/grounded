@@ -1,0 +1,162 @@
+# red_flags CONTENT by config, one pass each, cache_prompt off, fresh server per block.
+# The earlier runs printed only a count, so this re-runs each config with the text.
+# Every verdict here reproduces the corresponding stability run, which is the point:
+# the runs are deterministic, so this recovers what those runs would have recorded.
+# run 2026-09-17T18:17:18Z, macOS 27.0 (26A428), llama.cpp build 10809
+
+############ format 2, reasoning OFF, --chunks matched
+mode: matched, reasoning off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       red_flags_text=['central pressure-like pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=Coronary artery disease
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=72 red_flags=0 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=sharp chest pain with pleuritic component, pleuritic pain, pleuritic pain
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=79 red_flags=1 reasoning_chars=0
+       red_flags_text=['sharp pain on left chest, worse with pressing and deep breathing']
+       citations=['CP-PLEU-001', 'CP-PERI-002']
+       rationale=sharp pain on left chest, worse with pressing and deep breathing
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.
+
+############ format 2, reasoning ON (--thinking), --chunks matched
+mode: matched, reasoning ON (--thinking, NOT the shipping config)
+
+  red-acs                expect=red    got=red    PASS
+       tokens=226 red_flags=1 reasoning_chars=586
+       red_flags_text=['Central pressure-like pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=High blood pressure, high cholesterol, statin use
+  yellow-angina          expect=yellow got=yellow PASS
+       tokens=220 red_flags=0 reasoning_chars=655
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=Chest tightness resolved with rest, no red flag, known CAD
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=237 red_flags=0 reasoning_chars=652
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms (burning chest, sour taste) are typical but not red‑flag; no severe chest pain or complications.
+  yellow-pleuritic       expect=yellow got=yellow PASS
+       tokens=430 red_flags=0 reasoning_chars=1502
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=Pleuritic chest pain with improvement with sitting up; no red‑flag features such as pressure‑like pain beyond 20 min or sudden dyspnea.
+  probe-costo-unmatched  expect=green  got=yellow PROBE
+       tokens=572 red_flags=1 reasoning_chars=1905
+       red_flags_text=['Sharp pain on the left side of my chest. It hurts more when I press on it or take a deep breath.']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=Sharp pain on left chest worsening with pressing and deep breaths, but no crushing pressure, nausea, sweating, dizziness, or shortness of breath; likely non‑cardiac cause such as pleurisy or costochondritis.
+
+distribution (scored cases only): {'red': 1, 'yellow': 3}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got yellow (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+3/4 correct. Discrimination is demonstrated, accuracy is a separate question.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.
+
+############ format 2, reasoning OFF, --chunks red-only
+mode: red-only, reasoning off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       red_flags_text=['central pressure-like pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=68 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  green-gerd             expect=green  got=red    FAIL
+       tokens=62 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       rationale=burning behind breastbone beyond 20 minutes
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=62 red_flags=1 reasoning_chars=0
+       red_flags_text=['sharp left chest pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=60 red_flags=1 reasoning_chars=0
+       red_flags_text=['sharp pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.
+
+############ format 2, reasoning ON (--thinking), --chunks red-only
+mode: red-only, reasoning ON (--thinking, NOT the shipping config)
+
+  red-acs                expect=red    got=red    PASS
+       tokens=226 red_flags=1 reasoning_chars=586
+       red_flags_text=['Central pressure-like pain at rest beyond 20 minutes']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=High blood pressure, high cholesterol, statin use
+  yellow-angina          expect=yellow got=yellow PASS
+       tokens=217 red_flags=0 reasoning_chars=594
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CAD, chest tightness resolved after rest, no persistent pain or red flags
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=405 red_flags=0 reasoning_chars=1421
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=Burning chest pain after meals, worse lying down, eased sitting upright – possible cardiac ischemia but not meeting red‑flag criteria.
+  yellow-pleuritic       expect=yellow got=yellow PASS
+       tokens=532 red_flags=0 reasoning_chars=1838
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=Chest pain at rest with pleuritic quality, no red‑flag pressure‑like pain beyond 20 min, recent cold, no cardiac history – urgent but not immediate.
+  probe-costo-unmatched  expect=green  got=yellow PROBE
+       tokens=328 red_flags=0 reasoning_chars=998
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=Chest pain with pressure-like quality, but onset within 20 minutes and no other red‑flag features.
+
+distribution (scored cases only): {'red': 1, 'yellow': 3}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got yellow (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+3/4 correct. Discrimination is demonstrated, accuracy is a separate question.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

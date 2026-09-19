@@ -1,0 +1,165 @@
+# EPIC 4 RETRIEVAL SMOKE TEST, 2026-09-17
+# all-MiniLM-L6-v2 + sqlite-vec 0.1.9, 22 frozen chunks, corpus.db
+# every chunk verified against its frozen chunk_sha256 before embedding
+# widest chunk 231/256 word-pieces, so constraint 2 holds with headroom
+
+############ query mode: symptom
+RETRIEVAL SMOKE TEST, top-3, query = symptom
+expected = the chunks the case was hand-assigned in discrimination_test.py
+
++- red-acs                PARTIAL, 1/3
+     expected : ['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-DIFF-001']
+     not returned: ['CP-ACS-001', 'CP-ACS-002']
+         CP-PERI-002      d=0.8628    25 tok  [yellow]
+       * CP-ACS-003       d=0.8917   162 tok  [red]
+         CP-DIFF-001      d=0.9402   147 tok  [uncategorised]
+     retrieved 334 tokens, about 10.8 s of prompt eval
+
+-- yellow-angina          NONE OF THE EXPECTED
+     expected : ['CP-ANG-001', 'CP-ANG-002']
+     returned : ['CP-PLEU-001', 'CP-PERI-002', 'CP-DIFF-001']
+     not returned: ['CP-ANG-001', 'CP-ANG-002']
+         CP-PLEU-001      d=1.0992   156 tok  [yellow]
+         CP-PERI-002      d=1.1240    25 tok  [yellow]
+         CP-DIFF-001      d=1.1936   147 tok  [uncategorised]
+     retrieved 328 tokens, about 10.6 s of prompt eval
+
+++ green-gerd             ALL EXPECTED RETURNED
+     expected : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-GERD-002']
+       * CP-GERD-001      d=0.8618   216 tok  [green]
+         CP-PERI-002      d=1.0167    25 tok  [yellow]
+       * CP-GERD-002      d=1.0662    71 tok  [green]
+     retrieved 312 tokens, about 10.1 s of prompt eval
+
++- yellow-pleuritic       PARTIAL, 1/2
+     expected : ['CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-PERI-002', 'CP-DIFF-001', 'CP-ANG-001']
+     not returned: ['CP-PLEU-001']
+       * CP-PERI-002      d=0.6583    25 tok  [yellow]
+         CP-DIFF-001      d=0.7562   147 tok  [uncategorised]
+         CP-ANG-001       d=0.8547   187 tok  [yellow]
+     retrieved 359 tokens, about 11.6 s of prompt eval
+
++- probe-costo-unmatched  PARTIAL, 2/3  (PROBE, expected to miss)
+     expected : ['CP-DIFF-001', 'CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-DIFF-001', 'CP-PERI-002', 'CP-ANG-002']
+     not returned: ['CP-PLEU-001']
+       * CP-DIFF-001      d=0.6943   147 tok  [uncategorised]
+       * CP-PERI-002      d=0.6954    25 tok  [yellow]
+         CP-ANG-002       d=0.8353   231 tok  [yellow]
+     retrieved 403 tokens, about 13.0 s of prompt eval
+
+==============================================================
+scored cases: 4   all-expected 1  partial 3  none 1   (includes the probe in the counts only if it landed)
+total retrieved across all 5 cases: 1736 tokens, mean 347 per case
+mean prompt-eval cost per case: 11.2 s at 31 tok/s, retrieved context only, before the system prompt and the case text
+
+############ query mode: symptom+timeline
+RETRIEVAL SMOKE TEST, top-3, query = symptom+timeline
+expected = the chunks the case was hand-assigned in discrimination_test.py
+
++- red-acs                PARTIAL, 1/3
+     expected : ['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-DIFF-001']
+     not returned: ['CP-ACS-001', 'CP-ACS-002']
+         CP-PERI-002      d=0.8713    25 tok  [yellow]
+       * CP-ACS-003       d=0.9125   162 tok  [red]
+         CP-DIFF-001      d=0.9516   147 tok  [uncategorised]
+     retrieved 334 tokens, about 10.8 s of prompt eval
+
++- yellow-angina          PARTIAL, 1/2
+     expected : ['CP-ANG-001', 'CP-ANG-002']
+     returned : ['CP-PERI-002', 'CP-PERI-001', 'CP-ANG-001']
+     not returned: ['CP-ANG-002']
+         CP-PERI-002      d=1.0171    25 tok  [yellow]
+         CP-PERI-001      d=1.1261   136 tok  [yellow]
+       * CP-ANG-001       d=1.1401   187 tok  [yellow]
+     retrieved 348 tokens, about 11.2 s of prompt eval
+
+++ green-gerd             ALL EXPECTED RETURNED
+     expected : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-GERD-002']
+       * CP-GERD-001      d=0.9418   216 tok  [green]
+         CP-PERI-002      d=1.1335    25 tok  [yellow]
+       * CP-GERD-002      d=1.1408    71 tok  [green]
+     retrieved 312 tokens, about 10.1 s of prompt eval
+
++- yellow-pleuritic       PARTIAL, 1/2
+     expected : ['CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-PERI-002', 'CP-DIFF-001', 'CP-ANG-001']
+     not returned: ['CP-PLEU-001']
+       * CP-PERI-002      d=0.6798    25 tok  [yellow]
+         CP-DIFF-001      d=0.8246   147 tok  [uncategorised]
+         CP-ANG-001       d=0.8714   187 tok  [yellow]
+     retrieved 359 tokens, about 11.6 s of prompt eval
+
++- probe-costo-unmatched  PARTIAL, 2/3  (PROBE, expected to miss)
+     expected : ['CP-DIFF-001', 'CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-DIFF-001', 'CP-PERI-002', 'CP-ANG-001']
+     not returned: ['CP-PLEU-001']
+       * CP-DIFF-001      d=0.7687   147 tok  [uncategorised]
+       * CP-PERI-002      d=0.7835    25 tok  [yellow]
+         CP-ANG-001       d=0.8762   187 tok  [yellow]
+     retrieved 359 tokens, about 11.6 s of prompt eval
+
+==============================================================
+scored cases: 4   all-expected 1  partial 4  none 0   (includes the probe in the counts only if it landed)
+total retrieved across all 5 cases: 1712 tokens, mean 342 per case
+mean prompt-eval cost per case: 11.0 s at 31 tok/s, retrieved context only, before the system prompt and the case text
+
+############ query mode: symptom+profile
+RETRIEVAL SMOKE TEST, top-3, query = symptom+profile
+expected = the chunks the case was hand-assigned in discrimination_test.py
+
++- red-acs                PARTIAL, 1/3
+     expected : ['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+     returned : ['CP-ACS-003', 'CP-PERI-002', 'CP-DIFF-001']
+     not returned: ['CP-ACS-001', 'CP-ACS-002']
+       * CP-ACS-003       d=0.8897   162 tok  [red]
+         CP-PERI-002      d=0.9430    25 tok  [yellow]
+         CP-DIFF-001      d=1.0338   147 tok  [uncategorised]
+     retrieved 334 tokens, about 10.8 s of prompt eval
+
+-- yellow-angina          NONE OF THE EXPECTED
+     expected : ['CP-ANG-001', 'CP-ANG-002']
+     returned : ['CP-PERI-002', 'CP-GERD-003', 'CP-DIFF-001']
+     not returned: ['CP-ANG-001', 'CP-ANG-002']
+         CP-PERI-002      d=1.0615    25 tok  [yellow]
+         CP-GERD-003      d=1.0901   180 tok  [green]
+         CP-DIFF-001      d=1.1066   147 tok  [uncategorised]
+     retrieved 352 tokens, about 11.4 s of prompt eval
+
++- green-gerd             PARTIAL, 1/2
+     expected : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-DIFF-001']
+     not returned: ['CP-GERD-002']
+       * CP-GERD-001      d=0.8421   216 tok  [green]
+         CP-PERI-002      d=0.9464    25 tok  [yellow]
+         CP-DIFF-001      d=1.0486   147 tok  [uncategorised]
+     retrieved 388 tokens, about 12.5 s of prompt eval
+
++- yellow-pleuritic       PARTIAL, 1/2
+     expected : ['CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-PERI-002', 'CP-DIFF-001', 'CP-PERI-001']
+     not returned: ['CP-PLEU-001']
+       * CP-PERI-002      d=0.6928    25 tok  [yellow]
+         CP-DIFF-001      d=0.7912   147 tok  [uncategorised]
+         CP-PERI-001      d=0.8529   136 tok  [yellow]
+     retrieved 308 tokens, about 9.9 s of prompt eval
+
++- probe-costo-unmatched  PARTIAL, 2/3  (PROBE, expected to miss)
+     expected : ['CP-DIFF-001', 'CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-DIFF-001', 'CP-PERI-002', 'CP-ANG-001']
+     not returned: ['CP-PLEU-001']
+       * CP-DIFF-001      d=0.7678   147 tok  [uncategorised]
+       * CP-PERI-002      d=0.8157    25 tok  [yellow]
+         CP-ANG-001       d=0.9014   187 tok  [yellow]
+     retrieved 359 tokens, about 11.6 s of prompt eval
+
+==============================================================
+scored cases: 4   all-expected 0  partial 4  none 1   (includes the probe in the counts only if it landed)
+total retrieved across all 5 cases: 1741 tokens, mean 348 per case
+mean prompt-eval cost per case: 11.2 s at 31 tok/s, retrieved context only, before the system prompt and the case text
+

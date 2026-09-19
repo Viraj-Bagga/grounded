@@ -1,0 +1,50 @@
+# RELEASE vs DEBUG, same completion, same model, same simulator, n_gpu_layers 0.
+# iPhone 17 Pro, iOS 26.5, Xcode 26.6, RN 0.81.4, llama.rn 0.12.9.
+# Prompt: system_prompt.txt change set B + spike/req-demo-shape.json user turn.
+# run 2026-09-17, Release app pid 36532.
+
+                      Debug      Release    change
+load_s                36.4       3.6        see NOTE 1, this is not a Release win
+completion_s          333.2      235.9      1.41x faster
+prompt_n              1284       1284       identical prompt
+prompt_s              232.4      161.5
+prompt_tok_per_s      5.5        7.9        1.44x
+predicted_n           210        201
+predicted_tok_per_s   2.10       2.72       1.30x
+reasoning_chars       0          0          constraint 5 holds on both
+peak_rss_gb           3.14       2.84
+
+# NOTE 1. Do NOT report the load time as a 10x Release win. The Debug run read a
+# 2.84 GB file that had just been copied into the container, so it came off disk
+# cold. The Release run read a file the OS page cache had already seen several
+# times. The build configuration is not a plausible cause of a 10x change in an
+# mmap and read path. Treat 36.4 s as the cold number and 3.6 s as the warm one,
+# and note the demo on a judge's machine is always cold.
+
+# NOTE 2. Release does NOT close the gap to llama-server on the same Mac.
+#                       llama-server   simulator Debug   simulator Release
+#   prompt eval         30 to 32 tok/s     5.5              7.9    ~4x slower
+#   generation          9.5 to 10 tok/s    2.10             2.72   ~3.6x slower
+# Hard constraints 7 and 8 still do not hold in the demo condition.
+
+# NOTE 3. One completion is 3 min 56 s in Release. Judging is about 5 minutes
+# per desk visit. A single turn still consumes most of the visit, so Release
+# does not rescue a live four-beat demo.
+
+# GUARDS, exercised against real Release output rather than fixtures:
+#   raw_head            <|im_start|>assistant\n{ "urgency": "red", "rationale": "
+#   bare_JSON_parse     THREW: JSON Parse error: Unexpected character: <
+#   guarded_urgency     red
+#   guarded_citations   ["CP-ACS-001","CP-ACS-003"]      both resolve in the registry
+#   guarded_next_steps  ["Call 9-1-1 immediately","Do not drive to hospital"]
+# The template prefix is present in Release too, and a bare JSON.parse still
+# throws on it, so guard 1 is load-bearing on the shipping build and not a
+# Debug-only artifact.
+#
+# NOT CAPTURED: the dropped_* and flagged_* fields rendered below the fold and
+# there is no way to scroll a simulator screenshot from the host. RN 0.81 routes
+# console.log to React Native DevTools rather than Metro or os_log, so the log
+# fallback is empty too. The guards' drop behaviour is covered by 17 unit tests
+# in __tests__/guards.test.ts, all fixtures taken from real run output. If the
+# drop paths need to be seen live, the app should write its result to a file
+# rather than only to the screen.

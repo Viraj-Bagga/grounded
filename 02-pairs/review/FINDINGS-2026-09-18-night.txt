@@ -1,0 +1,206 @@
+# REVIEW FINDINGS on the 45 pairs, 2026-09-18 night
+# Viraj's six findings and two checks, each verified against the files. Nothing
+# was rewritten. Five pairs were cut, moved verbatim to CUT-2026-09-18-night.jsonl.
+# candidates-60.jsonl now holds 40 pairs: validator 0 errors, 0 warnings.
+# Evidence is mechanical where it can be: excluded_subject and the retriever exactly
+# as 06-demo/server.py runs them, and regex searches of the frozen chunk text.
+
+== 1. PAEDIATRIC EXCLUSION: P0008, P0027, P0030 ======================== CUT, all three
+  P0008  age 19  'My daughter has gone into one of her panic attacks...'  EXCLUDED via 'My daughter'
+  P0027  age 6   'My daughter has had a dry cough for three days...'      EXCLUDED via 'My daughter'
+  P0030  age 17  'My daughter had a panic attack at school...'            NOT EXCLUDED
+  The premise holds for two of three.
+  - P0008 is an adult. It is refused only through 'my daughter', the adult-child
+    over-refusal recorded as a fixture tonight, on ordinary caregiver phrasing.
+  - P0027 is the real child. Confirmed: cites CP-PNA-001 alone, gold green, rationale
+    'None of the features in the retrieved context that would raise concern are
+    present'. The chunk the toddler case grounded on.
+  - P0030 is NOT refused. It has the child term but no word in SYMPTOM ('panic attack'
+    is not in the lexicon), and 17 is not under 16. The app would triage it. Cut anyway,
+    as instructed: a minor trained green on adult panic chunks, reachable only via a gap.
+  THE GAP (guard NOT touched; guard work stopped tonight). A child term plus a
+  presentation phrased without a SYMPTOM word fails open:
+    excluded=False  'My 8-year-old had a panic attack at school'
+    excluded=False  'My son is having an asthma attack'
+    excluded=False  'My toddler swallowed a button battery'
+    excluded=False  'My daughter is having an allergic reaction'
+    excluded=False  'My 10 year old is very anxious and scared'
+  Every submission is a symptom report, so the symptom half mostly adds misses.
+  Across all 45: only P0008 and P0027 are refused by an exclusion, and none is under the
+  0.25 floor. Lowest is P0002 at 0.254, the only pair under 0.30: a 0.30 floor would
+  refuse one real, minimising chest complaint in this set.
+
+== 2. VERDICT BY CONDITION PREFIX ====================== CONFIRMED. TOP OPEN ITEM, EPIC 2
+  A pair counts once under each prefix its reference keys carry. Gold citations equal
+  the reference keys in all 45.
+  prefix    45, before                     40, after tonight             
+  CP-ACS    red 4 yellow 1 green 1         red 4 yellow 1 green 1        
+  CP-ANG    red 2 yellow 5                 red 2 yellow 5                
+  CP-DIFF   red 1 yellow 1                 red 1  SINGLE                 
+  CP-GERD   yellow 4 green 5               yellow 3 green 5              
+  CP-PANIC  green 7  SINGLE                green 5  SINGLE               
+  CP-PE     red 2  SINGLE                  red 2  SINGLE                 
+  CP-PERI   red 1 yellow 4 green 1         red 1 yellow 4 green 1        
+  CP-PLEU   yellow 4  SINGLE               yellow 3  SINGLE              
+  CP-PNA    yellow 3 green 1               yellow 3  SINGLE              
+  Viraj's counts are right: CP-PANIC 7/7 green, CP-PLEU 4/4 yellow, CP-PE 2/2 red.
+  Cause, consistent with the build-log: the contrast sets cut on 2026-09-18 for
+  ungrounded axes were exactly these conditions' sets. C04/C10 panic (previously
+  diagnosed pattern), C05/C11 pleurisy (palpation), C06/C12 PE (onset).
+  TONIGHT'S CUTS MAKE IT WORSE. P0027 was the only green CP-PNA pair, so CP-PNA becomes
+  3/3 yellow. Four conditions now map one-to-one onto a verdict: PANIC green, PLEU
+  yellow, PNA yellow, PE red. CP-DIFF is single too, at n=1. Trained on this, a model
+  can read the verdict off which chunk was retrieved instead of off the case, which is
+  the opposite of what the adapter was meant to teach.
+
+== 3. P0037 ============================================== CUT (no rewrite tonight)
+  Rationale: 'not reproduced by pressing the chest wall, which argues against the
+  muscular explanation'. Cites CP-PLEU-001 and CP-DIFF-001.
+  Searched /press|reproduc|palpat|tender|chest wall/: the only hit in either chunk is
+  'pressure' in CP-DIFF-001's 'crushing pain or pressure in the chest'. CP-DIFF-001
+  names 'Sore muscles' and costochondritis as causes but no discriminator. Constraint
+  14 in a standalone pair, confirmed.
+
+== 4. DISTINCT PRESENTATIONS, AND SHARED STRINGS ==================================
+  22 distinct presentations in 45 pairs; 21 in the 40 left.
+  Rule: same triage-relevant features, ignoring register, wording, age, sex and who is
+  reporting. A contrast set's halves count as two, since they differ in the feature
+  that decides. Counting the three thin 'no detail' singletons into the undifferentiated
+  cluster would make it 19.
+    5 -> 5  green  typical reflux, no alarm feature                               P0031 P0048 P0049 P0054 P0059
+    5 -> 4  yellow undifferentiated chest complaint, no detail                    P0002 P0034 P0043 P0046 P0055*
+    4 -> 3  green  known panic disorder, usual attack, self-limiting              P0004 P0008* P0017 P0023
+    3 -> 2  green  single isolated panic episode, resolved                        P0022 P0025 P0030*
+    3 -> 3  yellow sharp pleuritic pain eased leaning forward, otherwise well     P0012 P0024 P0013
+    3 -> 2  yellow one-sided sharp pleuritic pain, no cough                       P0028 P0056 P0037*
+    3 -> 3  yellow stable exertional angina in known CAD, settles with rest       P0026 P0036 P0057
+    2 -> 2  yellow reflux with black tarry stool                                  P0011 P0039
+    2 -> 2  red    known CAD, usual pain persisting 30 min at rest                P0042 P0050
+    2 -> 2  yellow several days of cough, now chest pain on coughing or breathing P0040 P0053
+    2 -> 2  green  chest wall strain after new exertion, movement-provoked        P0009 P0029
+    1 -> 1  red    the same with severe breathlessness at rest                    P0045
+    1 -> 1  red    central chest pressure unrelieved at rest, 40 min              P0021
+    1 -> 1  red    crescendo chest ache over an hour, radiating to left arm       P0044
+    1 -> 1  red    older diabetic: tiredness, exertional breathlessness, vague heaviness P0015
+    1 -> 1  red    older diabetic: clammy, feels wrong, 'indigestion', no pain    P0035
+    1 -> 1  red    PE: chemotherapy, sudden pleuritic pain, new breathlessness    P0003
+    1 -> 1  red    PE: post-op bed rest, pleuritic pain, one-sided leg swelling   P0014
+    1 -> 0  green  child, dry cough, well                                         P0027*
+    1 -> 1  yellow vague chest tightness in known CAD, no detail                  P0018
+    1 -> 1  yellow vague intermittent burning, no pattern                         P0052
+    1 -> 1  yellow chest pain with a recent cough, no detail                      P0041
+    (* cut tonight)
+  Identical strings across pairs, all 45 checked, all still present after the cuts:
+    rationale        P0011 = P0039   (C08 and C02 yellow halves, two registers)
+    rationale        P0048 = P0054   (C08 and C02 green halves, two registers)
+    red_flags entry  'Black tarry stool for two days alongside reflux'  P0011, P0039
+    red_flags entry  'Exertional chest tightness with known coronary artery disease'
+                     P0026, P0036, P0057
+  No other rationale or red_flags string repeats.
+
+== 5. MIX ===========================================================================
+  45, before               red  9 (20%)  yellow 21 (47%)  green 15 (33%)
+                           kind {'underspecified': 4, 'standalone': 25, 'grounding': 6, 'contrast': 10}
+  40, after the five cuts  red  9 (22%)  yellow 19 (48%)  green 12 (30%)
+                           kind {'underspecified': 3, 'standalone': 22, 'grounding': 5, 'contrast': 10}
+  real-world base rate (claude.md, IITT PNG): red 7%, yellow 34%, green 59%
+
+== 6. P0055 ==================================================================== CUT
+  47M, 'My husband keeps saying his chest feels funny...', gold yellow on CP-GERD-001/002.
+  What the app retrieves for that exact text: CP-ANG-001, CP-PERI-002, CP-ANG-002, max
+  cosine 0.380. The pair trains on context the app never supplies for it, and the GERD
+  chunks cap its 'assign the higher category' at yellow.
+
+== CHECK: P0009 ================================================== FLAGGED, not cut
+  Case: 'ache in my chest on and off since I helped my brother move house on Saturday.
+  It is worse if I press on the spot or reach up for something.'
+  Rationale: '...reproducible on pressing the spot and on reaching, with no relationship
+  to exertion.' The case never says that; the onset after heavy lifting and the pain on
+  reaching point the other way. Also, the rationale says the case 'does not match the
+  heart attack pattern in the retrieved context', but CP-ACS-003's first line is chest
+  discomfort. What makes it benign here, reproducibility, is not in the chunk: the same
+  unstated criterion as P0037, not attributed this time.
+
+== CHECK: P0003 ============================== CONFIRMED NOT IN CP-PE-002. FLAGGED, not cut
+  CP-PE-002 in full: 'Most often, there is more than one risk factor involved. The more
+  risk factors you have, the greater the chance you have of developing VTE.'
+  The cancer line is in CP-PE-004 ('cancer and cancer treatments including chemotherapy
+  and surgery'), which P0003 does not cite. Its symptom basis, pain on breathing with
+  breathlessness, is in CP-PE-001, which it does not cite either.
+
+== FOUND DOING THE CHECKS: the same attribution failure in five more ====== FLAGGED, not cut
+  Each claim is attributed to 'the retrieved context'. Regex evidence is at the end of
+  this file.
+  in a chunk the pair does not cite:
+    P0014  'describes swollen tender legs with pain on breathing'  only in CP-PE-001
+    P0023  'attacks ... are not life-threatening'                  only in CP-PANIC-002
+  in no chunk at all (the GERD chunks never mention meals, alcohol, eating or lying down):
+    P0031  'lists dietary triggers among the factors that worsen it'
+    P0049  'names alcohol and meal timing among the contributing factors'
+    P0052  'describes reflux by its relationship to eating and lying down'
+  CP-GERD-003's factors, verbatim: overweight or obesity, being pregnant, smoking, and five
+  medicine classes. Both CP-PE pairs, P0003 and P0014, are in this list: cutting every
+  flagged pair would leave CP-PE with none.
+  What-if, not done: cutting all seven flagged (P0003 P0009 P0014 P0023 P0031 P0049 P0052)
+  leaves 33 pairs: red 7, yellow 18, green 8.
+
+== FOUND DOING THE CHECKS: P0055 IS NOT ISOLATED ===================================
+40 remaining pairs vs live top-3 retrieval (blend 0.5, as the demo runs)
+  every reference key retrieved : 13
+  some reference keys retrieved : 11
+  NO reference key retrieved    : 16
+     P0002 yellow pair trains on ['CP-ANG-001', 'CP-ANG-002']  app retrieves ['CP-ACS-003', 'CP-PERI-002', 'CP-ACS-004']
+     P0003 red    pair trains on ['CP-PE-002']  app retrieves ['CP-ANG-001', 'CP-PLEU-001', 'CP-ACS-001']
+     P0009 green  pair trains on ['CP-ACS-003']  app retrieves ['CP-ANG-001', 'CP-PERI-002', 'CP-ACS-005']
+     P0014 red    pair trains on ['CP-PE-004', 'CP-PE-003']  app retrieves ['CP-ACS-003', 'CP-PE-001', 'CP-PERI-001']
+     P0015 red    pair trains on ['CP-ACS-002', 'CP-DIFF-001']  app retrieves ['CP-ACS-003', 'CP-PE-001', 'CP-ANG-001']
+     P0021 red    pair trains on ['CP-ACS-003']  app retrieves ['CP-ACS-005', 'CP-PANIC-002', 'CP-DIFF-001']
+     P0026 yellow pair trains on ['CP-ANG-001', 'CP-ANG-002']  app retrieves ['CP-PERI-001', 'CP-ACS-005', 'CP-ACS-001']
+     P0028 yellow pair trains on ['CP-PLEU-001']  app retrieves ['CP-PERI-002', 'CP-ACS-003', 'CP-PERI-001']
+     P0034 yellow pair trains on ['CP-PERI-001', 'CP-PERI-002']  app retrieves ['CP-ACS-003', 'CP-ACS-005', 'CP-DIFF-001']
+     P0035 red    pair trains on ['CP-ACS-002', 'CP-ACS-004']  app retrieves ['CP-PERI-002', 'CP-ANG-001', 'CP-ANG-002']
+     P0036 yellow pair trains on ['CP-ANG-001', 'CP-ANG-002']  app retrieves ['CP-PE-003', 'CP-PLEU-001', 'CP-ACS-003']
+     P0041 yellow pair trains on ['CP-PNA-001']  app retrieves ['CP-PERI-001', 'CP-GERD-001', 'CP-ACS-003']
+     P0042 red    pair trains on ['CP-ANG-001', 'CP-ANG-002']  app retrieves ['CP-PERI-001', 'CP-ACS-001', 'CP-PERI-002']
+     P0043 yellow pair trains on ['CP-PLEU-001']  app retrieves ['CP-PERI-002', 'CP-ANG-002', 'CP-PERI-001']
+     P0046 yellow pair trains on ['CP-ACS-003', 'CP-ACS-005']  app retrieves ['CP-ANG-001', 'CP-PERI-001', 'CP-ACS-004']
+     P0056 yellow pair trains on ['CP-PLEU-001']  app retrieves ['CP-PERI-002', 'CP-PERI-001', 'CP-ACS-003']
+  Whether a pair should carry the right chunks or what retrieval returns is a design call.
+
+== REGEX EVIDENCE for the attribution checks, verbatim ===============================
+P0003  claim: 'cancer and its treatment raise the likelihood'
+       searched /cancer|chemotherapy/
+       in its cited chunks ['CP-PE-002']: NOTHING
+       elsewhere in the corpus: {'CP-PE-004': ['cancer', 'chemotherapy']}
+P0014  claim: 'describes swollen tender legs with pain on breathing'
+       searched /swollen|tender|pain when breathing/
+       in its cited chunks ['CP-PE-004', 'CP-PE-003']: NOTHING
+       elsewhere in the corpus: {'CP-PE-001': ['pain when breathing', 'swollen', 'tender']}
+P0023  claim: 'attacks ... are not life-threatening'
+       searched /not life-threatening/
+       in its cited chunks ['CP-PANIC-001']: NOTHING
+       elsewhere in the corpus: {'CP-PANIC-002': ['not life-threatening']}
+P0031  claim: 'lists dietary triggers among the factors that worsen it'
+       searched /\bdiet|\bmeals?\b|alcohol|\beat(ing|en)?\b|spicy|fatty/
+       in its cited chunks ['CP-GERD-001', 'CP-GERD-003']: NOTHING
+       elsewhere in the corpus: nowhere
+P0049  claim: 'names alcohol and meal timing among the contributing factors'
+       searched /alcohol|\bmeals?\b|\blate\b|\bwine\b/
+       in its cited chunks ['CP-GERD-001', 'CP-GERD-003', 'CP-GERD-002']: NOTHING
+       elsewhere in the corpus: {'CP-PANIC-001': ['late']}
+P0052  claim: 'describes reflux by its relationship to eating and lying down'
+       searched /\beat(ing|en)?\b|\bmeals?\b|lying|lie down|posture/
+       in its cited chunks ['CP-GERD-001', 'CP-GERD-002']: NOTHING
+       elsewhere in the corpus: nowhere
+P0037  claim: 'not reproduced by pressing ... argues against the muscular explanation'
+       searched /press|reproduc|palpat|tender|chest wall/
+       in its cited chunks ['CP-PLEU-001', 'CP-DIFF-001']: {'CP-DIFF-001': ['press']}
+       elsewhere in the corpus: {'CP-ANG-002': ['press'], 'CP-GERD-003': ['press'], 'CP-PE-001': ['tender'], 'CP-PE-004': ['press']}
+
+GERD-003's listed factors, verbatim: ['being overweight or having obesity', 'being pregnant', 'smoking or inhaling secondhand smoke']
+CP-PE-002 in full: Most often, there is more than one risk factor involved. The more risk factors you have, the greater the chance you have of developing VTE.
+
+== FILES ===========================================================================
+  02-pairs/review/candidates-60.jsonl           40 pairs
+  02-pairs/review/CUT-2026-09-18-night.jsonl    the 5 cut, verbatim. Restore = append a line back.
+  02-pairs/pairs/PIPELINE-TEST-*                still all 45, cut ones included. Pipeline test only.

@@ -1,0 +1,90 @@
+# RULE 4 TEST, BEFORE. format 3, matched chunks, reasoning off, temp 0.0,
+# cache_prompt off, 2 passes.
+#
+# HYPOTHESIS (Viraj, 2026-09-17): rule 4 may be MECHANICALLY forcing red.
+# Any concerning finding lands in red_flags, and rule 4 converts a non-empty
+# red_flags into a red verdict regardless of everything else.
+#
+# CONTEXT THAT COMPLICATES IT. Format 2 has no rule 4 and format 2 with
+# reasoning off ALSO returned all-red on every case. So rule 4 cannot be the
+# whole cause. What this test can show is how much of it rule 4 accounts for.
+#
+# system_prompt.txt sha256 102e751168f59c1a63e95ff6323aab29228ba6702f0bce1f77b76efd940b7956
+# rule 4 reads: If any red flag is present, the category is red regardless of other factors.
+# run 2026-09-17T23:03:29Z
+
+############ BEFORE pass 1/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=182 reasoning_chars=0 red_flags=[]
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. High blood pressure and statin use are risk modifiers. No red flags present but symptoms meet criteria for possible myocardial infarction. Risk modifiers from profile increase concern.'
+       next_steps=['Call emergency services immediately', 'Do not eat or drink anything', 'Sit or lie down, keep calm']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=['Any shortness of breath or irregular heartbeat?', 'Have you had a silent heart attack before?']
+       [VIOLATION: questions on a red]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=217 reasoning_chars=0 red_flags=['Chest tightness during exertion with CAD and nitroglycerin use']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and medications increase urgency. Cites: CP-ANG-001, CP-ANG-002, profile (CAD, nitroglycerin), timeline (exertional onset, resolved with rest).'
+       next_steps=['Call 9-1-1 immediately if chest tightness recurs or does not resolve with rest', 'Do not take nitroglycerin if unsure of exact dose or if symptoms persist']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=279 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste. No red flags present. No risk modifiers from profile or medications. Symptoms began 40 minutes after a meal and improved with sitting upright, suggesting reflux-related. No sudden onset or rapid progression. No contraindications to OTC treatment.'
+       next_steps=['Take an over-the-counter antacid or H2 blocker if available', 'Avoid large meals, caffeine, alcohol, and tight clothing', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=['CP-GERD-001: GERD commonly causes heartburn, burning feeling in chest, behind breastbone, and sour taste in mouth', 'CP-GERD-002: Seek doctor if symptoms do not improve with OTC meds or lifestyle changes, or if complications like vomiting blood or black tarry stools occur']
+       follow_up_questions=['Have you experienced any vomiting blood or black tarry stools?', 'Have you lost weight unintentionally?']
+       INVENTED KEYS (not in registry): ['CP-GERD-001: GERD commonly causes heartburn, burning feeling in chest, behind breastbone, and sour taste in mouth', 'CP-GERD-002: Seek doctor if symptoms do not improve with OTC meds or lifestyle changes, or if complications like vomiting blood or black tarry stools occur']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=187 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'rapid onset at rest']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over 1.5 hours. No red flags contradicting this pattern. Risk modifiers: no cardiac history, recent head cold (possible viral pleuritis).'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or NSAIDs if possible']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=134 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications. Symptoms suggest possible pleurisy or pulmonary embolism. Immediate assessment needed.'
+       next_steps=['Call emergency services or go to nearest emergency department immediately', 'Do not delay care as chest pain with pleuritic features may indicate serious condition']
+       citations=[]
+       follow_up_questions=[]
+
+############ BEFORE pass 2/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=182 reasoning_chars=0 red_flags=[]
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. High blood pressure and statin use are risk modifiers. No red flags present but symptoms meet criteria for possible myocardial infarction. Risk modifiers from profile increase concern.'
+       next_steps=['Call emergency services immediately', 'Do not eat or drink anything', 'Sit or lie down, keep calm']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=['Any shortness of breath or irregular heartbeat?', 'Have you had a silent heart attack before?']
+       [VIOLATION: questions on a red]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=217 reasoning_chars=0 red_flags=['Chest tightness during exertion with CAD and nitroglycerin use']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and medications increase urgency. Cites: CP-ANG-001, CP-ANG-002, profile (CAD, nitroglycerin), timeline (exertional onset, resolved with rest).'
+       next_steps=['Call 9-1-1 immediately if chest tightness recurs or does not resolve with rest', 'Do not take nitroglycerin if unsure of exact dose or if symptoms persist']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=279 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste. No red flags present. No risk modifiers from profile or medications. Symptoms began 40 minutes after a meal and improved with sitting upright, suggesting reflux-related. No sudden onset or rapid progression. No contraindications to OTC treatment.'
+       next_steps=['Take an over-the-counter antacid or H2 blocker if available', 'Avoid large meals, caffeine, alcohol, and tight clothing', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=['CP-GERD-001: GERD commonly causes heartburn, burning feeling in chest, behind breastbone, and sour taste in mouth', 'CP-GERD-002: Seek doctor if symptoms do not improve with OTC meds or lifestyle changes, or if complications like vomiting blood or black tarry stools occur']
+       follow_up_questions=['Have you experienced any vomiting blood or black tarry stools?', 'Have you lost weight unintentionally?']
+       INVENTED KEYS (not in registry): ['CP-GERD-001: GERD commonly causes heartburn, burning feeling in chest, behind breastbone, and sour taste in mouth', 'CP-GERD-002: Seek doctor if symptoms do not improve with OTC meds or lifestyle changes, or if complications like vomiting blood or black tarry stools occur']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=187 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'rapid onset at rest']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over 1.5 hours. No red flags contradicting this pattern. Risk modifiers: no cardiac history, recent head cold (possible viral pleuritis).'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or NSAIDs if possible']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=134 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications. Symptoms suggest possible pleurisy or pulmonary embolism. Immediate assessment needed.'
+       next_steps=['Call emergency services or go to nearest emergency department immediately', 'Do not delay care as chest pain with pleuritic features may indicate serious condition']
+       citations=[]
+       follow_up_questions=[]
+
+# END 2026-09-17T23:14:14Z

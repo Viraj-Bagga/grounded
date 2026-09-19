@@ -1,0 +1,20 @@
+# REVIEW: nhlbi-chd-symptoms
+# Coronary Heart Disease - Symptoms
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/coronary-heart-disease/symptoms
+# key_prefix: CP-ANG   expected_category: yellow
+# role: Primary yellow source. Exertional, resolves on rest.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 001 [ok   ] tokens=187 heading=Coronary Heart Disease Symptoms
+If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.
+
+Sometimes coronary heart disease is "silent," meaning you may not have any symptoms until you have a heart attack or other complication. This can make coronary heart disease hard to diagnose . It is also why preventing heart disease is so important.
+
+Coronary heart disease often develops over many years. As plaque builds up and narrows the coronary arteries , you're more likely to have symptoms such as chest pain, shortness of breath, or neck pain when you exert yourself. Symptoms often go away with rest and return when you are active or under stress. Symptoms may get worse as plaque keeps building up.
+
+Chest pain or discomfort that does not go away or occurs while you are resting might be a sign of a heart attack. All chest pain should be checked by a healthcare provider.

@@ -1,0 +1,9 @@
+{
+  "name": "steel26-app",
+  "private": true,
+  "version": "0.0.0",
+  "comment": "Epic 5 app shell. Only the llama.rn pin so far; the RN project is not scaffolded yet (blocked on Xcode).",
+  "dependencies": {
+    "llama.rn": "0.12.9"
+  }
+}

@@ -1,0 +1,84 @@
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'LoadSpike' do
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  post_install do |installer|
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+
+    # TOOLCHAIN WORKAROUND, not an llama.rn problem.
+    #
+    # React Native 0.81.4 vendors fmt 11.0.2. Compiled with Xcode 26.6's clang
+    # that fails in fmt's own headers with "call to consteval function ... is
+    # not a constant expression" at format-inl.h:59, :60, :1387, :1391, :1394.
+    # fmt fixed this after 11.0.2; RN 0.81.4 pins the broken one.
+    #
+    # fmt already carries an escape hatch for exactly this class of breakage:
+    # base.h sets FMT_USE_CONSTEVAL 0 for several compilers it knows are
+    # broken, including "Apple clang < 14". Xcode 26 is simply newer than that
+    # list. Defining it to 0 externally takes the same path fmt takes for every
+    # other compiler it distrusts, so this is fmt's own fallback, not a hack
+    # around a real type error.
+    #
+    # A -DFMT_USE_CONSTEVAL=0 on the command line does NOT work, and it was
+    # tried first: base.h defines the macro through a bare `#if` chain with no
+    # `#ifndef` guard, so it overwrites anything passed in. The define reached
+    # the compiler response file and was discarded by the header. The guard has
+    # to be patched in the header itself.
+    #
+    # Forcing the chain's first branch makes fmt take the same FMT_USE_CONSTEVAL 0
+    # path it already takes for Apple clang < 14, libc++ < 10 and MSVC < 16.10.
+    # Idempotent, and re-applied on every pod install because Pods/ is generated.
+    #
+    # THIS IS A LOCAL PATCH TO A GENERATED DIRECTORY. The real fix is bumping
+    # React Native to a version that vendors fmt > 11.0.2. That is a bigger
+    # decision than a load spike should make, so it is deferred and recorded.
+    fmt_base = File.join(__dir__, 'Pods/fmt/include/fmt/base.h')
+    if File.exist?(fmt_base)
+      src = File.read(fmt_base)
+      needle = "#if !defined(__cpp_lib_is_constant_evaluated)\n#  define FMT_USE_CONSTEVAL 0"
+      patched = "#if 1  // PATCHED by Podfile: Xcode 26 clang breaks fmt 11.0.2 consteval\n#  define FMT_USE_CONSTEVAL 0"
+      if src.include?(needle)
+        # CocoaPods installs pod sources read-only, so this needs the bit back
+        # before writing and restores it afterwards.
+        mode = File.stat(fmt_base).mode
+        File.chmod(0o644, fmt_base)
+        File.write(fmt_base, src.sub(needle, patched))
+        File.chmod(mode & 0o7777, fmt_base)
+        Pod::UI.puts "[steel26] patched fmt base.h to disable consteval".yellow
+      elsif src.include?("PATCHED by Podfile")
+        Pod::UI.puts "[steel26] fmt base.h already patched".green
+      else
+        Pod::UI.warn "[steel26] fmt base.h did not match the expected consteval " \
+                     "block. fmt version may have changed; check whether the " \
+                     "patch is still needed before assuming the build is clean."
+      end
+    end
+  end
+end

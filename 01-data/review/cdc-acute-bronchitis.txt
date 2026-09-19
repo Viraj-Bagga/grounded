@@ -1,0 +1,103 @@
+# REVIEW: cdc-acute-bronchitis
+# Chest Cold (Acute Bronchitis) Basics
+# Centers for Disease Control and Prevention
+# https://www.cdc.gov/acute-bronchitis/about/index.html
+# key_prefix: CP-BRONCH   expected_category: green
+# role: Third green condition. Green has only had two, GERD and panic, so green pairs were repeating two presentations. Sits directly against CP-PNA in yellow with shared vocabulary, cough and chest discomfort, which is the same design logic that made chest pain the right first topic. Carries its own escalation criteria in a "When to seek medical care" section, which is the CP-GERD-002 shape that only one chunk in the corpus currently has.
+
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+
+--- chunk 001 [short] tokens=74 heading=Key points
+Cough keeping you up at night? Congestion? Sore throat? You may have a chest cold (or acute bronchitis).
+If you're a healthy person without underlying heart or lung problems or a weakened immune system, this information is for you.
+Viruses usually cause chest colds.
+Antibiotics will not help you feel better if you have a chest cold.
+
+--- chunk 002 [short] tokens=35 heading=Overview
+Acute bronchitis (often called a “chest cold”) occurs when the airways of the lungs swell and produce mucus (a thick, sticky fluid).
+
+--- chunk 003 [short] tokens=32 heading=Symptoms
+Symptoms of acute bronchitis last less than 3 weeks and can include:
+
+Coughing with or without mucus
+Feeling tired
+Congestion
+Sore throat
+Mild body aches
+
+--- chunk 004 [short] tokens=36 heading=Causes
+A virus usually causes a chest cold. Bacteria can sometimes cause a chest cold, but even in these cases, antibiotics are NOT recommended and will not help you feel better.
+
+--- chunk 005 [ok   ] tokens=122 heading=Prevention
+CDC recommends that all people use core prevention strategies. These are important steps you can take to protect yourself and others from respiratory viruses, including those that cause acute bronchitis:
+
+Stay up to date with recommended vaccines and boosters, such as the flu vaccine .
+Practice good hygiene (practices that improve cleanliness).
+Cover your coughs and sneezes
+Wash or sanitize your hands often
+Clean frequently touched surfaces
+Take steps for cleaner air.
+Bring in fresh outside air
+Purify indoor air
+Gather outdoors
+
+For more information on core prevention strategies, visit: Respiratory Virus Guidance | Respiratory Illnesses | CDC .
+
+--- chunk 006 [short] tokens=78 heading=When to seek medical care
+See a healthcare professional if you have any of the following:
+
+Fever that lasts longer than 5 days or fever of 104°F or higher
+Cough with bloody mucus
+Shortness of breath or trouble breathing
+Symptoms that last more than 3 weeks
+Repeated episodes of bronchitis
+
+This list is not all-inclusive. Please see a healthcare professional for any symptom that is severe or concerning.
+
+--- chunk 007 [short] tokens=31 heading=Treatment
+Acute bronchitis usually gets better on its own—without antibiotics. Antibiotics won't help you get better if you have a chest cold.
+
+--- chunk 008 [short] tokens=37 heading=Reminder
+If you have whooping cough (pertussis) or pneumonia, which can have similar symptoms to acute bronchitis, a healthcare professional will most likely prescribe antibiotics.
+
+--- chunk 009 [ok   ] tokens=169 heading=How to feel better
+Get plenty of rest.
+Drink plenty of fluids.
+Use a clean humidifier or cool mist vaporizer.
+Use saline nasal spray or drops. For young children, use a rubber suction bulb to clear mucus.
+For young children, use a rubber suction bulb to clear mucus.
+Breathe in steam from a bowl of hot water or shower. For young children, sit with the child in a bathroom filled with steam from a running shower.
+For young children, sit with the child in a bathroom filled with steam from a running shower.
+Use throat lozenges or cough drops. Do not give lozenges to children younger than 4 years of age.
+Do not give lozenges to children younger than 4 years of age.
+Use pasteurized honey to relieve cough for adults and children at least 1 year of age or older.
+
+--- chunk 010 [ok   ] tokens=120 heading=Over-the-counter medicine
+Ask a healthcare professional about over-the-counter medicines that can help you feel better.
+
+Over-the-counter medicines may provide temporary relief of symptoms, but they will not cure your illness.
+Always read over-the-counter medicine product labels and use as directed.
+Tell a healthcare professional about all prescription and other over-the-counter medicines you are taking.
+
+Some over-the-counter medicines are not recommended for children of certain ages.
+
+Ask a healthcare professional about the right dosage of over-the-counter medicines for your child's age and size and follow all directions.
+
+--- chunk 011 [short] tokens=66 heading=Pain relievers and fever reducers
+Children younger than 3 months: do not give pain relievers or fever reducers unless a healthcare professional tells you to do so.
+Children between 3 months and 6 months: only give acetaminophen.
+Children 6 months or older: it is OK to give acetaminophen or ibuprofen.
+
+--- chunk 012 [short] tokens=57 heading=Cough and cold medicines
+Children younger than 6 years: over-the-counter cough/cold medicines are not recommended and can result in serious and sometimes life-threatening side effects.
+Children 6 years or older: discuss the use of over-the-counter cough/cold medicines with a healthcare professional.
+
+--- chunk 013 [short] tokens=29 heading=Resources
+For more on treatment of common illnesses, visit CDC resources:
+
+Print version: Preventing and Treating Bronchitis [PDF – 2 pages]

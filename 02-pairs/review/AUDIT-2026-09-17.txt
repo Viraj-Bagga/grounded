@@ -1,0 +1,205 @@
+PAIR REVIEW AUDIT, 2026-09-17. Nothing fixed, nothing frozen.
+Run after Viraj's five findings from SAMPLE.txt.
+
+========================================================================
+AUDIT 1: PREGNANCY / OBSTETRIC
+========================================================================
+
+  P0051 standalone verdict=green chunks=CP-GERD-003,CP-GERD-001,CP-GERD-002
+     profile  : age: 29, sex: female | conditions: pregnancy, 30 weeks | medications: none
+     says     : Sorry, I am thirty weeks pregnant and getting terrible heartburn in the evenings, burning up behind my breastbone and a sour taste. Propping myself up helps. I 
+     red_flags: []
+
+  1 pregnancy pair(s) in the 60
+
+corpus obstetric coverage:
+  chunks with an obstetric topic: NONE
+  chunks whose TEXT mentions pregnancy: ['CP-GERD-003']
+    CP-GERD-003: being pregnant
+
+==========================================================================
+AUDIT 2: RULE 4 — non-red turns carrying red_flags
+==========================================================================
+Rule 4: "If any red flag is present, the category is red regardless of other factors."
+
+urgency   with red_flags    empty
+red                   12        0
+yellow                24        8
+green                  0       20
+
+NON-RED TURNS CARRYING red_flags: 24
+  by kind: {'contrast': 12, 'grounding': 2, 'standalone': 10}
+  by urgency: {'yellow': 24}
+
+  P0005 contrast       yellow turn1  ['Pain on inspiration building over five days']
+  P0006 contrast       yellow turn1  ['Pain on inspiration persisting four days']
+  P0007 contrast       yellow turn1  ['Sharp chest pain worse lying flat, relieved leaning forward']
+  P0010 contrast       yellow turn1  ['First ever episode of chest tightness with treated hypertension']
+  P0011 contrast       yellow turn1  ['Black tarry stool for two days alongside reflux']
+  P0012 grounding      yellow turn1  ['Sharp chest pain worse on inspiration, eased sitting forward']
+  P0013 contrast       yellow turn1  ['Sharp chest pain worse lying flat, eased sitting forward']
+  P0016 contrast       yellow turn1  ['Sharp chest pain worse on inspiration, not reproducible on pressing']
+  P0018 standalone     yellow turn2  ['Exertional chest tightness with known coronary artery disease']
+  P0020 contrast       yellow turn1  ['First ever episode of chest tightness with early family cardiac history']
+  P0024 standalone     yellow turn1  ['Sharp chest pain worse on deep breathing, eased leaning forward']
+  P0026 contrast       yellow turn1  ['Exertional chest tightness with known coronary artery disease']
+  P0028 standalone     yellow turn1  ['Sharp one-sided chest pain worse on inspiration for three days']
+  P0034 standalone     yellow turn2  ['Sharp chest pain worse on inspiration, relieved leaning forward']
+  P0036 contrast       yellow turn1  ['Exertional chest tightness with known coronary artery disease']
+  P0037 standalone     yellow turn1  ['Sharp chest pain worse on inspiration, not reproducible on pressing']
+  P0039 contrast       yellow turn1  ['Black tarry stool for two days alongside reflux']
+  P0040 grounding      yellow turn1  ['Chest pain on coughing and deep breathing after four days']
+  P0041 standalone     yellow turn2  ['Chest pain on coughing with fever and new breathlessness']
+  P0043 standalone     yellow turn2  ['Sharp chest pain worse on deep breathing for three days']
+  P0047 contrast       yellow turn1  ['Sharp chest pain worse on every breath, not reproducible on pressing']
+  P0053 standalone     yellow turn1  ['Chest pain on coughing with fever and productive cough for five days']
+  P0056 standalone     yellow turn1  ['Sharp chest pain on deep inspiration for two days']
+  P0057 standalone     yellow turn1  ['Exertional chest tightness with known coronary artery disease']
+
+RED turns with EMPTY red_flags (the mirror problem): none
+
+============================================================================
+AUDIT 3: SECOND DIFFERENCES IN EVERY CONTRAST SET
+============================================================================
+Clause-level diff of the two symptom texts. The intended discriminator is
+ONE of these. Anything else listed is a second difference.
+
+----------------------------------------------------------------------------
+C01  P0026(yellow) vs P0042(red)   axis: does the exertional pain resolve with rest
+   only in P0026 (yellow):
+      - Sat on the wall
+      - it went in about three minutes
+      - Fine now
+   only in P0042 (red):
+      + Sat on the wall but it has not shifted
+      + it has been half an hour now
+   -> 5 differing clause(s)
+----------------------------------------------------------------------------
+C02  P0039(yellow) vs P0054(green)   axis: are alarm features present
+   only in P0039 (yellow):
+      - burning in my chest after tea most nights worse when i lie down get a sour taste but also my poo has gone black
+      - sticky the last 2 days
+   only in P0054 (green):
+      + burning in my chest after tea most nights worse when i lie down get a sour taste sitting up sorts it out
+   -> 3 differing clause(s)
+----------------------------------------------------------------------------
+C03  P0013(yellow) vs P0045(red)   axis: is there haemodynamic or respiratory compromise
+   only in P0013 (yellow):
+      - Otherwise he seems himself
+      - talking normally
+   only in P0045 (red):
+      + In the last few minutes he has gone very short of breath just sitting there
+      + cannot finish a sentence
+   -> 4 differing clause(s)
+----------------------------------------------------------------------------
+C04  P0020(yellow) vs P0058(green)   axis: is this a recognised recurrence or a first episode
+   !! PROFILES DIFFER
+      P0020: age: 24, sex: female | conditions: none | medications: none
+      P0058: age: 24, sex: female | conditions: panic disorder | medications: sertraline
+   only in P0020 (yellow):
+      - Never had this before
+      - Dad had a heart attack at 50
+   only in P0058 (green):
+      + Panic attack
+      + Same as always
+      + Easing off now
+      + about ten minutes in
+   -> 6 differing clause(s)
+----------------------------------------------------------------------------
+C05  P0032(green) vs P0047(yellow)   axis: is the pain reproducible on palpation
+   only in P0032 (green):
+      - He helped us move furniture all Saturday
+      - It hurts most when I press on the spot
+      - he can point to it exactly
+   only in P0047 (yellow):
+      + It is much worse every time he breathes in
+      + Pressing on it makes no difference at all
+   -> 5 differing clause(s)
+----------------------------------------------------------------------------
+C06  P0006(yellow) vs P0033(red)   axis: is there a thrombosis risk factor and sudden onset
+   only in P0006 (yellow):
+      - ive had a pain in my side when i breathe in for about 4 days now its come on slow no travel or ops or anything just gradual
+   only in P0033 (red):
+      + sudden pain in my side when i breathe in came on out of nowhere an hour ago i got back from australia 2 days ago
+      + my left calf is swollen
+      + sore
+   -> 4 differing clause(s)
+----------------------------------------------------------------------------
+C07  P0036(yellow) vs P0050(red)   axis: does the exertional pain resolve with rest
+   only in P0036 (yellow):
+      - It goes after a minute or two of standing still
+      - It has been the same for about a year
+   only in P0050 (red):
+      + Today it came on the same way but it has stayed for over half an hour even though I have been sitting down
+   -> 3 differing clause(s)
+----------------------------------------------------------------------------
+C08  P0011(yellow) vs P0048(green)   axis: are alarm features present
+   only in P0011 (yellow):
+      - worse lying down
+      - sour taste
+      - But the last two days his stool has been black
+      - tarry
+      - I am frightened
+   only in P0048 (green):
+      + I keep telling him to get it checked
+      + It is worse when he lies down
+      + he gets a sour taste
+      + Sitting up sorts it out
+      + Nothing else going on
+   -> 10 differing clause(s)
+----------------------------------------------------------------------------
+C09  P0007(yellow) vs P0019(red)   axis: is there haemodynamic or respiratory compromise
+   only in P0007 (yellow):
+      - I thought I was over it
+      - but for two days now I have had this sharp pain in my chest
+      - It is definitely worse when I take a deep breath
+      - worse when I lie down flat
+      - it is better if I lean forward over the table
+      - I feel alright in myself otherwise
+   only in P0019 (red):
+      + For two days I have had sharp chest pain
+      + worse on a deep breath
+      + better leaning forward
+      + But in the last ten minutes I have gone really short of breath just sitting here
+      + I am frightened
+   -> 11 differing clause(s)
+----------------------------------------------------------------------------
+C10  P0001(green) vs P0010(yellow)   axis: is this a recognised recurrence or a first episode
+   !! PROFILES DIFFER
+      P0001: age: 33, sex: male | conditions: panic disorder | medications: none
+      P0010: age: 33, sex: male | conditions: high blood pressure | medications: amlodipine
+   only in P0001 (green):
+      - My colleague is having a panic attack at his desk
+      - Chest tight
+      - He says it is exactly like the ones he has had for years
+      - it is already settling after about ten minutes
+   only in P0010 (yellow):
+      + My colleague has gone very tight in the chest at his desk
+      + He has never had anything like this before
+      + he is on tablets for his blood pressure
+   -> 7 differing clause(s)
+----------------------------------------------------------------------------
+C11  P0016(yellow) vs P0060(green)   axis: is the pain reproducible on palpation
+   only in P0016 (yellow):
+      - Much worse on a deep breath
+      - Pressing on it does nothing
+   only in P0060 (green):
+      + Shifted a flat's worth of boxes yesterday
+      + Worst when I press the spot
+      + Can point to it with one finger
+   -> 5 differing clause(s)
+----------------------------------------------------------------------------
+C12  P0005(yellow) vs P0038(red)   axis: is there a thrombosis risk factor and sudden onset
+   only in P0005 (yellow):
+      - My dad says it hurts when he breathes in
+      - it has been building up over about five days
+      - He has not been anywhere or had any operations
+      - I do not know whether to worry
+   only in P0038 (red):
+      + My dad suddenly cannot breathe properly
+      + it hurts when he breathes in
+      + it started about half an hour ago
+      + He had a knee operation three weeks ago
+      + his calf has been swollen
+      + sore
+   -> 10 differing clause(s)

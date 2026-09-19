@@ -1,0 +1,61 @@
+# scope floor re-calibration at 0.25, 2026-09-18 (supersedes the 0.33 run)
+# 04-retrieval/calibrate_scope.py, 22 chunks, max cosine, SYMPTOMS ONLY
+
+floor under test: 0.25
+
+IN SCOPE (must pass; a refusal here is the catastrophic direction)
+  0.314  radiation, no 'chest' framing          There is a heaviness across my front and my le
+  0.386  original worst, kept for continuity    Burning behind my breastbone at night
+  0.422  the classic idiom                      Feels like an elephant sitting on my chest.
+  0.446  exertional, colloquial                 My chest goes tight when I walk up hills and s
+  0.489  the live refusal that started this     Chest got tight walking up the hill to my car,
+  0.517  reflux idiom, the GERD side            Bad indigestion that will not shift and I feel
+  0.535  squeezing plus autonomic               Got a squeezing feeling in my chest and I have
+  0.545  vague, which is how people actually open Something is not right in my chest and it has 
+  0.546  pleuritic, colloquial                  Sharp stabbing in my side when I take a deep b
+  0.594  woke with it                           Woke up with a dull ache in the middle of my c
+  0.613  musculoskeletal, the green side        My chest hurts when I press on it.
+  0.663  panic side                             My heart is pounding and my chest feels tight 
+
+OUT OF SCOPE (must refuse; a pass here costs 45 s, not a life)
+  0.450  ENT, the near miss                     I have a sore throat and a cough.  <-- PASSED
+  0.367  mental health                          I have been feeling really down and cannot sle  <-- PASSED
+  0.364  gastro                                 I have had diarrhoea since yesterday and my st  <-- PASSED
+  0.341  original best out-of-scope             My toddler has a fever and is pulling at her e  <-- PASSED
+  0.294  headache                               I have had a bad headache for three days.  <-- PASSED
+  0.291  dental                                 My tooth is killing me and the side of my face  <-- PASSED
+  0.265  knee                                   My knee has been sore since I started running.  <-- PASSED
+  0.252  ankle                                  I rolled my ankle playing football and it is s  <-- PASSED
+  0.220  rash                                   I have got a rash on my arm that itches.
+  0.217  wrist                                  I sprained my wrist falling off my bike.
+  0.211  urinary                                I keep needing to pee and it stings when I go.
+  0.176  eye                                    My eye is red and watery and it feels gritty.
+
+======================================================================
+  worst in-scope   0.314  (radiation, no 'chest' framing)
+  best out-scope   0.450  (ENT, the near miss)
+  gap              -0.136
+  n                12 in, 12 out
+  at floor 0.25: 0 in-scope refused, 8 out-of-scope passed
+  NOT SEPARABLE on this sample. No single floor works; the post-flight empty-citations check has to carry it.
+======================================================================
+
+=== LIVE end-to-end, all 8 out-of-scope queries clearing the 0.25 floor ===
+  REFUSED post-flight  0.450  sore throat and cough
+  REFUSED post-flight  0.367  feeling really down, cannot sleep
+  REFUSED post-flight  0.364  diarrhoea and stomach cramping
+  TRIAGED red          0.341  toddler fever, pulling at ear   <-- THE HOLE
+  REFUSED post-flight  0.294  three-day headache
+  REFUSED post-flight  0.291  tooth and face ache
+  REFUSED post-flight  0.265  sore knee since running
+  REFUSED post-flight  0.252  rolled ankle, swollen
+  7 of 8 refused. The one that got through cited CP-PNA-001, which really does
+  say 'Young children ... are at risk' and lists fever, so the key resolves.
+  Its stated reason was 'possible meningitis'. 'meningitis' is in NO chunk.
+
+=== the ectopic case, separately ===
+  0.321  'My stomach hurts and my period is late'
+    floor 0.40 refused it. floor 0.33 refused it. floor 0.25 does NOT.
+    excluded_subject does NOT catch it and never did: PREGNANCY requires an
+    explicit pregnancy word and 'my period is late' has none.
+    LIVE: refused post-flight, cited nothing, urgency yellow withheld, 42.3 s.

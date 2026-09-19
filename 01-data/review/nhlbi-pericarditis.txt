@@ -1,0 +1,27 @@
+# REVIEW: nhlbi-pericarditis
+# Heart Inflammation
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+# key_prefix: CP-PERI   expected_category: yellow
+# role: Third yellow, and the first real negative discriminator in the corpus. Carries: chest pain that is sharp, worse with breathing, and better sitting up and leaning forward. Partly closes the NEG-DISC gap below.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 002 [ok   ] tokens=136 heading=Heart Inflammation Symptoms
+If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9-1-1 or seek medical help right away.
+
+The symptoms of heart inflammation can occur suddenly or progress slowly. You may have severe symptoms or almost no symptoms.
+
+If a virus causes your heart inflammation, you may have a cough, runny nose, or gastrointestinal symptoms a few weeks before you notice any other symptoms of heart inflammation.
+
+Some symptoms of heart inflammation may feel like the flu and go away on their own after a few weeks. Other symptoms include chest pain or shortness of breath.
+
+There are several common symptoms for each type of heart inflammation.
+
+--- chunk 005 [short] tokens=25 heading=Pericarditis symptoms
+Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward
+Fast heartbeat
+Fever

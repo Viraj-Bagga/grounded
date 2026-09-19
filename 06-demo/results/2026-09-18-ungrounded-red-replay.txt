@@ -1,0 +1,88 @@
+# NEVER-WITHHOLD-RED, replayed through the demo server, 2026-09-18
+# 06-demo/server.py as changed tonight, against a stand-in llama-server that
+# serves recorded completions verbatim, in order. Retrieval, exclusions, floor,
+# every guard and post_flight run for real. The outputs are the three ACS runs
+# that were withheld as out of scope (A2 runs 10, 12, 13) and two controls, from
+# 06-demo/results/2026-09-18-leading-key-live.txt, whitespace as recorded there.
+# guards.py sha 0af0445a, server.py sha 62a1cdd7, index.html sha 3b83f681
+
+  PASS  A2 run 10: want flag, got flag   events ['retrieved', 'result']
+        symptoms  There is a heaviness across my front and my left arm has gone dead
+        shown     urgency=red  rationale=''  red_flags=[]  next_steps=[]  citations=[]  sources panel entries=0
+        note      This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        reason    the model cited nothing, so it had no grounded source to reason from
+        withheld  {"rationale": "Symptoms of possible heart attack: heaviness across front and left arm deadness. Risk modifiers: female age 29, no medications, no conditions. No red flags present. Risk of DVT low due to no surgery or travel. Symptoms align with CP-ACS-003 and CP-PERI-002 criteria. Immediate assessment needed.", "red_flags": [], "next_steps": ["Call emergency services immediately", "Do not wait for symptoms to worsen", "Do not take aspirin or other medications without medical advice"], "follow_up_questions": []}
+
+  PASS  A2 run 12: want flag, got flag   events ['retrieved', 'result']
+        symptoms  There is a heaviness across my front and my left arm has gone dead
+        shown     urgency=red  rationale=''  red_flags=[]  next_steps=[]  citations=[]  sources panel entries=0
+        note      This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        reason    the model cited nothing, so it had no grounded source to reason from
+        withheld  {"rationale": "Symptoms of possible cardiac event: heaviness across front and left arm deadness. Risk modifiers: female, no medications, no conditions. No red flags present. Symptoms align with CP-ACS-003 chest pain/heaviness and CP-PE-003 arm symptoms.", "red_flags": [], "next_steps": ["Call emergency services immediately", "Do not eat or drink", "Lie down with legs elevated"], "follow_up_questions": []}
+
+  PASS  A2 run 13: want flag, got flag   events ['retrieved', 'result']
+        symptoms  There is a heaviness across my front and my left arm has gone dead
+        shown     urgency=red  rationale=''  red_flags=[]  next_steps=[]  citations=[]  sources panel entries=0
+        note      This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        reason    the model cited nothing, so it had no grounded source to reason from
+        withheld  {"rationale": "Symptoms of possible heart attack: heaviness across front and left arm deadness. Risk modifiers: female, no medications, no conditions. No red flags present. Rapid progression and severe symptoms warrant immediate care.", "red_flags": ["heaviness across front", "left arm deadness"], "next_steps": ["Call emergency services immediately", "Do not eat or drink", "Sit or lie down, do not stand or walk"], "follow_up_questions": []}
+
+  PASS  C ENT run 1, control: want refuse, got refuse   events ['retrieved', 'refused']
+        symptoms  I have a sore throat and a cough.
+        refused   'the model cited nothing, so it had no grounded source to reason from', urgency_withheld=green
+
+  PASS  A run 1, control: want render, got render   events ['retrieved', 'result']
+        symptoms  There is a heaviness across my front and my left arm has gone dead
+        shown     urgency=red  citations=['CP-ACS-003']  red_flags=['heaviness across the front', 'left arm has gone dead']
+        ungrounded=None
+
+0 unexpected
+
+=== BROWSER: the same five outputs, rendered by 06-demo/static/index.html ===
+# Headless Chrome 153 driven over the DevTools protocol against the same replay
+# server, stand-in restarted so it served the same five outputs in the same order.
+# The Claude-in-Chrome extension was not connected. Screenshots of the output
+# panel sit beside this file. Timing lines read 0.0s and '?' because the
+# stand-in answers in milliseconds and reports no token counts.
+
+  A2 run 10, withheld before tonight   -> 2026-09-18-ungrounded-red-run10.png
+        banner      RED / Call emergency services now   (verdict v-red)
+        not-grounded line  NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        sections    none   sources none
+        rendered    RED | Call emergency services now | You | NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld. | Why: the model cited nothing, so it had no grounded source to reason from | 0.0s total · retrieval 336 tok · prompt ? tok at 0.0/s · generated ? tok at 0.0/s | reasoning off · schema-constrained · guards applied · no network
+
+  A2 run 12, withheld before tonight   -> 2026-09-18-ungrounded-red-run12.png
+        banner      RED / Call emergency services now   (verdict v-red)
+        not-grounded line  NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        sections    none   sources none
+        rendered    RED | Call emergency services now | You | NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld. | Why: the model cited nothing, so it had no grounded source to reason from | 0.0s total · retrieval 336 tok · prompt ? tok at 0.0/s · generated ? tok at 0.0/s | reasoning off · schema-constrained · guards applied · no network
+
+  A2 run 13, withheld before tonight   -> 2026-09-18-ungrounded-red-run13.png
+        banner      RED / Call emergency services now   (verdict v-red)
+        not-grounded line  NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+        sections    none   sources none
+        rendered    RED | Call emergency services now | You | NOT GROUNDED IN SOURCES | This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld. | Why: the model cited nothing, so it had no grounded source to reason from | 0.0s total · retrieval 336 tok · prompt ? tok at 0.0/s · generated ? tok at 0.0/s | reasoning off · schema-constrained · guards applied · no network
+
+  control: out-of-scope green, nothing cited   -> 2026-09-18-ungrounded-red-control-refused.png
+        banner      OUT OF SCOPE / No verdict given   (verdict v-refuse)
+        not-grounded line  absent
+        sections    none   sources none
+        rendered    OUT OF SCOPE | No verdict given | This is outside what this system covers. It can only assess chest pain, and it found nothing relevant to what you described. Please seek medical advice. | Why: the model cited nothing, so it had no grounded source to reason from | a green verdict was produced and withheld | this system covers chest pain only, 22 sources
+
+  control: a cited red   -> 2026-09-18-ungrounded-red-control-cited.png
+        banner      RED / Call emergency services now   (verdict v-red)
+        not-grounded line  absent
+        sections    ['Why', 'Red flags', 'What to do', 'Sources']   sources ['CP-ACS-003']
+        rendered    RED | Call emergency services now | You | WHY | Symptoms include heaviness across the front and left arm going dead, which are red flags for cardiac ischemia. Patient is female, age 29, no medications, no risk modifiers. Rapid progression and neurovascular compromise warrant immediate care. Cites CP-ACS-003. | RED FLAGS | heaviness across the front | left arm has gone dead | WHAT TO DO | Call emergency services immediately | Do not wait for symptoms to worsen | Do not take aspirin or other medications without medical advice | SOURCES | CP-ACS-003 | REMOVED BY APP GUARDS | Do not take aspirin or other medications without medical advice — flagged, kept | 0.0s total · retrieval 336 tok · prompt ? tok at 0.0/s · generated ? tok at 0.0/s | reasoning off · schema-constrained · guards applied · no network
+
+0 unexpected
+
+=== REAL llama-server, one run, the changed server and page end to end ===
+# NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf, -ngl 0, same headless Chrome driver.
+# Checks the normal path after the render refactor; this run was cited, as about
+# 9 in 10 are, so it did not take the ungrounded path.
+  -> 2026-09-18-ungrounded-red-live-real.png
+        banner      RED / Call emergency services now
+        not-grounded line  absent
+        sections    ['Why', 'Red flags', 'What to do', 'Sources']   sources ['CP-ACS-003', 'CP-PERI-002']
+        rendered    RED | Call emergency services now | You | WHY | Sudden onset of heaviness across the front and left arm deadness with no medications or medical history. Risk of cardiac event in female with no risk modifiers. Chest pain or heaviness is a key symptom of heart attack. Rapid progression and neurovascular compromise present. | RED FLAGS | heaviness across the front | left arm deadness | WHAT TO DO | Call emergency services immediately | Do not wait for symptoms to worsen | Do not drive yourself to care | SOURCES | CP-ACS-003CP-PERI-002 | 53.4s total · retrieval 336 tok · prompt 1139 tok at 32.2/s · generated 166 tok at 9.2/s | reasoning off · schema-constrained · guards applied · no network

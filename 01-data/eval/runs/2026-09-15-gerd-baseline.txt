@@ -1,0 +1,47 @@
+# NOTE added 2026-09-17: REASONING WAS ON for this run. discrimination_test.py did not
+# send enable_thinking=false before that date, so this is NOT the shipping config.
+# The reasoning-off reruns are 2026-09-17-*-reasoning-off.txt. Those still use this
+# harness's own prompt format, not the format 3 prompt in 02-pairs that ships.
+# green-gerd alone, cache_prompt=false, BASELINE system prompt, 2 passes
+# run 2026-09-15T21:19:39Z
+
+mode: matched, pass 1/2
+
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=237 red_flags=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms (burning chest, sour taste) are typical but not red‑flag; no severe chest pain or complications.
+
+distribution (scored cases only): {'yellow': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED YELLOW. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, pass 2/2
+
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=237 red_flags=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms (burning chest, sour taste) are typical but not red‑flag; no severe chest pain or complications.
+
+distribution (scored cases only): {'yellow': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED YELLOW. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+============================================================
+STABILITY ACROSS 2 PASSES, cache_prompt off
+  green-gerd             yellow  yellow  stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

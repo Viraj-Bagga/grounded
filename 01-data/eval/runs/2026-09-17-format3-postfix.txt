@@ -1,0 +1,91 @@
+# FORMAT 3 POST-FIX, 2 passes. Prompt rewritten 2026-09-17:
+#   - first line: findings come only from PATIENT PROFILE / SYMPTOM TIMELINE /
+#     SYMPTOMS. RETRIEVED CONTEXT supplies criteria, never findings.
+#   - rules 7 and 8 restored from format 2: discriminating qualifier per
+#     red_flags entry, risk factors belong in rationale.
+# Pre-fix pass 1 and pass 2 were byte-identical, so this config is
+# deterministic and any change below is attributable to the prompt.
+# Pre-fix fabrications being tested for persistence:
+#   yellow-pleuritic  red_flags ['fast heartbeat', 'fever']  (lines of CP-PERI-002)
+#   probe-costo       red_flags ['sudden onset and progression',
+#                                'possible pleurisy as a cause']
+# system_prompt.txt sha256 post-fix 2427e6230e688197623e5f3db74159b8911c8a718a6355a3641bad6d005089ab
+#                          pre-fix  dafa139cb2136c568081acf05a187dc572cd990aa87beca46f3c1ddc5d25645e
+# matched chunks, reasoning off, temperature 0.0, cache_prompt off, fresh server
+# run 2026-09-17T18:43:32Z, macOS 27.0 (26A428), llama.cpp build 10809 commit 5266f24da
+#
+# NOTE: a first attempt at 18:42:03Z produced only tracebacks. The server had
+# been killed when the pre-fix pass 2 script exited, so both passes hit
+# ConnectionRefused and no inference ran. This run starts its own server.
+
+############ POST-FIX pass 1/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=157 reasoning_chars=0 red_flags=['chest pressure radiating to jaw']
+       rationale='Sudden onset chest pressure, radiation to jaw, sweating, nausea, and persistent pain for 30 minutes with no relief despite rest. High blood pressure and statin use are risk modifiers. Symptoms align with cardiac event per CP-ACS-001 and CP-ACS-003. Red flag: chest pressure radiating to jaw.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to care', 'Lie down and rest']
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=167 reasoning_chars=0 red_flags=['chest tightness that does not go away']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; red flag: chest pain that does not go away or occurs while resting. Risk modifiers from profile and medications increase urgency.'
+       next_steps=['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve', 'Do not take nitroglycerin if unsure of exact dose or timing']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=['Is the chest tightness recurring or worsening?', 'Have you taken nitroglycerin today?']
+       [VIOLATION: questions on a red]
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=199 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste, and relief with sitting upright. No red flags present. Risk modifiers: no cardiac history, no medications. Symptoms began 40 minutes after a meal, suggesting postprandial reflux. No progression to severe pain or alarm features.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as directed', 'Avoid large meals and late dinners', 'Elevate head of bed if symptoms recur']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Any persistent vomiting or blood in vomit or stool?', 'Any unexplained weight loss or persistent nausea?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=184 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'fever', 'fast heartbeat']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) consistent with pleurisy. Rapid onset at rest, no exertional relation, and presence of fever and fast heartbeat are red flags. Risk modifiers: none from profile or medications. Findings: pleuritic chest pain, fever, tachycardia.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change', 'Do not attempt to drive yourself']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=121 reasoning_chars=0 red_flags=['sharp chest pain with deep breath']
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present in profile or medications. Risk modifiers absent. Possible pleurisy or pulmonary embolism.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change']
+       citations=['CP-PLEU-001']
+       follow_up_questions=[]
+
+############ POST-FIX pass 2/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=157 reasoning_chars=0 red_flags=['chest pressure radiating to jaw']
+       rationale='Sudden onset chest pressure, radiation to jaw, sweating, nausea, and persistent pain for 30 minutes with no relief despite rest. High blood pressure and statin use are risk modifiers. Symptoms align with cardiac event per CP-ACS-001 and CP-ACS-003. Red flag: chest pressure radiating to jaw.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to care', 'Lie down and rest']
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=167 reasoning_chars=0 red_flags=['chest tightness that does not go away']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; red flag: chest pain that does not go away or occurs while resting. Risk modifiers from profile and medications increase urgency.'
+       next_steps=['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve', 'Do not take nitroglycerin if unsure of exact dose or timing']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=['Is the chest tightness recurring or worsening?', 'Have you taken nitroglycerin today?']
+       [VIOLATION: questions on a red]
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=199 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste, and relief with sitting upright. No red flags present. Risk modifiers: no cardiac history, no medications. Symptoms began 40 minutes after a meal, suggesting postprandial reflux. No progression to severe pain or alarm features.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as directed', 'Avoid large meals and late dinners', 'Elevate head of bed if symptoms recur']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Any persistent vomiting or blood in vomit or stool?', 'Any unexplained weight loss or persistent nausea?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=184 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'fever', 'fast heartbeat']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) consistent with pleurisy. Rapid onset at rest, no exertional relation, and presence of fever and fast heartbeat are red flags. Risk modifiers: none from profile or medications. Findings: pleuritic chest pain, fever, tachycardia.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change', 'Do not attempt to drive yourself']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=121 reasoning_chars=0 red_flags=['sharp chest pain with deep breath']
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present in profile or medications. Risk modifiers absent. Possible pleurisy or pulmonary embolism.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change']
+       citations=['CP-PLEU-001']
+       follow_up_questions=[]
+
+# END post-fix run 2026-09-17T18:52:42Z

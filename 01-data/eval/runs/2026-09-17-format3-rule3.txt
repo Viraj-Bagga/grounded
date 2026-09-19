@@ -1,0 +1,97 @@
+# FORMAT 3, RULE 3 REWRITTEN. 2 passes, matched chunks, reasoning off,
+# temperature 0.0, cache_prompt off, fresh server.
+#
+# Change set B, on top of change set A (grounding first line + rules 7/8).
+# Rule 3 was: 'Every clinical claim you make must carry a citation key drawn
+# from RETRIEVED CONTEXT. Never cite a key that does not appear there.'
+# Rule 3 is now: 'Cite a key for every clinical criterion or threshold you
+# apply. Do not cite findings reported by the patient; those come from the
+# case and need no source. Citations justify the reasoning, not the symptoms.
+# Never cite a key that does not appear in RETRIEVED CONTEXT.'
+#
+# The final sentence was KEPT deliberately. Viraj's wording did not include it,
+# but it is the only instruction in the prompt against inventing a key, and
+# invented keys are hard constraint 9 with measured cases (CP-RISK-014,
+# MED-ANTICOAG-007). Zero invented keys across all runs to date. Dropping it
+# would put a constraint that currently holds at risk for no stated gain.
+#
+# THE QUESTION THIS RUN ANSWERS: do citations survive. Rule 3 no longer
+# requires a citation per clinical claim, so citations=[] is now a permitted
+# output, and an empty citations list breaks demo beat four.
+#
+# system_prompt.txt sha256 ca631a3dedc8eb9a3aa71ce8eaffd1b19524fc17dd6f678b4c24c0e279b9400a
+#   change set A  2427e6230e688197623e5f3db74159b8911c8a718a6355a3641bad6d005089ab
+#   pre-fix       dafa139cb2136c568081acf05a187dc572cd990aa87beca46f3c1ddc5d25645e
+# run 2026-09-17T18:54:36Z, macOS 27.0 (26A428), llama.cpp build 10809 commit 5266f24da
+
+############ RULE3 pass 1/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=179 reasoning_chars=0 red_flags=[]
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. Risk modifiers: age 58, high blood pressure, high cholesterol, statin use. No red flags present. Cites: CP-ACS-001, CP-ACS-002, CP-ACS-003.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to the hospital', 'Sit or lie down, keep calm']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=222 reasoning_chars=0 red_flags=['Chest tightness during exertion with CAD and nitroglycerin use']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and medications increase urgency. Cites: CP-ANG-001, CP-ANG-002, profile (CAD, nitroglycerin), timeline (exertional onset, resolved with rest).'
+       next_steps=['Call 9-1-1 immediately if chest tightness recurs or does not resolve with rest', 'Administer prescribed nitroglycerin as directed', 'Monitor for ongoing chest discomfort or shortness of breath']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=218 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste, and relief with sitting upright. No red flags present. Risk modifiers: no cardiac history, no medications. No contraindications. Symptoms are typical of GERD and not emergent.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as directed', 'Avoid large meals and late meals', 'Elevate head of bed while sleeping', 'Seek medical evaluation if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Any vomiting blood or black tarry stools?', 'Any persistent vomiting or unexplained weight loss?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=184 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'rapid onset at rest']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over 1.5 hours. No red flags contradicting this pattern. Risk modifiers: no cardiac history, recent head cold (possible viral pleuritis).'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not attempt to drive yourself']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=141 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications. Symptoms suggest pleurisy or pulmonary embolism. Immediate assessment needed.'
+       next_steps=['Call emergency services or go to nearest emergency department immediately', 'Do not wait for symptoms to change', 'Monitor for worsening pain, shortness of breath, or dizziness']
+       citations=[]
+       follow_up_questions=[]
+
+############ RULE3 pass 2/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=179 reasoning_chars=0 red_flags=[]
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. Risk modifiers: age 58, high blood pressure, high cholesterol, statin use. No red flags present. Cites: CP-ACS-001, CP-ACS-002, CP-ACS-003.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to the hospital', 'Sit or lie down, keep calm']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=222 reasoning_chars=0 red_flags=['Chest tightness during exertion with CAD and nitroglycerin use']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and medications increase urgency. Cites: CP-ANG-001, CP-ANG-002, profile (CAD, nitroglycerin), timeline (exertional onset, resolved with rest).'
+       next_steps=['Call 9-1-1 immediately if chest tightness recurs or does not resolve with rest', 'Administer prescribed nitroglycerin as directed', 'Monitor for ongoing chest discomfort or shortness of breath']
+       citations=['CP-ANG-001', 'CP-ANG-002', 'profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+       follow_up_questions=[]
+       INVENTED KEYS (not in registry): ['profile (CAD, nitroglycerin)', 'timeline (exertional onset, resolved with rest)']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=218 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms consistent with GERD: burning chest pain, worse when lying down, sour taste, and relief with sitting upright. No red flags present. Risk modifiers: no cardiac history, no medications. No contraindications. Symptoms are typical of GERD and not emergent.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as directed', 'Avoid large meals and late meals', 'Elevate head of bed while sleeping', 'Seek medical evaluation if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Any vomiting blood or black tarry stools?', 'Any persistent vomiting or unexplained weight loss?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=184 reasoning_chars=0 red_flags=['sharp chest pain with deep breathing', 'rapid onset at rest']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over 1.5 hours. No red flags contradicting this pattern. Risk modifiers: no cardiac history, recent head cold (possible viral pleuritis).'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not attempt to drive yourself']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=141 reasoning_chars=0 red_flags=[]
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags present. Risk modifiers: no medical history, no medications. Symptoms suggest pleurisy or pulmonary embolism. Immediate assessment needed.'
+       next_steps=['Call emergency services or go to nearest emergency department immediately', 'Do not wait for symptoms to change', 'Monitor for worsening pain, shortness of breath, or dizziness']
+       citations=[]
+       follow_up_questions=[]
+
+# END rule3 run 2026-09-17T19:04:06Z

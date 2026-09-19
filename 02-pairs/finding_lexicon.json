@@ -1,0 +1,312 @@
+{
+  "_generated_by": "02-pairs/export_lexicon.py from validate_pairs.py",
+  "_warning": "Do not hand-edit. Edit validate_pairs.py and re-export.",
+  "finding_synonyms": {
+    "fever": [
+      "fever",
+      "febrile",
+      "feverish",
+      "pyrexia",
+      "temperature",
+      "running a temperature",
+      "high temperature",
+      "hot and shivery"
+    ],
+    "chills": [
+      "chills",
+      "shivering",
+      "rigors"
+    ],
+    "fast heartbeat": [
+      "fast heartbeat",
+      "rapid heartbeat",
+      "fast heart rate",
+      "rapid heart rate",
+      "racing heart",
+      "heart racing",
+      "pounding heart",
+      "heart pounding",
+      "heart is racing",
+      "heart is pounding",
+      "heart going",
+      "thumping",
+      "tachycardia",
+      "palpitations",
+      "fast pulse",
+      "rapid pulse"
+    ],
+    "sweating": [
+      "sweating",
+      "sweaty",
+      "sweat",
+      "sweats",
+      "clammy",
+      "drenched",
+      "soaked through",
+      "pouring with sweat",
+      "diaphoresis",
+      "diaphoretic"
+    ],
+    "nausea": [
+      "nausea",
+      "nauseated",
+      "nauseous",
+      "queasy",
+      "feel sick",
+      "feeling sick"
+    ],
+    "vomiting": [
+      "vomiting",
+      "vomit",
+      "vomited",
+      "throwing up",
+      "threw up",
+      "thrown up",
+      "been sick",
+      "being sick",
+      "bringing it back up",
+      "emesis"
+    ],
+    "shortness of breath": [
+      "shortness of breath",
+      "short of breath",
+      "out of breath",
+      "puffed",
+      "winded",
+      "catch my breath",
+      "catch his breath",
+      "catch her breath",
+      "cannot catch my breath",
+      "can't catch my breath",
+      "gasping",
+      "breathless",
+      "breathlessness",
+      "dyspnea",
+      "dyspnoea",
+      "trouble breathing",
+      "difficulty breathing",
+      "hard to breathe",
+      "cannot breathe",
+      "can't breathe"
+    ],
+    "dizziness": [
+      "dizzy",
+      "dizziness",
+      "lightheaded",
+      "light-headed",
+      "lightheadedness",
+      "faint",
+      "fainting",
+      "fainted",
+      "syncope",
+      "passed out"
+    ],
+    "cough": [
+      "cough",
+      "coughing"
+    ],
+    "coughing blood": [
+      "coughing blood",
+      "coughing up blood",
+      "bloody mucus",
+      "blood in mucus",
+      "hemoptysis",
+      "haemoptysis"
+    ],
+    "swelling": [
+      "swelling",
+      "swollen",
+      "swollen up",
+      "puffy",
+      "fatter than",
+      "bigger than the other",
+      "edema",
+      "oedema"
+    ],
+    "weight loss": [
+      "weight loss",
+      "losing weight",
+      "lost weight"
+    ],
+    "bleeding": [
+      "bleeding",
+      "bleed",
+      "blood",
+      "bloody",
+      "tarry",
+      "tar-like",
+      "black and sticky",
+      "sticky black",
+      "black and tarry",
+      "melena",
+      "coffee grounds",
+      "hemorrhage",
+      "haemorrhage"
+    ],
+    "fatigue": [
+      "fatigue",
+      "tired",
+      "tiredness",
+      "exhausted",
+      "exhaustion"
+    ],
+    "pallor": [
+      "pale",
+      "pallor",
+      "ashen"
+    ],
+    "cyanosis": [
+      "cyanosis",
+      "blue lips",
+      "bluish",
+      "turning blue"
+    ],
+    "confusion": [
+      "confusion",
+      "confused",
+      "disoriented"
+    ],
+    "difficulty swallowing": [
+      "difficulty swallowing",
+      "trouble swallowing",
+      "dysphagia",
+      "painful swallowing",
+      "pain when swallowing"
+    ],
+    "numbness": [
+      "numbness",
+      "numb",
+      "tingling",
+      "pins and needles"
+    ],
+    "rash": [
+      "rash",
+      "hives"
+    ],
+    "loss of appetite": [
+      "loss of appetite",
+      "no appetite",
+      "off my food",
+      "gone off my food",
+      "off her food",
+      "off his food",
+      "not eating",
+      "cannot face food"
+    ]
+  },
+  "contradiction_axes": {
+    "course": {
+      "persisting": [
+        "does not go away",
+        "doesn't go away",
+        "not go away",
+        "does not resolve",
+        "not resolved",
+        "unresolved",
+        "unrelieved",
+        "no relief",
+        "without relief",
+        "has not let up",
+        "has not eased",
+        "persistent",
+        "persisting",
+        "unchanged",
+        "ongoing",
+        "continuous",
+        "still present",
+        "does not improve",
+        "no improvement"
+      ],
+      "resolving": [
+        "resolved",
+        "resolved completely",
+        "went away",
+        "goes away",
+        "gone away",
+        "subsided",
+        "settled",
+        "eased",
+        "easing",
+        "relieved",
+        "improved",
+        "improving",
+        "no further symptoms",
+        "symptom free",
+        "abated"
+      ]
+    },
+    "duration": {
+      "brief": [
+        "within 20 minutes",
+        "under 20 minutes",
+        "less than 20",
+        "within minutes",
+        "brief",
+        "briefly",
+        "momentary",
+        "short lived",
+        "short-lived",
+        "seconds"
+      ],
+      "prolonged": [
+        "beyond 20 minutes",
+        "over 20 minutes",
+        "over 30 minutes",
+        "more than 30 minutes",
+        "half an hour",
+        "for hours",
+        "two hours",
+        "unchanged"
+      ]
+    },
+    "rest response": {
+      "relieved by rest": [
+        "resolved with rest",
+        "goes away with rest",
+        "better with rest",
+        "eased with rest",
+        "relieved by rest",
+        "resolved after rest",
+        "eased after sitting",
+        "better sitting"
+      ],
+      "not relieved by rest": [
+        "despite rest",
+        "not relieved by rest",
+        "unchanged after resting",
+        "no relief with rest",
+        "does not improve with rest",
+        "not better with rest"
+      ]
+    }
+  },
+  "present_only_axes": [
+    "course",
+    "duration"
+  ],
+  "negation_cues": [
+    "no",
+    "not",
+    "never",
+    "without",
+    "denies",
+    "denied",
+    "absent",
+    "none",
+    "lacks",
+    "lacking",
+    "rather than",
+    "instead of"
+  ],
+  "clause_breaks": [
+    ".",
+    ";",
+    ":",
+    "!",
+    "?",
+    " but ",
+    " however ",
+    " although ",
+    " whereas "
+  ]
+}

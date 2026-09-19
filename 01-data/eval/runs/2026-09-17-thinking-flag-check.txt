@@ -1,0 +1,21 @@
+# --thinking must reproduce the pre-fix harness. Expect red-acs: red, 226 tokens,
+# rationale 'High blood pressure, high cholesterol, statin use', as in every earlier run.
+# run 2026-09-17T18:07:44Z, macOS 27.0 (26A428), llama.cpp build 10809, cache_prompt=false
+
+mode: matched, reasoning ON (--thinking, NOT the shipping config)
+
+  red-acs                expect=red    got=red    PASS
+       tokens=226 red_flags=1 reasoning_chars=586
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=High blood pressure, high cholesterol, statin use
+
+distribution (scored cases only): {'red': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

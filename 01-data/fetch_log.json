@@ -1,0 +1,93 @@
+{
+  "mlp-chestpain": {
+    "url": "https://medlineplus.gov/chestpain.html",
+    "retrieved": "2026-09-15T18:55:23+00:00",
+    "status": 200,
+    "bytes": 74006,
+    "sha256": "e07f49e31106a573"
+  },
+  "nhlbi-ha-symptoms": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-attack/symptoms",
+    "retrieved": "2026-09-15T18:55:23+00:00",
+    "status": 200,
+    "bytes": 69907,
+    "sha256": "f3fd53bdede140ea"
+  },
+  "nhlbi-ha-what": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-attack",
+    "retrieved": "2026-09-15T18:55:24+00:00",
+    "status": 200,
+    "bytes": 65041,
+    "sha256": "5165252f4d04d481"
+  },
+  "nhlbi-chd-symptoms": {
+    "url": "https://www.nhlbi.nih.gov/health/coronary-heart-disease/symptoms",
+    "retrieved": "2026-09-15T18:55:25+00:00",
+    "status": 200,
+    "bytes": 75293,
+    "sha256": "f39f6be1dd9cd449"
+  },
+  "nhlbi-angina": {
+    "url": "https://www.nhlbi.nih.gov/health/angina",
+    "retrieved": "2026-09-15T18:55:25+00:00",
+    "status": 200,
+    "bytes": 63718,
+    "sha256": "bc4105e0383f2f06"
+  },
+  "nhlbi-vte": {
+    "url": "https://www.nhlbi.nih.gov/health/venous-thromboembolism/symptoms",
+    "retrieved": "2026-09-15T19:07:50+00:00",
+    "status": 200,
+    "bytes": 64123,
+    "sha256": "a92ab297c901c69f"
+  },
+  "nhlbi-pneumonia": {
+    "url": "https://www.nhlbi.nih.gov/health/pneumonia/symptoms",
+    "retrieved": "2026-09-15T19:07:50+00:00",
+    "status": 200,
+    "bytes": 62132,
+    "sha256": "7ce54876ad9f153e"
+  },
+  "niddk-gerd": {
+    "url": "https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-adults/symptoms-causes",
+    "retrieved": "2026-09-15T18:55:27+00:00",
+    "status": 200,
+    "bytes": 43198,
+    "sha256": "fbc341fc7420cfde"
+  },
+  "nimh-panic": {
+    "url": "https://www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms",
+    "retrieved": "2026-09-15T18:55:27+00:00",
+    "status": 200,
+    "bytes": 66206,
+    "sha256": "ce43f2b6abfacd0f"
+  },
+  "nhlbi-vte-causes": {
+    "url": "https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes",
+    "retrieved": "2026-09-15T19:20:53+00:00",
+    "status": 200,
+    "bytes": 87844,
+    "sha256": "4ad7e910f8ce2bc2"
+  },
+  "nhlbi-pericarditis": {
+    "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms",
+    "retrieved": "2026-09-15T20:20:06+00:00",
+    "status": 200,
+    "bytes": 65470,
+    "sha256": "95fb5fe81865c8db"
+  },
+  "mlp-pleural": {
+    "url": "https://medlineplus.gov/pleuraldisorders.html",
+    "retrieved": "2026-09-15T20:20:07+00:00",
+    "status": 200,
+    "bytes": 101098,
+    "sha256": "c64b520775801cfc"
+  },
+  "cdc-acute-bronchitis": {
+    "url": "https://www.cdc.gov/acute-bronchitis/about/index.html",
+    "retrieved": "2026-09-15T21:41:24+00:00",
+    "status": 200,
+    "bytes": 49586,
+    "sha256": "05b62f6af9e8f3f7"
+  }
+}

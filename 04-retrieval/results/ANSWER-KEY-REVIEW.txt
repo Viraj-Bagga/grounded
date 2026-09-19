@@ -1,0 +1,191 @@
+ANSWER KEY REVIEW SHEET, generated 2026-09-17
+==============================================================================
+
+The chunk lists in discrimination_test.py were hand-assigned when the file was
+written and have never been reviewed. Every eval run in this project has used
+them as the `matched` condition, so they are load-bearing and unvalidated.
+
+Known-wrong example, found 2026-09-17: red-acs expects CP-ACS-002, which reads
+"Heart attacks can happen without any symptoms ... called silent heart attacks".
+That is asymptomatic MI. red-acs is a florid symptomatic presentation. No
+retriever should return it, and it has been scored as a miss all day.
+
+HOW TO USE THIS. For each case below, every one of the 22 chunks is listed in
+blended-score order with its category, token count and opening text. Mark the
+ones the case SHOULD get. Ignore the ranking when deciding; it is shown only so
+the plausible candidates are near the top.
+
+Two things worth holding in mind while marking:
+  - token cost is real. 3 chunks at the 140 mean is about 13.5 s of prompt eval
+    at 31 tok/s on the demo path. Fewer, better chunks is a legitimate answer.
+  - CP-PERI-002 is the chunk whose "Fast heartbeat / Fever" lines the model
+    copied onto a patient who had neither. If a case should NOT get it, saying so
+    matters more than usual.
+
+==============================================================================
+CASE: red-acs   expect=red
+  PROFILE : 58-year-old man. History of high blood pressure and high cholesterol. Takes a statin.
+  TIMELINE: T+0:00 central chest pressure began while sitting watching television. T+0:04 pain spread to the jaw. T+0:11 sweating and nausea. T+0:26 pain unchanged after resting.
+  SAYS    : Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.
+
+  CURRENT KEY (unreviewed): ['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+
+  mark  key             cat             tok  text
+  --------------------------------------------------------------------------
+  [x]   CP-ACS-003      red             162  If you are having a heart attack, you may experience one or more of the symptoms below. 
+  [ ]   CP-DIFF-001     uncategorised   147  Having a pain in your chest can be scary. It does not always mean that you are having a 
+  [ ]   CP-PERI-002     yellow           25  Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up
+  [ ]   CP-ANG-002      yellow          231  Angina can be a warning sign that you are at a higher risk of having a heart attack. If 
+  [ ]   CP-PERI-001     yellow          136  If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9
+  [ ]   CP-PANIC-002    green           154  People with panic disorder may have:  Sudden and repeated panic attacks of overwhelming 
+  [ ]   CP-GERD-001     green           216  Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause 
+  [ ]   CP-ANG-001      yellow          187  If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.  Som
+  [ ]   CP-ACS-005      red              85  The pain from angina usually happens after physical activity and goes away in a few minu
+  [x]   CP-ACS-001      red              92  Not all heart attacks begin with the sudden and crushing chest pain that comes when the 
+  [ ]   CP-PNA-001      yellow          228  The symptoms of pneumonia can be mild or serious. Young children, older adults, and peop
+  [ ]   CP-GERD-002     green            71  chest pain loss of appetite persistent vomiting problems swallowing or pain while swallo
+  [ ]   CP-ACS-004      red             199  Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for e
+  [ ]   CP-PE-003       red             149  Being still slows blood flow through the veins in your arms and legs, raising the likeli
+  [ ]   CP-PLEU-001     yellow          156  Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs
+  [ ]   CP-PE-004       red             163  Certain medical conditions can raise your chance of developing VTE. Some conditions are 
+  [ ]   CP-PE-001       red             180  Call your healthcare provider right away if you think you may have symptoms of VTE. Deep
+  [ ]   CP-GERD-003     green           180  Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stom
+  [x]   CP-ACS-002      red              42  Heart attacks can happen without any symptoms or with very mild symptoms. These are call
+  [ ]   CP-PANIC-001    green           185  People with panic disorder have frequent and unexpected panic attacks. These attacks are
+  [ ]   CP-PANIC-003    green            69  A panic attack is a one-time or occasional episode of intense fear with physical and emo
+  [ ]   CP-PE-002       red              32  Most often, there is more than one risk factor involved. The more risk factors you have,
+
+==============================================================================
+CASE: yellow-angina   expect=yellow
+  PROFILE : 61-year-old woman. Known coronary artery disease. Prescribed nitroglycerin.
+  TIMELINE: T+0:00 chest tightness began while climbing two flights of stairs. T+0:03 sat down to rest. T+0:06 tightness resolved completely. T+0:20 no further symptoms.
+  SAYS    : I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.
+
+  CURRENT KEY (unreviewed): ['CP-ANG-001', 'CP-ANG-002']
+
+  mark  key             cat             tok  text
+  --------------------------------------------------------------------------
+  [x]   CP-ANG-002      yellow          231  Angina can be a warning sign that you are at a higher risk of having a heart attack. If 
+  [x]   CP-ANG-001      yellow          187  If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.  Som
+  [ ]   CP-PERI-001     yellow          136  If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9
+  [ ]   CP-PERI-002     yellow           25  Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up
+  [ ]   CP-ACS-005      red              85  The pain from angina usually happens after physical activity and goes away in a few minu
+  [ ]   CP-ACS-003      red             162  If you are having a heart attack, you may experience one or more of the symptoms below. 
+  [ ]   CP-PLEU-001     yellow          156  Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs
+  [ ]   CP-PE-001       red             180  Call your healthcare provider right away if you think you may have symptoms of VTE. Deep
+  [ ]   CP-DIFF-001     uncategorised   147  Having a pain in your chest can be scary. It does not always mean that you are having a 
+  [ ]   CP-PE-003       red             149  Being still slows blood flow through the veins in your arms and legs, raising the likeli
+  [ ]   CP-ACS-001      red              92  Not all heart attacks begin with the sudden and crushing chest pain that comes when the 
+  [ ]   CP-GERD-003     green           180  Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stom
+  [ ]   CP-GERD-001     green           216  Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause 
+  [ ]   CP-PNA-001      yellow          228  The symptoms of pneumonia can be mild or serious. Young children, older adults, and peop
+  [ ]   CP-GERD-002     green            71  chest pain loss of appetite persistent vomiting problems swallowing or pain while swallo
+  [ ]   CP-PANIC-002    green           154  People with panic disorder may have:  Sudden and repeated panic attacks of overwhelming 
+  [ ]   CP-ACS-004      red             199  Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for e
+  [ ]   CP-ACS-002      red              42  Heart attacks can happen without any symptoms or with very mild symptoms. These are call
+  [ ]   CP-PE-004       red             163  Certain medical conditions can raise your chance of developing VTE. Some conditions are 
+  [ ]   CP-PANIC-001    green           185  People with panic disorder have frequent and unexpected panic attacks. These attacks are
+  [ ]   CP-PANIC-003    green            69  A panic attack is a one-time or occasional episode of intense fear with physical and emo
+  [ ]   CP-PE-002       red              32  Most often, there is more than one risk factor involved. The more risk factors you have,
+
+==============================================================================
+CASE: green-gerd   expect=green
+  PROFILE : 29-year-old woman. No cardiac history. No regular medication.
+  TIMELINE: T+0:00 burning behind the breastbone began about 40 minutes after a large late meal. T+0:15 worse on lying down. T+0:22 sour taste in the mouth. T+0:35 eased after sitting upright.
+  SAYS    : Burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.
+
+  CURRENT KEY (unreviewed): ['CP-GERD-001', 'CP-GERD-002']
+
+  mark  key             cat             tok  text
+  --------------------------------------------------------------------------
+  [x]   CP-GERD-001     green           216  Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause 
+  [ ]   CP-PERI-002     yellow           25  Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up
+  [ ]   CP-ACS-005      red              85  The pain from angina usually happens after physical activity and goes away in a few minu
+  [ ]   CP-PERI-001     yellow          136  If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9
+  [ ]   CP-PE-003       red             149  Being still slows blood flow through the veins in your arms and legs, raising the likeli
+  [x]   CP-GERD-002     green            71  chest pain loss of appetite persistent vomiting problems swallowing or pain while swallo
+  [ ]   CP-ANG-002      yellow          231  Angina can be a warning sign that you are at a higher risk of having a heart attack. If 
+  [ ]   CP-ANG-001      yellow          187  If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.  Som
+  [ ]   CP-GERD-003     green           180  Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stom
+  [ ]   CP-DIFF-001     uncategorised   147  Having a pain in your chest can be scary. It does not always mean that you are having a 
+  [ ]   CP-ACS-003      red             162  If you are having a heart attack, you may experience one or more of the symptoms below. 
+  [ ]   CP-ACS-001      red              92  Not all heart attacks begin with the sudden and crushing chest pain that comes when the 
+  [ ]   CP-PANIC-002    green           154  People with panic disorder may have:  Sudden and repeated panic attacks of overwhelming 
+  [ ]   CP-PLEU-001     yellow          156  Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs
+  [ ]   CP-PE-001       red             180  Call your healthcare provider right away if you think you may have symptoms of VTE. Deep
+  [ ]   CP-PNA-001      yellow          228  The symptoms of pneumonia can be mild or serious. Young children, older adults, and peop
+  [ ]   CP-ACS-002      red              42  Heart attacks can happen without any symptoms or with very mild symptoms. These are call
+  [ ]   CP-ACS-004      red             199  Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for e
+  [ ]   CP-PANIC-001    green           185  People with panic disorder have frequent and unexpected panic attacks. These attacks are
+  [ ]   CP-PE-004       red             163  Certain medical conditions can raise your chance of developing VTE. Some conditions are 
+  [ ]   CP-PE-002       red              32  Most often, there is more than one risk factor involved. The more risk factors you have,
+  [ ]   CP-PANIC-003    green            69  A panic attack is a one-time or occasional episode of intense fear with physical and emo
+
+==============================================================================
+CASE: yellow-pleuritic   expect=yellow
+  PROFILE : 34-year-old woman. No cardiac history. Recent head cold, now resolved.
+  TIMELINE: T+0:00 sharp left-sided chest pain began at rest. T+0:10 clearly worse on deep breath. T+0:25 easier sitting forward, worse lying flat. T+1:30 unchanged, no relation to exertion.
+  SAYS    : Sharp pain in my left chest. It is much worse when I breathe in deeply and it eases if I sit up and lean forward. Walking around does not change it.
+
+  CURRENT KEY (unreviewed): ['CP-PERI-002', 'CP-PLEU-001']
+
+  mark  key             cat             tok  text
+  --------------------------------------------------------------------------
+  [x]   CP-PERI-002     yellow           25  Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up
+  [ ]   CP-ANG-001      yellow          187  If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.  Som
+  [ ]   CP-PERI-001     yellow          136  If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9
+  [ ]   CP-ACS-003      red             162  If you are having a heart attack, you may experience one or more of the symptoms below. 
+  [ ]   CP-DIFF-001     uncategorised   147  Having a pain in your chest can be scary. It does not always mean that you are having a 
+  [x]   CP-PLEU-001     yellow          156  Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs
+  [ ]   CP-ACS-005      red              85  The pain from angina usually happens after physical activity and goes away in a few minu
+  [ ]   CP-ANG-002      yellow          231  Angina can be a warning sign that you are at a higher risk of having a heart attack. If 
+  [ ]   CP-GERD-001     green           216  Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause 
+  [ ]   CP-PNA-001      yellow          228  The symptoms of pneumonia can be mild or serious. Young children, older adults, and peop
+  [ ]   CP-ACS-001      red              92  Not all heart attacks begin with the sudden and crushing chest pain that comes when the 
+  [ ]   CP-PE-001       red             180  Call your healthcare provider right away if you think you may have symptoms of VTE. Deep
+  [ ]   CP-GERD-002     green            71  chest pain loss of appetite persistent vomiting problems swallowing or pain while swallo
+  [ ]   CP-ACS-004      red             199  Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for e
+  [ ]   CP-GERD-003     green           180  Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stom
+  [ ]   CP-ACS-002      red              42  Heart attacks can happen without any symptoms or with very mild symptoms. These are call
+  [ ]   CP-PANIC-002    green           154  People with panic disorder may have:  Sudden and repeated panic attacks of overwhelming 
+  [ ]   CP-PE-004       red             163  Certain medical conditions can raise your chance of developing VTE. Some conditions are 
+  [ ]   CP-PE-003       red             149  Being still slows blood flow through the veins in your arms and legs, raising the likeli
+  [ ]   CP-PANIC-001    green           185  People with panic disorder have frequent and unexpected panic attacks. These attacks are
+  [ ]   CP-PANIC-003    green            69  A panic attack is a one-time or occasional episode of intense fear with physical and emo
+  [ ]   CP-PE-002       red              32  Most often, there is more than one risk factor involved. The more risk factors you have,
+
+==============================================================================
+CASE: probe-costo-unmatched   expect=green   (PROBE, not scored)
+  PROFILE : 24-year-old man. No medical history. Moved apartment yesterday.
+  TIMELINE: T+0:00 sharp left-sided chest pain noticed on waking. T+0:05 worse when pressing the area. T+0:08 worse on deep breath. T+2:00 unchanged, no other symptoms.
+  SAYS    : Sharp pain on the left side of my chest. It hurts more when I press on it or take a deep breath.
+
+  CURRENT KEY (unreviewed): ['CP-DIFF-001', 'CP-PERI-002', 'CP-PLEU-001']
+
+  mark  key             cat             tok  text
+  --------------------------------------------------------------------------
+  [x]   CP-PERI-002     yellow           25  Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up
+  [ ]   CP-ACS-003      red             162  If you are having a heart attack, you may experience one or more of the symptoms below. 
+  [ ]   CP-PERI-001     yellow          136  If you have chest pain or severe shortness of breath, or your symptoms get worse, call 9
+  [ ]   CP-ANG-001      yellow          187  If you can’t tell whether your chest pain is a heart attack, call 9-1-1 right away.  Som
+  [x]   CP-DIFF-001     uncategorised   147  Having a pain in your chest can be scary. It does not always mean that you are having a 
+  [ ]   CP-ACS-005      red              85  The pain from angina usually happens after physical activity and goes away in a few minu
+  [ ]   CP-PE-001       red             180  Call your healthcare provider right away if you think you may have symptoms of VTE. Deep
+  [ ]   CP-ANG-002      yellow          231  Angina can be a warning sign that you are at a higher risk of having a heart attack. If 
+  [x]   CP-PLEU-001     yellow          156  Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs
+  [ ]   CP-ACS-001      red              92  Not all heart attacks begin with the sudden and crushing chest pain that comes when the 
+  [ ]   CP-GERD-001     green           216  Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause 
+  [ ]   CP-PNA-001      yellow          228  The symptoms of pneumonia can be mild or serious. Young children, older adults, and peop
+  [ ]   CP-GERD-002     green            71  chest pain loss of appetite persistent vomiting problems swallowing or pain while swallo
+  [ ]   CP-ACS-004      red             199  Any time you think you might be having a heart attack, don’t ignore it. Call 9-1-1 for e
+  [ ]   CP-GERD-003     green           180  Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stom
+  [ ]   CP-ACS-002      red              42  Heart attacks can happen without any symptoms or with very mild symptoms. These are call
+  [ ]   CP-PANIC-002    green           154  People with panic disorder may have:  Sudden and repeated panic attacks of overwhelming 
+  [ ]   CP-PE-004       red             163  Certain medical conditions can raise your chance of developing VTE. Some conditions are 
+  [ ]   CP-PANIC-001    green           185  People with panic disorder have frequent and unexpected panic attacks. These attacks are
+  [ ]   CP-PANIC-003    green            69  A panic attack is a one-time or occasional episode of intense fear with physical and emo
+  [ ]   CP-PE-003       red             149  Being still slows blood flow through the veins in your arms and legs, raising the likeli
+  [ ]   CP-PE-002       red              32  Most often, there is more than one risk factor involved. The more risk factors you have,
+
+==============================================================================
+[x] = currently in the key. Edit to taste and hand back the five lists.

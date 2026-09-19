@@ -1,0 +1,281 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! STALE, DO NOT REVIEW FROM THIS FILE.  Marked 2026-09-18.
+!! It documents P0001, P0005, P0006, P0010, P0033, P0038, and ALL SIX were cut
+!! with sets C04, C05, C06, C09, C10, C11 and C12. It covers nothing that
+!! survives. Kept only as the record of why those sets were cut.
+!! The live file is FULL-REVIEW.txt, regenerate with 02-pairs/write_review.py.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+==============================================================================
+SAMPLE 2 FOR REVIEW  -  the three sets that were worst before the rebuild
+written 2026-09-17  |  NOT FROZEN
+==============================================================================
+
+C06, C12 and C10. Before the rebuild these carried four, four and two
+differences. The audit of all twelve now shows one discriminator each.
+
+WHAT CHANGED, AND WHY THESE THREE
+
+C06 and C12 were the scaffolder's fault, not the author's. Their axis read
+"is there a thrombosis risk factor AND sudden onset", which is two
+discriminators in one line, so no amount of careful writing could produce a
+clean set. The axis is now "did the pain come on suddenly or build gradually",
+and THE RISK FACTOR IS HELD CONSTANT: the long flight is in both halves of C06,
+the knee operation is in both halves of C12. The set now teaches onset speed.
+Before, it could equally have taught "flight means red".
+
+C10 differed in the PROFILE: the yellow half gained high blood pressure and
+amlodipine, an independent cardiac risk factor that justified yellow on its own
+and made the intended axis redundant. Both halves now have no cardiac history
+and no medications. The profile still differs in one respect, the panic disorder
+diagnosis, and that IS the axis. C04 is the same by design.
+
+CORRECTION to an earlier version of this note, which said the diagnosis "cannot
+be stated anywhere else". That was wrong: it is also stated in the symptom line,
+"the same as the ones he has had for years". The profile and the symptom text
+say the same thing twice, which is consistent rather than contradictory, but the
+claim that the profile was the only possible place for it was false.
+
+HOW TO READ EACH SET. The shared text is identical in both halves, character for
+character, up to the point where they diverge. Read the shared block once, then
+the two tails. If anything in the tails other than the named discriminator
+differs, the set is still broken.
+
+
+##############################################################################
+# SET C06   axis: did the pain come on suddenly or build gradually
+##############################################################################
+
+  SHARED, identical in both halves (76 characters):
+    pain in my side when i breathe in, i got back from australia 2 days ago, it 
+
+  P0006 (yellow) continues:  built up gradually over four days
+  P0033 (red) continues:  came on suddenly an hour ago
+
+------------------------------------------------------------------------------
+P0006   target=yellow   register=poor spelling and punctuation
+  side: pain on breathing after a recent long flight, built up over four days
+  chunks: CP-PE-001, CP-PE-002
+
+  PATIENT PROFILE
+    age: 41, sex: female
+    conditions: none
+    medications: none
+
+  SYMPTOMS
+    pain in my side when i breathe in, i got back from australia 2 days ago, it built up gradually over four days
+
+  ANSWER
+    {
+      "urgency": "yellow",
+      "rationale": "Pain on breathing after a recent long flight that built up gradually over four days. The retrieved context names immobility on a long flight as raising the likelihood of clot, so this needs assessment, but the gradual build does not suggest an acute event in progress.",
+      "red_flags": [
+        "Pain on breathing for four days after a long flight"
+      ],
+      "next_steps": [
+        "Arrange assessment today",
+        "Call 9-1-1 if it suddenly worsens, you become breathless at rest, or you cough up blood"
+      ],
+      "citations": [
+        "CP-PE-001",
+        "CP-PE-002"
+      ],
+      "follow_up_questions": []
+    }
+
+------------------------------------------------------------------------------
+P0033   target=red   register=poor spelling and punctuation
+  side: pain on breathing after a recent long flight, came on suddenly an hour ago
+  chunks: CP-PE-001, CP-PE-002
+
+  PATIENT PROFILE
+    age: 41, sex: female
+    conditions: none
+    medications: none
+
+  SYMPTOMS
+    pain in my side when i breathe in, i got back from australia 2 days ago, it came on suddenly an hour ago
+
+  ANSWER
+    {
+      "urgency": "red",
+      "rationale": "Pain on breathing after a recent long flight that came on suddenly an hour ago. The retrieved context names immobility on a long flight as raising the likelihood of clot, and sudden onset of pain on breathing is the presentation it describes as needing immediate contact.",
+      "red_flags": [
+        "Sudden onset pain on breathing one hour ago after a long flight"
+      ],
+      "next_steps": [
+        "Call 9-1-1 now",
+        "Do not walk about or drive yourself",
+        "Stay sitting or lying until help arrives"
+      ],
+      "citations": [
+        "CP-PE-001",
+        "CP-PE-002"
+      ],
+      "follow_up_questions": []
+    }
+
+
+##############################################################################
+# SET C12   axis: did the pain come on suddenly or build gradually
+##############################################################################
+
+  SHARED, identical in both halves (81 characters):
+    My dad has pain when he breathes in. He had a knee operation three weeks ago. It 
+
+  P0005 (yellow) continues:  has built up gradually over four days.
+  P0038 (red) continues:  came on suddenly an hour ago.
+
+------------------------------------------------------------------------------
+P0005   target=yellow   register=panicked caregiver
+  side: pain on breathing after a recent long flight, built up over four days
+  chunks: CP-PE-001, CP-PE-002
+
+  PATIENT PROFILE
+    age: 52, sex: male
+    conditions: none
+    medications: none
+
+  SYMPTOMS
+    My dad has pain when he breathes in. He had a knee operation three weeks ago. It has built up gradually over four days.
+
+  ANSWER
+    {
+      "urgency": "yellow",
+      "rationale": "Pain on breathing three weeks after surgery that built up gradually over four days. The retrieved context names the months after an operation as the highest risk period, so this needs assessment, but the gradual build does not suggest an acute event in progress.",
+      "red_flags": [
+        "Pain on breathing for four days after recent surgery"
+      ],
+      "next_steps": [
+        "Arrange assessment today",
+        "Call 9-1-1 if it suddenly worsens, he becomes breathless at rest, or he coughs up blood"
+      ],
+      "citations": [
+        "CP-PE-001",
+        "CP-PE-002"
+      ],
+      "follow_up_questions": []
+    }
+
+------------------------------------------------------------------------------
+P0038   target=red   register=panicked caregiver
+  side: pain on breathing after a recent long flight, came on suddenly an hour ago
+  chunks: CP-PE-001, CP-PE-002
+
+  PATIENT PROFILE
+    age: 52, sex: male
+    conditions: none
+    medications: none
+
+  SYMPTOMS
+    My dad has pain when he breathes in. He had a knee operation three weeks ago. It came on suddenly an hour ago.
+
+  ANSWER
+    {
+      "urgency": "red",
+      "rationale": "Pain on breathing three weeks after surgery that came on suddenly an hour ago. The retrieved context names the months after an operation as the highest risk period, and sudden onset of pain on breathing is the presentation it describes as needing immediate contact.",
+      "red_flags": [
+        "Sudden onset pain on breathing one hour ago after recent surgery"
+      ],
+      "next_steps": [
+        "Call 9-1-1 now",
+        "Keep him still, do not walk him to the car",
+        "Stay with him until the ambulance arrives"
+      ],
+      "citations": [
+        "CP-PE-001",
+        "CP-PE-002"
+      ],
+      "follow_up_questions": []
+    }
+
+
+##############################################################################
+# SET C10   axis: is this a previously diagnosed and recognised pattern
+##############################################################################
+
+  SHARED, identical in both halves (141 characters):
+    My colleague went tight in the chest at his desk, breathing fast, hands shaking. It is settling now, about ten minutes in. He says it is the 
+
+  P0001 (green) continues:  same as the ones he has had for years.
+  P0010 (yellow) continues:  first time this has ever happened to him.
+
+------------------------------------------------------------------------------
+P0001   target=green   register=describing a third person
+  side: same symptoms as many previous attacks, settling, panic disorder in the profile, no cardiac history
+  chunks: CP-PANIC-001, CP-PANIC-002
+
+  PATIENT PROFILE
+    age: 33, sex: male
+    conditions: panic disorder
+    medications: none
+
+  SYMPTOMS
+    My colleague went tight in the chest at his desk, breathing fast, hands shaking. It is settling now, about ten minutes in. He says it is the same as the ones he has had for years.
+
+  ANSWER
+    {
+      "urgency": "green",
+      "rationale": "Chest tightness with rapid breathing and shaking, settling within about ten minutes and the same as many previous attacks, in a person with diagnosed panic disorder. The retrieved context notes these attacks are not life-threatening and the physical symptoms usually resolve with time.",
+      "red_flags": [],
+      "next_steps": [
+        "Take him somewhere quiet and stay with him until it passes",
+        "Seek care the same day if an attack ever feels different from his usual ones"
+      ],
+      "citations": [
+        "CP-PANIC-001",
+        "CP-PANIC-002"
+      ],
+      "follow_up_questions": []
+    }
+
+------------------------------------------------------------------------------
+P0010   target=yellow   register=describing a third person
+  side: first episode of these symptoms, settling, no prior diagnosis in the profile, no cardiac history
+  chunks: CP-PANIC-001, CP-PANIC-002
+
+  PATIENT PROFILE
+    age: 33, sex: male
+    conditions: none
+    medications: none
+
+  SYMPTOMS
+    My colleague went tight in the chest at his desk, breathing fast, hands shaking. It is settling now, about ten minutes in. He says it is the first time this has ever happened to him.
+
+  ANSWER
+    {
+      "urgency": "yellow",
+      "rationale": "Chest tightness with rapid breathing and shaking, settling within about ten minutes, but a first ever episode in a person with no diagnosis. The retrieved context describes panic symptoms that can feel like a heart attack, which is a reason to assess rather than to assume.",
+      "red_flags": [
+        "First ever episode of chest tightness with rapid breathing"
+      ],
+      "next_steps": [
+        "Have him assessed today",
+        "Call 9-1-1 if it returns with sweating, or the tightness spreads to his arm or jaw"
+      ],
+      "citations": [
+        "CP-PANIC-001",
+        "CP-PANIC-002"
+      ],
+      "follow_up_questions": []
+    }
+
+
+==============================================================================
+AUDIT RESULT ACROSS ALL TWELVE SETS
+==============================================================================
+
+  one discriminator each, all 12.
+  profiles identical in 10 of 12.
+  C04 and C10 differ in the profile BY DESIGN: the panic disorder diagnosis is
+  the discriminator and cannot be stated anywhere else.
+
+  Also changed outside the nine, because the diff flagged them:
+    C07  "It has been the same for about a year" was in the yellow half only.
+         The red half referenced it as "came on the same way", which is not the
+         same as stating it. It is now verbatim in both.
+    C01  the yellow half ended "Fine now", a second assertion of the resolution
+         the previous clause already made. Removed.
+
+  Nothing frozen. 59 pairs, 0 errors, 0 warnings.
+

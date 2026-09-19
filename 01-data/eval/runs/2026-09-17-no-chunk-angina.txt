@@ -1,0 +1,46 @@
+# NO-CHUNK MEASUREMENT, not a fix. yellow-angina, format 3 + rule 3 (change
+# set B), RETRIEVED CONTEXT = none, 2 passes, reasoning off, temperature 0.0,
+# cache_prompt off, fresh server.
+#
+# THE QUESTION. Three prompt change sets, A, B and C, moved the verdict
+# distribution not at all: 1/4 every time, yellow-angina red in all of them.
+# Fabrication fell each time; discrimination did not. So this removes the
+# corpus from the experiment and asks the base model directly.
+#
+#   red with nothing retrieved -> the bias is in the base model. Prompt work
+#     and corpus work do not reach it, and the fine-tune has to carry
+#     category assignment by itself.
+#   not red -> retrieved content was moving the verdict and corpus balance
+#     is back on the table.
+#
+# yellow-angina is the case to ask: 61-year-old, known CAD, exertional
+# tightness that RESOLVED COMPLETELY with rest. That is stable angina and a
+# yellow, and it is the clearest under-call in the set.
+#
+# rule 7 was reverted from its change-set-C conditional wording back to the
+# A/B wording first, and the sha asserted, so this is B exactly.
+# run 2026-09-17T19:13:20Z, macOS 27.0 (26A428), llama.cpp build 10809 commit 5266f24da
+
+NO-CHUNK PROBE: yellow-angina, expect=yellow, 2 passes
+system_prompt.txt sha256 ca631a3dedc8eb9a3aa71ce8eaffd1b19524fc17dd6f678b4c24c0e279b9400a
+format 3, RETRIEVED CONTEXT = none, reasoning off, temperature 0.0, cache_prompt off
+
+  pass 1/2  expect=yellow got=red    FAIL   tokens=133 reasoning_chars=0
+       red_flags=['Chest tightness triggered by exertion', 'Coronary artery disease history']
+       rationale='Chest tightness triggered by exertion with complete resolution upon rest, consistent with angina. Patient has coronary artery disease and is on nitroglycerin, a red flag for cardiac events. Symptoms resolved quickly but indicate underlying cardiac pathology.'
+       next_steps=['Call emergency services immediately', 'Administer nitroglycerin if prescribed and available', 'Monitor for recurrence or worsening symptoms']
+       citations=[]
+       follow_up_questions=[]
+  pass 2/2  expect=yellow got=red    FAIL   tokens=133 reasoning_chars=0
+       red_flags=['Chest tightness triggered by exertion', 'Coronary artery disease history']
+       rationale='Chest tightness triggered by exertion with complete resolution upon rest, consistent with angina. Patient has coronary artery disease and is on nitroglycerin, a red flag for cardiac events. Symptoms resolved quickly but indicate underlying cardiac pathology.'
+       next_steps=['Call emergency services immediately', 'Administer nitroglycerin if prescribed and available', 'Monitor for recurrence or worsening symptoms']
+       citations=[]
+       follow_up_questions=[]
+
+verdicts across 2 passes: {'red': 2}
+RED WITH NOTHING RETRIEVED. The bias is in the base model, not in
+the corpus and not in the retrieved chunk. Prompt and corpus work
+do not reach it; the fine-tune has to carry category assignment.
+
+# END no-chunk run 2026-09-17T19:14:38Z

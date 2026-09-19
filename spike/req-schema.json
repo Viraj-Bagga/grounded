@@ -1,0 +1,72 @@
+{
+  "model": "local",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an offline triage assistant running fully on-device. You have no internet access. You must never state a clinical fact that is not present in the RETRIEVED CONTEXT block.\n\nYou classify a presenting complaint using the WHO Interagency Integrated Triage Tool into exactly one of three categories:\n- red: emergency, needs immediate care, minutes matter\n- yellow: priority, needs assessment within hours\n- green: non-urgent, can wait or be self-managed\n\nRules:\n1. Use PATIENT PROFILE to adjust the category. Age, pregnancy status, and current medications can move a presentation up a category. Anticoagulants, beta blockers and immunosuppressants are specifically relevant.\n2. Use SYMPTOM TIMELINE to judge onset and progression. Sudden onset, rest onset, and rapid progression all raise urgency.\n3. Every clinical claim you make must carry a citation key drawn from RETRIEVED CONTEXT. Never cite a key that does not appear there.\n4. If any red flag is present, the category is red regardless of other factors.\n5. You do not diagnose. You assign a triage category, give the reasoning, and give next steps.\n6. If the information you have is not enough to separate two categories, assign the higher one and put the missing information in follow_up_questions.\n\nRespond with a single JSON object and nothing else. No preamble, no markdown fences, no trailing commentary.\n\nWorked example.\n\nInput: 24 year old male, rolled his ankle playing football forty minutes ago, swelling over the outer ankle, able to bear weight and walk six steps, no numbness, no deformity, no medications, no medical history.\n\nOutput:\n{\"urgency\":\"green\",\"rationale\":\"Isolated ankle injury with preserved weight bearing and no neurovascular compromise. No red flags present and no risk modifiers from profile or medications.\",\"red_flags\":[],\"next_steps\":[\"Rest, ice, compression and elevation for the first 48 hours\",\"Over the counter analgesia as directed on the packet\",\"Seek assessment if unable to bear weight after 48 hours or if numbness develops\"],\"citations\":[],\"follow_up_questions\":[\"Any pain directly over the bony bump on either side of the ankle?\"]}"
+    },
+    {
+      "role": "user",
+      "content": "[PATIENT PROFILE]\nage: 58\nsex: female\npregnancy_status: not applicable\nheight_cm: 163\nweight_kg: 81\nknown_conditions: type 2 diabetes (dx 2016), hypertension (dx 2012), hyperlipidemia (dx 2015), atrial fibrillation (dx 2024)\ncurrent_medications:\n  - metformin 1000mg twice daily\n  - lisinopril 20mg once daily\n  - atorvastatin 40mg once daily\n  - apixaban 5mg twice daily, last dose approximately 6 hours ago\nallergies: penicillin (rash)\nsmoking_status: former, quit 2009, approximately 20 pack-year history\nfamily_history: father myocardial infarction age 61, mother stroke age 74\nlast_known_vitals: BP 148/92 self-measured 3 days ago, resting HR 88\nbaseline_function: independent, walks 20 minutes most days without chest symptoms\n[/PATIENT PROFILE]\n\n[SYMPTOM TIMELINE]\nT+0:00  Seated at kitchen table, no exertion. Sudden onset of central chest pressure, described as heavy. Not positional, not worse on deep breath.\nT+0:04  Pressure spreads to left shoulder and into the jaw. Reports feeling clammy.\nT+0:09  Nausea begins. Stands up, feels lightheaded, sits back down.\nT+0:14  Shortness of breath at rest. Not relieved by sitting forward.\nT+0:21  Takes 325mg aspirin from home cabinet on own initiative.\nT+0:26  Pressure unchanged. Rates it 7 of 10, up from 5 of 10 at onset.\nT+0:33  Current. Still symptomatic. Now also reports mild pain radiating to the back between the shoulder blades.\nprior_episodes: two brief episodes of similar but milder pressure in the past 3 weeks, each under 5 minutes, both during stair climbing, both resolved with rest. Never reported to a clinician.\n[/SYMPTOM TIMELINE]\n\n[RETRIEVED CONTEXT]\n\n<chunk key=\"CP-ACS-001\" section=\"Chest pain, features suggesting acute coronary syndrome\">\nChest discomfort that is central, pressure-like or heavy rather than sharp, and that does not change with position or with breathing, raises concern for a cardiac cause. Discomfort that spreads to one or both arms, the shoulder, the neck, the jaw or the upper back increases that concern further. Associated sweating, nausea, vomiting, breathlessness at rest, or a sense of impending doom are each independently concerning. Symptoms that begin at rest, that persist beyond roughly twenty minutes without relief, or that are worse than any prior episode should be treated as an emergency. Emergency medical services should be contacted rather than arranging private transport, because prehospital ECG and defibrillation capability change outcomes within the first hour. Taking aspirin at home does not reduce the urgency of assessment and does not indicate the episode has resolved.\n</chunk>\n\n<chunk key=\"CP-RISK-014\" section=\"Risk modifiers in chest pain assessment\">\nSeveral background factors raise the pretest probability that chest discomfort is cardiac in origin. These include age over fifty, diabetes mellitus, hypertension, hyperlipidemia, current or former tobacco use, and a first degree relative with premature coronary disease. Diabetes deserves particular attention because it can blunt the typical pain response, so a patient with diabetes may present with breathlessness, fatigue or nausea and comparatively little chest discomfort. Women, older adults and patients with diabetes are all more likely to present atypically, and an atypical presentation in a high risk patient should never lower the assigned urgency. A pattern of brief exertional episodes over preceding weeks that then progresses to symptoms occurring at rest represents a change in stability and is itself a concerning feature independent of the current episode's severity.\n</chunk>\n\n<chunk key=\"MED-ANTICOAG-007\" section=\"Anticoagulant considerations in acute presentations\">\nPatients taking a direct oral anticoagulant such as apixaban, rivaroxaban, edoxaban or dabigatran, or taking warfarin, require additional caution in any acute presentation involving pain in the chest, abdomen, back or head. Anticoagulation raises the consequence of bleeding complications and changes some treatment pathways, including decisions about thrombolysis. Chest or back pain in an anticoagulated patient should prompt consideration of causes other than coronary occlusion, including aortic dissection, particularly where pain radiates through to the back or is described as tearing or ripping. The specific anticoagulant, its dose, and the time of the most recent dose should be communicated to receiving clinicians. Anticoagulant use is never a reason to delay emergency assessment.\n</chunk>\n\n[/RETRIEVED CONTEXT]\n\n[PRESENTING COMPLAINT]\nI've had a heavy pressure in the middle of my chest for about half an hour. It came on while I was just sitting down having tea, I wasn't doing anything. It's spread up into my jaw and my left shoulder and now I can feel it in my back too. I've gone really sweaty and I feel sick. I'm short of breath even sitting still. I took an aspirin about ten minutes ago but it hasn't touched it. It's getting worse, not better. Should I be worried?\n[/PRESENTING COMPLAINT]"
+    }
+  ],
+  "temperature": 0.2,
+  "max_tokens": 1024,
+  "stream": false,
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "triage_result",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "red",
+              "yellow",
+              "green"
+            ]
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "red_flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "next_steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "follow_up_questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "urgency",
+          "rationale",
+          "red_flags",
+          "next_steps",
+          "citations",
+          "follow_up_questions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

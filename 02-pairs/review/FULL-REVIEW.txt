@@ -1,0 +1,1267 @@
+==============================================================================
+FULL REVIEW  -  all 45 frozen pairs
+written 2026-09-18  |  PIPELINE-TEST DATA, NOT TRAINING DATA
+==============================================================================
+
+WHAT THESE ARE. The 45 pairs frozen on 2026-09-18 as
+02-pairs/pairs/PIPELINE-TEST-{train,heldout}.jsonl. They were frozen to prove
+the training pipeline runs, NOT because the content was signed off. Nothing here
+has been approved. Read them as drafts.
+
+WHY THIS FILE REPLACES SAMPLE.txt. SAMPLE.txt documents P0001, P0005, P0006,
+P0010, P0033 and P0038. All six were cut on 2026-09-18 with sets C04, C05, C06,
+C09, C10, C11 and C12. It covers NOTHING that survives, so the whole of the
+frozen set is printed here rather than a remainder.
+
+THE FIVE SURVIVING CONTRAST SETS RUN ON THREE AXES, all three re-verified
+against the chunk text on 2026-09-18 and all three passing constraint 14. The
+quote is printed above each set so the claim can be checked rather than trusted.
+
+WHAT TO LOOK FOR, in rough order of how much damage it does:
+
+  1. A red_flag or a rationale clause stating a finding the SYMPTOMS block does
+     not state, or contradicts. Constraint 11. This is the failure that reads
+     exactly like a real finding and that nothing downstream can catch.
+  2. A second difference inside a contrast set. The set then teaches the wrong
+     thing and no amount of careful wording elsewhere fixes it.
+  3. next_steps instructing a medication dose. Constraint 12, and the fastest
+     thing a medical-track judge finds.
+  4. follow_up_questions present on a red verdict. Constraint 4.
+  5. A cited key whose chunk does not carry the criterion being applied.
+
+RETRIEVED CONTEXT is deliberately not printed. It is identical across a set by
+construction, and it is the thing a finding must NEVER come from, so showing it
+beside the answer invites the exact misreading item 1 is about. The keys are
+listed on each pair instead.
+
+WHAT THE AUTOMATED CHECKS SAY, so you are not reading blind:
+  validate_pairs.py  45 pairs, 0 errors, 0 warnings.
+  constraint 12 guard (medication in next_steps)  0 hits.
+  constraint 4  (follow_ups on a red)             0 hits.
+  constraint 11 guard (red_flags)                 0 hits, after the fix below.
+
+>> FIXED 2026-09-18. Recorded because P0042 is where you would have hit it.
+
+   Before the fix, guards.screen_red_flags DROPPED this red flag from P0042:
+     "Chest tightness unchanged after 30 minutes at rest"
+   on a case that reads:
+     "Chest got tight walking up the hill ... Sat on the wall. It has not
+      shifted, it has been half an hour now."
+
+   The exertion axis in validate_pairs.CONTRADICTION_AXES treats "walking up"
+   (pole: exertional) and "at rest" (pole: non exertional) as contradictory. It
+   is conflating WHAT BROUGHT THE PAIN ON with WHAT THE PATIENT IS DOING NOW.
+   Exertional onset plus persistence at rest is not a contradiction, it is the
+   evolving-ACS pattern, and it is the exact discriminator the CP-ANG sets are
+   built on.
+
+   It was phrasing-dependent, which is worse than consistent: "unchanged after
+   30 minutes at rest" dropped, "unchanged after 30 minutes" kept, "after
+   sitting down" kept. So whether the demo showed the correct red flag turned on
+   which words the model happened to pick.
+
+   THE FIX: `exertion` is retired from CONTRADICTION_AXES. Three axes remain,
+   course, duration and rest response. The vocabulary and the reasoning are kept
+   in validate_pairs.RETIRED_AXES so nobody re-adds it. `rest response` stays
+   and is legitimate, because both its poles describe the same question, how the
+   pain responded to rest, rather than straddling onset and current state.
+
+   Verified live on the demo path, not just in the suites. A case reading
+   "Chest tightness came on while I was walking up the stairs ... sat down to
+   rest but it has not gone away ... half an hour now" returned red with two
+   red flags, "chest tightness persists at rest for 30 minutes" and "persistent
+   chest pain at rest". Both kept, nothing dropped. Replaying the retired axis
+   against that same output drops BOTH, which would have left a red verdict with
+   no supporting red flags on a textbook evolving ACS.
+
+
+==============================================================================
+CONTRAST SETS   (10 pairs, 5 sets)
+==============================================================================
+Two halves that differ in ONE stated finding and nothing else. Read the
+shared block once, then the two tails. If anything other than the named
+discriminator differs, the set is broken. Constraint 14: the axis must
+quote a line from a chunk both halves cite, and that line is printed.
+
+##############################################################################
+# SET 1   CP-PERI   register: describing a third person
+# axis: is there severe shortness of breath
+##############################################################################
+
+  CONSTRAINT 14, the line that draws the distinction:
+    CP-PERI-001: "If you have chest pain or severe shortness of breath, or your symptoms
+    get worse, call 9-1-1 or seek medical help right away."
+
+  SHARED, identical in both halves (168 characters):
+    My brother has a sharp pain in his chest. It is worse when he breathes in and worse lying flat, and it eases when he sits forward. He had a cold a couple of weeks ago.
+
+  P0013 (yellow) continues:  Otherwise he seems himself, talking normally.
+  P0045 (red) continues:  In the last few minutes he has gone very short of breath just sitting there and cannot finish a sentence.
+
+------------------------------------------------------------------------------
+P0013   target=yellow   register=describing a third person
+   chunks in context: CP-PERI-001 CP-PERI-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 29, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My brother has a sharp pain in his chest. It is worse when he breathes in and worse lying flat, and it eases when he sits forward. He had a cold a couple of weeks ago. Otherwise he seems himself, talking normally.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain worse on inspiration and lying flat, relieved by sitting forward, a few weeks after a viral illness. The retrieved context links a preceding virus to heart inflammation. He is otherwise well, so this needs assessment today rather than emergency care.
+    red_flags : Sharp chest pain worse lying flat, eased sitting forward
+    next_steps: Arrange assessment today
+                Call 9-1-1 if he becomes breathless at rest or the pain worsens sharply
+    citations : CP-PERI-001
+                CP-PERI-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0045   target=red   register=describing a third person
+   chunks in context: CP-PERI-001 CP-PERI-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 29, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My brother has a sharp pain in his chest. It is worse when he breathes in and worse lying flat, and it eases when he sits forward. He had a cold a couple of weeks ago. In the last few minutes he has gone very short of breath just sitting there and cannot finish a sentence.
+
+  ANSWER
+    urgency   : RED
+    rationale : Sharp positional chest pain after a viral illness, now with sudden breathlessness at rest and an inability to complete a sentence. The retrieved context says to call for emergency help if there is chest pain with severe shortness of breath.
+    red_flags : Sudden breathlessness at rest, unable to finish a sentence
+    next_steps: Call 9-1-1 now
+                Let him sit in whatever position he can breathe in
+                Stay with him until help arrives
+    citations : CP-PERI-001
+                CP-PERI-002
+    follow_ups: (empty)
+
+
+##############################################################################
+# SET 2   CP-GERD   register: panicked caregiver
+# axis: is there black tarry stool alongside the reflux
+##############################################################################
+
+  CONSTRAINT 14, the line that draws the distinction:
+    CP-GERD-002 lists under signs of bleeding in the digestive tract: "stool that
+    contains blood or looks black and tarry."
+
+  SHARED, identical in both halves (139 characters):
+    My husband gets burning in his chest after dinner most nights, worse when he lies down, and he gets a sour taste. Sitting up sorts it out.
+
+  P0048 (green) continues:  Nothing else has changed.
+  P0011 (yellow) continues:  His stool has been black and tarry for the last two days.
+
+------------------------------------------------------------------------------
+P0048   target=green   register=panicked caregiver
+   chunks in context: CP-GERD-001 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 55, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My husband gets burning in his chest after dinner most nights, worse when he lies down, and he gets a sour taste. Sitting up sorts it out. Nothing else has changed.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Burning behind the breastbone after meals, worse lying flat and relieved by sitting up, with a sour taste. Typical reflux and none of the alarm features listed in the retrieved context.
+    red_flags : (empty)
+    next_steps: Leave longer between his evening meal and bed
+                Raise the head of the bed if it wakes him
+                Seek care if his stool turns black, he vomits blood, or swallowing becomes painful
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0011   target=yellow   register=panicked caregiver
+   chunks in context: CP-GERD-001 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 55, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My husband gets burning in his chest after dinner most nights, worse when he lies down, and he gets a sour taste. Sitting up sorts it out. His stool has been black and tarry for the last two days.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : The same reflux pattern, but with two days of black tarry stool. The retrieved context lists that as a sign of bleeding in the digestive tract, which moves this from self-care to same-day assessment.
+    red_flags : Black tarry stool for two days alongside reflux
+    next_steps: Have him seen today, do not wait
+                Go to an emergency department if he feels faint or vomits blood
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: (empty)
+
+
+##############################################################################
+# SET 3   CP-ANG   register: plain and factual
+# axis: does the exertional tightness resolve on rest, or persist
+##############################################################################
+
+  CONSTRAINT 14, the line that draws the distinction:
+    CP-ANG-001: "Symptoms often go away with rest and return when you are active or under stress."
+    CP-ANG-001: "Chest pain or discomfort that does not go away or occurs while you are
+    resting might be a sign of a heart attack."
+
+  SHARED, identical in both halves (116 characters):
+    I get a tight band across my chest when I climb the stairs at work. It has been the same for about a year. Today it
+
+  P0036 (yellow) continues:  went after a minute or two of standing still.
+  P0050 (red) continues:  has stayed for over half an hour even though I have been sitting down.
+
+------------------------------------------------------------------------------
+P0036   target=yellow   register=plain and factual
+   chunks in context: CP-ANG-001 CP-ANG-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 68, sex: male
+      conditions: coronary artery disease, type 2 diabetes
+      medications: metformin, atorvastatin
+    [SYMPTOMS]
+      I get a tight band across my chest when I climb the stairs at work. It has been the same for about a year. Today it went after a minute or two of standing still.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Exertional chest tightness in known coronary artery disease, unchanged in pattern for a year and relieved within minutes of stopping. The retrieved context describes symptoms that go away with rest and return with activity as the coronary disease pattern.
+    red_flags : Exertional chest tightness with known coronary artery disease
+    next_steps: Arrange to be seen by a clinician today
+                Stop and rest as soon as it comes on
+                Call 9-1-1 if it lasts more than a few minutes or starts at rest
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0050   target=red   register=plain and factual
+   chunks in context: CP-ANG-001 CP-ANG-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 68, sex: male
+      conditions: coronary artery disease, type 2 diabetes
+      medications: metformin, atorvastatin
+    [SYMPTOMS]
+      I get a tight band across my chest when I climb the stairs at work. It has been the same for about a year. Today it has stayed for over half an hour even though I have been sitting down.
+
+  ANSWER
+    urgency   : RED
+    rationale : Exertional chest tightness in known coronary artery disease that has persisted beyond half an hour despite sitting down, against a year of episodes that settled within minutes. The retrieved context names pain that does not go away or occurs at rest as a possible heart attack.
+    red_flags : Chest tightness persisting over 30 minutes despite sitting down
+    next_steps: Call 9-1-1 now
+                Do not drive yourself to hospital
+                Stay sitting and still until the ambulance arrives
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: (empty)
+
+
+##############################################################################
+# SET 4   CP-GERD   register: poor spelling and punctuation
+# axis: is there black tarry stool alongside the reflux
+##############################################################################
+
+  CONSTRAINT 14, the line that draws the distinction:
+    CP-GERD-002 lists under signs of bleeding in the digestive tract: "stool that
+    contains blood or looks black and tarry."
+
+  SHARED, identical in both halves (103 characters):
+    burnin in my chest after tea most nights worse when i lie down get a sour taste sittin up sorts it out
+
+  P0054 (green) continues:  nothin else changed
+  P0039 (yellow) continues:  but my poo has gone black and tarry the last 2 days
+
+------------------------------------------------------------------------------
+P0054   target=green   register=poor spelling and punctuation
+   chunks in context: CP-GERD-001 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 31, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      burnin in my chest after tea most nights worse when i lie down get a sour taste sittin up sorts it out nothin else changed
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Burning behind the breastbone after meals, worse lying flat and relieved by sitting up, with a sour taste. Typical reflux and none of the alarm features listed in the retrieved context.
+    red_flags : (empty)
+    next_steps: Leave two to three hours between eating and lying down
+                Raise the head of the bed if symptoms wake you
+                Seek care if your stool turns black, you vomit blood, or swallowing becomes painful
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0039   target=yellow   register=poor spelling and punctuation
+   chunks in context: CP-GERD-001 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 31, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      burnin in my chest after tea most nights worse when i lie down get a sour taste sittin up sorts it out but my poo has gone black and tarry the last 2 days
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : The same reflux pattern, but with two days of black tarry stool. The retrieved context lists that as a sign of bleeding in the digestive tract, which moves this from self-care to same-day assessment.
+    red_flags : Black tarry stool for two days alongside reflux
+    next_steps: Be seen today, do not wait for it to settle
+                Go to an emergency department if you feel faint or vomit blood
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: (empty)
+
+
+##############################################################################
+# SET 5   CP-ANG   register: terse adult
+# axis: does the exertional tightness resolve on rest, or persist
+##############################################################################
+
+  CONSTRAINT 14, the line that draws the distinction:
+    CP-ANG-001: "Symptoms often go away with rest and return when you are active or under stress."
+    CP-ANG-001: "Chest pain or discomfort that does not go away or occurs while you are
+    resting might be a sign of a heart attack."
+
+  SHARED, identical in both halves (95 characters):
+    Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It
+
+  P0026 (yellow) continues:  went in about three minutes.
+  P0042 (red) continues:  has not shifted, it has been half an hour now.
+
+------------------------------------------------------------------------------
+P0026   target=yellow   register=terse adult
+   chunks in context: CP-ANG-001 CP-ANG-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 61, sex: female
+      conditions: coronary artery disease
+      medications: nitroglycerin as needed, atorvastatin
+    [SYMPTOMS]
+      Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It went in about three minutes.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Exertional chest tightness in known coronary artery disease, following the patient's established pattern and resolving within minutes of stopping. That fits stable angina rather than an evolving event, but angina is a warning sign of raised heart attack risk and warrants assessment.
+    red_flags : Exertional chest tightness with known coronary artery disease
+    next_steps: Arrange to be seen by a clinician today
+                Stop and rest at once if it returns
+                Call 9-1-1 if chest pain lasts more than a few minutes or comes on at rest
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0042   target=red   register=terse adult
+   chunks in context: CP-ANG-001 CP-ANG-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 61, sex: female
+      conditions: coronary artery disease
+      medications: nitroglycerin as needed, atorvastatin
+    [SYMPTOMS]
+      Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It has not shifted, it has been half an hour now.
+
+  ANSWER
+    urgency   : RED
+    rationale : Exertional chest tightness in known coronary artery disease that has not resolved after half an hour at rest. The patient's usual episodes settle within minutes; pain that persists at rest is the feature that separates an evolving event from stable angina.
+    red_flags : Chest tightness unchanged after 30 minutes at rest
+    next_steps: Call 9-1-1 now
+                Do not drive to hospital, wait for the ambulance
+                Sit still and stay where you are
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: (empty)
+
+
+==============================================================================
+GROUNDING   (6 pairs)
+==============================================================================
+The answer must cite the key that carries the criterion it applies, and
+must not assert a finding the case does not state. Check the red_flags
+against the SYMPTOMS block, not against the chunk list.
+
+------------------------------------------------------------------------------
+P0009   target=green   register=verbose and anxious
+   chunks in context: CP-ACS-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 34, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Sorry to bother you, I know this is probably nothing, but I have had this ache in my chest on and off since I helped my brother move house on Saturday. It is worse if I press on the spot or reach up for something. I just keep reading things online and now I am worried.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest ache following unaccustomed lifting, reproducible on pressing the spot and on reaching, with no relationship to exertion. It does not match the heart attack pattern in the retrieved context, and the patient reports no other symptoms.
+    red_flags : (empty)
+    next_steps: Rest the area and avoid heavy lifting for a few days
+                Seek care the same day if the pain becomes constant, spreads to the arm or jaw, or comes on at rest
+    citations : CP-ACS-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0012   target=yellow   register=poor spelling and punctuation
+   chunks in context: CP-PERI-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 44, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      sharp pain in my chest its worse breathing in and better if i sit forward been 2 days
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain over two days, worse on inspiration and relieved by sitting forward. That positional pattern matches the presentation in the retrieved context and needs assessment today.
+    red_flags : Sharp chest pain worse on inspiration, eased sitting forward
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest
+    citations : CP-PERI-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0021   target=red   register=plain and factual
+   chunks in context: CP-ACS-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 59, sex: male
+      conditions: high blood pressure
+      medications: ramipril
+    [SYMPTOMS]
+      Pressure in the centre of my chest for the last forty minutes. It has not eased off since I sat down.
+
+  ANSWER
+    urgency   : RED
+    rationale : Central chest pressure for forty minutes that has not eased with sitting. That is the most common presenting symptom described in the retrieved context, and it has persisted at rest.
+    red_flags : Central chest pressure unchanged for forty minutes at rest
+    next_steps: Call 9-1-1 now
+                Do not drive yourself
+                Sit down and stay still until help arrives
+    citations : CP-ACS-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0027   target=green   register=describing a third person
+   chunks in context: CP-PNA-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 6, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My daughter has had a dry cough for three days. She is running about as normal, eating fine, no temperature, breathing looks normal to me.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Dry cough for three days in a child who is active, eating normally and breathing comfortably. None of the features in the retrieved context that would raise concern are present.
+    red_flags : (empty)
+    next_steps: Keep her drinking and let her rest as she wants to
+                Seek care the same day if she develops a temperature, breathes quickly, or goes off her food
+    citations : CP-PNA-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0029   target=green   register=terse adult
+   chunks in context: CP-PERI-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 30, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Ache across my chest since I started at the gym on Monday. Worse when I do press-ups. Fine the rest of the time.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest ache since starting a new exercise routine, provoked by a specific movement and absent otherwise. It does not match the pain pattern in the retrieved context.
+    red_flags : (empty)
+    next_steps: Ease off chest exercises for a week and build up more slowly
+                Seek care the same day if the ache becomes constant or comes on at rest
+    citations : CP-PERI-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0040   target=yellow   register=panicked caregiver
+   chunks in context: CP-PNA-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 72, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My mother has had a cough for four days and now it hurts in her chest when she coughs or takes a deep breath. She is more tired than usual but she is up and about.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Four days of cough now with chest pain on coughing and deep breathing, and increased tiredness, in an older adult. The retrieved context notes older adults are at risk of more serious illness and may not show typical symptoms.
+    red_flags : Chest pain on coughing and deep breathing after four days
+    next_steps: Arrange assessment today
+                Call 9-1-1 if she becomes breathless at rest, confused, or her lips look blue
+    citations : CP-PNA-001
+    follow_ups: (empty)
+
+
+==============================================================================
+UNDER-SPECIFIED   (4 pairs)
+==============================================================================
+In scope but missing the fact that separates two categories. Rule 6 says
+assign the higher category and put the gap in follow_up_questions. These
+replaced the decline pairs, which were reframed on 2026-09-17.
+
+------------------------------------------------------------------------------
+P0002   target=yellow   register=minimising the symptom
+   chunks in context: CP-ANG-001 CP-ANG-002
+   missing fact: Chunks cleared the relevance floor but the case is too thin to separate two categories. Rule 6: assign the higher one and put what is missing in follow_up_questions. Do NOT invent detail the case does not give.
+
+  CASE
+    [PATIENT PROFILE]
+      age: 45, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Bit of a niggle in my chest, honestly it is nothing, the wife made me check.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest discomfort with no information on what brings it on, how long it lasts, or what comes with it. The retrieved context separates pain that settles with rest from pain that persists, and this case does not say which this is. Assigning the higher category until that is answered.
+    red_flags : (empty)
+    next_steps: Do not dismiss it until the questions below are answered
+                Seek assessment today if it is there now or keeps returning
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: Does it come on when you exert yourself and ease when you stop?
+                How long does it last once it starts?
+                Has it spread to your arm, neck or jaw, or come with sweating?
+
+------------------------------------------------------------------------------
+P0046   target=yellow   register=terse adult
+   chunks in context: CP-ACS-003 CP-ACS-005
+   missing fact: Chunks cleared the relevance floor but the case is too thin to separate two categories. Rule 6: assign the higher one and put what is missing in follow_up_questions. Do NOT invent detail the case does not give.
+
+  CASE
+    [PATIENT PROFILE]
+      age: 63, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Chest has not been right today.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest symptoms reported with no detail of character, timing, provocation or associated features. The retrieved context distinguishes pain that persists at rest from pain that settles, and nothing here establishes which applies. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Seek assessment today
+                Call 9-1-1 if the discomfort is present now and has lasted more than a few minutes
+    citations : CP-ACS-003
+                CP-ACS-005
+    follow_ups: Is the discomfort there now, and how long has it lasted?
+                Does it come on with exertion and go away with rest?
+                Is there any sweating, nausea or breathlessness with it?
+
+------------------------------------------------------------------------------
+P0052   target=yellow   register=verbose and anxious
+   chunks in context: CP-GERD-001 CP-GERD-002
+   missing fact: Chunks cleared the relevance floor but the case is too thin to separate two categories. Rule 6: assign the higher one and put what is missing in follow_up_questions. Do NOT invent detail the case does not give.
+
+  CASE
+    [PATIENT PROFILE]
+      age: 38, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      I get a bit of burning in my chest sometimes. I do not really know what sets it off, it just happens now and then. I have had it a while I suppose. Should I be doing something about it?
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Intermittent burning chest discomfort with no timing, no relationship to meals or posture, and no duration given. The retrieved context describes reflux by its relationship to eating and lying down, none of which this case establishes. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Seek assessment rather than continuing to wait it out
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: Does it come on after meals or when you lie down?
+                Do you ever get a sour taste or food coming back up?
+                Have you noticed any difficulty swallowing, or blood in your vomit or stool?
+
+------------------------------------------------------------------------------
+P0055   target=yellow   register=panicked caregiver
+   chunks in context: CP-GERD-001 CP-GERD-002
+   missing fact: Chunks cleared the relevance floor but the case is too thin to separate two categories. Rule 6: assign the higher one and put what is missing in follow_up_questions. Do NOT invent detail the case does not give.
+
+  CASE
+    [PATIENT PROFILE]
+      age: 47, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My husband keeps saying his chest feels funny. He will not tell me any more than that and he will not sit down. I do not know what to do.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest symptoms reported second hand with no description of character, duration or provocation. Nothing in the case establishes which of the patterns in the retrieved context applies. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Ask him the questions below and seek assessment today
+                Call 9-1-1 if he becomes sweaty, breathless, or the discomfort is constant
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: Is the feeling there constantly or does it come and go?
+                Did it start during exertion, after a meal, or at rest?
+                Is he sweating, breathless, or is the feeling spreading anywhere?
+
+
+==============================================================================
+STANDALONE   (25 pairs)
+==============================================================================
+One case, one answer. The bulk of the set. Check urgency against the case
+and red_flags against the SYMPTOMS block.
+
+------------------------------------------------------------------------------
+P0003   target=red   register=verbose and anxious
+   chunks in context: CP-PE-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 58, sex: female
+      conditions: cancer, on chemotherapy
+      medications: chemotherapy
+    [SYMPTOMS]
+      I am sorry to trouble you. I am halfway through chemo and about two hours ago I got a sudden pain in my chest when I breathe in, and I am more out of breath than I have been. I did not want to make a fuss but it has not gone.
+
+  ANSWER
+    urgency   : RED
+    rationale : Sudden pain on breathing with new breathlessness, two hours ago, during chemotherapy. The retrieved context notes that risk factors combine and that cancer and its treatment raise the likelihood, and more than one is present here.
+    red_flags : Sudden pain on breathing with new breathlessness during chemotherapy
+    next_steps: Call 9-1-1 now
+                Do not drive yourself
+                Tell them you are having chemotherapy
+    citations : CP-PE-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0004   target=green   register=describing a third person
+   chunks in context: CP-PANIC-001 CP-PANIC-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 27, sex: female
+      conditions: panic disorder
+      medications: sertraline
+    [SYMPTOMS]
+      My flatmate is having one of her panic attacks. Chest tight, hands tingling, breathing fast. She says it feels exactly like the others and she has had loads. It is already easing off after about ten minutes.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest tightness with tingling and rapid breathing in a person with diagnosed panic disorder, described as identical to previous attacks and already settling. No features suggesting a cardiac or respiratory cause.
+    red_flags : (empty)
+    next_steps: Sit with her somewhere quiet and let the attack pass
+                Seek care the same day if this one feels different from her usual attacks or does not settle
+    citations : CP-PANIC-001
+                CP-PANIC-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0008   target=green   register=panicked caregiver
+   chunks in context: CP-PANIC-001 CP-PANIC-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 19, sex: female
+      conditions: panic disorder
+      medications: none
+    [SYMPTOMS]
+      My daughter has gone into one of her panic attacks, chest tight, hands tingling, and I hate seeing it. She says it is the same as always and she knows it will pass. It is easing already.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest tightness with tingling in diagnosed panic disorder, recognised by the patient as her usual attack and already easing. The retrieved context notes these attacks are not life-threatening and the physical symptoms usually resolve with time.
+    red_flags : (empty)
+    next_steps: Sit with her somewhere quiet until it passes
+                Seek care the same day if an attack ever feels different from her usual ones
+    citations : CP-PANIC-001
+                CP-PANIC-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0014   target=red   register=poor spelling and punctuation
+   chunks in context: CP-PE-004 CP-PE-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 66, sex: male
+      conditions: type 2 diabetes, high blood pressure
+      medications: metformin, ramipril
+    [SYMPTOMS]
+      been in bed 2 wks since my hip op and now got a pain in my chest wen i breath in started this morning and my right leg is fatter than the left
+
+  ANSWER
+    urgency   : RED
+    rationale : Pain on breathing that began this morning after two weeks of bed rest following hip surgery, with asymmetric leg swelling. The retrieved context names bed rest after surgery and the first three months post-operatively as raising the likelihood, and describes swollen tender legs with pain on breathing.
+    red_flags : Pain on breathing with one-sided leg swelling after hip surgery
+    next_steps: Call 9-1-1 now
+                Stay in bed, do not walk about
+                Have someone stay with you until help arrives
+    citations : CP-PE-004
+                CP-PE-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0015   target=red   register=plain and factual
+   chunks in context: CP-ACS-002 CP-DIFF-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 71, sex: male
+      conditions: type 2 diabetes
+      medications: metformin, gliclazide
+    [SYMPTOMS]
+      I have felt unusually tired since yesterday and slightly short of breath walking to the gate. No real pain, just a vague heaviness. I put it down to the heat but my wife thought I should ask.
+
+  ANSWER
+    urgency   : RED
+    rationale : Unusual tiredness and breathlessness on mild exertion with vague chest heaviness and no clear pain, over a day, in a man with diabetes. The retrieved context notes heart attacks can occur with very mild symptoms or none, and that this is more common in people with diabetes.
+    red_flags : Vague chest heaviness with new breathlessness on mild exertion
+    next_steps: Call 9-1-1 now
+                Do not drive yourself or walk any further
+                Tell them you have diabetes
+    citations : CP-ACS-002
+                CP-DIFF-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0017   target=green   register=minimising the symptom
+   chunks in context: CP-PANIC-001 CP-PANIC-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 26, sex: male
+      conditions: panic disorder
+      medications: sertraline
+    [SYMPTOMS]
+      Nothing serious. Just the usual panic thing, chest goes tight for ten minutes and passes. I only asked because my flatmate nagged.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest tightness lasting about ten minutes in diagnosed panic disorder, described as the patient's usual pattern and self-limiting. The retrieved context describes panic attack symptoms that resolve with time.
+    red_flags : (empty)
+    next_steps: Keep using whatever helps you ride the attack out
+                Seek care the same day if one feels different from your usual attacks
+    citations : CP-PANIC-001
+                CP-PANIC-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0018   target=yellow   register=describing a third person
+   chunks in context: CP-ANG-002
+
+  TURN 1
+    [PATIENT PROFILE]
+      age: 64, sex: female
+      conditions: coronary artery disease
+      medications: bisoprolol, atorvastatin
+    [SYMPTOMS]
+      My mother gets chest tightness. I am not sure how worried to be.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest tightness reported in a woman with known coronary artery disease, with no detail yet on what brings it on or how long it lasts. The retrieved context distinguishes angina that occurs on exertion from pain that persists, and that has not been established. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Do not leave this unanswered today
+    citations : CP-ANG-002
+    follow_ups: Does it come on when she exerts herself?
+                How long does it last once it starts?
+                Is it there at the moment?
+
+  TURN 2
+    [PATIENT PROFILE]
+      age: 64, sex: female
+      conditions: coronary artery disease
+      medications: bisoprolol, atorvastatin
+    [SYMPTOMS]
+      It comes on when she walks up the road and goes after she stands still for a few minutes. It is not there now.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Exertional chest tightness in known coronary artery disease that settles within minutes of stopping and is not present now. The retrieved context describes angina as chest discomfort when the heart is working hard and names it a warning sign of raised heart attack risk.
+    red_flags : Exertional chest tightness with known coronary artery disease
+    next_steps: Arrange assessment today
+                Call 9-1-1 if an episode lasts more than a few minutes or starts at rest
+    citations : CP-ANG-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0022   target=green   register=describing a third person
+   chunks in context: CP-PANIC-003 CP-PANIC-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 45, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My sister had a one-off episode last week, chest tight and frightened, lasted about twenty minutes and passed. She has been fine since. She has never had one before or after.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : A single episode of chest tightness with fear lasting about twenty minutes, resolved, with no recurrence since. The retrieved context describes an isolated panic attack as a one-time episode that is not itself a disorder.
+    red_flags : (empty)
+    next_steps: No action needed for a single resolved episode
+                Seek assessment if it happens again or if an episode comes with sweating or pain spreading to the arm or jaw
+    citations : CP-PANIC-003
+                CP-PANIC-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0023   target=green   register=verbose and anxious
+   chunks in context: CP-PANIC-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 31, sex: female
+      conditions: panic disorder
+      medications: none
+    [SYMPTOMS]
+      I know this is my panic disorder, I have had it for years, but I always second guess myself. Chest went tight on the bus, heart going, hands tingly, and it settled after about a quarter of an hour like it always does. I feel silly asking.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Chest tightness with tingling and a racing heart on public transport, settling within about fifteen minutes, in long-standing diagnosed panic disorder and following the patient's established pattern. The retrieved context notes attacks can occur at any time and are not life-threatening.
+    red_flags : (empty)
+    next_steps: Carry on with what already helps you manage an attack
+                Seek care the same day if an attack feels different from your usual ones
+    citations : CP-PANIC-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0024   target=yellow   register=minimising the symptom
+   chunks in context: CP-PERI-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 33, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      It is probably nothing but I have had a sharp pain in my chest for a couple of days. It is worse taking a deep breath and a bit better leaning forward. I have carried on as normal.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain over two days, worse on deep breathing and eased by leaning forward. That positional pattern matches the presentation in the retrieved context and warrants assessment today despite the patient feeling otherwise well.
+    red_flags : Sharp chest pain worse on deep breathing, eased leaning forward
+    next_steps: Arrange assessment today rather than carrying on
+                Call 9-1-1 if you become breathless at rest
+    citations : CP-PERI-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0025   target=green   register=poor spelling and punctuation
+   chunks in context: CP-PANIC-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 22, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      had one panic attack in an exam 3 wks ago chest tight cudnt breathe properly lasted 20 mins nothing since not worried just wondered
+
+  ANSWER
+    urgency   : GREEN
+    rationale : A single episode of chest tightness and difficult breathing during an exam three weeks ago, lasting twenty minutes, with nothing since. The retrieved context describes an isolated panic attack as a one-off episode and not a mental disorder.
+    red_flags : (empty)
+    next_steps: No action needed for one resolved episode
+                Seek assessment if episodes start recurring, or if one comes with sweating or pain spreading to the arm or jaw
+    citations : CP-PANIC-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0028   target=yellow   register=terse adult
+   chunks in context: CP-PLEU-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 47, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Sharp pain left side of chest. Worse breathing in. Three days. No cough.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp one-sided chest pain worse on inspiration over three days without cough. The retrieved context describes pleurisy as inflammation of the pleura causing sharp pain with breathing.
+    red_flags : Sharp one-sided chest pain worse on inspiration for three days
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest or cough up blood
+    citations : CP-PLEU-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0030   target=green   register=panicked caregiver
+   chunks in context: CP-PANIC-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 17, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My daughter had a panic attack at school, first one ever, about twenty minutes and it passed. That was a fortnight ago and there has been nothing since. I am still a bit rattled about it.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : A single resolved episode a fortnight ago with no recurrence. The retrieved context describes an isolated panic attack as a one-time episode rather than a disorder.
+    red_flags : (empty)
+    next_steps: No action needed for a single resolved episode
+                Seek assessment if they start recurring or if one comes with chest pain spreading to the arm or jaw
+    citations : CP-PANIC-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0031   target=green   register=terse adult
+   chunks in context: CP-GERD-001 CP-GERD-003
+
+  CASE
+    [PATIENT PROFILE]
+      age: 36, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Heartburn most evenings. Worse after a big curry or a few pints. Antacids from the chemist sort it. Been going on months.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Burning behind the breastbone in the evenings for months, provoked by large meals and alcohol. The retrieved context describes this as typical reflux and lists dietary triggers among the factors that worsen it.
+    red_flags : (empty)
+    next_steps: Try smaller evening meals and leave longer before lying down
+                Cut back on alcohol and see whether the pattern changes
+                Seek assessment if swallowing becomes difficult, you lose weight without trying, or your stool turns black
+    citations : CP-GERD-001
+                CP-GERD-003
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0034   target=yellow   register=panicked caregiver
+   chunks in context: CP-PERI-001 CP-PERI-002
+
+  TURN 1
+    [PATIENT PROFILE]
+      age: 41, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My partner has chest pain and I am panicking a bit. What do I need to know?
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest pain reported without detail on character, position or associated symptoms. The retrieved context separates positional pain relieved by sitting forward from pain with breathlessness needing emergency help, and neither has been established. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Stay with him while you answer the questions below
+    citations : CP-PERI-001
+                CP-PERI-002
+    follow_ups: Is it sharp, and is it worse when he breathes in?
+                Does it change when he sits forward or lies flat?
+                Is he short of breath right now?
+
+  TURN 2
+    [PATIENT PROFILE]
+      age: 41, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      It is sharp and worse breathing in, and he says leaning forward helps. He is breathing fine. He had flu a fortnight ago.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain worse on inspiration and relieved by leaning forward, two weeks after a viral illness, with no breathlessness. The retrieved context links a preceding virus to heart inflammation and describes this positional pattern.
+    red_flags : Sharp chest pain worse on inspiration, relieved leaning forward
+    next_steps: Arrange assessment today
+                Call 9-1-1 if he becomes short of breath at rest or the pain suddenly worsens
+    citations : CP-PERI-001
+                CP-PERI-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0035   target=red   register=describing a third person
+   chunks in context: CP-ACS-002 CP-ACS-004
+
+  CASE
+    [PATIENT PROFILE]
+      age: 78, sex: female
+      conditions: type 2 diabetes, high blood pressure
+      medications: metformin, amlodipine
+    [SYMPTOMS]
+      My gran has gone very quiet and clammy this afternoon and says she just feels wrong. She keeps saying it is indigestion. She is not complaining of pain as such.
+
+  ANSWER
+    urgency   : RED
+    rationale : An older woman with diabetes who is clammy and says she feels wrong, attributing it to indigestion, without reporting pain. The retrieved context notes heart attacks can present with very mild symptoms or none, particularly in older adults and people with diabetes, and says to call for emergency care even when unsure.
+    red_flags : Clammy and unwell without pain in an older adult with diabetes
+    next_steps: Call 9-1-1 now
+                Do not wait to see if it passes
+                Do not drive her yourself, wait for the ambulance
+    citations : CP-ACS-002
+                CP-ACS-004
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0037   target=yellow   register=describing a third person
+   chunks in context: CP-PLEU-001 CP-DIFF-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 55, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      My wife has had a sharp pain in her chest for two days, worse when she breathes in. She is not breathless and there is no cough. She keeps saying it is a pulled muscle but pressing on it does not change it.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain over two days, worse on inspiration and not reproduced by pressing the chest wall, which argues against the muscular explanation. The retrieved context lists pleurisy among the causes of chest pain and describes sharp pain with breathing.
+    red_flags : Sharp chest pain worse on inspiration, not reproducible on pressing
+    next_steps: Arrange assessment today
+                Call 9-1-1 if she becomes breathless at rest, or the pain becomes crushing
+    citations : CP-PLEU-001
+                CP-DIFF-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0041   target=yellow   register=terse adult
+   chunks in context: CP-PNA-001
+
+  TURN 1
+    [PATIENT PROFILE]
+      age: 35, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Chest hurts. Had a cough a few days.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest pain with a cough over several days and no further detail. The retrieved context describes chest pain on breathing or coughing among pneumonia symptoms alongside fever and breathlessness, none of which has been established here. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Answer the questions below before deciding whether to wait
+    citations : CP-PNA-001
+    follow_ups: Does the pain come when you breathe in or cough?
+                Have you had a temperature or chills?
+                Are you more short of breath than usual?
+
+  TURN 2
+    [PATIENT PROFILE]
+      age: 35, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Hurts when I cough. Had a temperature since yesterday. Bit more puffed going upstairs.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest pain on coughing with a temperature since yesterday and new breathlessness on stairs, following several days of cough. These match the symptom pattern in the retrieved context and warrant assessment today.
+    red_flags : Chest pain on coughing with fever and new breathlessness
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest or your lips look blue
+    citations : CP-PNA-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0043   target=yellow   register=minimising the symptom
+   chunks in context: CP-PLEU-001
+
+  TURN 1
+    [PATIENT PROFILE]
+      age: 28, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Probably nothing but I have got a twinge in my chest. Honestly I feel fine.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Chest discomfort minimised by the patient with no detail on character, duration or what changes it. The retrieved context describes sharp pain with breathing as a pleural pattern, which has not been established. Assigning the higher category pending answers.
+    red_flags : (empty)
+    next_steps: Answer the questions below rather than leaving it
+    citations : CP-PLEU-001
+    follow_ups: Is it sharp, and worse when you breathe in?
+                How long has it been there?
+                Are you breathless, or coughing anything up?
+
+  TURN 2
+    [PATIENT PROFILE]
+      age: 28, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Sharp I suppose, and yes worse on a deep breath. Three days. Not breathless, no cough.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain worse on deep breathing for three days, without breathlessness or cough. The retrieved context describes pleurisy as inflammation of the pleura causing sharp pain with breathing.
+    red_flags : Sharp chest pain worse on deep breathing for three days
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest or cough up blood
+    citations : CP-PLEU-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0044   target=red   register=poor spelling and punctuation
+   chunks in context: CP-ACS-001 CP-ACS-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 49, sex: male
+      conditions: high cholesterol
+      medications: atorvastatin
+    [SYMPTOMS]
+      started off mild about an hour ago just a bit of an ache in my chest but its been coming and going and getting worse and now its going into my left arm
+
+  ANSWER
+    urgency   : RED
+    rationale : Chest ache that began mildly an hour ago, has come and gone while worsening, and is now radiating to the left arm. The retrieved context describes exactly this pattern: symptoms that start slowly, are mild at first, and come and go over several hours.
+    red_flags : Worsening chest ache over an hour now radiating to the left arm
+    next_steps: Call 9-1-1 now
+                Do not drive yourself to hospital
+                Sit down and stay still until help arrives
+    citations : CP-ACS-001
+                CP-ACS-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0049   target=green   register=verbose and anxious
+   chunks in context: CP-GERD-001 CP-GERD-003 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 52, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      I hope this is not wasting your time. I get a burning feeling behind my breastbone, mostly in the evening, and sometimes a sour taste at the back of my throat. It is worse if I have eaten late or had a glass of wine, and it is better if I prop myself up on pillows. It has been like this for a good while and nothing else has changed.
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Burning behind the breastbone with regurgitation of acid, worse after late meals and alcohol and relieved by lying propped up. The retrieved context describes this pattern as typical reflux and names alcohol and meal timing among the contributing factors.
+    red_flags : (empty)
+    next_steps: Leave two to three hours between eating and lying down
+                Keep propping yourself up at night if it helps
+                Seek assessment if swallowing becomes painful or difficult, or you lose weight without trying
+    citations : CP-GERD-001
+                CP-GERD-003
+                CP-GERD-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0053   target=yellow   register=plain and factual
+   chunks in context: CP-PNA-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 61, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      Cough for five days, now producing green phlegm. Chest hurts when I cough. Temperature of 38.4 last night. More tired than usual but managing.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Five days of productive cough with chest pain on coughing, a documented fever and increased tiredness. These match the symptom pattern in the retrieved context and warrant assessment today.
+    red_flags : Chest pain on coughing with fever and productive cough for five days
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest, confused, or your lips look blue
+    citations : CP-PNA-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0056   target=yellow   register=poor spelling and punctuation
+   chunks in context: CP-PLEU-001
+
+  CASE
+    [PATIENT PROFILE]
+      age: 24, sex: female
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      got a sharp pain in me chest when i breath in deep started 2 days ago no cough no temp not breathless
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Sharp chest pain on deep inspiration for two days without cough or breathlessness. The retrieved context describes pleurisy as causing sharp pain with breathing, which needs assessment.
+    red_flags : Sharp chest pain on deep inspiration for two days
+    next_steps: Arrange assessment today
+                Call 9-1-1 if you become breathless at rest or cough up blood
+    citations : CP-PLEU-001
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0057   target=yellow   register=minimising the symptom
+   chunks in context: CP-ANG-001 CP-ANG-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 59, sex: female
+      conditions: coronary artery disease
+      medications: atorvastatin, bisoprolol
+    [SYMPTOMS]
+      It is honestly nothing. I get a bit of tightness walking the dog up the hill, it goes when I stop. I have had it for months and I would not have mentioned it.
+
+  ANSWER
+    urgency   : YELLOW
+    rationale : Exertional chest tightness in known coronary artery disease that settles on stopping and has been present for months. The retrieved context describes symptoms that go away with rest and return with activity, and names angina a warning sign of raised heart attack risk, regardless of how mild it feels.
+    red_flags : Exertional chest tightness with known coronary artery disease
+    next_steps: Arrange assessment today despite it feeling minor
+                Stop and rest as soon as it comes on
+                Call 9-1-1 if it lasts more than a few minutes or begins at rest
+    citations : CP-ANG-001
+                CP-ANG-002
+    follow_ups: (empty)
+
+------------------------------------------------------------------------------
+P0059   target=green   register=poor spelling and punctuation
+   chunks in context: CP-GERD-001 CP-GERD-002
+
+  CASE
+    [PATIENT PROFILE]
+      age: 40, sex: male
+      conditions: none
+      medications: none
+    [SYMPTOMS]
+      burnin in me chest of an evenin after me dinner sour taste comes up sittin up helps nowt else wrong
+
+  ANSWER
+    urgency   : GREEN
+    rationale : Burning behind the breastbone after evening meals with a sour taste, relieved by sitting up. Typical reflux, with none of the alarm features listed in the retrieved context.
+    red_flags : (empty)
+    next_steps: Leave longer between your evening meal and going to bed
+                Raise the head of the bed if it wakes you
+                Seek care if swallowing becomes painful, your stool turns black, or you vomit blood
+    citations : CP-GERD-001
+                CP-GERD-002
+    follow_ups: (empty)
+
+==============================================================================
+END. 45 pairs: contrast 10, grounding 6, underspecified 4, standalone 25
+==============================================================================

@@ -1,0 +1,121 @@
+# green-gerd alone, reasoning off, cache_prompt off, 3 passes each, fresh server per block.
+# Asked for 2026-09-17: does the reasoning-off green result hold across repeats.
+# run 2026-09-17T18:13:16Z, macOS 27.0 (26A428), llama.cpp build 10809
+
+############ BASELINE system prompt
+mode: matched, reasoning off, pass 1/3
+
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+
+distribution (scored cases only): {'red': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, reasoning off, pass 2/3
+
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+
+distribution (scored cases only): {'red': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, reasoning off, pass 3/3
+
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+
+distribution (scored cases only): {'red': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+============================================================
+STABILITY ACROSS 3 PASSES, cache_prompt off
+  green-gerd             red     red     red     stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.
+
+############ BASELINE + GREEN_CRITERION
+SYSTEM PROMPT: baseline plus GREEN_CRITERION
+
+mode: matched, reasoning off, pass 1/3
+
+  green-gerd             expect=green  got=green  PASS
+       tokens=61 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms with self-care response
+
+distribution (scored cases only): {'green': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED GREEN. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, reasoning off, pass 2/3
+
+  green-gerd             expect=green  got=green  PASS
+       tokens=61 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms with self-care response
+
+distribution (scored cases only): {'green': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED GREEN. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, reasoning off, pass 3/3
+
+  green-gerd             expect=green  got=green  PASS
+       tokens=61 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms with self-care response
+
+distribution (scored cases only): {'green': 1}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+EVERY CASE RETURNED GREEN. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+============================================================
+STABILITY ACROSS 3 PASSES, cache_prompt off
+  green-gerd             green   green   green   stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

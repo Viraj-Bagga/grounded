@@ -1,0 +1,5 @@
+.venv/
+node_modules/
+*.gguf
+03-model/hf-bf16/
+__pycache__/

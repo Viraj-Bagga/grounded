@@ -1,0 +1,57 @@
+# REVIEW: niddk-gerd
+# Acid Reflux (GER & GERD) in Adults - Symptoms & Causes
+# National Institute of Diabetes and Digestive and Kidney Diseases, NIH
+# https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-adults/symptoms-causes
+# key_prefix: CP-GERD   expected_category: green
+# role: Primary green. Burning, post-prandial, positional. The classic ACS mimic.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 001 [ok   ] tokens=216 heading=What are the symptoms of GER and GERD?
+Gastroesophageal reflux (GER) and gastroesophageal reflux disease (GERD) commonly cause symptoms such as
+
+heartburn , a painful, burning feeling in the middle of your chest, behind your breastbone, rising from the lower tip of your breastbone toward your throat
+regurgitation, or stomach contents coming back up through your esophagus and into your throat or mouth, which may cause you to taste food or stomach acid
+
+However, not all adults with GERD have heartburn or regurgitation. Other symptoms may include
+
+chest pain
+nausea
+problems swallowing or pain while swallowing
+symptoms of complications in the mouth, throat, or lungs , such as chronic cough or hoarseness
+
+Symptoms of GERD may include chronic cough.
+
+You should see a doctor if you think you have GERD, or if your symptoms don’t get better with over-the-counter medicines or lifestyle changes.
+
+You should also see a doctor if you have symptoms that could be related to GERD complications or other serious health problems, such as
+
+--- chunk 002 [short] tokens=71 heading=What are the symptoms of GER and GERD?
+chest pain
+loss of appetite
+persistent vomiting
+problems swallowing or pain while swallowing
+signs of bleeding in the digestive tract , such as vomit that contains blood or looks like coffee grounds stool that contains blood or looks black and tarry
+vomit that contains blood or looks like coffee grounds
+stool that contains blood or looks black and tarry
+unexplained weight loss
+
+--- chunk 003 [ok   ] tokens=180 heading=What causes GER and GERD?
+Your lower esophageal sphincter and diaphragm most often prevent GER, which is when stomach contents come back up into your esophagus. However, many people have GER once in a while.
+
+GERD may develop if your lower esophageal sphincter becomes weak or relaxes when it shouldn’t. Factors that may affect the lower esophageal sphincter and lead to GERD include
+
+being overweight or having obesity
+being pregnant
+smoking or inhaling secondhand smoke
+
+Some medicines can cause GERD or make GERD symptoms worse. Examples include
+
+benzodiazepines, sedatives that make you calmer or sleepy
+calcium channel blockers, which are used to treat high blood pressure
+certain asthma medicines
+nonsteroidal anti-inflammatory drugs (NSAIDs)
+tricyclic antidepressants

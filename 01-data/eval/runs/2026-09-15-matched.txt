@@ -1,0 +1,36 @@
+# NOTE added 2026-09-17: REASONING WAS ON for this run. discrimination_test.py did not
+# send enable_thinking=false before that date, so this is NOT the shipping config.
+# The reasoning-off reruns are 2026-09-17-*-reasoning-off.txt. Those still use this
+# harness's own prompt format, not the format 3 prompt in 02-pairs that ships.
+# discrimination_test.py --chunks matched
+# run 2026-09-15T21:02:46Z, base model, llama-server -ngl 0, temp 0.0
+
+mode: matched
+
+  red-acs                expect=red    got=red    PASS
+       tokens=211 red_flags=1
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+  yellow-angina          expect=yellow got=yellow PASS
+       tokens=220 red_flags=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=237 red_flags=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+  yellow-pleuritic       expect=yellow got=yellow PASS
+       tokens=352 red_flags=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+  probe-costo-unmatched  expect=green  got=yellow PROBE
+       tokens=425 red_flags=0
+       citations=['CP-PLEU-001', 'CP-PERI-002']
+
+distribution (scored cases only): {'red': 1, 'yellow': 3}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got yellow (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+3/4 correct. Discrimination is demonstrated, accuracy is a separate question.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

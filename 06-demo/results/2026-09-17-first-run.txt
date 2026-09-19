@@ -1,0 +1,30 @@
+# LAPTOP DEMO, first end-to-end run, 2026-09-17.
+# 06-demo/server.py against llama-server (-ngl 0), retrieval blend alpha 0.5
+# top-3, prompt = format 3 at sha 102e7511, guards from 02-pairs/guards.py.
+
+BEAT 1 + 2  symptom flow -> red result, profile "You"
+  retrieved   CP-ACS-003, CP-PERI-002, CP-DIFF-001   334 tok in 9.4 s (first call, MiniLM load)
+  urgency     red                      CORRECT for this case
+  citations   3, all resolve
+  timing      70.5 s total | prompt 1204 tok @ 31.1/s | gen 223 tok @ 9.9/s
+  NOTE the rates match the documented llama-server numbers exactly (30-32 and 9.5-10).
+
+BEAT 3  profile changes the answer          *** FAILED ***
+  same symptom, deliberately mild: "Some tightness in my chest this evening and I
+  feel a bit short of breath. It comes and goes."
+    You  (29F, no meds)                   -> RED   35.2 s
+    Dad  (71M, AF, apixaban, bisoprolol)  -> RED   59.4 s
+  The profile did not change the verdict. Both red. The beat does not work.
+  Guard 4 DID fire on Dad: the model returned red carrying three
+  follow_up_questions and the guard cleared them, which is visible in the UI.
+
+BEAT 4  citation expander
+  GET /api/chunk/CP-ACS-003 -> text, NHLBI, url, retrieved 2026-09-15, 162 tok
+  GET /api/chunk/CP-RISK-014 -> HTTP 404, "not in the registry"
+  Constraint 9 is enforced twice: guard 3 strips the key before render, and the
+  expander refuses it again if anything upstream let it through.
+
+GUARDS, end to end on a synthetic worst case
+  citations   CP-RISK-014 dropped, CP-ACS-003 kept
+  next_steps  "Administer nitroglycerin if available" dropped
+  follow_ups  cleared on a red

@@ -1,0 +1,32 @@
+# REVIEW: nhlbi-vte-causes
+# Venous Thromboembolism
+# National Heart, Lung, and Blood Institute, NIH
+# https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes
+# key_prefix: CP-PE   expected_category: red
+# role: Risk factors for VTE. Shares CP-PE with the symptoms page; keys continue the same series.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 004 [short] tokens=32 heading=What raises the likelihood of VTE?
+Most often, there is more than one risk factor involved. The more risk factors you have, the greater the chance you have of developing VTE.
+
+--- chunk 005 [ok   ] tokens=149 heading=Not moving for long periods of time
+Being still slows blood flow through the veins in your arms and legs, raising the likelihood of DVT. Especially when combined with other risk factors, DVT can develop during a long flight (more than 4 hours) or when a person is on bed rest in a nursing home, hospital setting, or after surgery. The chance of developing a blood clot is highest in the first 3 months after surgery and lowers with time. Ask your healthcare provider about prevention plans if you are scheduled for major surgery. Slower blood flow can create a low- oxygen environment that traps blood in places such as the leg veins or makes it easier for clots to form.
+
+Learn about ways to prevent blood clots after surgery or while traveling.
+
+--- chunk 006 [ok   ] tokens=163 heading=Medical conditions
+Certain medical conditions can raise your chance of developing VTE. Some conditions are more closely linked to developing DVT or pulmonary embolism than others and include:
+
+Blood clotting disorders or a history of blood clots
+cancer and cancer treatments including chemotherapy and surgery
+Diabetes , which raises the likelihood of plaque buildup in the arteries that can lead to blood clots
+Heart conditions such as heart attack or congestive heart failure
+High blood pressure, which can damage blood vessels
+Infections, such as with SARS-CoV-2, the virus that causes COVID-19
+Kidney disease , which makes the blood clot more easily
+Spinal cord injury, which can damage veins deep in your body and may cause paralysis, reducing blood flow
+Obesity, which can lead to inflammation and damage in the lining of blood vessels

@@ -1,0 +1,88 @@
+# REASONING OFF, as shipped. Full suite, matched, system prompt + GREEN_CRITERION, 2 passes.
+# NOTE: reasoning matches what ships, the prompt does not. This is still the harness's
+# own format 2, not the format 3 prompt in 02-pairs/pair_format.py that the app sends.
+# See 2026-09-17-format3-probe.txt.
+# Full suite rather than green-gerd alone, because the 2026-09-15 finding was
+# that the criterion also drags yellow cases to green. green-gerd is one line of it.
+# run 2026-09-17T18:02:16Z, macOS 27.0 (26A428), llama.cpp build 10809, cache_prompt=false, enable_thinking=false
+
+SYSTEM PROMPT: baseline plus GREEN_CRITERION
+
+mode: matched, reasoning off, pass 1/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=72 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=central pressure-like pain at rest beyond 20 minutes
+  yellow-angina          expect=yellow got=green  FAIL
+       tokens=63 red_flags=0 reasoning_chars=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=symptom resolved with rest, no red flag present
+  green-gerd             expect=green  got=green  PASS
+       tokens=61 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms with self-care response
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=75 red_flags=1 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=sharp chest pain at rest beyond 20 minutes
+  probe-costo-unmatched  expect=green  got=green  PROBE
+       tokens=62 red_flags=0 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-DIFF-001']
+       rationale=CP-PERI-002
+
+distribution (scored cases only): {'red': 2, 'green': 2}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got green (PASS)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+2/4 correct. Discrimination is demonstrated, accuracy is a separate question.
+
+mode: matched, reasoning off, pass 2/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=72 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=central pressure-like pain at rest beyond 20 minutes
+  yellow-angina          expect=yellow got=green  FAIL
+       tokens=63 red_flags=0 reasoning_chars=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=symptom resolved with rest, no red flag present
+  green-gerd             expect=green  got=green  PASS
+       tokens=61 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=GERD symptoms with self-care response
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=75 red_flags=1 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=sharp chest pain at rest beyond 20 minutes
+  probe-costo-unmatched  expect=green  got=green  PROBE
+       tokens=62 red_flags=0 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-DIFF-001']
+       rationale=CP-PERI-002
+
+distribution (scored cases only): {'red': 2, 'green': 2}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got green (PASS)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+2/4 correct. Discrimination is demonstrated, accuracy is a separate question.
+
+============================================================
+STABILITY ACROSS 2 PASSES, cache_prompt off
+  red-acs                red     red     stable
+  yellow-angina          green   green   stable
+  green-gerd             green   green   stable
+  yellow-pleuritic       red     red     stable
+  probe-costo-unmatched  green   green   stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

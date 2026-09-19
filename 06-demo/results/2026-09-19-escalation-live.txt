@@ -1,0 +1,82 @@
+# PROFILE ESCALATION + CHILD GUARD, live through the demo, 2026-09-19
+# 06-demo/server.py against llama-server, NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf, -ngl 0,
+#   temperature 0.2. POST /api/triage per case, the profile named on each line.
+# escalation.py sha 99cb3fb3, guards.py sha c52a68d5, server.py sha a2c384f9, system_prompt.txt sha 26e4f4ff
+# The server refuses to start unless every rule quote is verbatim in its chunk: it started.
+# Every run is checked for: urgency never lowered, the expected rule fired, and
+# no follow-up questions on a red (constraint 4).
+
+  PASS  A  profile=self       85.2 s  events ['retrieved', 'result']  
+        symptoms   I have felt unusually tired since yesterday and slightly short of breath walking to the gate. No real pain, just a vague heaviness.
+        model said red, shown red   citations ['CP-ACS-003', 'CP-PERI-001']
+        rule R6 flag      fact='female'  symptom="tired", "unusually"  keys=['CP-ACS-003']
+        red_flags ['unable to bear weight since the injury']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Symptoms include unusual tiredness, shortness of breath with activity, and heaviness in the chest, which are key cardiac symptoms. Patient is female, increasing risk for cardiac events. No red flags contradicting but all criteria for cardiac concern present. Cites: CP-ACS-003 (chest pain, heaviness, shortness of breath), CP-PERI-001 (chest pain or severe shortness of breath).", "red_flags": ["unable to bear weight since the injury"], "next_steps": ["Call 9-1-1 immediately for possible cardiac emergency"], "citations": ["CP-ACS-003", "CP-PERI-001"], "follow_up_questions": [] }
+
+  PASS  B  profile=dad        62.7 s  events ['retrieved', 'result']  
+        symptoms   I have felt unusually tired since yesterday and slightly short of breath walking to the gate. No real pain, just a vague heaviness.
+        model said red, shown red   citations ['CP-ACS-003', 'CP-PERI-001']
+        rule R2 supports  fact='age 71'  symptom="tired", described as "slightly"  keys=['CP-ACS-002']
+        red_flags ['shortness of breath when resting', 'rapid or irregular heartbeat', 'unusual tiredness for no reason']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Patient is 71 years old with atrial fibrillation and on apixaban, a known risk for bleeding complications. Symptoms include unusual tiredness and shortness of breath, which are red flags for cardiac events. Rapid progression and risk modifiers from profile and medications increase urgency. Cites: CP-ACS-003 (shortness of breath when resting or doing a little bit of physical activity), CP-PERI-001 (if symptoms get worse, call 9-1-1).", "red_flags": [ "shortness of breath when resting", "rapid or irregular heartbeat", "unusual tiredness for no reason" ], "next_steps": [ "Call 9-1-1 immediately", "Do not wait for symptoms to worsen", "Do not discontinue apixaban without medical advice" ], "citations": [ "CP-ACS-003", "CP-PERI-001" ], "follow_up_questions": [] }
+
+  PASS  C  profile=mum        52.3 s  events ['retrieved', 'result']  
+        symptoms   I get a tight band across my chest when I climb the stairs. It goes after a minute or two of standing still.
+        model said red, shown red   citations ['CP-ACS-005', 'CP-PLEU-001']
+        rule R3 at_least  fact='coronary artery disease'  symptom="tight" with "climb"  keys=['CP-ANG-002']
+        red_flags ['Chest pain not relieved by rest or medication', 'Patient has coronary artery disease']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Chest pain with exertional onset and no relief with rest or medication raises concern for possible heart attack. Patient has coronary artery disease and is on beta blocker (atorvastatin is not a beta blocker, but still relevant). Chest pain is a red flag for cardiac event.", "red_flags": [ "Chest pain not relieved by rest or medication", "Patient has coronary artery disease" ], "next_steps": [ "Call emergency services immediately", "Do not wait for symptoms to resolve" ], "citations": [ "CP-ACS-005", "CP-PLEU-001" ], "follow_up_questions": [] }
+
+  PASS  D  profile=aunt       60.5 s  events ['retrieved', 'result']  
+        symptoms   About two hours ago I got a sudden pain in my chest when I breathe in, and I am more out of breath than usual.
+        model said red, shown red   citations ['CP-DIFF-001', 'CP-ACS-001']
+        rule R4 supports  fact='breast cancer'  symptom="pain" on "breathe"  keys=['CP-PE-004', 'CP-PE-001']
+        red_flags ['Sudden chest pain with shortness of breath', 'Chemotherapy increases cardiovascular risk']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Sudden chest pain with shortness of breath in a 52-year-old female with breast cancer on chemotherapy raises high-risk concern for cardiac or pulmonary emergency. Chemotherapy increases cardiovascular risk and cancer-related complications. Chest pain with dyspnea is a red flag for possible cardiac event or pulmonary embolism.", "red_flags": [ "Sudden chest pain with shortness of breath", "Chemotherapy increases cardiovascular risk" ], "next_steps": [ "Call emergency services immediately", "Do not wait for symptoms to resolve", "Avoid exertion and remain seated if possible" ], "citations": [ "CP-DIFF-001", "CP-ACS-001" ], "follow_up_questions": [ "Any nausea, sweating, or dizziness accompanying the chest pain?", "Has this pain been constant or intermittent?" ] }
+
+  PASS  E  profile=grandpa    58.3 s  events ['retrieved', 'result']  
+        symptoms   Since yesterday my right leg is swollen and sore, and now I get a pain in my chest when I breathe in.
+        model said red, shown red   citations ['CP-PERI-001', 'CP-PE-001']
+        rule R5 supports  fact='hip replacement, 5 weeks ago'  symptom="sore" on "breathe"  keys=['CP-PE-003', 'CP-PE-001']
+        red_flags ['Recent hip replacement surgery']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Chest pain with shortness of breath in a 77-year-old male with recent hip replacement and hypertension is a high-risk presentation. Chest pain with shortness of breath is a red flag for possible pulmonary embolism or cardiac event. Risk modifiers include age, recent surgery, and hypertension. No reassuring features present.", "red_flags": [ "Chest pain with shortness of breath", "Recent hip replacement surgery" ], "next_steps": [ "Call 9-1-1 or seek emergency care immediately", "Do not delay assessment" ], "citations": [ "CP-PERI-001", "CP-PE-001" ], "follow_up_questions": [] }
+
+  PASS  F  profile=maya        0.0 s  events ['refused']  
+        symptoms   She has had a cough and a temperature since last night.
+        refused: This system cannot assess children. Their symptoms can have causes it has no information about, and some of them are urgent. Please contact a doctor or emergency services now rather than relying on this.
+        reason: Maya's profile says age 6. The corpus is written about adults, with no paediatric content beyond one passage on pneumonia in babies.
+
+  PASS  G1  profile=self        0.0 s  events ['confirm_subject']  
+        symptoms   My daughter drove me here. Heavy pressure in my chest for half an hour.
+        confirm_subject: This mentions a child ("My daughter"). If it is about them, choose their profile. If it is about you, continue.
+
+  PASS  G2  profile=self       76.3 s  events ['retrieved', 'result']  
+        symptoms   My daughter drove me here. Heavy pressure in my chest for half an hour.
+        model said red, shown red   citations ['CP-ACS-001', 'CP-ANG-002']
+        no rule fired
+        red_flags ['chest pressure lasting 30 minutes', 'female with no risk modifiers']  follow_ups []
+        raw  { "urgency": "red", "rationale": "Chest pressure lasting 30 minutes with no relief, no mention of nausea, sweating, dizziness, or shortness of breath. Risk factors: female, no medications, no medical history. CP-ACS-001 indicates chest pain can be serious and requires immediate care if persistent. CP-ANG-002 advises calling 9-1-1 for chest pain that does not go away. Risk modifiers: female, no known conditions, no medications.", "red_flags": [ "chest pressure lasting 30 minutes", "female with no risk modifiers" ], "next_steps": [ "Call 9-1-1 immediately", "Do not wait for symptoms to resolve", "Do not drive yourself to the hospital" ], "citations": [ "CP-ACS-001", "CP-ANG-002" ], "follow_up_questions": [] }
+
+0 unexpected
+done
+
+=== CAN A RULE RAISE A VERDICT LIVE? Probed, because every case above came back red from the model
+# Same server and config. One line per run: the model's urgency, the shown urgency, the rules.
+  mum      refused: the model cited nothing, so it had no grounded source to reason from  64s  | A bit of indigestion after lunch, nothing much.
+  mum      model red    shown red    rules [('R1', 'supports')] cites ['CP-PERI-001', 'CP-PERI-002']  59s  | Just a bit of burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.
+  grandpa  model yellow shown red    rules [('R2', 'raised')] cites ['CP-ACS-003', 'CP-PLEU-001', 'CP-PERI-002']  67s  | Bit of a niggle in my chest, honestly it is nothing.
+  grandpa  model red    shown red    rules [('R2', 'supports')] cites ['CP-ACS-003']  25s  | Bit of a niggle in my chest, honestly it is nothing.
+  grandpa  model red    shown red    rules [('R2', 'supports')] cites ['CP-ACS-003', 'CP-PLEU-001', 'CP-PERI-002']  43s  | Bit of a niggle in my chest, honestly it is nothing.
+  -> 1 raise in 3 runs of the Grandpa niggle case (yellow raised to red by R2); the other
+     two the model already said red. Not a reliable demo preset. Mum's 'bit of indigestion'
+     was REFUSED post-flight (nothing cited): the layer leaves refusals alone by design, so R1
+     never ran on it.
+
+=== BROWSER: headless Chrome 153 on the real page, screenshots beside this file
+# The Claude-in-Chrome extension was not connected; Chrome was driven over the DevTools protocol.
+  2026-09-19-escalation-cards.png    the six family cards
+  2026-09-19-escalation-dad.png       RED | Call emergency services now | Dad | Supports this red · age 71 on Dad's profile, with "tired", described as "slightly" | “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.” | CP-ACS-002 | rule R2 | NOT GROUNDED IN SOURCES | This system co
+  2026-09-19-escalation-child.png     NOT ASSESSED | Child profile, no verdict given | Maya | This system cannot assess children. Their symptoms can have causes it has no information about, and some of them are urgent. Please contact a doctor or emergency services now rather than relying on this. | Why: Maya's profile says age 6. The corpus is written about adults, with no paediatric content beyond one passage on pneumonia in babies.
+  2026-09-19-escalation-confirm.png   WHO IS THIS FOR? | No verdict yet | You | This mentions a child ("My daughter"). If it is about them, choose their profile. If it is about you, continue. | Continue as you
+  2026-09-19-escalation-compare.png  A: A · YOU | RED | Call emergency services now | You | Flagged, no change · female on your profile, with "tired", "unusually" | “Feeling unusually tired for no reason, sometimes for days (this is more common in women)” | CP-ACS-003 | rule R6 | WHY | Symptoms of p
+                                     B: B · DAD | RED | Call emergency services now | Dad | Supports this red · age 71 on Dad's profile, with "tired", described as "slightly" | “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.” | CP-ACS-002 | 

@@ -1,0 +1,46 @@
+# REVIEW: nimh-panic
+# Panic Disorder: When Fear Overwhelms
+# National Institute of Mental Health, NIH
+# https://www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms
+# key_prefix: CP-PANIC   expected_category: green
+# role: Second green. Abrupt onset, peaks within minutes, palpitations plus chest pain.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 001 [ok   ] tokens=185 heading=What is panic disorder?
+People with panic disorder have frequent and unexpected panic attacks. These attacks are characterized by a sudden wave of fear or discomfort or a sense of losing control even when there is no clear danger or trigger. Not everyone who experiences a panic attack will develop panic disorder.
+
+Panic attacks often include physical symptoms that might feel like a heart attack, such as trembling or tingling in the body or a rapid heart rate. Panic attacks can occur at any time, sometimes even during sleep. Many people with panic disorder worry about the possibility of having another attack and may significantly change their lives to avoid having another attack. Panic attacks can occur as frequently as several times a day or as rarely as a few times a year.
+
+Panic disorder often begins in the late teens or early adulthood. Women are more likely than men to develop panic disorder. With the right treatment and support, people with panic disorder can manage their symptoms and improve their quality of life.
+
+--- chunk 002 [ok   ] tokens=154 heading=What are the signs and symptoms of panic disorder?
+People with panic disorder may have:
+
+Sudden and repeated panic attacks of overwhelming anxiety and fear
+A feeling of being out of control
+A fear of death or impending doom during a panic attack
+An intense worry about when the next panic attack will happen
+A fear or avoidance of places where panic attacks have occurred in the past
+
+Physical symptoms during a panic attack may include:
+
+Pounding or racing heart
+Sweating
+Chills
+Trembling
+Difficulty breathing
+Weakness or dizziness
+Tingly or numb hands
+Chest pain
+Stomach pain or nausea
+
+A panic attack can last from a few minutes to an hour or sometimes longer. While these feelings can be distressing, panic attacks themselves are not life-threatening, and the physical symptoms usually resolve with time. However, for some, the fear of future attacks may lead to ongoing anxiety.
+
+--- chunk 003 [short] tokens=69 heading=What is the difference between a panic attack and panic disorder?
+A panic attack is a one-time or occasional episode of intense fear with physical and emotional symptoms. An isolated panic attack is not a mental disorder.
+
+Panic disorder may be diagnosed when a person experiences recurrent and unexpected panic attacks, along with ongoing worry or behavioral changes due to the fear of future attacks, often interfering with daily life.

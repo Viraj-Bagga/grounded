@@ -1,0 +1,119 @@
+# excluded_subject probe, offline, 2026-09-18
+# 02-pairs/guards.py sha 3db47fce, after the late-period and paediatric exclusions
+# want/got: PREG = pregnancy refusal, PAED = paediatric refusal, - = not excluded
+# Covers every exclusion fixture, every demo preset with both profiles, all 24
+# calibrate_scope.py queries with the 29F profile, and adult phrasings chosen to
+# over-refuse. The 'info' block is known over-refusal, expected to refuse.
+
+== every exclusion fixture in 02-pairs/guard_fixtures.json ==
+  ok  want=PREG got=PREG  third-trimester reflux, the P0051  pregnancy or a late or missed period ("pregnancy") with a chest or abdominal symptom ("heartbur
+  ok  want=PREG got=PREG  pre-eclampsia shaped, scores 0.416 pregnancy or a late or missed period ("34 weeks pregnant") with a chest or abdominal symptom ("
+  ok  want=-    got=-     pregnancy with a non-chest symptom 
+  ok  want=-    got=-     ordinary reflux is untouched       
+  ok  want=PREG got=PREG  KNOWN OVER-REFUSAL: someone else's pregnancy or a late or missed period ("pregnant") with a chest or abdominal symptom ("chest"), 
+  ok  want=PREG got=PREG  the founding ectopic case, missed  pregnancy or a late or missed period ("period is late") with a chest or abdominal symptom ("sto
+  ok  want=PREG got=PREG  'missed my period' with one-sided  pregnancy or a late or missed period ("missed my period") with a chest or abdominal symptom ("b
+  ok  want=PREG got=PREG  a contraction and a one-word stoma pregnancy or a late or missed period ("period's late") with a chest or abdominal symptom ("stom
+  ok  want=-    got=-     a late period with a non-abdominal 
+  ok  want=-    got=-     'period' on its own is not a pregn 
+  ok  want=-    got=-     the demo preset whose timeline say 
+  ok  want=PAED got=PAED  the toddler case, TRIAGED red with a child ("toddler") with a symptom ("fever"), and the corpus has no paediatric content beyond o
+  ok  want=PAED got=PAED  an age under 16 with no child noun a child ("4-year-old") with a symptom ("chest"), and the corpus has no paediatric content beyon
+  ok  want=PAED got=PAED  my son                             a child ("My son") with a symptom ("cough"), and the corpus has no paediatric content beyond on
+  ok  want=PAED got=PAED  an infant age in weeks             a child ("6 weeks old") with a symptom ("not feeding"), and the corpus has no paediatric conten
+  ok  want=PAED got=PAED  a spelled-out age                  a child ("two year old") with a symptom ("coughing"), and the corpus has no paediatric content 
+  ok  want=PAED got=PAED  a structured profile age under 16  a child ("age: 9") with a symptom ("chest"), and the corpus has no paediatric content beyond on
+  ok  want=PAED got=PAED  boundary: 15 is a child            a child ("15 years old") with a symptom ("pain"), and the corpus has no paediatric content beyo
+  ok  want=-    got=-     boundary: 16 is not                
+  ok  want=-    got=-     a compound adult age is not read a 
+  ok  want=-    got=-     baby aspirin is not a baby         
+  ok  want=-    got=-     a son-in-law is not a child        
+  ok  want=-    got=-     the Dad profile and the beat 1 pre 
+  ok  want=PAED got=PAED  KNOWN OVER-REFUSAL: an adult's chi a child ("My daughter") with a symptom ("chest"), and the corpus has no paediatric content beyo
+  ok  want=PAED got=PAED  KNOWN OVER-REFUSAL: an adult's own a child ("12 years old") with a symptom ("chest"), and the corpus has no paediatric content bey
+== new targets: pregnancy ==
+  ok  want=PREG got=PREG  ectopic, demo shape                pregnancy or a late or missed period ("period is late") with a chest or abdominal symptom ("sto
+  ok  want=PREG got=PREG  ectopic, bare                      pregnancy or a late or missed period ("period is late") with a chest or abdominal symptom ("sto
+  ok  want=PREG got=PREG  missed my period + belly           pregnancy or a late or missed period ("missed my period") with a chest or abdominal symptom ("b
+  ok  want=PREG got=PREG  missed period + pelvic             pregnancy or a late or missed period ("Missed period") with a chest or abdominal symptom ("pelv
+  ok  want=PREG got=PREG  missed two periods + tummy         pregnancy or a late or missed period ("missed two periods") with a chest or abdominal symptom (
+  ok  want=PREG got=PREG  period is 5 days late + abdo       pregnancy or a late or missed period ("period is 5 days late") with a chest or abdominal sympto
+  ok  want=PREG got=PREG  period's late + stomachache        pregnancy or a late or missed period ("period's late") with a chest or abdominal symptom ("stom
+  ok  want=PREG got=PREG  late period + chest                pregnancy or a late or missed period ("Late period") with a chest or abdominal symptom ("chest"
+  ok  want=PREG got=PREG  pregnant + lower abdo (newly refused) pregnancy or a late or missed period ("12 weeks pregnant") with a chest or abdominal symptom ("
+== new targets: paediatric ==
+  ok  want=PAED got=PAED  toddler, demo shape                a child ("toddler") with a symptom ("fever"), and the corpus has no paediatric content beyond o
+  ok  want=PAED got=PAED  4-year-old chest                   a child ("4-year-old") with a symptom ("chest"), and the corpus has no paediatric content beyon
+  ok  want=PAED got=PAED  two year old cough                 a child ("two year old") with a symptom ("coughing"), and the corpus has no paediatric content 
+  ok  want=PAED got=PAED  6 weeks old not feeding            a child ("6 weeks old") with a symptom ("not feeding"), and the corpus has no paediatric conten
+  ok  want=PAED got=PAED  my son wheeze                      a child ("My son") with a symptom ("cough"), and the corpus has no paediatric content beyond on
+  ok  want=PAED got=PAED  my daughter fell                   a child ("My daughter") with a symptom ("fell"), and the corpus has no paediatric content beyon
+  ok  want=PAED got=PAED  15 years old boundary              a child ("15 years old") with a symptom ("pain"), and the corpus has no paediatric content beyo
+  ok  want=PAED got=PAED  fifteen-year-old                   a child ("fifteen-year-old") with a symptom ("tight"), and the corpus has no paediatric content
+  ok  want=PAED got=PAED  profile age: 9                     a child ("age: 9") with a symptom ("chest"), and the corpus has no paediatric content beyond on
+  ok  want=PAED got=PAED  baby hot                           a child ("baby") with a symptom ("crying"), and the corpus has no paediatric content beyond one
+  ok  want=PAED got=PAED  our little girl                    a child ("Our little girl") with a symptom ("rash"), and the corpus has no paediatric content b
+  ok  want=PAED got=PAED  newborn yellow                     a child ("Newborn") with a symptom ("yellow"), and the corpus has no paediatric content beyond 
+  ok  want=PAED got=PAED  my kid vomiting                    a child ("kid") with a symptom ("throwing up"), and the corpus has no paediatric content beyond
+  ok  want=PAED got=PAED  grandson fever                     a child ("My grandson") with a symptom ("fever"), and the corpus has no paediatric content beyo
+  ok  want=PAED got=PAED  8yo                                a child ("8yo") with a symptom ("chest"), and the corpus has no paediatric content beyond one p
+  ok  want=PAED got=PAED  a month old                        a child ("a month old") with a symptom ("floppy"), and the corpus has no paediatric content bey
+  ok  want=PAED got=PAED  not himself                        a child ("age: 3") with a symptom ("not himself"), and the corpus has no paediatric content bey
+== must NOT be excluded: demo presets x both profiles ==
+  ok  want=-    got=-     preset 1 / self                    
+  ok  want=-    got=-     preset 1 / dad                     
+  ok  want=-    got=-     preset 2 / self                    
+  ok  want=-    got=-     preset 2 / dad                     
+  ok  want=-    got=-     preset 3 / self                    
+  ok  want=-    got=-     preset 3 / dad                     
+  ok  want=-    got=-     preset 4 / self                    
+  ok  want=-    got=-     preset 4 / dad                     
+== calibration queries (self profile) ==
+  ok  want=-    got=-     IN  original worst, kept for conti 
+  ok  want=-    got=-     IN  the live refusal that started  
+  ok  want=-    got=-     IN  the classic idiom              
+  ok  want=-    got=-     IN  exertional, colloquial         
+  ok  want=-    got=-     IN  squeezing plus autonomic       
+  ok  want=-    got=-     IN  radiation, no 'chest' framing  
+  ok  want=-    got=-     IN  reflux idiom, the GERD side    
+  ok  want=-    got=-     IN  vague, which is how people act 
+  ok  want=-    got=-     IN  pleuritic, colloquial          
+  ok  want=-    got=-     IN  musculoskeletal, the green sid 
+  ok  want=-    got=-     IN  woke with it                   
+  ok  want=-    got=-     IN  panic side                     
+  ok  want=PAED got=PAED  OUT original best out-of-scope     a child ("toddler") with a symptom ("fever"), and the corpus has no paediatric content beyond o
+  ok  want=-    got=-     OUT ankle                          
+  ok  want=-    got=-     OUT headache                       
+  ok  want=-    got=-     OUT knee                           
+  ok  want=-    got=-     OUT rash                           
+  ok  want=-    got=-     OUT mental health                  
+  ok  want=-    got=-     OUT dental                         
+  ok  want=-    got=-     OUT urinary                        
+  ok  want=-    got=-     OUT gastro                         
+  ok  want=-    got=-     OUT eye                            
+  ok  want=-    got=-     OUT wrist                          
+  ok  want=-    got=-     OUT ENT, the near miss             
+== adult phrasings that must NOT be excluded ==
+  ok  want=-    got=-     twenty-five years old              
+  ok  want=-    got=-     a 58-year-old                      
+  ok  want=-    got=-     16 years old boundary              
+  ok  want=-    got=-     baby aspirin                       
+  ok  want=-    got=-     son-in-law                         
+  ok  want=-    got=-     boyfriend                          
+  ok  want=-    got=-     short period                       
+  ok  want=-    got=-     late at night                      
+  ok  want=-    got=-     period late + ankle                
+  ok  want=-    got=-     kidney                             
+  ok  want=-    got=-     for 3 years                        
+  ok  want=-    got=-     age: 45 profile                    
+== KNOWN over-refusal shapes (informational, expected to refuse) ==
+  info  got=PAED  daughter drove me (spec)           a child ("My daughter") with a symptom ("chest"), and the corpus has no paediatric content beyo
+  info  got=PAED  son is 40 (spec)                   a child ("My son") with a symptom ("chest"), and the corpus has no paediatric content beyond on
+  info  got=PAED  since I was 12 years old           a child ("12 years old") with a symptom ("chest"), and the corpus has no paediatric content bey
+  info  got=PAED  I have two kids                    a child ("kids") with a symptom ("chest"), and the corpus has no paediatric content beyond one 
+  info  got=PREG  period is not late                 pregnancy or a late or missed period ("period is not late") with a chest or abdominal symptom (
+  info  got=PREG  not pregnant (pre-existing)        pregnancy or a late or missed period ("pregnant") with a chest or abdominal symptom ("chest"), 
+  info  got=PREG  expecting it to (pre-existing)     pregnancy or a late or missed period ("expecting") with a chest or abdominal symptom ("chest"),
+  info  got=PAED  had a baby 3 weeks ago             a child ("baby") with a symptom ("breath"), and the corpus has no paediatric content beyond one
+
+0 unexpected

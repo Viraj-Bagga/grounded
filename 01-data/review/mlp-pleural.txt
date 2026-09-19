@@ -1,0 +1,21 @@
+# REVIEW: mlp-pleural
+# Pleural Disorders (health topic summary)
+# MedlinePlus, National Library of Medicine
+# https://medlineplus.gov/pleuraldisorders.html
+# key_prefix: CP-PLEU   expected_category: yellow
+# role: Fourth yellow. Pleurisy as sharp pain with breathing, the other half of the pleuritic vocabulary. Thinner than the NHLBI pages; may yield only one chunk.
+#
+# Delete any chunk that is navigation, boilerplate, or clinically useless.
+# Merge or split by hand where the boundary is wrong. A red-flag list must
+# never be split across two chunks: the citation breaks if it is.
+# Chunks marked OVER must be cut down. They are not truncated for you.
+#
+--- chunk 001 [ok   ] tokens=156 heading=(intro)
+Your pleura is a large, thin sheet of tissue that wraps around the outside of your lungs and lines the inside of your chest cavity. Between the layers of the pleura is a very thin space. Normally it's filled with a small amount of fluid. The fluid helps the two layers of the pleura glide smoothly past each other as your lungs breathe air in and out.
+
+Disorders of the pleura include:
+
+Pleurisy - inflammation of the pleura that causes sharp pain with breathing
+Pleural effusion - excess fluid in the pleural space
+Pneumothorax - buildup of air or gas in the pleural space
+Hemothorax - buildup of blood in the pleural space

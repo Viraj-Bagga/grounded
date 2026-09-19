@@ -1,0 +1,176 @@
+# REASONING OFF, as shipped. 2 passes per mode, baseline system prompt
+# NOTE: reasoning matches what ships, the prompt does not. This is still the harness's
+# own format 2, not the format 3 prompt in 02-pairs/pair_format.py that the app sends.
+# See 2026-09-17-format3-probe.txt.
+# run 2026-09-17T17:51:58Z, macOS 27.0 (26A428), llama.cpp build 10809, cache_prompt=false, enable_thinking=false
+# fresh server per mode; the 2 passes within a mode share one server
+
+############ MATCHED
+mode: matched, reasoning off, pass 1/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=Coronary artery disease
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=72 red_flags=0 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=sharp chest pain with pleuritic component, pleuritic pain, pleuritic pain
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=79 red_flags=1 reasoning_chars=0
+       citations=['CP-PLEU-001', 'CP-PERI-002']
+       rationale=sharp pain on left chest, worse with pressing and deep breathing
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+mode: matched, reasoning off, pass 2/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       rationale=Coronary artery disease
+  green-gerd             expect=green  got=red    FAIL
+       tokens=57 red_flags=0 reasoning_chars=0
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       rationale=chest pain
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=72 red_flags=0 reasoning_chars=0
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       rationale=sharp chest pain with pleuritic component, pleuritic pain, pleuritic pain
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=79 red_flags=1 reasoning_chars=0
+       citations=['CP-PLEU-001', 'CP-PERI-002']
+       rationale=sharp pain on left chest, worse with pressing and deep breathing
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+Next: re-run with --chunks red-only. If that changes nothing, the
+problem is the model or the prompt. If matched discriminates and
+red-only does not, the problem is corpus balance.
+
+============================================================
+STABILITY ACROSS 2 PASSES, cache_prompt off
+  red-acs                red     red     stable
+  yellow-angina          red     red     stable
+  green-gerd             red     red     stable
+  yellow-pleuritic       red     red     stable
+  probe-costo-unmatched  red     red     stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.
+
+############ RED-ONLY  (started 2026-09-17T17:57:27Z)
+mode: red-only, reasoning off, pass 1/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=68 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  green-gerd             expect=green  got=red    FAIL
+       tokens=62 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       rationale=burning behind breastbone beyond 20 minutes
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=62 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=60 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+
+mode: red-only, reasoning off, pass 2/2
+
+  red-acs                expect=red    got=red    PASS
+       tokens=80 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=68 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       rationale=CP-ACS-001
+  green-gerd             expect=green  got=red    FAIL
+       tokens=62 red_flags=0 reasoning_chars=0
+       citations=['CP-ACS-001', 'CP-ACS-003']
+       rationale=burning behind breastbone beyond 20 minutes
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=62 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=60 red_flags=1 reasoning_chars=0
+       citations=['CP-ACS-001']
+       rationale=CP-ACS-001
+
+distribution (scored cases only): {'red': 4}
+invented citation keys across all cases: 0
+follow_up_questions non-empty on a red: none
+
+--- unmatched-evidence probe, NOT scored ---
+  probe-costo-unmatched: expected green, got red (FAIL)
+    No chunk in the corpus describes this condition. Chunks supplied
+    were loosely relevant only. Invented keys: none
+
+EVERY CASE RETURNED RED. The model is not discriminating.
+
+============================================================
+STABILITY ACROSS 2 PASSES, cache_prompt off
+  red-acs                red     red     stable
+  yellow-angina          red     red     stable
+  green-gerd             red     red     stable
+  yellow-pleuritic       red     red     stable
+  probe-costo-unmatched  red     red     stable
+
+Every verdict identical on every pass. Results from this harness are now reproducible,
+and the earlier warm-versus-cold divergence is attributed to prefix-cache state.
+
+Real-world IITT distribution is roughly 7% red / 34% yellow / 59% green (PNG validation study). An eval set that is mostly red does not resemble use.

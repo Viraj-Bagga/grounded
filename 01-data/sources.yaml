@@ -1,0 +1,239 @@
+# Epic 1 source manifest.
+# One entry per source document. `key_prefix` drives citation key generation.
+# license_status: green = public domain, verified. amber = usable with conditions. red = do not ship.
+#
+# Verified 2026-09-15. Re-check before ship.
+
+topic: chest_pain
+topic_note: >
+  Chosen first because it is one presenting complaint whose differential spans all three
+  triage categories. Sourcing it yields a red/yellow/green eval triad out of one vocabulary.
+
+sources:
+
+  - id: mlp-chestpain
+    key_prefix: CP-DIFF
+    title: "Chest Pain (health topic summary)"
+    publisher: "MedlinePlus, National Library of Medicine"
+    url: https://medlineplus.gov/chestpain.html
+    license_status: green
+    license_note: "MedlinePlus health topic page summaries are public domain (US government work)."
+    attribution: "Source: MedlinePlus, National Library of Medicine"
+    # Deliberately uncategorised, not an omission. This is the differential
+    # itself and spans red, yellow and green, so forcing one category would be
+    # wrong. CP-DIFF-001 is frozen with this empty on purpose. Do not "fix" it.
+    expected_category: null
+    role: "Supplies the differential itself and the top-level red flag line."
+    selectors: ["#topic-summary", "div.main-content"]
+
+  - id: nhlbi-ha-symptoms
+    key_prefix: CP-ACS
+    title: "Heart Attack - Symptoms"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/heart-attack/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "Primary red source. Carries the angina-vs-MI discriminator."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-chd-symptoms
+    key_prefix: CP-ANG
+    title: "Coronary Heart Disease - Symptoms"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/coronary-heart-disease/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Primary yellow source. Exertional, resolves on rest."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-angina
+    key_prefix: CP-ANG
+    title: "Angina"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/angina
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Stable vs unstable angina. The unstable variant may need its own red key."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-vte
+    key_prefix: CP-PE
+    title: "Venous Thromboembolism"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/venous-thromboembolism/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "Second red. Pleuritic pain plus dyspnoea, distinct from ACS vocabulary."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-vte-causes
+    key_prefix: CP-PE
+    title: "Venous Thromboembolism"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: red
+    role: "Risk factors for VTE. Shares CP-PE with the symptoms page; keys continue the same series."
+    selectors: ["main", "#main-content"]
+
+  - id: nhlbi-pneumonia
+    key_prefix: CP-PNA
+    title: "Pneumonia"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/pneumonia/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Second yellow. Fever plus cough differentiates it."
+    selectors: ["main", "#main-content"]
+
+  - id: niddk-gerd
+    key_prefix: CP-GERD
+    title: "Acid Reflux (GER & GERD) in Adults - Symptoms & Causes"
+    publisher: "National Institute of Diabetes and Digestive and Kidney Diseases, NIH"
+    url: https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-adults/symptoms-causes
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NIDDK, National Institutes of Health"
+    expected_category: green
+    role: "Primary green. Burning, post-prandial, positional. The classic ACS mimic."
+    selectors: ["main", "#main-content"]
+
+  - id: nimh-panic
+    key_prefix: CP-PANIC
+    title: "Panic Disorder: When Fear Overwhelms"
+    publisher: "National Institute of Mental Health, NIH"
+    url: https://www.nimh.nih.gov/health/publications/panic-disorder-when-fear-overwhelms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NIMH, National Institutes of Health"
+    expected_category: green
+    role: "Second green. Abrupt onset, peaks within minutes, palpitations plus chest pain."
+    selectors: ["main", "#main-content"]
+
+
+  - id: nhlbi-pericarditis
+    key_prefix: CP-PERI
+    title: "Heart Inflammation"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    # NHLBI has no standalone pericarditis topic. It is covered under Heart
+    # Inflammation, alongside myocarditis and endocarditis. /health/pericarditis
+    # 404s; /health-topics/pericarditis redirects here.
+    url: https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+    license_status: green
+    license_note: "US government work."
+    attribution: "Source: NHLBI, National Institutes of Health"
+    expected_category: yellow
+    role: "Third yellow, and the first real negative discriminator in the corpus. Carries: chest pain that is sharp, worse with breathing, and better sitting up and leaning forward. Partly closes the NEG-DISC gap below."
+    selectors: ["main", "#main-content"]
+
+  - id: mlp-pleural
+    key_prefix: CP-PLEU
+    title: "Pleural Disorders (health topic summary)"
+    publisher: "MedlinePlus, National Library of Medicine"
+    # NHLBI has no pleurisy topic either; /health/pleurisy 404s. MedlinePlus
+    # carries it as a health topic page summary, which is the cleared class.
+    # Topic summary only, NOT /ency/.
+    url: https://medlineplus.gov/pleuraldisorders.html
+    license_status: green
+    license_note: "MedlinePlus health topic page summaries are public domain (US government work)."
+    attribution: "Source: MedlinePlus, National Library of Medicine"
+    expected_category: yellow
+    role: "Fourth yellow. Pleurisy as sharp pain with breathing, the other half of the pleuritic vocabulary. Thinner than the NHLBI pages; may yield only one chunk."
+    selectors: ["#topic-summary", "div.main-content"]
+
+  - id: cdc-acute-bronchitis
+    key_prefix: CP-BRONCH
+    title: "Chest Cold (Acute Bronchitis) Basics"
+    publisher: "Centers for Disease Control and Prevention"
+    url: https://www.cdc.gov/acute-bronchitis/about/index.html
+    license_status: green
+    license_note: >
+      US government work, public domain. CDC is in the cleared publisher set.
+      Checked 2026-09-17 against cdc.gov/other/agencymaterials.html, which puts
+      four conditions on reuse of CDC public domain content: attribution to
+      CDC; a prominent disclaimer that the use does not imply endorsement by
+      CDC, HHS or the US Government; no change to substantive content; and a
+      statement that the material is available free on the agency website.
+      The page carries no copyright statement. Its two images are not shipped.
+    attribution: "Source: Centers for Disease Control and Prevention"
+    expected_category: green
+    role: >
+      Third green condition. Green has only had two, GERD and panic, so green
+      pairs were repeating two presentations. Sits directly against CP-PNA in
+      yellow with shared vocabulary, cough and chest discomfort, which is the
+      same design logic that made chest pain the right first topic. Carries its
+      own escalation criteria in a "When to seek medical care" section, which is
+      the CP-GERD-002 shape that only one chunk in the corpus currently has.
+    # NOTE: cdc.gov is behind Akamai and 403s a bare User-Agent. build_corpus.py
+    # now sends the Sec-Fetch-* header set, which returns 200. A re-fetch with an
+    # older copy of the fetcher will fail on this source and only this source.
+    selectors: ["main.cdc-main", "main", "#content"]
+
+# ---------------------------------------------------------------------------
+# GAPS. These have no confirmed public-domain source yet.
+# ---------------------------------------------------------------------------
+gaps:
+  - key_prefix: CP-COSTO
+    condition: "Costochondritis / musculoskeletal chest wall pain"
+    expected_category: green
+    problem: >
+      Thinly covered by US government health sites, which concentrate on conditions
+      that kill people. This is the same side of the differential the model has zero
+      evidence on. Needs deliberate effort rather than being picked up for free.
+    # 2026-09-15: leads 1 and 2 are now DISPROVEN, do not re-chase them.
+    #   medlineplus.gov/costochondritis.html          404, no such topic page
+    #   niams.nih.gov/health-topics/costochondritis   404, no such topic
+    # The only good costochondritis text is medlineplus.gov/ency/article/000164.htm,
+    # which is A.D.A.M. and excluded below. This gap may simply not be closable
+    # from the cleared publisher set.
+    # medlineplus.gov/chestinjuriesanddisorders.html DOES resolve and does name
+    # costochondritis, but its summary is anatomy and definition, which is the
+    # delete side of the review rule. Checked, not merely assumed.
+    candidate_leads:
+      - "MedlinePlus chest pain summary names costochondritis but does not describe it"
+      - "VA/DoD clinical practice guidelines, US government work, not yet checked"
+      - "CDC clinician-facing musculoskeletal guidance, not yet checked"
+
+  - key_prefix: NEG-DISC
+    condition: "Negative discriminators: palpation-reproducible pain only"
+    expected_category: null
+    # NARROWED 2026-09-15. Positional and worse-on-inspiration are now covered.
+    # CP-PERI-002 carries "chest pain that feels sharp, gets worse with
+    # breathing, and feels better with sitting up and leaning forward", which is
+    # three discriminators in one line, and CP-PLEU-001 adds "sharp pain with
+    # breathing". What remains missing is chest wall tenderness.
+    problem: >
+      Nothing in the current source set states that pain reproducible on
+      palpation, that is chest wall tenderness on pressing, argues against a
+      cardiac cause. Positional and inspiration-dependent pain are now covered
+      by CP-PERI-002 and CP-PLEU-001. Palpation is the remaining hole, and it
+      overlaps the CP-COSTO gap above, so one good musculoskeletal source would
+      likely close both.
+    candidate_leads:
+      - "VA/DoD clinical practice guidelines (US government work, clinician-facing)"
+      - "CDC clinician guidance pages"
+
+# ---------------------------------------------------------------------------
+# EXCLUDED. Do not add these back without re-reading the licence.
+# ---------------------------------------------------------------------------
+excluded:
+  - source: "MedlinePlus Medical Encyclopedia (medlineplus.gov/ency/...)"
+    reason: "A.D.A.M. content, licensed to NLM for MedlinePlus use only. Copyrighted."
+  - source: "StatPearls"
+    reason: "CC BY-NC-ND 4.0. ND forbids derivatives; chunking is a derivative. NC conflicts with the Seed Round pitch."
+  - source: "Schmitt-Thompson Clinical Content protocols"
+    reason: "Commercially licensed, including to developers building RAG triage. Approach is usable, text is not."
+  - source: "American Heart Association, Mayo Clinic, Merck Manuals, UpToDate, WebMD"
+    reason: "Copyrighted. Note that MedlinePlus links out to AHA and Mayo; a .gov URL does not make the target public domain."

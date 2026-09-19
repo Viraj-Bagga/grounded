@@ -1,0 +1,89 @@
+# FORMAT 3, RULE 7 NOW CONDITIONAL. 2 passes, matched chunks, reasoning off,
+# temperature 0.0, cache_prompt off, fresh server.
+#
+# Change set C, on top of A (grounding first line + rules 7/8) and B (rule 3).
+# WHY. Change set A's rule 7 demanded a discriminating qualifier on every
+# red_flags entry. The nearest source of discriminating phrases is the
+# retrieved chunk, so a formatting rule manufactured a content fabrication:
+# yellow-angina came back red_flags ['chest tightness that does not go away']
+# for a case whose timeline says 'T+0:06 tightness resolved completely'.
+# CP-ANG-001 supplies that exact phrase as a CRITERION. Rule 7 is now
+# conditional: qualify only when the case text supplies the qualifier, never
+# from RETRIEVED CONTEXT, and a bare finding is correct when the case gives
+# no qualifier.
+#
+# system_prompt.txt sha256 871748eaada02a33c01bd88e8c07fd0a29aeb907d1f2163dfa0cdd8a2248eeaf
+#   change set B  ca631a3dedc8eb9a3aa71ce8eaffd1b19524fc17dd6f678b4c24c0e279b9400a
+#   change set A  2427e6230e688197623e5f3db74159b8911c8a718a6355a3641bad6d005089ab
+#   pre-fix       dafa139cb2136c568081acf05a187dc572cd990aa87beca46f3c1ddc5d25645e
+# run 2026-09-17T19:04:17Z, macOS 27.0 (26A428), llama.cpp build 10809 commit 5266f24da
+
+############ RULE7-CONDITIONAL pass 1/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=127 reasoning_chars=0 red_flags=['Chest pressure with radiation to jaw and sweating for 30 minutes']
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. High blood pressure and statin use are risk modifiers. No red flag qualifiers needed as findings are discriminating. Risk factors from profile increase urgency.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to the hospital']
+       citations=[]
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=148 reasoning_chars=0 red_flags=['Chest tightness during exertion with known CAD']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and symptoms indicate high risk. Cites: CP-ANG-001, CP-ANG-002'
+       next_steps=['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=[]
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=203 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms of GERD (burning chest, sour taste, worse when lying down) are consistent with reflux. No red flags present. Risk modifiers: no cardiac history, no medications. No contraindications. Symptoms began 40 minutes after a meal, suggesting postprandial reflux. No progression to severe pain or alarm features.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as needed', 'Avoid large meals and lying down for 2 hours after eating', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=[]
+       follow_up_questions=['Any vomiting or difficulty swallowing since the onset?', 'Any chest pain radiating to the arm or jaw?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=173 reasoning_chars=0 red_flags=['Sharp chest pain worse with deep breathing', 'Rapid progression from onset to worse with breathing']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over time. No risk modifiers from profile or medications. Rapid progression from onset to worse with breathing is a red flag. No reassuring features. No red flags present and no risk modifiers from profile or medications.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change', 'Do not attempt to drive yourself']
+       citations=[]
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=159 reasoning_chars=0 red_flags=['Sharp chest pain with deep breath', 'No relief with sitting up or leaning forward']
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags from profile or medications. Risk modifiers: no medical history, no anticoagulants, beta blockers, or immunosuppressants. Acute onset, worsening with breathing, and persistent pain for 2 hours. High risk for pleurisy, pneumothorax, or pulmonary embolism.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change']
+       citations=[]
+       follow_up_questions=[]
+
+############ RULE7-CONDITIONAL pass 2/2
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=127 reasoning_chars=0 red_flags=['Chest pressure with radiation to jaw and sweating for 30 minutes']
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for 30 minutes. High blood pressure and statin use are risk modifiers. No red flag qualifiers needed as findings are discriminating. Risk factors from profile increase urgency.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to the hospital']
+       citations=[]
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=148 reasoning_chars=0 red_flags=['Chest tightness during exertion with known CAD']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Risk modifiers from profile and symptoms indicate high risk. Cites: CP-ANG-001, CP-ANG-002'
+       next_steps=['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=[]
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=203 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms of GERD (burning chest, sour taste, worse when lying down) are consistent with reflux. No red flags present. Risk modifiers: no cardiac history, no medications. No contraindications. Symptoms began 40 minutes after a meal, suggesting postprandial reflux. No progression to severe pain or alarm features.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as needed', 'Avoid large meals and lying down for 2 hours after eating', 'Seek medical attention if symptoms persist beyond 24 hours, worsen, or if vomiting blood or black tarry stools occur']
+       citations=[]
+       follow_up_questions=['Any vomiting or difficulty swallowing since the onset?', 'Any chest pain radiating to the arm or jaw?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=173 reasoning_chars=0 red_flags=['Sharp chest pain worse with deep breathing', 'Rapid progression from onset to worse with breathing']
+       rationale='Sharp chest pain with pleuritic pattern (worse with deep breathing, better with sitting forward) is a red flag for pleuritic pain. Rapid onset at rest and unchanged over time. No risk modifiers from profile or medications. Rapid progression from onset to worse with breathing is a red flag. No reassuring features. No red flags present and no risk modifiers from profile or medications.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change', 'Do not attempt to drive yourself']
+       citations=[]
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=159 reasoning_chars=0 red_flags=['Sharp chest pain with deep breath', 'No relief with sitting up or leaning forward']
+       rationale='Sharp chest pain with pleuritic component (worsens with deep breath) and no relief with sitting up or leaning forward. No red flags from profile or medications. Risk modifiers: no medical history, no anticoagulants, beta blockers, or immunosuppressants. Acute onset, worsening with breathing, and persistent pain for 2 hours. High risk for pleurisy, pneumothorax, or pulmonary embolism.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change']
+       citations=[]
+       follow_up_questions=[]
+
+# END rule7 run 2026-09-17T19:13:06Z

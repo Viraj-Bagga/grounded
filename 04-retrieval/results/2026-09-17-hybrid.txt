@@ -1,0 +1,78 @@
+# EPIC 4 HYBRID RETRIEVAL, BM25 + vector blend, 2026-09-17
+# query = symptom + timeline. No corpus change: BM25 is computed from the
+# chunk text already in corpus.db. Nothing re-chunked, re-frozen or re-keyed.
+# Both scores min-max normalized per query so alpha is a real mixing weight.
+
+############ alpha 0.5, the principled default
+HYBRID SMOKE TEST, top-3, alpha=0.5 (blend), query = symptom+timeline
+
++- red-acs                PARTIAL, 1/3
+     expected : ['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+     returned : ['CP-ACS-003', 'CP-DIFF-001', 'CP-PERI-002']
+       * CP-ACS-003       blend=0.973 cos=0.584 bm25=13.68   162 tok  [red]
+         CP-DIFF-001      blend=0.891 cos=0.547 bm25=12.18   147 tok  [uncategorised]
+         CP-PERI-002      blend=0.851 cos=0.620 bm25= 9.60    25 tok  [yellow]
+     retrieved 334 tokens, about 10.8 s of prompt eval
+
+++ yellow-angina          ALL EXPECTED RETURNED
+     expected : ['CP-ANG-001', 'CP-ANG-002']
+     returned : ['CP-ANG-002', 'CP-ANG-001', 'CP-PERI-001']
+       * CP-ANG-002       blend=0.831 cos=0.340 bm25= 9.03   231 tok  [yellow]
+       * CP-ANG-001       blend=0.716 cos=0.350 bm25= 6.74   187 tok  [yellow]
+         CP-PERI-001      blend=0.587 cos=0.366 bm25= 4.08   136 tok  [yellow]
+     retrieved 554 tokens, about 17.9 s of prompt eval
+
++- green-gerd             PARTIAL, 1/2
+     expected : ['CP-GERD-001', 'CP-GERD-002']
+     returned : ['CP-GERD-001', 'CP-PERI-002', 'CP-ACS-005']
+       * CP-GERD-001      blend=1.000 cos=0.557 bm25=20.86   216 tok  [green]
+         CP-PERI-002      blend=0.570 cos=0.358 bm25= 9.98    25 tok  [yellow]
+         CP-ACS-005       blend=0.471 cos=0.236 bm25=10.16    85 tok  [red]
+     retrieved 326 tokens, about 10.5 s of prompt eval
+
++- yellow-pleuritic       PARTIAL, 1/2
+     expected : ['CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-PERI-002', 'CP-ANG-001', 'CP-PERI-001']
+       * CP-PERI-002      blend=1.000 cos=0.769 bm25=29.74    25 tok  [yellow]
+         CP-ANG-001       blend=0.563 cos=0.620 bm25= 9.82   187 tok  [yellow]
+         CP-PERI-001      blend=0.520 cos=0.574 bm25= 9.21   136 tok  [yellow]
+     retrieved 348 tokens, about 11.2 s of prompt eval
+
++- probe-costo-unmatched  PARTIAL, 1/3  (PROBE)
+     expected : ['CP-DIFF-001', 'CP-PERI-002', 'CP-PLEU-001']
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-PERI-001']
+       * CP-PERI-002      blend=0.992 cos=0.693 bm25=14.55    25 tok  [yellow]
+         CP-ACS-003       blend=0.871 cos=0.574 bm25=13.54   162 tok  [red]
+         CP-PERI-001      blend=0.760 cos=0.564 bm25=10.52   136 tok  [yellow]
+     retrieved 323 tokens, about 10.4 s of prompt eval
+
+==================================================================
+all-expected 1   partial 4   none 0
+distinct chunks across the 5 cases: 8 of 22
+  ['CP-ACS-003', 'CP-ACS-005', 'CP-ANG-001', 'CP-ANG-002', 'CP-DIFF-001', 'CP-GERD-001', 'CP-PERI-001', 'CP-PERI-002']
+CP-ACS-001 or CP-ACS-002 on red-acs: NEITHER
+total retrieved 1885 tokens, mean 377 per case, about 12.2 s of prompt eval per case
+
+############ diagnostic sweep, NOT a weight selection
+DIAGNOSTIC SWEEP, not a weight selection. query = symptom+timeline
+
+ alpha  expected found  distinct chunks   ACS-001/002 on red-acs   tokens
+  0.00       7/12                     9                  neither     2060
+  0.25       7/12                     9                  neither     2060
+  0.50       6/12                     8                  neither     1885
+  0.75       8/12                     7                  neither     1782
+  1.00       7/12                     7                  neither     1712
+
+############ pure BM25 for reference
+     returned : ['CP-PERI-002', 'CP-ACS-003', 'CP-PERI-001']
+       * CP-PERI-002      blend=1.000 cos=0.693 bm25=14.55    25 tok  [yellow]
+         CP-ACS-003       blend=0.930 cos=0.574 bm25=13.54   162 tok  [red]
+         CP-PERI-001      blend=0.723 cos=0.564 bm25=10.52   136 tok  [yellow]
+     retrieved 323 tokens, about 10.4 s of prompt eval
+
+==================================================================
+all-expected 2   partial 3   none 0
+distinct chunks across the 5 cases: 9 of 22
+  ['CP-ACS-003', 'CP-ACS-005', 'CP-ANG-001', 'CP-ANG-002', 'CP-DIFF-001', 'CP-GERD-001', 'CP-PERI-001', 'CP-PERI-002', 'CP-PLEU-001']
+CP-ACS-001 or CP-ACS-002 on red-acs: NEITHER
+total retrieved 2060 tokens, mean 412 per case, about 13.3 s of prompt eval per case

@@ -1,0 +1,37 @@
+# FORMAT 3 PROBE, second pass. Confirms whether the fabricated red_flags on
+# yellow-pleuritic ('fast heartbeat', 'fever') reproduce. Both strings are lines
+# in CP-PERI-002, which is supplied to that case as retrieved context.
+# run 2026-09-17T18:34:52Z, same config as pass 1
+
+format 3 (02-pairs/pair_format.py), matched chunks, reasoning off, temperature 0.0, cache_prompt off
+
+  red-acs                expect=red    got=red    PASS
+       tokens=193 reasoning_chars=0 red_flags=['Chest pressure for >30 minutes', 'Radiation to jaw', 'Sweating', 'Nausea', 'Persistent pain', 'Risk factors: hypertension, hyperlipidemia, statin use']
+       rationale='Sudden onset chest pressure with radiation to jaw, sweating, nausea, and persistent pain for over 30 minutes. Patient has risk factors (high blood pressure, high cholesterol, statin use) and symptoms align with cardiac ischemia. Red flags present per symptom timeline and profile.'
+       next_steps=['Call emergency services immediately', 'Do not drive yourself to the hospital', 'If available, chew aspirin if not allergic']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=152 reasoning_chars=0 red_flags=['Chest tightness during exertion with known coronary artery disease', 'Symptoms resolved with rest but occurred during activity']
+       rationale='Chest tightness during exertion with known coronary artery disease and nitroglycerin use; angina is a red flag for possible heart attack. Symptoms resolved with rest but occurred during activity, indicating cardiac ischemia. No red flags absent.'
+       next_steps=['Call 9-1-1 immediately', 'Do not wait for symptoms to recur']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=[]
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=203 reasoning_chars=0 red_flags=[]
+       rationale='Symptoms of GERD (burning chest, sour taste, worse when lying down) are present but no red flags such as chest pain, persistent vomiting, or signs of bleeding. No risk modifiers from profile or medications. Symptoms began 40 minutes after a meal and improved with sitting upright.'
+       next_steps=['Take over-the-counter antacid or H2 blocker as directed', 'Avoid large meals, caffeine, and alcohol', 'Elevate head of bed if symptoms recur at night']
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Have you experienced any chest pain, persistent vomiting, or black/tarry stools?', 'Is there any difficulty swallowing or pain while swallowing?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=144 reasoning_chars=0 red_flags=['fast heartbeat', 'fever']
+       rationale='Sharp chest pain that worsens with deep breathing and improves with sitting forward is consistent with pleuritic pain. The patient has a fast heartbeat and fever, which are red flags for possible pleurisy or other pleural disorders. These symptoms suggest an acute condition that could be life-threatening if not treated immediately.'
+       next_steps=['Call emergency services immediately', 'Do not wait for symptoms to change']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=196 reasoning_chars=0 red_flags=['sharp chest pain that worsens with deep breathing', 'sudden onset and progression', 'possible pleurisy as a cause']
+       rationale='Sharp chest pain that worsens with deep breathing and pressing, with no relief, and no mention of nausea, sweating, dizziness, or shortness of breath. However, the symptom timeline shows sudden onset and progression, and the retrieved context lists pleurisy as a possible cause which can be serious. The patient is 24 years old with no medical history, but the symptom is acute and potentially life-threatening. The presence of pleurisy as a possible cause and the acute nature of the pain warrants immediate care.'
+       next_steps=['Call emergency services immediately', 'Do not delay care']
+       citations=['CP-PLEU-001']
+       follow_up_questions=[]

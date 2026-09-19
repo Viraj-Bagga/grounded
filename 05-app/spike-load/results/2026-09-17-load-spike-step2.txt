@@ -1,0 +1,59 @@
+# EPIC 5 LOAD SPIKE, STEP 2. First call to initLlama in the project's life.
+# iOS Simulator, iPhone 17 Pro, iOS 26.5, macOS 27.0 (26A428), Xcode 26.6 (17F113).
+# React Native 0.81.4, llama.rn pinned 0.12.9 exactly, prebuilt rnllama.xcframework
+# (simulator slice universal x86_64 + arm64). Debug build, Metro.
+# Model: 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf, 2,837,072,864 bytes,
+# copied into the app's Documents directory and loaded from there.
+# n_gpu_layers = 0. n_ctx = 4096. NO physical device run.
+# Prompt: 02-pairs/system_prompt.txt at change set B (sha ca631a3d...) plus the
+# user turn, schema and sampling from spike/req-demo-shape.json.
+
+LOADS                 yes
+load_s                36.4          (36406 ms)
+arch                  nemotron_h
+n_params              3,973,556,832
+n_embd                3136
+desc                  nemotron_h ?B Q4_K - Medium
+
+peak_rss_gb           3.14          direct ps on the app pid immediately after load
+
+# RSS is not a plateau, it oscillates, and that matters more than the peak.
+# A poller pinned to the app pid sampled every 0.5 s for 10 min, 1200 samples.
+# It started AFTER the load, so it never saw the 3.14 GB above; its own peak was
+# 2.55 GB and its floor was 0.39 GB.
+#
+#   sample    1   2.49 GB   just after load
+#   sample  241   0.86 GB   during prompt eval
+#   sample  481   2.53 GB   late prompt eval / generation
+#   sample  601   2.56 GB   generation
+#   sample  841   0.58 GB   after the completion returned
+#   sample 1185   0.39 GB   idle floor
+#
+# Weights are mmap'd, so these are clean pages the kernel evicts and refaults.
+# The Mac is already evicting under pressure with far more RAM than a target
+# phone has. On a 4 to 6 GB device this becomes continuous refaulting from
+# flash, which makes the phone SLOWER than the numbers below, not faster.
+# Do not read the 0.39 GB floor as "it only needs 400 MB".
+
+ONE COMPLETION, demo shape
+completion_s          333.2         (333155 ms)  = 5 min 33 s
+prompt_n              1284
+prompt_s              232.4
+prompt_tok_per_s      5.5
+predicted_n           210
+predicted_tok_per_s   2.10
+reasoning_content_len 0             hard constraint 5 holds through llama.rn
+
+# COMPARISON, same Mac, same model, same -ngl 0, under llama-server:
+#   prompt eval   30 to 32 tok/s   ->  5.5 tok/s in the simulator   ~5.7x slower
+#   generation    9.5 to 10 tok/s  ->  2.10 tok/s in the simulator  ~4.7x slower
+# Hard constraints 7 and 8 carry the llama-server numbers. They do not hold here.
+
+# OUTPUT DEFECT: `text` begins with the literal chat-template header
+#   <|im_start|>assistant
+#   { "urgency": "red", ... }
+# so JSON.parse on the raw string throws. The app must strip the header before
+# parsing. Not seen under llama-server, which returns message.content already
+# split. This is a llama.rn-specific handling difference.
+
+# Verdict on the demo-shape case was red, which is correct for that ACS case.

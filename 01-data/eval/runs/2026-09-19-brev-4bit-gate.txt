@@ -1,0 +1,76 @@
+# EPIC 3 STEP 2: bitsandbytes 4-bit gate + LoRA attach, on Brev, 2026-09-19
+# instance  massedcompute_A6000_base, $0.684/hr, not stoppable. RTX A6000 49 GB, driver 580.126.09,
+#           Ubuntu 22.04.5, Python 3.10.12. created 11:17:50 EDT, delete issued 11:53:09,
+#           confirmed gone 11:55:32. About 37 min billed, about $0.42.
+# model     nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16, downloaded on the instance. model.safetensors sha256
+#           55d4e2519456c4a9bddf596b0748d630e3b2ce6ff6f4c2b7ed3e07e2b00dad42, matching the local known-good 55d4e2519456c4a9.
+# script    03-model/brev_4bit_gate.py --attach-lora, with ONE change: trust_remote_code=False.
+#           The repo's own modeling file imports mamba_ssm's rmsnorm_fn unconditionally and raises
+#           without it, so on the five pip packages it cannot load. transformers 5.17 ships
+#           nemotron_h natively, verified first on the laptop CPU: 0 missing keys, backbone. renamed
+#           to model. on load, finite logits, bf16 greedy output '.
+
+
+' for the gate prompt.
+# NOT TRAINED. The adapter was attached and counted, nothing more.
+
+=== step 2, versions (pip install --user trl peft bitsandbytes transformers accelerate)
+python        3.10.12
+trl           1.13.0
+peft          0.21.0
+bitsandbytes  0.50.2
+transformers  5.17.0
+accelerate    1.15.0
+torch         2.14.0+cu130
+torch CUDA    13.0, device available: True
+
+=== steps 3 and 4, the gate, verbatim (progress bars removed)
+=== GATE: python3 brev_4bit_gate.py --model ~/nemotron --attach-lora
+torch        2.14.0+cu130
+bitsandbytes 0.50.2
+transformers 5.17.0
+gpu          NVIDIA RTX A6000
+
+check 1  loading in 4-bit ...
+[transformers] The following generation flags are not valid and may be ignored: ['top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `mamba_chunk_scan_combined` is falling back to its reference PyTorch implementation because `mamba_ssm` is not installed. This is correct but much slower; install `mamba_ssm` for the optimized kernel.
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `selective_state_update` is falling back to its reference PyTorch implementation because `mamba_ssm` is not installed. This is correct but much slower; install `mamba_ssm` for the optimized kernel.
+check 1  PASS. loaded, 3.28 GB on device
+
+check 2  did the SSM tensors actually quantize?
+    module      block   found expected   types
+    in_proj     Mamba2     21       21   Linear4bitx21
+    out_proj    Mamba2     21       21   Linear4bitx21
+    up_proj     MLP        17       17   Linear4bitx17
+    down_proj   MLP        17       17   Linear4bitx17
+    q_proj      attn        4        4   Linear4bitx4
+    k_proj      attn        4        4   Linear4bitx4
+    v_proj      attn        4        4   Linear4bitx4
+    o_proj      attn        4        4   Linear4bitx4
+check 2  PASS. every projection is 4-bit, Mamba2 included
+
+check 3  generating ...
+    logits finite: yes
+    output: '.\n\n\n\n\n\n\n\n\n\n\n'
+check 3  PASS
+
+==============================================================
+  GATE OPEN. 4-bit works on this hybrid Mamba2 model.
+==============================================================
+
+step 3  attaching LoRA ...
+    target      matched expected
+    q_proj            4        4
+    k_proj            4        4
+    v_proj            4        4
+    o_proj            4        4
+    up_proj          17       17
+    down_proj        17       17
+    total            50       50
+trainable params: 10,119,168 || all params: 3,983,676,000 || trainable%: 0.2540
+
+step 3  PASS. 50 matched, adapter attached. Not trained.
+gate exit=0
+exit=0

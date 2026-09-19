@@ -1,0 +1,26 @@
+# REPLAY of the measured failing output through the real demo server, 2026-09-18
+# 06-demo/server.py, unmodified, run twice against a stand-in llama-server that
+# streams ONE recorded completion verbatim: repeat 2 of the addendum in
+# 06-demo/results/2026-09-18-exclusions-live.txt. Retrieval, exclusions, floor,
+# guards, post-flight check and citation expansion all run for real.
+#   port 8771  guards.py as shipped tonight (leading-key rule)
+#   port 8772  the same, with screen_citations swapped back to the exact-match
+#              version it replaced, verbatim
+# guards.py sha c0669886, server.py sha 76168819
+# Why a replay: 10 live runs tonight never produced this output shape, so the
+# live batch could not exercise the fix. This does, deterministically.
+
+  symptoms  There is a heaviness across my front and my left arm has gone dead
+  replayed citations  ["CP-ACS-003: Chest pain, heaviness, or discomfort in the center or left side of the chest is a common symptom of heart attack.", "CP-ACS-003: Pain or discomfort in one or both arms is also a common symptom of heart attack."]
+
+  OLD exact-match rule  (port 8772)  events ['retrieved', 'refused']
+    REFUSED  reason='the model cited nothing, so it had no grounded source to reason from'  urgency_withheld=red
+    message  This is outside what this system covers. It can only assess chest pain, and it found nothing relevant to what you described. Please seek medical advice.
+
+  NEW leading-key rule  (port 8771)  events ['retrieved', 'result']
+    RENDERED  urgency=red  citations=['CP-ACS-003']
+    dropped   {"citations": [], "next_steps": [], "follow_up_questions": [], "red_flags": [], "red_flags_skipped": false}
+    expander  [('CP-ACS-003', 'National Heart, Lung, and Blood Institute, NIH', '2026-09-15')]
+
+  GET /api/chunk/CP-ACS-003 on 8771 -> CP-ACS-003, National Heart, Lung, and Blood Institute, NIH, https://www.nhlbi.nih.gov/health/heart-attack/symptoms, retrieved 2026-09-15
+    text begins: 'If you are having a heart attack, you may experience one or more of the symptoms below.\n\nChest pain, heaviness'

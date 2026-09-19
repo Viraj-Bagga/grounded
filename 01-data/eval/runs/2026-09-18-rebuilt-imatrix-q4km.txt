@@ -1,0 +1,48 @@
+# format3_probe.py against a Q4_K_M REBUILT FROM SCRATCH, epic 3 pipeline proof
+# date 2026-09-18
+# model  03-model/base/FINAL-imatrix-Q4_K_M.gguf  2,837,073,184 bytes
+# chain  HF BF16 (sha 55d4e2519456c4a9, 7,947,142,640 B)
+#          -> convert_hf_to_gguf.py --outtype f16
+#          -> llama-imatrix on cpp-Q8_0, calibration.txt, 32 chunks, PPL 5.9045
+#          -> llama-quantize --imatrix ... Q4_K_M
+# gguf kv quantize.imatrix.entries_count 92, chunks_count 32
+# system_prompt.txt sha256 26e4f4ff3e30c899d51f97877b5e7f90b16053c90c593954a04ab14b8b71a2b7
+# matched chunks, reasoning off, temperature 0.0, cache_prompt off
+#
+# PURPOSE. Not a prompt experiment. This asks one question: does a model rebuilt
+# from HF weights behave like the artifact that has been demoed against all
+# week? Compare line for line with 2026-09-17-rule4-after.txt. All five match,
+# including the three known failures. The chain reproduces the shipping model.
+
+  red-acs                expect=red    got=red    PASS
+       tokens=215 reasoning_chars=0 red_flags=['chest pressure for 26 minutes', 'sweating with chest discomfort', 'nausea with chest pain', 'jaw pain with chest pressure']
+       citations=['CP-ACS-001', 'CP-ACS-002', 'CP-ACS-003']
+       follow_up_questions=[]
+  yellow-angina          expect=yellow got=red    FAIL
+       tokens=187 reasoning_chars=0 red_flags=['Chest tightness triggered by exertion with complete resolution on rest', 'Known coronary artery disease with nitroglycerin use']
+       citations=['CP-ANG-001', 'CP-ANG-002']
+       follow_up_questions=[]
+       NOTE red_flags[0] carries a REASSURING feature, complete resolution on
+       rest, as a red flag. Rule 7 forbids exactly this. Same as 09-17.
+  green-gerd             expect=green  got=yellow FAIL
+       tokens=224 reasoning_chars=0 red_flags=[]
+       citations=['CP-GERD-001', 'CP-GERD-002']
+       follow_up_questions=['Have you experienced any chest pain, persistent vomiting, or black/tarry stools?', 'Have you lost weight unintentionally?']
+  yellow-pleuritic       expect=yellow got=red    FAIL
+       tokens=240 reasoning_chars=0 red_flags=['rapid onset chest pain at rest', 'fever and tachycardia', 'pleuritic pain pattern']
+       citations=['CP-PERI-002', 'CP-PLEU-001']
+       follow_up_questions=[]
+       NOTE 'fever and tachycardia' is FABRICATED, copied out of CP-PERI-002.
+       Constraint 11, the exact failure logged 2026-09-17. Reproduced here,
+       which is the point: the rebuild carries the base model's faults forward
+       unchanged, so nothing about the conversion is masking or adding them.
+  probe-costo-unmatched  expect=green  got=red    PROBE
+       tokens=104 reasoning_chars=0 red_flags=[] citations=[]
+
+# VERDICT MATRIX vs shipped, 2026-09-17-rule4-after.txt
+#   red-acs        red    == red
+#   yellow-angina  red    == red
+#   green-gerd     yellow == yellow
+#   yellow-pleuritic red  == red
+#   probe-costo    red    == red
+#   5/5 identical.
