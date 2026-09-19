@@ -4392,3 +4392,52 @@ and refused when it is not. Viraj is reframing the beat.
 probably overlapped these test servers, which ran on ports 8081 and 8771, and
 mine overlapped its runs. Treat timings from either session after 16:05 as
 contended.
+
+### 2026-09-19 Beat 3 reframed: same symptom, two people. Mum escalated red, You refused, every run.
+
+**Viraj's call:** build for red next to refused, which is honest and holds,
+rather than hunt for a two-verdict pairing that does not exist.
+
+**The text: "A bit of indigestion after lunch, nothing much."** Of the six
+screened texts, two refused You 3 of 3: indigestion and mild heartburn.
+Heartburn fires no rule for Mum, so it cannot give her an escalated red.
+Indigestion fires R1.
+
+**3 pairs, You and Mum sent together as compare mode does, 35-chunk index:**
+- You: refused 3 of 3, "the model cited nothing". With the earlier screen,
+  6 of 6.
+- Mum: red 3 of 3, every one escalated from yellow by R1 with the rule line:
+  1 grounded raise citing CP-ANG-003 and CP-ACS-003, and 2 through the refusal
+  rescue, where the model's citations carried a label in front of the key
+  ("RETRIEVED CONTEXT: CP-ANG-003 ...") and were dropped.
+**The new corpus is what makes it hold.** On 22 chunks the escalation sweep
+had indigestion on Mum refused yellow once and green twice. R1 lifts a green
+only to yellow, which the rescue does not cover, so 2 of 3 would have been a
+refusal on both sides. On 35 chunks the model said yellow 3 of 3. CP-ANG-003,
+which lists "heartburn or indigestion" as an angina symptom, is now in the
+context and is the likely reason.
+`01-data/eval/runs/2026-09-19-beat3-reframe-indigestion-pairs.txt`.
+
+**Swapped in.** The Mum preset in `06-demo/static/js/app.js` is now
+"Indigestion (Mum)" with that text, replacing "Sick and sweaty (Mum)". It is
+the other session's uncommitted file, a one-entry change like the stairs
+preset, and that session is told.
+
+**Recorded in claude.md, Current state, plainly:** the model cites nothing
+when it is reassured, so a non-red verdict is usually refused. Counted over
+the 50 live answers saved today: 19 of 25 non-red answers had no citation that
+resolves, and 0 of 25 reds. It is the same root cause as the red bias, the
+untuned base model, and it is why no two-verdict comparison holds. Say it at
+the desk before a judge finds it. Constraint 15 and the epic 6 beat 3 text now
+describe the reframed beat, and the beat 3 timing is corrected to the 86 s
+measured at `-np 2`.
+
+**Confirmed in the page by the other session (steel26-c1), 16:30 to 16:33,
+with these test servers off.** Its UI check passed 22 of 22. In compare mode
+on the Indigestion (Mum) preset, You was refused (a green withheld, nothing
+cited) and Mum came back red, raised from yellow by R1 with the rule line,
+citing CP-ANG-003 and CP-ACS-003. Mum alone came back as a rescued red, not
+grounded. That makes You refused 7 of 7 and Mum escalated to red 5 of 5
+across both sessions. One outlier it could not explain: Mum's first turn ran
+at 6.6 tok/s (53.6 s). The compare took 36.9 s.
+`06-demo/results/2026-09-19-ui-check.txt`.
