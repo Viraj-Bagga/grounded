@@ -1,0 +1,54 @@
+{
+  "id": "model-nemotron3-nano-4b-q4km",
+  "version": "2026.09.15-base",
+  "kind": "model",
+  "title": "NVIDIA Nemotron 3 Nano 4B, Q4_K_M GGUF, base model (not fine-tuned)",
+  "description": "The GGUF the laptop demo runs under llama-server, and the file llama.rn 0.12.9 loaded in the iOS simulator.",
+  "language": "en",
+  "region": "global",
+  "license": {
+    "name": "NVIDIA Nemotron Open Model License",
+    "status": "amber",
+    "status_meaning": "usable with conditions, in the license_status scheme of 01-data/sources.yaml",
+    "version": "v. December 15, 2025",
+    "url": "https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-nemotron-open-model-license/",
+    "file": "LICENSE.txt",
+    "official_copy": "LICENSE.pdf",
+    "identified_from": "Hugging Face model card of nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16 at revision dfaf35de3e30f1867dd8dbc38a7fc9fb52d3914f: license other, license_name nvidia-nemotron-open-model-license. Retrieved 2026-09-19.",
+    "text_provenance": "LICENSE.txt is the text of the licence page at url, retrieved 2026-09-19. It matches NVIDIA's PDF of the licence word for word apart from the page's 'Last Modified: December 15, 2025' line. LICENSE.pdf is that PDF, unmodified, from https://www.nvidia.com/content/dam/en-zz/Solutions/license-agreements/enterprise-software/NVIDIA-Nemotron-Open-Model-License-12-12-25.pdf. The LICENSE file in the Hugging Face repo is 0 bytes at the revision above.",
+    "known_gap": "The licence's definition of Work refers to an Appendix. Neither the page nor the PDF contains one.",
+    "conditions": [
+      "Clause 3a: recipients must be given a copy of this License. It ships in this pack as LICENSE.txt and LICENSE.pdf."
+    ],
+    "legal_review": {
+      "required_before": "any real distribution",
+      "accepted_for": "the SteelHacks XIII demo, 2026-09-19",
+      "why": "Clause 7 has whoever uses or distributes the model indemnify NVIDIA against third-party claims related to output from it. In this app the output is a triage verdict.",
+      "clause": "7",
+      "verbatim": "7. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of NVIDIA, and only if You agree to indemnify, defend, and hold NVIDIA harmless for any liability incurred by, or claims asserted against, NVIDIA by reason of your accepting any such warranty or additional liability. You will indemnify and hold harmless NVIDIA from and against any claim by any third party arising out of or related to your use or distribution of the Works, Derivative Works thereof, or output from the Works or Derivative Works."
+    }
+  },
+  "model": {
+    "file": "model.gguf",
+    "expect_architecture": "nemotron_h",
+    "expect_quant": "Q4_K_M",
+    "family": "NVIDIA Nemotron 3 Nano 4B",
+    "fine_tuned": false,
+    "origin": "Not known. The Hugging Face repo this GGUF was downloaded from was not recorded. Only its sha256 was, in build-log.md on 2026-09-15."
+  },
+  "files": [
+    {
+      "path": "model.gguf",
+      "source": "03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf",
+      "sha256": "be5d9a656a51922f24f1f09a759cebb694e1f5d9728bf0ef9f8c972c5a0b5ef2"
+    },
+    {
+      "path": "LICENSE.txt",
+      "source": "07-distribute/licenses/nvidia-nemotron-open-model-license.txt"
+    },
+    {
+      "path": "LICENSE.pdf",
+      "source": "07-distribute/licenses/nvidia-nemotron-open-model-license.pdf"
+    }
+  ]
+}

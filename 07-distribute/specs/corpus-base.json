@@ -1,0 +1,30 @@
+{
+  "id": "corpus-base",
+  "version": "2026.09.15",
+  "kind": "corpus",
+  "title": "Base corpus: chest pain, 22 chunks",
+  "description": "The frozen chest-pain corpus and its sqlite-vec index, as the retrieval layer builds them. citations.csv is the key registry the citation guard validates against.",
+  "language": "en",
+  "region": "global",
+  "license": {
+    "name": "Public domain (US federal government works)",
+    "status": "green",
+    "note": "Every source is a US government work. Publisher, URL, retrieval date and licence status per source are derived from citations.csv at build time."
+  },
+  "corpus": {
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "embedding_dim": 384,
+    "normalized": true,
+    "note": "Queries must be embedded with the same model. Reading the vectors needs the sqlite-vec extension; the embedder is not in this pack."
+  },
+  "files": [
+    {
+      "path": "citations.csv",
+      "source": "01-data/citations.csv"
+    },
+    {
+      "path": "corpus.db",
+      "source": "04-retrieval/corpus.db"
+    }
+  ]
+}
