@@ -1,0 +1,287 @@
+2026-09-19 20:18 to 20:21 UTC (16:18 to 16:21 local) ui_check.mjs, every mode but review and reread
+config: llama-server b10809-5266f24da, 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf, --jinja -np 2 -ngl 0 -c 8192
+        (CPU, 4096 tokens per slot, host prompt cache at its default); demo 06-demo/server.py on 8770;
+        temperature 0.2, reasoning off, schema on; index 35 chunks; macOS low power mode 0;
+        the other session's servers (8081, 8771) not running
+build: main at 0212b9b plus the uncommitted 06-demo rebuild (finish review round 2, disposition ship);
+       Google Chrome 153.0.8010.48, headless, 1440x900 desktop and 390x844 phone
+method: node 06-demo/ui_check.mjs <mode> OUTDIR for shots, people, guards, flow, compare, two-tabs, in that order.
+        Screenshots went to a scratch directory and are not kept; the finish review's own capture is in
+        06-demo/.impeccable/review/. reread is not repeated here (it needs a llama-server restart); its run is
+        2026-09-19-reread-after-restart.txt.
+result: 33 PASS, 0 FAIL
+
+== checks, as printed
+  === shots  16:18:24
+  PASS  desktop: new assessment shows presets
+  PASS  desktop: people list shows the household
+  PASS  desktop: Mum's form shows the rules her profile turns on
+  PASS  desktop: Maya's empty screen says she is not assessed
+  PASS  phone: new assessment shows presets
+  PASS  phone: people list shows the household
+  PASS  phone: Mum's form shows the rules her profile turns on
+  PASS  phone: Maya's empty screen says she is not assessed
+  all passed
+  === shots exit 0  16:18:30
+  === people  16:18:30
+  PASS  an empty form names what is missing
+  PASS  the preview shows the rule the new condition turns on
+  PASS  the new person is saved and listed
+  PASS  the new person gets a chip
+  PASS  the deleted person is gone, and only them
+  all passed
+  === people exit 0  16:18:33
+  === guards  16:18:33
+        child profile: 1.0 s
+  PASS  a child's profile gets NOT ASSESSED
+  PASS  a child word on an adult profile asks who it is for
+        out of scope: 1.0 s
+  PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+  all passed
+  === guards exit 0  16:18:37
+  === flow  16:18:37
+  PASS  the Mum preset selects Mum
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 14.6 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0  16:19:23
+  === compare  16:19:23
+  PASS  compare with the Mum preset picks You and Mum
+        compare, both sides: 42.1 s
+  PASS  both sides answered
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+  === compare exit 0  16:20:07
+  === two-tabs  16:20:07
+        tab B, Grandpa: 42.6 s
+        tab A, Dad: 44.2 s
+  PASS  the two tabs hold two different assessments
+  PASS  each assessment kept its own person and words
+        tab B follow-up: 31.9 s
+        tab A follow-up: 32.8 s
+  PASS  both follow-ups reused their own cache
+  all passed
+  === two-tabs exit 0  16:21:26
+
+== every assessment the run created, turn by turn (content, from 06-demo/data/conversations/)
+-- 20260919-161834-6aa8c2  mode single  for Maya
+  Maya  turn 1 (first)  -> refused
+    said: She has a pain in her chest.
+    event: {"profile_id": "maya", "side": 0, "message": "This system cannot assess children. Their symptoms can have causes it has no information about, and some of them are urgent. Please contact a doctor or emergency services now rather than relying on this.", "categorical": true, "child": true, "reason": "Maya's profile says age 6. The corpus is written about adults, with no paediatric content beyond one passage on pneumonia in babies.", "followups_left": 4}
+
+-- 20260919-161835-b1e81e  mode single  for You
+  no turns saved: this is the guards check's child word on an adult profile. The page asked who it is for
+  and the test did not answer. The question is not a turn, so the file is empty and the history skips it.
+
+-- 20260919-161836-ae978a  mode single  for You
+  You  turn 1 (first)  -> refused
+    said: I twisted my ankle playing football and now it is swollen.
+    event: {"profile_id": "self", "side": 0, "message": "This is outside what this system covers. It can only assess chest pain, and it found nothing relevant to what you described. Please seek medical advice.", "reason": "nothing in the corpus is relevant to this query (best match 0.198, floor 0.25)", "max_cosine": 0.198, "nearest": ["CP-PE-001", "CP-PE-003", "CP-ANG-010"], "followups_left": 4}
+
+-- 20260919-161838-c33e70  mode single  for Mum
+  Mum  turn 1 (first)  -> result
+    said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+    retrieved: ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001']
+    read 738 tok in 11.3 s, reused 675, wrote 324 in 15.7 s (20.6/s), total 27.2 s; slot 1, re_read=False, follow-ups left 4
+    urgency red (model said yellow)
+    rule R1 escalate: type 2 diabetes with "sweaty", described as "a bit" [CP-ACS-002]
+    why: Symptoms include sweating, nausea, and feeling sick after dinner, which are common in both cardiac and GERD presentations. No chest pain, no shortness of breath, no dizziness, and no rapid heartbeat. Risk modifiers: age 64, type 2 diabetes, coronary artery disease, but no acute cardiac symptoms. No red flags present. Urgency is elevated due to possible cardiac or GERD, but not meeting emergency criteria.
+    red flags: []
+    next steps: ['Call 9-1-1 if chest discomfort develops, worsens, or does not resolve with rest.', 'Monitor for worsening chest pain, shortness of breath, or dizziness.']
+    questions: []
+    citations kept: ['CP-ACS-003', 'CP-GERD-001']
+    removed by guards: {'citations': ['PATIENT PROFILE: age 64, type 2 diabetes, coronary artery disease are risk modifiers'], 'next_steps': ['Take antacid or over-the-counter heartburn medication if symptoms persist.'], 'follow_up_questions': ['Any chest discomfort, pressure, or tightness in the center or left side of the chest?', 'Any shortness of breath at rest or with minimal activity?', 'Any dizziness, light-headedness, or rapid heartbeat?'], 'red_flags': [], 'red_flags_skipped': False}
+  Mum  turn 2 (follow-up)  -> result
+    said: It has not gone away, it has been an hour now.
+    reused the first turn's chunks, no retrieval
+    read 41 tok in 1.2 s, reused 1736, wrote 241 in 12.4 s (19.3/s), total 13.6 s; slot 1, re_read=False, follow-ups left 3
+    urgency red
+    rule R1 escalate: type 2 diabetes with "sweaty", described as "a bit" [CP-ACS-002]
+    why: Symptoms persist for one hour without improvement, including sweating, nausea, and feeling sick. Risk modifiers: age 64, type 2 diabetes, coronary artery disease. No chest pain yet, but persistent symptoms in a high-risk patient warrant emergency evaluation. Red flags: persistent sweating, nausea, feeling sick for >1 hour in a patient with CAD.
+    red flags: ['persistent sweating for one hour']
+    next steps: ['Call 9-1-1 immediately', 'Do not delay care', 'Monitor for chest pain or worsening symptoms']
+    questions: []
+    citations kept: ['CP-ACS-003', 'CP-ANG-003']
+    removed by guards: {'citations': ['PATIENT PROFILE: age 64, type 2 diabetes, coronary artery disease are high-risk factors'], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [{'entry': 'nausea and feeling sick for one hour', 'why': 'not in the case: nausea'}], 'red_flags_skipped': False}
+
+-- 20260919-161924-6cccfa  mode compare  for You and Mum
+  You  turn 1 (first)  -> result
+    said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+    retrieved: ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001']
+    read 4 tok in 4.3 s, reused 1398, wrote 274 in 34.5 s (7.9/s), total 41.1 s; slot 1, re_read=False, follow-ups left 4
+    urgency yellow
+    why: Symptoms include sweating, nausea, and feeling sick after dinner, which are common in both cardiac and gastrointestinal presentations. No chest pain, no shortness of breath, no rapid heartbeat, and no risk modifiers. Angina and heart attack are possible but not confirmed. GERD symptoms like nausea and chest discomfort are possible but not severe. No red flags present.
+    red flags: []
+    next steps: ['Monitor symptoms for progression, especially chest pain, shortness of breath, or worsening sweating.', 'If symptoms worsen or new chest discomfort develops, seek immediate care.']
+    questions: ['Have you experienced chest pain, pressure, or discomfort in the center or left side of your chest?', 'Have you had shortness of breath at rest or with minimal activity?']
+    citations kept: ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001']
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+  Mum  turn 1 (first)  -> result
+    said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+    retrieved: ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001']
+    read 738 tok in 13.9 s, reused 675, wrote 254 in 25.1 s (10.1/s), total 40.1 s; slot 0, re_read=False, follow-ups left 4
+    urgency red (model said yellow)
+    rule R1 escalate: type 2 diabetes with "sweaty", described as "a bit" [CP-ACS-002]
+    why: Patient is 64 years old with coronary artery disease, which is a risk modifier. Symptoms include sweating, nausea, and feeling sick after dinner, which are possible cardiac symptoms. However, no chest pain or pressure is reported, and onset is not sudden or progressive. Risk factors from profile and medications (metformin, atorvastatin) do not increase immediate risk. Symptoms may be related to GERD or mild GI upset. No red flags present.
+    red flags: []
+    next steps: ['Monitor symptoms for 30 minutes. If chest pain, pressure, or worsening discomfort develops, call 9-1-1.', 'If symptoms persist or worsen, seek medical evaluation.']
+    questions: []
+    citations kept: ['CP-ACS-003', 'CP-GERD-001']
+    removed by guards: {'citations': [], 'next_steps': ['Consider over-the-counter antacids or lifestyle adjustments for possible GERD.'], 'follow_up_questions': ['Does the chest discomfort radiate to your arm, jaw, or back?', 'Have you experienced any shortness of breath or light-headedness?'], 'red_flags': [], 'red_flags_skipped': False}
+
+-- 20260919-162009-07128f  mode single  for Grandpa
+  Grandpa  turn 1 (first)  -> result
+    said: Bit of a niggle in my chest, honestly it is nothing.
+    retrieved: ['CP-ACS-003', 'CP-PERI-002', 'CP-PLEU-001']
+    read 480 tok in 16.8 s, reused 675, wrote 230 in 23.5 s (9.8/s), total 41.7 s; slot 1, re_read=False, follow-ups left 4
+    urgency red
+    rule R2 escalate: age 77 with "chest", described as "Bit of" [CP-ACS-002]
+    why: 77-year-old male with high blood pressure, recent hip replacement, and chest pain that is a 'niggle' but could be cardiac. Risk modifiers include age, hypertension, and recent surgery. Chest pain is a key cardiac symptom per CP-ACS-003. Rapid progression or risk factors elevate urgency to red.
+    red flags: ['chest pain', 'recent hip replacement', 'high blood pressure']
+    next steps: ['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or other antiplatelet unless instructed']
+    questions: []
+    citations kept: ['CP-ACS-003', 'CP-PERI-002', 'CP-PLEU-001']
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': ['Is the chest pain sharp and does it worsen with breathing?', 'Have you had any shortness of breath or sweating?'], 'red_flags': [], 'red_flags_skipped': False}
+  Grandpa  turn 2 (follow-up)  -> result
+    said: Now it is spreading to my left arm.
+    reused the first turn's chunks, no retrieval
+    read 37 tok in 1.8 s, reused 1384, wrote 250 in 29.0 s (8.6/s), total 30.9 s; slot 1, re_read=False, follow-ups left 3
+    urgency red
+    rule R2 escalate: age 77 with "chest", described as "Bit of" [CP-ACS-002]
+    why: 77-year-old male with high blood pressure, recent hip replacement, chest pain spreading to left arm. Chest pain is a key cardiac symptom per CP-ACS-003. Spreading to left arm is a discriminating red flag for myocardial infarction per CP-ACS-003. Risk modifiers include age, hypertension, and recent surgery. Rapid progression elevates urgency to red.
+    red flags: ['chest pain', 'spreading to left arm', 'recent hip replacement', 'high blood pressure']
+    next steps: ['Call emergency services immediately', 'Do not wait for symptoms to worsen', 'Do not take aspirin or other antiplatelet unless instructed']
+    questions: []
+    citations kept: ['CP-ACS-003', 'CP-PERI-002', 'CP-PLEU-001']
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': ['Is the chest pain sharp and does it worsen with breathing?', 'Have you had any shortness of breath or sweating?'], 'red_flags': [], 'red_flags_skipped': False}
+
+-- 20260919-162009-39e538  mode single  for Dad
+  Dad  turn 1 (first)  -> result
+    said: Tight chest when I walk up the hill, it eased when I stopped.
+    retrieved: ['CP-PERI-002', 'CP-DIFF-001', 'CP-ANG-002']
+    read 543 tok in 17.0 s, reused 675, wrote 258 in 24.9 s (10.3/s), total 43.4 s; slot 0, re_read=False, follow-ups left 4
+    urgency red
+    NOT GROUNDED: This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+    red flags: []
+    next steps: []
+    questions: []
+    citations kept: []
+    removed by guards: {'citations': ['PATIENT PROFILE (age, atrial fibrillation, apixaban, bisoprolol)', 'RETRIEVED CONTEXT (CP-DIFF-001, CP-ANG-002)'], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+  Dad  turn 2 (follow-up)  -> result
+    said: It came back when I climbed the stairs.
+    reused the first turn's chunks, no retrieval
+    read 37 tok in 1.8 s, reused 1475, wrote 268 in 30.1 s (8.9/s), total 32.0 s; slot 0, re_read=False, follow-ups left 3
+    urgency red
+    NOT GROUNDED: This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+    red flags: []
+    next steps: []
+    questions: []
+    citations kept: []
+    removed by guards: {'citations': ['PATIENT PROFILE (age, atrial fibrillation, apixaban, bisoprolol)', 'RETRIEVED CONTEXT (CP-DIFF-001, CP-ANG-002)'], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+
+
+==================================================================================================
+2026-09-19 20:30 to 20:33 UTC (16:30 to 16:33 local) re-run of shots, flow and compare after the Mum preset changed
+why: the other session replaced preset 5, on Viraj's instruction, with "Indigestion (Mum)": "A bit of indigestion after
+     lunch, nothing much.", no timeline, who mum (beat 3 reframed: same symptom, two people). The flow check that looked
+     for the old words "sick and sweaty" now compares the composer with the preset's own text instead.
+config: as above; the other session's servers (8081, 8771) off, confirmed before the run
+result: 22 PASS, 0 FAIL
+
+== checks, as printed
+  === shots  16:30:36
+  PASS  desktop: new assessment shows presets
+  PASS  desktop: people list shows the household
+  PASS  desktop: Mum's form shows the rules her profile turns on
+  PASS  desktop: Maya's empty screen says she is not assessed
+  PASS  phone: new assessment shows presets
+  PASS  phone: people list shows the household
+  PASS  phone: Mum's form shows the rules her profile turns on
+  PASS  phone: Maya's empty screen says she is not assessed
+  all passed
+  === shots exit 0  16:30:43
+  === flow  16:30:43
+  PASS  the Mum preset selects Mum
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 10.4 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0  16:31:51
+  === compare  16:31:51
+  PASS  compare with the Mum preset picks You and Mum
+        compare, both sides: 36.9 s
+  PASS  both sides answered
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+  === compare exit 0  16:32:30
+
+== every assessment the re-run created, turn by turn
+-- 20260919-163044-3d9071  mode single  for Mum
+  Mum  turn 1 (first)  -> result
+    said: A bit of indigestion after lunch, nothing much.
+    retrieved: ['CP-ACS-003', 'CP-PE-003', 'CP-ANG-003']
+    read 661 tok in 26.1 s, reused 675, wrote 172 in 25.8 s (6.6/s), total 53.6 s
+    urgency red (model said yellow)
+    NOT GROUNDED: This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+    rule R1 escalate: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    why: 
+    red flags: []
+    next steps: []
+    questions: []
+    citations kept: []
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+  Mum  turn 2 (follow-up)  -> result
+    said: It has not gone away, it has been an hour now.
+    reused the first turn chunks, no retrieval
+    read 41 tok in 1.4 s, reused 1507, wrote 147 in 8.2 s (17.9/s), total 9.6 s
+    urgency red
+    NOT GROUNDED: This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.
+    rule R1 escalate: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    why: 
+    red flags: []
+    next steps: []
+    questions: []
+    citations kept: []
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+
+-- 20260919-163152-9ebc29  mode compare  for You and Mum
+  You  turn 1 (first)  -> refused
+    said: A bit of indigestion after lunch, nothing much.
+    event: {"profile_id": "self", "side": 0, "message": "This is outside what this system covers. It can only assess chest pain, and it found nothing relevant to what you described. Please seek medical advice.", "reason": "the model cited nothing, so it had no grounded source to reason from", "urgency_withheld": "green", "gen_ms": 27636, "n": 1, "first": true, "cache": {"expected": 0, "reused": 675, "read": 650, "slot_taken": false, "slot": 0, "re_read": false}, "ttft_ms": 20226, "timings": {"cache_n": 675, "prompt_n": 650, "prompt_ms": 19630.335, "prompt_per_token_ms": 30.200515384615382, "prompt_per_second": 33.11201770117525, "predicted_n": 82, "predicted_ms": 7409.96, "predicted_per_token_ms": 91.48098765432098, "predicted_per_second": 10.931233097074749}, "retrieval_ms": 285, "total_ms": 27922, "followups_left": 4}
+  Mum  turn 1 (first)  -> result
+    said: A bit of indigestion after lunch, nothing much.
+    retrieved: ['CP-ACS-003', 'CP-PE-003', 'CP-ANG-003']
+    read 661 tok in 19.6 s, reused 675, wrote 246 in 15.4 s (15.9/s), total 35.9 s
+    urgency red (model said yellow)
+    rule R1 escalate: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    why: Indigestion is a non-specific symptom that can occur in many conditions, including angina, but no red flags are present. The patient is 64, has coronary artery disease, and is on metformin and atorvastatin, which are not anticoagulants or beta blockers. No sudden onset, progression, or neurovascular compromise. Risk modifiers present but no acute trigger.
+    red flags: []
+    next steps: ['Monitor symptoms; if chest pain, pressure, or discomfort develops, seek immediate care.', 'Avoid strenuous activity and monitor for shortness of breath or dizziness.']
+    questions: []
+    citations kept: ['CP-ANG-003', 'CP-ACS-003']
+    removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': ['Any chest pain, pressure, or discomfort in the center or left side of the chest?', 'Any shortness of breath at rest or with minimal activity?'], 'red_flags': [], 'red_flags_skipped': False}
+note: Mum's first turn in the flow re-run generated at 6.6 tok/s (53.6 s in all), against 20.6 tok/s for the same
+      step in the first run above. Cause not known. Low Power Mode was off, the other session's servers were off,
+      and nothing heavy was running when checked at 16:33. Its follow-up ran at 17.9 tok/s, and the compare that
+      followed at 10.9 and 15.9 tok/s with both sides at once. Treat 53.6 s as an outlier, not the preset's cost.
+
+reading: the reframed beat held in the page. Compare: You refused (green withheld, nothing cited), Mum red raised
+      from yellow by R1 with the rule line, citing CP-ANG-003 and CP-ACS-003. Mum alone: a rescued red, not grounded,
+      R1 shown. One run each, on top of the other session's 6 of 6 and 3 of 3.

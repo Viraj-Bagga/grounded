@@ -1,0 +1,6 @@
+data/
+_backup/
+.impeccable/questions/
+__pycache__/
+.impeccable/review/
+.impeccable/hook.cache.json

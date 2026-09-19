@@ -1,0 +1,17 @@
+2026-09-19 19:29 UTC out-of-scope tooth complaint on the 35-chunk corpus, one run, through the rebuilt demo
+config: llama-server -np 2 -c 8192 -ngl 0, reasoning off, schema on, temperature 0.2; scope floor 0.25; macOS low power mode 0
+assessment 20260919-152951-af9d29 (06-demo/data/conversations, gitignored), person You
+
+said: My tooth is killing me and my gums are swollen.
+retrieved: ['CP-PE-001', 'CP-ACS-004', 'CP-PERI-001']
+urgency red
+why: Patient reports severe tooth pain and swollen gums, which may indicate a dental emergency. No risk modifiers from profile or medications. Red flags: severe pain and swelling could indicate infection requiring immediate care. Cites: CP-PERI-001 (call 9-1-1 for chest pain or severe shortness of breath), but not applicable; however, severe dental pain is a medical emergency. Red flag: severe pain and swelling. Cites: CP-PERI-001 (call 9-1-1 for chest pain or severe shortness of breath), but not applicable; however, severe dental pain is a medical emergency. Red flag: severe pain and swelling.
+red flags: ['severe tooth pain and swollen gums']
+next steps: ['Call 9-1-1 immediately for emergency dental care']
+citations kept: ['CP-PERI-001']
+removed by guards: {'citations': [], 'next_steps': [], 'follow_up_questions': [], 'red_flags': [], 'red_flags_skipped': False}
+read 611 tok, reused 675, wrote 215, total 20.2 s
+
+reading: it cleared the 0.25 floor and was triaged red on a pericarditis chunk. Same hole as claude.md constraint 13's
+tooth query ('My tooth is killing me and the side of my face aches'), in a different phrasing. One run, not repeated.
+The UI test's out-of-scope case is a twisted ankle instead.

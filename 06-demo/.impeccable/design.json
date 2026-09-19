@@ -1,0 +1,514 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-19T20:21:54+00:00",
+  "title": "Design System: Triage",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#424242",
+          "#636363",
+          "#868686",
+          "#ababab",
+          "#cecece",
+          "#eeeeee"
+        ]
+      },
+      "chrome": {
+        "role": "neutral",
+        "displayName": "Cool Chrome",
+        "canonical": "oklch(96.6% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#414245",
+          "#626366",
+          "#848689",
+          "#a9abae",
+          "#ccced1",
+          "#edeff2"
+        ]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Record Well",
+        "canonical": "oklch(94.5% 0.007 260.7)",
+        "tonalRamp": [
+          "#090b0e",
+          "#222428",
+          "#404246",
+          "#616368",
+          "#84868b",
+          "#a8abb0",
+          "#cbced3",
+          "#eceff4"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(18.5% 0.012 254.1)",
+        "tonalRamp": [
+          "#080b10",
+          "#20242a",
+          "#3e4349",
+          "#5f646a",
+          "#81878d",
+          "#a6abb2",
+          "#c8ced6",
+          "#e9eff7"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Ink Lifted",
+        "canonical": "oklch(31.4% 0.019 254.8)",
+        "tonalRamp": [
+          "#060c13",
+          "#1e252d",
+          "#3c434c",
+          "#5c646e",
+          "#7f8792",
+          "#a3acb7",
+          "#c6cfda",
+          "#e6effb"
+        ],
+        "note": "Hard-coded as #2b323b in app.css (send and primary hover), not yet a custom property."
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink Second",
+        "canonical": "oklch(40.6% 0.023 255.7)",
+        "tonalRamp": [
+          "#050b15",
+          "#1d252f",
+          "#3a434f",
+          "#5b6471",
+          "#7d8794",
+          "#a1acba",
+          "#c4cfdd",
+          "#e4f0fe"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink Third",
+        "canonical": "oklch(50.4% 0.024 257.5)",
+        "tonalRamp": [
+          "#050b15",
+          "#1d242f",
+          "#3b434f",
+          "#5b6471",
+          "#7d8795",
+          "#a2acba",
+          "#c4cfdd",
+          "#e5efff"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(90.5% 0.009 258.3)",
+        "tonalRamp": [
+          "#090b0f",
+          "#212429",
+          "#3f4347",
+          "#606369",
+          "#83868c",
+          "#a7abb1",
+          "#caced4",
+          "#ebeff5"
+        ]
+      },
+      "rule-2": {
+        "role": "neutral",
+        "displayName": "Control Line",
+        "canonical": "oklch(80.5% 0.016 257.2)",
+        "tonalRamp": [
+          "#070b12",
+          "#1f242c",
+          "#3d434b",
+          "#5e646d",
+          "#808790",
+          "#a5abb5",
+          "#c7ced8",
+          "#e8effa"
+        ]
+      },
+      "action": {
+        "role": "primary",
+        "displayName": "Signal Blue",
+        "canonical": "oklch(43.8% 0.202 266.3)",
+        "tonalRamp": [
+          "#010134",
+          "#060276",
+          "#132aab",
+          "#2e53d4",
+          "#4d7afe",
+          "#85a8fc",
+          "#b8cdfe",
+          "#e7efff"
+        ]
+      },
+      "action-soft": {
+        "role": "primary",
+        "displayName": "Signal Blue Wash",
+        "canonical": "oklch(93.8% 0.022 272.1)",
+        "tonalRamp": [
+          "#080b15",
+          "#20232f",
+          "#3e424f",
+          "#5f6370",
+          "#818694",
+          "#a6aab9",
+          "#c8cddd",
+          "#e9eefe"
+        ]
+      },
+      "red": {
+        "role": "triage",
+        "displayName": "Emergency Red",
+        "canonical": "oklch(54.0% 0.198 29.0)",
+        "tonalRamp": [
+          "#1f0000",
+          "#4a0302",
+          "#810303",
+          "#ba100c",
+          "#e54638",
+          "#fd8171",
+          "#fdbbb0",
+          "#fee9e5"
+        ]
+      },
+      "yellow": {
+        "role": "triage",
+        "displayName": "Signal Yellow",
+        "canonical": "oklch(81.1% 0.166 85.0)",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2202",
+          "#553e02",
+          "#7d5e09",
+          "#a87f14",
+          "#d6a20d",
+          "#fdc43b",
+          "#feedc8"
+        ]
+      },
+      "green": {
+        "role": "triage",
+        "displayName": "Field Green",
+        "canonical": "oklch(51.3% 0.121 152.5)",
+        "tonalRamp": [
+          "#000f04",
+          "#022d13",
+          "#005127",
+          "#16763f",
+          "#439b62",
+          "#6ac185",
+          "#8de5a7",
+          "#c6ffd5"
+        ]
+      },
+      "hold": {
+        "role": "neutral",
+        "displayName": "Hold Slate",
+        "canonical": "oklch(48.5% 0.023 253.0)",
+        "tonalRamp": [
+          "#050c15",
+          "#1c252f",
+          "#3a434f",
+          "#5a6470",
+          "#7d8794",
+          "#a1acb9",
+          "#c4cfdd",
+          "#e4f0fe"
+        ],
+        "note": "Always under the hatch pattern for no-verdict fields; dashed as the not-grounded border."
+      },
+      "on-yellow": {
+        "role": "triage",
+        "displayName": "Ink on Yellow",
+        "canonical": "oklch(18.3% 0.011 247)",
+        "tonalRamp": [
+          "#080b10",
+          "#20242a",
+          "#3e4349",
+          "#5f646a",
+          "#81878d",
+          "#a6abb2",
+          "#c8ced6",
+          "#e9eff7"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "The category word inside the urgency bar. Weight 800 is reserved for it and the brand mark."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Answer section headings, set at the t-20 size."
+      },
+      "disposition": {
+        "displayName": "Disposition",
+        "purpose": "The disposition beside the verdict word."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Answers, what was said, fields. Prose capped at 70ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, field labels, preset and history titles, rule heads."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Record headers, history meta, the Checked line, allowance and scope lines."
+      },
+      "key": {
+        "displayName": "Key",
+        "purpose": "Citation keys, rule ids, A/B side tags. Mono means data."
+      },
+      "measure": {
+        "displayName": "Measure",
+        "purpose": "Timelines, raw model output, the profile text the model reads."
+      }
+    },
+    "patterns": [
+      {
+        "name": "hatch",
+        "value": "repeating-linear-gradient(135deg, rgb(0 0 0 / .24) 0 6px, transparent 6px 12px)",
+        "purpose": "Over hold for any no-verdict state: refusal bars, the child note, Under 16 tags, hold history marks."
+      },
+      {
+        "name": "dashed-hold",
+        "value": "1.5px dashed #56606c",
+        "purpose": "The not-grounded note border."
+      },
+      {
+        "name": "struck",
+        "value": "line-through, 1.5px, ink-3",
+        "purpose": "Any entry a guard removed, always followed by a tag naming why."
+      },
+      {
+        "name": "focus-ring",
+        "value": "3px solid #1f3fbf, offset 2px",
+        "purpose": "Every focusable element."
+      },
+      {
+        "name": "field-halo",
+        "value": "0 0 0 3px #e5eafa",
+        "purpose": "Focused text fields and token fields, with a blue border."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "drawer-lift",
+        "value": "0 12px 40px rgb(15 19 24 / .22)",
+        "purpose": "Sidebar opened as a drawer below 60rem."
+      },
+      {
+        "name": "sheet-lift-bottom",
+        "value": "0 -8px 40px rgb(15 19 24 / .25)",
+        "purpose": "Source sheet as a bottom sheet below 60rem."
+      },
+      {
+        "name": "sheet-lift-side",
+        "value": "-8px 0 40px rgb(15 19 24 / .2)",
+        "purpose": "Source sheet as a right panel from 60rem."
+      },
+      {
+        "name": "scrim",
+        "value": "rgb(15 19 24 / .38) drawer, .42 sheet",
+        "purpose": "Behind overlays only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "develop",
+        "value": "180ms steps(2, jump-none), clip-path inset from the right",
+        "purpose": "The urgency bar arriving. Off under prefers-reduced-motion."
+      },
+      {
+        "name": "drawer",
+        "value": "160ms cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Sidebar drawer sliding in."
+      },
+      {
+        "name": "disclosure",
+        "value": "160ms ease-out",
+        "purpose": "Checked-line chevron rotating 90deg."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "pair-fields",
+        "value": "36rem"
+      },
+      {
+        "name": "who-pair",
+        "value": "40rem"
+      },
+      {
+        "name": "bar-inset",
+        "value": "45rem"
+      },
+      {
+        "name": "wide",
+        "value": "60rem"
+      }
+    ],
+    "layout": {
+      "col": "45rem",
+      "colPair": "64rem",
+      "peoplePage": "72rem",
+      "side": "18.5rem",
+      "top": "3.5rem",
+      "pad": "1rem",
+      "prose": "70ch"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink-filled action for saving, continuing and confirming. There is no blue button.",
+      "html": "<button class=\"ds-btn-primary\">Save changes</button>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-btn-primary{min-height:2.75rem;padding:0 1rem;border:0;border-radius:var(--r);background:var(--ink);color:var(--paper);font:700 1.0625rem/1 var(--font);cursor:pointer;} .ds-btn-primary:hover{background:#2b323b;} .ds-btn-primary:focus-visible{outline:3px solid var(--action);outline-offset:2px;} .ds-btn-primary:disabled{background:var(--rule-2);cursor:not-allowed;}"
+    },
+    {
+      "name": "Plain Button",
+      "kind": "button",
+      "refersTo": "button-plain",
+      "description": "Paper button with an ink border, for secondary actions such as New assessment or Delete.",
+      "html": "<button class=\"ds-btn-plain\">New assessment</button>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-btn-plain{min-height:2.75rem;padding:0 1rem;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);color:var(--ink);font:700 1.0625rem/1 var(--font);cursor:pointer;} .ds-btn-plain:hover{background:var(--well);} .ds-btn-plain:focus-visible{outline:3px solid var(--action);outline-offset:2px;}"
+    },
+    {
+      "name": "Person Chips",
+      "kind": "chip",
+      "refersTo": "chip-person",
+      "description": "One tap per person across the top bar; the selected person fills with ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">You</button><button class=\"ds-chip\" aria-pressed=\"true\">Dad</button><button class=\"ds-chip\">Maya <span class=\"ds-u16\">Under 16</span></button></div>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-chips{display:flex;gap:.375rem;background:var(--chrome);padding:.5rem;} .ds-chip{height:2.375rem;display:inline-flex;align-items:center;gap:.375rem;padding:0 .75rem;border:1.5px solid var(--rule-2);border-radius:var(--r);background:var(--paper);color:var(--ink-2);font:600 .9375rem/1 var(--font);cursor:pointer;} .ds-chip:hover{color:var(--ink);border-color:var(--ink-2);} .ds-chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper);} .ds-chip:focus-visible{outline:3px solid var(--action);outline-offset:2px;} .ds-u16{font:700 .6875rem/1 var(--font);padding:.1875rem .3125rem;background:var(--hold) var(--hatch);color:#fff;}"
+    },
+    {
+      "name": "Composer",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "The bottom field and the ink send square, with the follow-up allowance pips above.",
+      "html": "<form class=\"ds-comp\"><div class=\"ds-allow\"><span class=\"ds-pip ds-used\"></span><span class=\"ds-pip\"></span><span class=\"ds-pip\"></span><span class=\"ds-pip\"></span> 3 follow-ups left in this assessment</div><div class=\"ds-row\"><textarea class=\"ds-ta\" rows=\"1\" placeholder=\"Describe what is happening, in your own words\"></textarea><button class=\"ds-send\" type=\"button\" aria-label=\"Send\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 19V5\"/><path d=\"m5.5 11.5 6.5-6.5 6.5 6.5\"/></svg></button></div></form>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-comp{display:grid;gap:.375rem;border-top:1px solid var(--rule);padding:.5rem 1rem .75rem;background:var(--paper);} .ds-allow{display:flex;gap:3px;align-items:center;font:400 .875rem var(--font);color:var(--ink-2);} .ds-pip{width:.625rem;height:.625rem;border:1.5px solid var(--ink-2);} .ds-used{background:var(--ink-2);} .ds-row{display:flex;gap:.5rem;align-items:flex-end;} .ds-ta{flex:1;min-height:3rem;resize:none;padding:.6875rem .75rem;border:1.5px solid var(--rule-2);border-radius:var(--r);background:var(--paper);color:var(--ink);font:400 1.0625rem/1.4 var(--font);} .ds-ta::placeholder{color:var(--ink-3);} .ds-ta:focus{border-color:var(--action);outline:none;box-shadow:0 0 0 3px var(--action-soft);} .ds-send{width:3rem;height:3rem;display:grid;place-items:center;border:0;border-radius:var(--r);background:var(--ink);color:var(--paper);cursor:pointer;} .ds-send:hover{background:#2b323b;} .ds-send:focus-visible{outline:3px solid var(--action);outline-offset:2px;}"
+    },
+    {
+      "name": "Urgency Bars",
+      "kind": "custom",
+      "refersTo": "urgency-bar-red",
+      "description": "The one saturated field: square, full width, verdict word and the owner's disposition. Hold is hatched and means no verdict.",
+      "html": "<div class=\"ds-bar ds-red\"><span class=\"ds-w\">RED</span><span class=\"ds-d\">Call emergency services now</span></div><div class=\"ds-bar ds-yellow\"><span class=\"ds-w\">YELLOW</span><span class=\"ds-d\">Be seen today</span></div><div class=\"ds-bar ds-green\"><span class=\"ds-w\">GREEN</span><span class=\"ds-d\">Self-care, and the signs that change the answer</span></div><div class=\"ds-bar ds-hold\"><span class=\"ds-w\">OUT OF SCOPE</span><span class=\"ds-d\">No verdict given</span></div>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-bar{display:flex;align-items:center;gap:.875rem;flex-wrap:wrap;min-height:3.75rem;padding:.75rem 1rem;margin-bottom:.75rem;} .ds-w{font:800 1.875rem/1 var(--font);letter-spacing:.01em;} .ds-d{font:700 1.0625rem/1.25 var(--font);} .ds-red{background:var(--red);color:#fff;} .ds-yellow{background:var(--yellow);color:var(--on-yellow);} .ds-green{background:var(--green);color:#fff;} .ds-hold{background:var(--hold) var(--hatch);color:#fff;}"
+    },
+    {
+      "name": "Rule Line",
+      "kind": "custom",
+      "refersTo": "urgency-bar-red",
+      "description": "A profile rule pinned under the bar it changed, quoting its source line with a citation chip.",
+      "html": "<div class=\"ds-bar2\"><span>RED</span> Call emergency services now</div><div class=\"ds-rules\"><div class=\"ds-rule\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ds-ic\"><path d=\"M7 17 17 7\"/><path d=\"M8 7h9v9\"/></svg><div><div><b>Raised YELLOW to RED</b>: type 2 diabetes on Mum's profile, with \"sweaty\", described as \"a bit\"</div><div class=\"ds-q\">“Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.”</div><div class=\"ds-src\"><button class=\"ds-cite\"><span class=\"ds-k\">CP-ACS-002</span></button><span class=\"ds-rid\">rule R1</span></div></div></div></div>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-bar2{background:var(--red);color:#fff;padding:.75rem 1rem;font:700 1.0625rem var(--font);} .ds-bar2 span{font:800 1.875rem/1 var(--font);margin-right:.75rem;} .ds-rules{border:1px solid var(--rule);border-top:0;padding:.25rem .875rem;} .ds-rule{display:grid;grid-template-columns:1.25rem 1fr;gap:.625rem;padding:.625rem 0;font:400 1.0625rem/1.5 var(--font);} .ds-ic{color:var(--action);margin-top:.125rem;} .ds-q{color:var(--ink-2);margin-top:.25rem;font-size:.9375rem;} .ds-src{margin-top:.375rem;display:flex;gap:.375rem;align-items:center;} .ds-cite{display:inline-flex;align-items:center;min-height:2.25rem;padding:0 .75rem;border:1.5px solid var(--rule-2);border-radius:var(--r);background:var(--paper);cursor:pointer;} .ds-cite:hover{border-color:var(--action);} .ds-cite:focus-visible{outline:3px solid var(--action);outline-offset:2px;} .ds-k{font:700 .875rem var(--mono);color:var(--action);} .ds-rid{font:400 .75rem var(--mono);color:var(--ink-3);}"
+    },
+    {
+      "name": "Numbered Steps and Removals",
+      "kind": "custom",
+      "refersTo": "step-numeral",
+      "description": "What to do as keypad numerals; a guard removal struck through with a tag naming why.",
+      "html": "<h3 class=\"ds-h\">What to do</h3><ol class=\"ds-keys\"><li><span class=\"ds-key\">1</span><span>Call 9-1-1 immediately</span></li><li><span class=\"ds-key\">2</span><span>Do not wait for symptoms to worsen</span></li></ol><ul class=\"ds-plain\"><li><s>Take over-the-counter antacid or ginger for possible GERD symptoms.</s><span class=\"ds-tag\">removed: medication instruction</span></li></ul>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-h{font:700 1.25rem/1.25 var(--font);letter-spacing:-.005em;margin:0 0 .5rem;} .ds-keys{list-style:none;padding:0;margin:0;display:grid;gap:.5rem;font:400 1.0625rem/1.5 var(--font);} .ds-keys li{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;align-items:start;} .ds-keys li>span:last-child{padding-top:.1875rem;} .ds-key{width:2rem;height:2rem;display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:var(--r);font:700 .9375rem/1 var(--font);} .ds-plain{margin:.5rem 0 0;padding-left:1.125rem;font:400 1.0625rem/1.5 var(--font);} .ds-plain s{color:var(--ink-3);text-decoration-thickness:1.5px;} .ds-tag{display:inline-block;font:700 .75rem var(--font);border:1px solid var(--ink-3);color:var(--ink-2);padding:.0625rem .375rem;margin-left:.375rem;border-radius:3px;}"
+    },
+    {
+      "name": "Said Row and Not-Grounded Note",
+      "kind": "card",
+      "refersTo": "said-row",
+      "description": "What the person said as a square record row, and the dashed note used when an answer cites nothing.",
+      "html": "<div class=\"ds-said\"><div class=\"ds-who\">For Dad <span>· 3:34 PM</span></div><div>It has come back again, just now.</div><div class=\"ds-tl\"><b>Timeline</b><span>T+0:00 began at rest. T+0:10 worse on deep breath.</span></div></div><div class=\"ds-ung\"><b>Not grounded in sources</b><p>This system could not ground this answer in its sources, so only the urgency is shown. A possible emergency is never withheld.</p></div>",
+      "css": ":host{--paper:#ffffff;--chrome:#f2f4f7;--well:#eaedf2;--ink:#0f1318;--ink-2:#414a56;--ink-3:#5c6572;--rule:#dce0e6;--rule-2:#b9c0ca;--action:#1f3fbf;--action-soft:#e5eafa;--red:#c8261d;--yellow:#f2b705;--on-yellow:#101418;--green:#1c7a43;--hold:#56606c;--hatch:repeating-linear-gradient(135deg,rgb(0 0 0 / .24) 0 6px,transparent 6px 12px);--font:\"Atkinson Next\",system-ui,-apple-system,\"Segoe UI\",sans-serif;--mono:\"Atkinson Mono\",ui-monospace,\"SF Mono\",Menlo,monospace;--r:6px;font-family:var(--font);color:var(--ink);} .ds-said{background:var(--well);padding:.625rem .875rem .75rem;margin-bottom:1rem;font:400 1.0625rem/1.5 var(--font);} .ds-who{font:700 .875rem var(--font);color:var(--ink-2);} .ds-who span{font-weight:400;} .ds-tl{display:grid;grid-template-columns:max-content 1fr;gap:.75rem;margin-top:.375rem;font:400 .875rem/1.5 var(--mono);color:var(--ink-2);} .ds-tl b{font:700 .875rem var(--font);color:var(--ink);} .ds-ung{border:1.5px dashed var(--hold);padding:.75rem .875rem;border-radius:var(--r);font:400 1.0625rem/1.5 var(--font);} .ds-ung p{margin:.25rem 0 0;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Health Worker's Handset",
+    "overview": "A triage conversation set in the grammar of a field worker's phone: numbered, bold, readable with one hand in bad light. The screen is paper white with a cool grey chrome layer around it and near-black ink on top. There is one action blue and it stays small. The only saturated field on any screen is the urgency bar, a square full-width band in a WHO triage colour with the category word in heavy type. Everything else that matters (a refusal, an answer that is not grounded, something a guard removed) is carried by form and by a word, never by a fourth colour: refusal is hatched, not-grounded is dashed, removed is struck through.\n\nThe reading order is the design. The person says what is happening, and it is kept as a plain record row, not a bubble. Four steps (Retrieve, Read, Write, Check) fill in while the model works. Then the urgency bar, with any profile rule lines pinned directly under it, then numbered steps in keypad squares, then why, then red flags, questions and sources. A single \"Checked\" line closes each answer and opens the measurements. Density is moderate: a 45rem reading column, 70ch prose, 2.75rem tap targets.\n\nThe world refuses the chatbot bubble stack and the soft health-app card grid. There are no cards, no avatars, no gradients, no illustration, and no decorative colour.",
+    "keyCharacteristics": [
+      "Paper, chrome and ink, with one action blue kept to links, source keys, raise icons, step progress and focus rings.",
+      "Triage colour only in full-width square urgency bars, and in the small history marks.",
+      "Refusal hatched, not-grounded dashed, removed struck through with a word tag saying why.",
+      "Atkinson Hyperlegible Next for everything read; Atkinson Hyperlegible Mono for keys, timelines and measurements.",
+      "Square bars and record rows; 6px corners on controls only.",
+      "Selection fills with ink, not blue.",
+      "One drawn stroke icon set; no glyphs or emoji stand in for icons."
+    ],
+    "rules": [
+      {
+        "name": "The One Saturated Field Rule",
+        "body": "On any screen the urgency bar is the only saturated field. The small red and yellow marks in the history list are the single allowed exception, because they index past bars.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Selects Rule",
+        "body": "Pressed person chips, compare tabs, the sex toggle, primary buttons and send fill with ink. Blue is for pointing at something (a link, a key, a focus), never for choosing.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Fourth Colour Rule",
+        "body": "A refusal, the not-grounded note, rule lines and guard removals are never drawn in a triage colour. They are told apart by pattern (hatch, dash, strike) and by their words.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Means Data Rule",
+        "body": "Mono is only for citation keys, rule ids, timelines, token and cache counts and raw model output. Never for prose, headings or labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Word Rule",
+        "body": "Weight 800 is reserved for the verdict word and the brand mark. Headings stop at 700.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only Overlays Cast Shadows Rule",
+        "body": "Nothing in the page flow has a shadow. If it does not cover the page, it is flat.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** open every answer with the urgency bar, then rule lines, then \"What to do\" as numbered keypad steps, then Why, Red flags, Questions for you, Sources, and the Checked line.",
+      "**Do** give every urgency its word as well as its colour; the bar always says RED, YELLOW, GREEN or its no-verdict word.",
+      "**Do** fill selected and primary controls with ink (#0f1318 family), and keep blue to links, source keys, raise icons, step progress and focus rings.",
+      "**Do** mark every guard removal in place with a strikethrough and a tag that names the reason.",
+      "**Do** set citation keys, rule ids, timelines and measurements in Atkinson Mono.",
+      "**Do** keep controls at a 2.75rem minimum height and answer prose at 70ch or less.",
+      "**Do** draw new icons on the existing 24px grid at 1.75 stroke with round caps and joins, in currentColor.",
+      "**Do** self-host every font and asset; nothing loads from a CDN."
+    ],
+    "donts": [
+      "**Don't** put a triage colour anywhere except the urgency bar and the history marks.",
+      "**Don't** render a refusal, a not-grounded answer, a rule line or a removal in red, yellow or green, or style a refusal so it could pass for a milder verdict.",
+      "**Don't** put what the person said in a chat bubble, or align it right.",
+      "**Don't** group answer sections into rounded cards or a card grid.",
+      "**Don't** fill a button or a selected state with blue.",
+      "**Don't** add shadows to anything that does not cover the page.",
+      "**Don't** use emoji or text glyphs as icons.",
+      "**Don't** reword the dispositions, refusal messages or rule lines; they are Viraj's copy.",
+      "**Don't** show the raw model stream by default."
+    ]
+  }
+}

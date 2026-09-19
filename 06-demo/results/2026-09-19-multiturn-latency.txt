@@ -1,0 +1,147 @@
+2026-09-19 19:10 UTC multi-turn latency, through the demo server
+config: llama-server -np 2 -c 8192 -ngl 0 (CPU), 4096 tokens per slot; demo 06-demo/server.py; temperature 0.2, reasoning off, schema on
+index: 35 chunks; macOS low power mode 0; other llama-server (8081) busy at start: None
+each turn: what was said, what was retrieved or reused, the slot, the timings, and the guarded content
+
+== single: one assessment (20260919-151041-efa6e3)
+  person You  side 0  turn 1 (first)  -> result
+  said: Burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.  [timeline: T+0:00 began about 40 minutes after a large late meal. T+0:15 worse lying down.]
+  retrieved ['CP-GERD-001', 'CP-PERI-002', 'CP-PERI-001'] (377 tokens, 69 ms)
+  reading: slot 0, evicted=False, expected reuse 0 tokens, estimate 43193 ms
+  timings: read 547 tok in 7965 ms, reused 675, wrote 199 tok in 8933 ms (22.2/s)
+  wall: server 16975 ms, client 16977 ms, first token at 8308 ms; re_read=False; follow-ups left 4; other llama busy=None
+  urgency red
+  why: Chest pain with sour taste and worse when lying flat suggests GERD, but chest pain that worsens with lying down and could indicate cardiac involvement. Risk modifiers: none in profile, no medications. Symptoms align with CP-PERI-001: chest pain that could be serious. Immediate action needed if chest pain is severe or worsening.
+  red flags: ['chest pain worse when lying down', 'sour taste in mouth']
+  next steps: ['Call 9-1-1 immediately if chest pain is severe, worsening, or associated with shortness of breath', 'Do not delay care if symptoms persist or escalate']
+  questions: []
+  citations: ['CP-PERI-001', 'CP-GERD-001']
+  removed by guards: nothing
+  person You  side 0  turn 2 (follow-up)  -> result
+  said: It is easing now that I am sitting upright. There is no pain in my arm or jaw.
+  reused ['CP-GERD-001', 'CP-PERI-002', 'CP-PERI-001'] (no retrieval)
+  reading: slot 0, evicted=False, expected reuse 1421 tokens, estimate 983 ms
+  timings: read 48 tok in 1135 ms, reused 1420, wrote 131 tok in 6064 ms (21.4/s)
+  wall: server 7203 ms, client 7205 ms, first token at 1458 ms; re_read=False; follow-ups left 3; other llama busy=None
+  urgency green
+  why: Symptoms are improving with upright positioning, no progression, no red flags present. No risk modifiers from profile or medications. GERD symptoms are typical and resolving.
+  red flags: []
+  next steps: ['Continue sitting upright if symptoms recur', 'Avoid large meals and late dinners']
+  questions: []
+  citations: ['CP-GERD-001']
+  removed by guards: {'next_steps': ['Over-the-counter antacids or H2 blockers may help if symptoms return']}
+  person You  side 0  turn 3 (follow-up)  -> result
+  said: I have had this before after big meals, and antacids helped last time.
+  reused ['CP-GERD-001', 'CP-PERI-002', 'CP-PERI-001'] (no retrieval)
+  reading: slot 0, evicted=False, expected reuse 1599 tokens, estimate 943 ms
+  timings: read 45 tok in 1125 ms, reused 1598, wrote 126 tok in 5940 ms (21.0/s)
+  wall: server 7069 ms, client 7071 ms, first token at 1458 ms; re_read=False; follow-ups left 2; other llama busy=None
+  urgency green
+  why: Symptoms are recurrent but mild and self-managed with antacids. No new red flags. Risk modifiers: none. Symptoms align with typical GERD pattern.
+  red flags: []
+  next steps: ['Avoid large meals and late dinners', 'Seek medical advice if symptoms persist or worsen']
+  questions: []
+  citations: ['CP-GERD-001']
+  removed by guards: {'next_steps': ['Continue antacids if symptoms recur']}
+
+== parallel: two assessments at once (20260919-151112-b21b6d, 20260919-151112-3504c1)
+  person Mum  side 0  turn 1 (first)  -> result
+  said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+  retrieved ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001'] (590 tokens, 81 ms)
+  reading: slot 1, evicted=False, expected reuse 0 tokens, estimate 30980 ms
+  timings: read 1413 tok in 31453 ms, reused 0, wrote 279 tok in 22387 ms (12.4/s)
+  wall: server 53984 ms, client 53986 ms, first token at 32238 ms; re_read=False; follow-ups left 4; other llama busy=None
+  urgency red (model said yellow)
+  why: 
+  red flags: []
+  next steps: []
+  questions: []
+  citations: []
+  NOT GROUNDED: the model cited nothing, so it had no grounded source to reason from; a profile rule raised the withheld yellow to red, so it is shown, not refused
+  rule R1 raised: type 2 diabetes with "sweaty", described as "a bit"
+  removed by guards: {'citations': ['PATIENT PROFILE: age 64, sex female, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin', 'SYMPTOMS: feeling a bit sick and sweaty after dinner, probably something I ate']}
+  person Dad  side 0  turn 1 (first)  -> result
+  said: I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.
+  retrieved ['CP-ANG-001', 'CP-ACS-006', 'CP-PNA-002'] (599 tokens, 80 ms)
+  reading: slot 0, evicted=False, expected reuse 0 tokens, estimate 31943 ms
+  timings: read 721 tok in 31255 ms, reused 675, wrote 189 tok in 18063 ms (10.4/s)
+  wall: server 49455 ms, client 49458 ms, first token at 32147 ms; re_read=False; follow-ups left 4; other llama busy=None
+  urgency red
+  why: Patient is 71 with atrial fibrillation and on apixaban, a high-risk anticoagulant. Chest tightness on exertion is a cardiac symptom. Apixaban increases bleeding risk if cardiac event occurs. Chest pain that does not resolve with rest is a red flag for myocardial infarction. Risk modifiers from profile and medication elevate urgency.
+  red flags: ['chest tightness on exertion', 'apixaban increases bleeding risk']
+  next steps: ['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve', 'Do not discontinue apixaban without medical advice']
+  questions: []
+  citations: ['CP-ANG-001', 'CP-PNA-002']
+  removed by guards: nothing
+  person Mum  side 0  turn 2 (follow-up)  -> result
+  said: It has not gone away, it has been an hour now.
+  reused ['CP-ACS-003', 'CP-ANG-003', 'CP-GERD-001'] (no retrieval)
+  reading: slot 1, evicted=False, expected reuse 1692 tokens, estimate 1007 ms
+  timings: read 41 tok in 1868 ms, reused 1691, wrote 236 tok in 20463 ms (11.5/s)
+  wall: server 22492 ms, client 22495 ms, first token at 2684 ms; re_read=False; follow-ups left 3; other llama busy=None
+  urgency red
+  why: 
+  red flags: []
+  next steps: []
+  questions: []
+  citations: []
+  NOT GROUNDED: the model cited nothing, so it had no grounded source to reason from
+  rule R1 supports: type 2 diabetes with "sweaty", described as "a bit"
+  removed by guards: {'citations': ['PATIENT PROFILE: age 64, sex female, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin', 'SYMPTOMS: feeling a bit sick and sweaty after dinner, probably something I ate', 'FOLLOW-UP: It has not gone away, it has been an hour now'], 'red_flags': [{'entry': 'Persistent nausea and sweating for over an hour', 'why': 'not in the case: nausea'}]}
+  person Dad  side 0  turn 2 (follow-up)  -> result
+  said: It happened again on the way back down.
+  reused ['CP-ANG-001', 'CP-ACS-006', 'CP-PNA-002'] (no retrieval)
+  reading: slot 0, evicted=False, expected reuse 1585 tokens, estimate 983 ms
+  timings: read 37 tok in 1870 ms, reused 1584, wrote 185 tok in 17854 ms (10.3/s)
+  wall: server 19884 ms, client 19887 ms, first token at 2683 ms; re_read=False; follow-ups left 3; other llama busy=None
+  urgency red
+  why: Chest tightness on exertion recurs on the way down, indicating ongoing cardiac symptom. Patient is 71 with atrial fibrillation on apixaban, a high-risk anticoagulant. Recurrence of chest tightness with exertion is a red flag for myocardial infarction. Risk modifiers from profile and medication elevate urgency.
+  red flags: ['chest tightness on exertion', 'apixaban increases bleeding risk']
+  next steps: ['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve', 'Do not discontinue apixaban without medical advice']
+  questions: []
+  citations: ['CP-ANG-001', 'CP-PNA-002']
+  removed by guards: nothing
+  isolation 20260919-151112-b21b6d: person mum, turns ['Feeling a bit sick and sweaty after dinner, probably something I ate.', 'It has not gone away, it has been an hour now.'], model turns 2, slot 1 -> OK
+  isolation 20260919-151112-3504c1: person dad, turns ['I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.', 'It happened again on the way back down.'], model turns 2, slot 0 -> OK
+
+== evict: a third assessment (20260919-151228-111906) takes a slot
+  person Aunt Sue  side 0  turn 1 (first)  -> result
+  said: Sharp pain in my chest when I breathe in, since this morning.
+  retrieved ['CP-PERI-002', 'CP-PLEU-001', 'CP-ANG-008'] (222 tokens, 320 ms)
+  reading: slot 0, evicted=False, expected reuse 0 tokens, estimate 27009 ms
+  timings: read 341 tok in 5514 ms, reused 675, wrote 182 tok in 8944 ms (20.2/s)
+  wall: server 14967 ms, client 14968 ms, first token at 6304 ms; re_read=False; follow-ups left 4; other llama busy=None
+  urgency red
+  why: Sharp chest pain with breathing, rapid progression since morning, associated with chemotherapy, and risk of pneumothorax or hemothorax. High-risk condition requiring immediate evaluation.
+  red flags: ['rapid progression since morning', 'sharp chest pain with breathing', 'chemotherapy']
+  next steps: ['Immediate emergency department evaluation', 'Chest X-ray and ECG', 'Oxygen therapy if needed', 'Blood tests for infection or tumor markers']
+  questions: []
+  citations: ['CP-PERI-002', 'CP-ANG-008', 'CP-PLEU-001']
+  rule R4 supports: breast cancer with "Sharp" on "breathe"
+  removed by guards: {'red_flags': [{'entry': 'fever', 'why': 'not in the case: fever'}, {'entry': 'fast heartbeat', 'why': 'not in the case: fast heartbeat'}]}
+  took slot 0, which belonged to 20260919-151112-3504c1
+  person Dad  side 0  turn 3 (follow-up)  -> result
+  said: Now I also feel a little dizzy.
+  reused ['CP-ANG-001', 'CP-ACS-006', 'CP-PNA-002'] (no retrieval)
+  reading: slot 1, evicted=True, expected reuse 1806 tokens, estimate 35970 ms
+  timings: read 37 tok in 1322 ms, reused 1805, wrote 193 tok in 9791 ms (19.6/s)
+  wall: server 11143 ms, client 11146 ms, first token at 1698 ms; re_read=False; follow-ups left 2; other llama busy=None
+  urgency red
+  why: Chest tightness on exertion recurs on the way down, now accompanied by dizziness. Patient is 71 with atrial fibrillation on apixaban, a high-risk anticoagulant. Dizziness with exertional chest symptoms raises concern for cardiac event. Risk modifiers from profile and medication elevate urgency.
+  red flags: ['chest tightness on exertion', 'apixaban increases bleeding risk', 'dizziness with exertion']
+  next steps: ['Call 9-1-1 immediately', 'Do not wait for symptoms to resolve', 'Do not discontinue apixaban without medical advice']
+  questions: []
+  citations: ['CP-ANG-001', 'CP-PNA-002']
+  rule R2 supports: age 71 with "tight", described as "a little"
+  removed by guards: nothing
+
+== first turn against follow-up (turns that reached the model)
+  first     You       read   547 reused   675 read-time    8.0 s  wrote  199 in   8.9 s  total   17.0 s  re_read=False
+  first     Mum       read  1413 reused     0 read-time   31.5 s  wrote  279 in  22.4 s  total   54.0 s  re_read=False
+  first     Dad       read   721 reused   675 read-time   31.3 s  wrote  189 in  18.1 s  total   49.5 s  re_read=False
+  first     Aunt Sue  read   341 reused   675 read-time    5.5 s  wrote  182 in   8.9 s  total   15.0 s  re_read=False
+  follow-up You       read    48 reused  1420 read-time    1.1 s  wrote  131 in   6.1 s  total    7.2 s  re_read=False
+  follow-up You       read    45 reused  1598 read-time    1.1 s  wrote  126 in   5.9 s  total    7.1 s  re_read=False
+  follow-up Mum       read    41 reused  1691 read-time    1.9 s  wrote  236 in  20.5 s  total   22.5 s  re_read=False
+  follow-up Dad       read    37 reused  1584 read-time    1.9 s  wrote  185 in  17.9 s  total   19.9 s  re_read=False
+  follow-up Dad       read    37 reused  1805 read-time    1.3 s  wrote  193 in   9.8 s  total   11.1 s  re_read=False

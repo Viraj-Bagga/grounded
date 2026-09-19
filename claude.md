@@ -114,6 +114,8 @@ Violating any of these silently breaks something downstream. They are not prefer
 
     **Validate each entry's LEADING key, not the whole string.** Measured 2026-09-18: on textbook ACS the model cited `"CP-ACS-003: Chest pain, heaviness, or discomfort..."`, the right key with the chunk's line appended. Exact matching dropped it, the list came out empty, and the post-flight scope check (constraint 13) refused a heart attack as out of scope in 2 of 4 runs. `screen_citations` and `screenCitations` now take the key at the start of each entry, after at most an opening bracket, and the key must be whole: `CP-ACS-0031` is not `CP-ACS-003`. Only the key is rendered, never the model's appended text, because the expander shows the chunk's real text. Prose that merely mentions a key is still dropped, and a key cited twice is kept once. Verified 2026-09-18: 4 of 30 live runs produced the annotated shape, the old rule would have refused all 4, and all 4 rendered red. Constraint 13 has the detail, including the empty-citation reds this cannot reach, which are handled there by never withholding a red.
 
+    **Prompt sections cited in place of keys, measured 2026-09-19.** Across every assessment the demo saved that day, **8 of 37 model turns cited a section of the prompt rather than a key**: `PATIENT PROFILE: ...`, `SYMPTOMS: ...`, `FOLLOW-UP: ...` and `RETRIEVED CONTEXT: CP-ACS-003 (...)`. The guard drops all of them. 4 of the 8 had no valid key left after that. All 4 were the sick-and-sweaty text on Mum, and all 4 rendered as a not-grounded red. So this is one way a turn ends up with nothing cited; the other, more common one is an empty list (Current state). **2 of the 8 had the right key behind the label**, `RETRIEVED CONTEXT: CP-ACS-003 (...)`. In one of them the model attached three glosses to that key, and two of them are not in CP-ACS-003: "more than 10 minutes" and "high-risk patients". **Whether a key behind a label should count is an open guards call.** The guard is unchanged. Constraint 15 records a compare run rescued this way. Run: `06-demo/results/2026-09-19-prompt-section-citations.txt`.
+
 10. **PEFT does not error on a `target_modules` entry that matches nothing.** As long as one other target matches, it builds the adapter and trains silently. That is exactly how `gate_proj`, which does not exist on this architecture, sat in the seven-module list and would have produced a clean-looking run. After building the config, assert the matched module count is non-zero **and equals what you expect**, per target. `03-model/qlora_config.py` does this and self-tests offline with `python 03-model/qlora_config.py`. Expected for this model: q/k/v/o_proj 4 each, up/down_proj 17 each, 50 total.
 
 11. **`red_flags` entries must be grounded in the case text, and no clinical finding may be sourced from a retrieved chunk and attributed to the patient.** Findings about the patient come only from the profile, timeline and symptom text. Retrieved context supplies criteria, never findings. A red flag is a finding in *this patient*: the chunk says which findings would be red flags, only the case text says which ones the patient actually has.
@@ -313,8 +315,10 @@ The corpus-bias explanation is ruled out as the driver, though not as a contribu
 | IITT | Disposition |
 |---|---|
 | Red | Call emergency services now |
-| Yellow | Be seen today, and how to get there |
-| Green | Self-care, plus the signs that change the answer |
+| Yellow | Be seen today |
+| Green | Self-care, and the signs that change the answer |
+
+This is the page's wording, word for word (`DISPOSITION` in `06-demo/static/js/answer.js`). The table was changed to match the page on 2026-09-19, Viraj's call, because the page is what a person reads.
 
 **The green side is under-sourced.** Government health sites cover what kills people, so costochondritis and chest wall pain are thin. Same side the model has no evidence on. Both problems point the same direction.
 

@@ -1,0 +1,57 @@
+2026-09-19 prompt sections cited in place of source keys, from every assessment saved today
+source: 06-demo/data/conversations/*.json (gitignored), each turn's raw model output; scanned 2026-09-19 20:25 UTC
+config: as 2026-09-19-multiturn-latency.txt (-np 2 -c 8192 -ngl 0, reasoning off, schema on, temperature 0.2, 35 chunks)
+rule applied by the guard: the key must lead the entry, after at most an opening bracket (claude.md constraint 9)
+
+model turns with parseable output: 37
+citation entries by shape: {'exact key': 51, 'prompt section label': 18, 'key first, text appended': 18, 'other': 10}
+turns citing a prompt section: 8; left with no valid key: 4
+
+-- 20260919-151112-b21b6d  Mum  turn 1: model yellow, shown red, NOT GROUNDED; keys kept []
+   said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+   dropped: PATIENT PROFILE: age 64, sex female, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin
+   dropped: SYMPTOMS: feeling a bit sick and sweaty after dinner, probably something I ate
+-- 20260919-151112-b21b6d  Mum  turn 2: model red, shown red, NOT GROUNDED; keys kept []
+   said: It has not gone away, it has been an hour now.
+   dropped: PATIENT PROFILE: age 64, sex female, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin
+   dropped: SYMPTOMS: feeling a bit sick and sweaty after dinner, probably something I ate
+   dropped: FOLLOW-UP: It has not gone away, it has been an hour now
+-- 20260919-152635-baf4e2  Mum  turn 1: model yellow, shown red, NOT GROUNDED; keys kept []
+   said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+   dropped: PATIENT PROFILE: age 64, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin
+   dropped: SYMPTOMS: sweating, nausea, feeling sick after dinner
+   dropped: RETRIEVED CONTEXT: CP-ACS-003 (heart attack symptoms include sweating, nausea, shortness of breath, light-headedness)
+   dropped: RETRIEVED CONTEXT: CP-GERD-001 (GERD symptoms include chest pain, nausea, heartburn, regurgitation)
+-- 20260919-152635-baf4e2  Mum  turn 2: model red, shown red, NOT GROUNDED; keys kept []
+   said: It has not gone away, it has been an hour now.
+   dropped: PATIENT PROFILE: age 64, conditions: type 2 diabetes, coronary artery disease, medications: metformin, atorvastatin
+   dropped: SYMPTOMS: sweating, nausea, feeling sick after dinner
+   dropped: RETRIEVED CONTEXT: CP-ACS-003 (heart attack symptoms include sweating, nausea, shortness of breath, light-headedness)
+   dropped: RETRIEVED CONTEXT: CP-ACS-003 (if symptoms persist for more than 10 minutes, seek emergency care)
+   dropped: RETRIEVED CONTEXT: CP-ACS-003 (red flags include persistent symptoms in high-risk patients)
+-- 20260919-153147-1afc81  Grandpa  turn 1: model red, shown red; keys kept ['CP-ACS-003', 'CP-PERI-002']
+   said: Bit of a niggle in my chest, honestly it is nothing.
+   dropped: PATIENT PROFILE: Age 77, high blood pressure, recent hip replacement
+-- 20260919-153147-1afc81  Grandpa  turn 2: model red, shown red; keys kept ['CP-ACS-003', 'CP-PERI-002']
+   said: Now it is spreading to my left arm.
+   dropped: PATIENT PROFILE: Age 77, high blood pressure, recent hip replacement
+-- 20260919-161838-c33e70  Mum  turn 1: model yellow, shown red; keys kept ['CP-ACS-003', 'CP-GERD-001']
+   said: Feeling a bit sick and sweaty after dinner, probably something I ate.
+   dropped: PATIENT PROFILE: age 64, type 2 diabetes, coronary artery disease are risk modifiers
+-- 20260919-161838-c33e70  Mum  turn 2: model red, shown red; keys kept ['CP-ACS-003', 'CP-ANG-003']
+   said: It has not gone away, it has been an hour now.
+   dropped: PATIENT PROFILE: age 64, type 2 diabetes, coronary artery disease are high-risk factors
+
+CP-ACS-003 checked for the glosses the model attached to it behind 'RETRIEVED CONTEXT:':
+   'sweating': in the chunk
+   'nausea': in the chunk
+   'shortness of breath': in the chunk
+   'light-headedness': in the chunk
+   '10 minutes': NOT in the chunk
+   'high-risk': NOT in the chunk
+   'persist': NOT in the chunk
+
+reading: the guard is right to drop PATIENT PROFILE, SYMPTOMS and FOLLOW-UP entries; they are prompt text, not sources.
+The RETRIEVED CONTEXT entries carry the right key behind a label, the same class as the annotated key in constraint 9,
+and two of the three glosses on them are not in CP-ACS-003. Whether a key behind that label counts is a guards call
+(02-pairs/guards.py), not made here. The page shows the dropped entries under 'citations that are not in the source registry'.

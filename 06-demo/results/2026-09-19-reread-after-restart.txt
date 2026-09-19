@@ -1,0 +1,27 @@
+2026-09-19 19:37 UTC forced re-read: a follow-up after llama-server restarted
+config: llama-server -np 2 -c 8192 -ngl 0 (CPU), --cache-ram at its default 8 GiB; demo 06-demo/server.py;
+        macOS low power mode 0; the other session's llama-server (8081) not running
+method: first turn through the API; llama-server on 8080 killed and restarted, which empties its slot
+        caches and its host prompt cache; follow-up sent through the page by `node 06-demo/ui_check.mjs reread`
+assessment 20260919-153348-b7ac22, Dad
+
+turn 1 (first): I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.
+  -> result red
+  read 721 tokens in 11.5 s, reused 675, wrote 232 in 10.7 s, total 22.9 s
+  cache: expected 0, reused 675, re_read=False, slot 1, slot taken=False
+  removed by guards: {'follow_up_questions': ['Any shortness of breath or nausea?', 'Any pain radiating to arm or jaw?']}
+
+turn 2 (follow-up): It has come back again, just now.
+  -> result red
+  read 1664 tokens in 24.6 s, reused 0, wrote 211 in 10.4 s, total 35.1 s
+  cache: expected 1628, reused 0, re_read=True, slot 1, slot taken=False
+  removed by guards: {'follow_up_questions': ['Any shortness of breath or nausea?', 'Any pain radiating to arm or jaw?'], 'red_flags': [{'entry': 'possible ongoing myocardial infarction', 'why': 'case says resolving not persisting'}]}
+
+page checks (ui_check.mjs reread):
+  PASS  a slow read says it is re-reading, while it happens  (notice shown at 4.2 s, 'about 35 s in all')
+  PASS  the answer says it re-read everything, and why
+
+reading: a follow-up normally reads ~40 new tokens in ~1 s. With the cache gone it re-read the whole
+assessment. The page announced it while it was happening, from the elapsed read time, and the answer's
+summary line says so afterwards. It is not predicted in advance: a taken slot is usually restored from
+llama-server's host prompt cache (see 2026-09-19-multiturn-latency.txt, evict section).

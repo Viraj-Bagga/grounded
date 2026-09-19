@@ -2,503 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Offline Triage</title>
-<style>
-  :root{
-    --bg:#0d1014; --panel:#151a21; --line:#232b35; --ink:#e7ecf2; --dim:#8c99a8;
-    --red:#e5484d; --amber:#f5a524; --green:#30a46c; --accent:#6aa9ff;
-    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
-    /* Type scale, ~1.25 per step: 12 / 15 / 19 / 24. Four sizes, not seven.
-       The verdict takes the top step because urgency is what a judge must read
-       first and without hunting for it. */
-    --t-xs:12px; --t-sm:15px; --t-md:19px; --t-lg:24px;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:var(--t-sm)/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
-  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
-  h1{font-size:var(--t-md);margin:0;letter-spacing:-.2px}
-  .sub{color:var(--dim);font-size:var(--t-sm)}
-  .offline{margin-left:auto;font:var(--t-xs) var(--mono);color:var(--green);
-    border:1px solid var(--line);border-radius:999px;padding:3px 10px}
-  .offline.bad{color:var(--red)}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-  @media(max-width:860px){.grid{grid-template-columns:1fr}}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-  label{display:block;font-size:var(--t-xs);color:var(--dim);margin:10px 0 5px;
-    text-transform:uppercase;letter-spacing:.6px}
-  textarea,input{width:100%;background:#0f1319;color:var(--ink);
-    border:1px solid var(--line);border-radius:7px;padding:9px;font-size:var(--t-sm);
-    font-family:inherit;resize:vertical}
-  textarea:focus,input:focus{outline:1px solid var(--accent);border-color:var(--accent)}
-  /* Family cards: one per person, showing the facts the escalation rules read. */
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
-  .card{background:#0f1319;border:1px solid var(--line);border-radius:8px;padding:9px 10px;
-    cursor:pointer;text-align:left;color:var(--dim);font:inherit;display:flex;
-    flex-direction:column;gap:2px}
-  .card.on{border-color:var(--accent);background:#16243a;color:var(--ink)}
-  .card .nm{display:flex;align-items:center;gap:6px;font-weight:650;color:var(--ink);
-    font-size:var(--t-sm)}
-  .card .ab{margin-left:auto;font:var(--t-xs) var(--mono);color:var(--accent)}
-  .card .kid{margin-left:auto;font:var(--t-xs) var(--mono);border:1px solid var(--line);
-    border-radius:999px;padding:0 7px}
-  .card .ln{font-size:var(--t-xs);line-height:1.45}
-  .modes{display:flex;gap:6px}
-  .modes button{flex:1;background:transparent;border:1px solid var(--line);color:var(--dim);
-    padding:7px;border-radius:7px;cursor:pointer;font-size:var(--t-xs)}
-  .modes button.on{border-color:var(--accent);color:var(--ink)}
-  .hint{font-size:var(--t-xs);color:var(--dim);margin-top:6px;min-height:1em}
-  .grid.compare{grid-template-columns:1fr}
-  .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:860px){.pair{grid-template-columns:1fr}}
-  .side .who{font:var(--t-xs) var(--mono);color:var(--dim);text-transform:uppercase;
-    letter-spacing:.6px;margin-bottom:8px}
-  /* A profile rule under the verdict. Accent when it changed the answer, dim when
-     it only supports it. Never a triage colour. */
-  .esc{margin:-2px 0 12px}
-  .esc-line{border-left:2px solid var(--dim);padding:6px 0 6px 10px;margin:8px 0;
-    font-size:var(--t-sm)}
-  .esc-line.esc-raised{border-left-color:var(--accent)}
-  .esc-line b{color:var(--ink)}
-  .esc-line .q{color:var(--dim);margin-top:3px}
-  .esc-line .src{margin-top:4px;display:flex;align-items:center;flex-wrap:wrap}
-  .esc-line .rid{font:var(--t-xs) var(--mono);color:var(--dim);margin-left:4px}
-  .cont{margin-top:4px;background:transparent;border:1px solid var(--accent);color:var(--ink);
-    padding:8px 12px;border-radius:7px;cursor:pointer;font-size:var(--t-sm)}
-  .go{width:100%;margin-top:14px;background:var(--accent);color:#08121f;border:0;
-    padding:11px;border-radius:7px;font-weight:650;font-size:var(--t-sm);cursor:pointer}
-  .go:disabled{opacity:.45;cursor:not-allowed}
-  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-  .presets button{background:transparent;border:1px dashed var(--line);color:var(--dim);
-    font-size:var(--t-xs);padding:5px 9px;border-radius:6px;cursor:pointer}
-  .presets button:hover{color:var(--ink);border-color:var(--accent)}
-  .verdict{display:flex;align-items:center;gap:12px;padding:14px;border-radius:9px;
-    border:1px solid;margin-bottom:12px}
-  .verdict .dot{width:14px;height:14px;border-radius:50%;flex:none}
-  .verdict b{font-size:var(--t-lg);line-height:1.15;letter-spacing:-.2px;display:block}
-  .verdict .disp{color:var(--dim);font-size:var(--t-sm)}
-  .v-red{border-color:var(--red);background:rgba(229,72,77,.10)}
-  .v-red .dot{background:var(--red)} .v-red b{color:var(--red)}
-  .v-yellow{border-color:var(--amber);background:rgba(245,165,36,.10)}
-  .v-yellow .dot{background:var(--amber)} .v-yellow b{color:var(--amber)}
-  .v-green{border-color:var(--green);background:rgba(48,163,108,.10)}
-  .v-green .dot{background:var(--green)} .v-green b{color:var(--green)}
-  /* Refusal is deliberately NOT one of the three triage colours. It must not
-     read as a fourth, milder category. */
-  .v-refuse{border-color:var(--dim);background:rgba(140,153,168,.10)}
-  .v-refuse .dot{background:var(--dim)} .v-refuse b{color:var(--ink)}
-  h3{font-size:var(--t-xs);color:var(--dim);text-transform:uppercase;letter-spacing:.6px;
-    margin:16px 0 7px}
-  ul{margin:0;padding-left:18px} li{margin:4px 0}
-  .flag li{color:var(--red)}
-  .cite{display:inline-block;font:var(--t-xs) var(--mono);background:#0f1319;
-    border:1px solid var(--line);border-radius:6px;padding:4px 9px;margin:3px 5px 3px 0;
-    cursor:pointer;color:var(--accent)}
-  .cite:hover{border-color:var(--accent)}
-  .stream{font:var(--t-xs)/1.5 var(--mono);color:var(--dim);background:#0b0e12;
-    border:1px solid var(--line);border-radius:7px;padding:10px;max-height:200px;
-    overflow:auto;white-space:pre-wrap;word-break:break-word}
-  .meta{font:var(--t-xs) var(--mono);color:var(--dim);margin-top:10px;line-height:1.7}
-  .meta b{color:var(--ink);font-weight:600}
-  .dropped{margin-top:12px;border-left:2px solid var(--red);padding-left:10px}
-  .dropped .t{font:var(--t-xs) var(--mono);color:var(--red);text-transform:uppercase;
-    letter-spacing:.6px}
-  .dropped li{font-size:var(--t-sm);color:var(--dim);text-decoration:line-through}
-  .empty{color:var(--dim);font-size:var(--t-sm);padding:22px 0;text-align:center}
-  dialog{font-size:var(--t-sm);background:var(--panel);color:var(--ink);border:1px solid var(--line);
-    border-radius:11px;max-width:620px;width:92%;padding:0}
-  dialog::backdrop{background:rgba(0,0,0,.65)}
-  .dh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;
-    align-items:center;gap:10px}
-  .dh .k{font:var(--t-xs) var(--mono);color:var(--accent)}
-  .dh button{margin-left:auto;background:transparent;border:1px solid var(--line);
-    color:var(--dim);border-radius:6px;padding:4px 10px;cursor:pointer}
-  .db{padding:16px;white-space:pre-wrap;font-size:var(--t-sm);line-height:1.55}
-  .df{padding:12px 16px;border-top:1px solid var(--line);font:var(--t-xs) var(--mono);
-    color:var(--dim);line-height:1.7}
-  .df a{color:var(--accent)}
-  .warn{border:1px solid var(--amber);background:rgba(245,165,36,.09);color:var(--amber);
-    border-radius:7px;padding:9px;font:var(--t-xs) var(--mono);margin-bottom:10px}
-  /* A red that cites nothing. Neutral grey like the refusal, so the line under
-     the red banner never reads as a second triage colour. */
-  .ungrounded{border:1px solid var(--dim);background:rgba(140,153,168,.10);
-    border-radius:7px;padding:10px 12px;margin-bottom:10px}
-  .ungrounded .t{font:var(--t-xs) var(--mono);color:var(--dim);text-transform:uppercase;
-    letter-spacing:.6px;margin-bottom:4px}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f2f4f7">
+<title>Triage</title>
+<link rel="preload" href="/fonts/atkinson-hyperlegible-next-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/app.css">
+<script type="module" src="/js/app.js"></script>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Offline Triage</h1>
-    <span class="sub">WHO Interagency Integrated Triage Tool</span>
-    <span class="offline" id="net">checking…</span>
-  </header>
-
-  <div class="grid" id="grid">
-    <div class="panel">
-      <label for="sym">What is happening</label>
-      <textarea id="sym" rows="4" placeholder="Describe the symptoms in your own words"></textarea>
-      <div class="presets" id="presets"></div>
-
-      <label for="tl">Timeline <span style="text-transform:none">(optional)</span></label>
-      <textarea id="tl" rows="2" placeholder="T+0:00 began while sitting…"></textarea>
-
-      <label>Who is this for</label>
-      <div class="modes" id="modes">
-        <button data-m="single" class="on">One person</button>
-        <button data-m="compare">Compare two</button>
-      </div>
-      <div class="cards" id="profiles"></div>
-      <div class="hint" id="hint"></div>
-
-      <button class="go" id="go">Assess</button>
-      <div class="meta" id="retrieved"></div>
+<!--
+THESIS: A triage conversation in the health worker's handset grammar: numbered, bold, one hand in bad light. It refuses the chatbot bubble stack and the soft health-app card grid.
+OWN-WORLD: Paper white, cool chrome grey, near-black ink, one action blue. Triage colours only in full-width urgency bars. Refusal hatched, not-grounded dashed, removed struck through. Atkinson Hyperlegible, its mono for keys and measurements. Square bars, keypad numerals, 6px controls, one drawn icon set.
+STORY: The person says what is happening, watches four steps work, reads the urgency first, then what to do, then why, and opens any source. Follow-ups reuse what was read and say so.
+FIRST VIEWPORT: Person chips across the top, one tap each. Empty: the person's facts, what the app watches for, five numbered presets, the composer at the bottom. Answered: a full-width urgency bar with rule lines pinned under it, then numbered steps.
+FORM: The Health Worker's Handset, grounded list position 4, seed 18445d6f.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<div class="app">
+  <nav class="side" id="side" aria-label="Assessments">
+    <div class="side-head">
+      <div class="mark"><span class="dot" aria-hidden="true"></span>Triage</div>
+      <a class="new-btn" href="/" data-link><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New assessment</a>
     </div>
-
-    <div class="panel">
-      <div id="out"><div class="empty">No assessment yet.</div></div>
-      <div id="streamWrap" style="display:none">
-        <h3>Generating on-device</h3>
-        <div class="stream" id="stream"></div>
-      </div>
+    <div class="history" id="history"></div>
+    <div class="side-foot">
+      <a class="foot-link" id="people-link" href="/people" data-link>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18.5 14.2a6.5 6.5 0 0 1 3 5.8"/></svg>
+        People<span class="n" id="people-n"></span></a>
+      <div class="status" id="status" role="status"></div>
     </div>
+  </nav>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="top">
+      <button class="icon-btn only-narrow" id="menu" type="button" aria-label="Assessments and people" aria-expanded="false" aria-controls="side">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="chips" id="chips" role="toolbar" aria-label="Who this is for"></div>
+      <button class="icon-btn only-narrow" id="compare-narrow" type="button" aria-label="Compare two people" aria-pressed="false">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="7" height="15" rx="1"/><rect x="13.5" y="4.5" width="7" height="15" rx="1"/></svg></button>
+      <a class="icon-btn only-narrow" href="/" data-link aria-label="New assessment">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>
+    </header>
+    <main id="main" tabindex="-1"><div class="page"><p class="loading">Loading…</p></div></main>
   </div>
 </div>
 
-<dialog id="dlg">
-  <div class="dh"><span class="k" id="dk"></span><button id="dx">Close</button></div>
-  <div class="db" id="dbody"></div>
-  <div class="df" id="dfoot"></div>
+<dialog class="sheet" id="sheet" aria-labelledby="sheet-k">
+  <div class="sh-head"><span class="k" id="sheet-k"></span><span class="n" id="sheet-n"></span>
+    <button class="icon-btn" id="sheet-x" type="button" aria-label="Close">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sh-body" id="sheet-body"></div>
+  <div class="sh-foot" id="sheet-foot"></div>
 </dialog>
-
-<script>
-const $ = s => document.querySelector(s);
-let mode = 'single', picked = ['self'], FAMILY = [], busy = false;
-
-const PRESETS = [
-  ["Crushing chest pressure",
-   "Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.",
-   "T+0:00 began while sitting watching television. T+0:04 spread to the jaw. T+0:11 sweating and nausea. T+0:26 unchanged after resting."],
-  ["Burning after a meal",
-   "Burning in my chest after dinner, worse when I lie flat, with a sour taste coming up.",
-   "T+0:00 began about 40 minutes after a large late meal. T+0:15 worse lying down. T+0:35 eased sitting upright."],
-  ["Tight chest on the stairs",
-   "I got tight in the chest going up the stairs like I sometimes do. It went away once I sat down.",
-   "T+0:00 began climbing two flights. T+0:03 sat down to rest. T+0:06 resolved completely."],
-  // BEAT 3. Retrieval reliably supplies CP-PERI-002 here, and its
-  // "Fast heartbeat / Fever" lines are the ones the model copies onto patients
-  // who have neither, so the grounding guard has something real to catch.
-  //
-  // The case is SILENT on fever and heart rate, deliberately. An earlier
-  // version of this preset said "No fever, and my heart does not feel like it
-  // is racing" and the guard passed a fever red flag straight through, because
-  // the check asked only whether the word appeared in the case at all. A
-  // patient denying a finding was being read as evidence FOR it. That is fixed
-  // now, but the preset stays silent rather than relying on the fix, because a
-  // demo should not depend on the subtlest branch in the code.
-  ["Guards firing",
-   "Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.",
-   "T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion."],
-  // PROFILE ESCALATION. Picks Mum, because her diabetes is what raises it: R1,
-  // CP-ACS-002. Measured 2026-09-19 at temperature 0.2: the model said yellow,
-  // with citations, in 3 of 3 runs and R1 raised each to red. In the sweep the
-  // same text was refused twice, and the refusal rescue now raises those too.
-  // In compare mode it sets You against Mum. 06-demo/results/2026-09-19-rescue-preset-live.txt
-  ["Sick and sweaty (Mum)",
-   "Feeling a bit sick and sweaty after dinner, probably something I ate.",
-   "", "mum"],
-];
-
-const DISPOSITION = {
-  red:    "Call emergency services now",
-  yellow: "Be seen today",
-  green:  "Self-care, and the signs that change the answer",
-};
-
-function renderPresets(){
-  $('#presets').innerHTML = '';
-  PRESETS.forEach(([label, sym, tl, who]) => {
-    const b = document.createElement('button');
-    b.textContent = label;
-    b.onclick = () => {
-      $('#sym').value = sym; $('#tl').value = tl;
-      // A preset that needs a profile picks it: alone, or against You to compare.
-      if (who){ picked = mode === 'compare' ? ['self', who] : [who]; renderProfiles(); }
-    };
-    $('#presets').appendChild(b);
-  });
-}
-
-function facts(p){
-  const out = [`${p.age} · ${p.sex}`];
-  if (p.conditions.length) out.push(p.conditions.join(', '));
-  if (p.medications.length) out.push(p.medications.join(', '));
-  if (p.surgery) out.push(`${p.surgery.what}, ${p.surgery.weeks_ago} weeks ago`);
-  if (!p.conditions.length && !p.medications.length && !p.surgery)
-    out.push('no conditions, no medications');
-  return out;
-}
-
-function renderProfiles(){
-  const host = $('#profiles'); host.innerHTML = '';
-  FAMILY.forEach(p => {
-    const b = document.createElement('button');
-    const slot = picked.indexOf(p.id);
-    b.className = 'card' + (slot >= 0 ? ' on' : '');
-    b.innerHTML = `<span class="nm">${esc(p.label)}` +
-      (p.child ? '<span class="kid">child</span>' : '') +
-      (mode === 'compare' && slot >= 0 ? `<span class="ab">${'AB'[slot]}</span>` : '') +
-      '</span>' + facts(p).map(f => `<span class="ln">${esc(f)}</span>`).join('');
-    b.onclick = () => pick(p.id);
-    host.appendChild(b);
-  });
-  $('#hint').textContent = mode === 'compare' && picked.length !== 2
-    ? 'Pick two people to compare.' : '';
-  $('#go').textContent = mode === 'compare' ? 'Assess both' : 'Assess';
-  $('#go').disabled = busy || (mode === 'compare' && picked.length !== 2);
-}
-
-function pick(id){
-  if (mode === 'single') picked = [id];
-  else if (picked.includes(id)) picked = picked.filter(x => x !== id);
-  else picked = [...picked, id].slice(-2);
-  renderProfiles();
-}
-
-function setMode(m){
-  mode = m;
-  if (m === 'single') picked = picked.length ? picked.slice(0, 1) : ['self'];
-  document.querySelectorAll('#modes button').forEach(b =>
-    b.classList.toggle('on', b.dataset.m === m));
-  $('#grid').classList.toggle('compare', m === 'compare');
-  $('#out').innerHTML = '<div class="empty">No assessment yet.</div>';
-  renderProfiles();
-}
-document.querySelectorAll('#modes button').forEach(b => b.onclick = () => setMode(b.dataset.m));
-
-async function health(){
-  try{
-    const r = await (await fetch('/api/health')).json();
-    $('#net').textContent = r.ok ? 'offline · on-device' : 'llama-server down';
-    $('#net').className = 'offline' + (r.ok ? '' : ' bad');
-    FAMILY = r.profiles;
-    renderProfiles();
-  }catch(e){
-    $('#net').textContent = 'server down'; $('#net').className = 'offline bad';
-  }
-}
-
-function list(items){
-  return items && items.length
-    ? '<ul>' + items.map(x => `<li>${esc(x)}</li>`).join('') + '</ul>'
-    : '<div style="font-size:var(--t-sm);color:var(--dim)">none</div>';
-}
-const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-
-function banner(d){
-  const u = d.result.urgency;
-  return `
-    <div class="verdict v-${u}">
-      <span class="dot"></span>
-      <span><b>${u.toUpperCase()}</b><div class="disp">${DISPOSITION[u]||''}</div></span>
-      <span style="margin-left:auto;font:var(--t-xs) var(--mono);color:var(--dim)">
-        ${esc(d.profile)}</span>
-    </div>`;
-}
-
-function removed(drop, flag){
-  const any = (drop.citations||[]).length + (drop.next_steps||[]).length
-            + (drop.follow_up_questions||[]).length + (drop.red_flags||[]).length;
-  if (!any && !flag.length) return '';
-  return `<div class="dropped"><div class="t">Removed by app guards</div><ul>` +
-    (drop.red_flags||[]).map(x=>`<li>${esc(x.entry)} — ${esc(x.why)}</li>`).join('') +
-    (drop.next_steps||[]).map(x=>`<li>${esc(x)} — medication instruction</li>`).join('') +
-    (drop.citations||[]).map(x=>`<li>${esc(x)} — not in citation registry</li>`).join('') +
-    (drop.follow_up_questions||[]).map(x=>`<li>${esc(x)} — questions on a red</li>`).join('') +
-    flag.map(x=>`<li style="text-decoration:none;color:var(--amber)">${esc(x)} — flagged, kept</li>`).join('') +
-    `</ul></div>`;
-}
-
-function timing(d){
-  const t = d.timings || {};
-  return `<div class="meta">
-    <b>${(d.total_ms/1000).toFixed(1)}s</b> total ·
-    retrieval <b>${d.retrieved_tokens}</b> tok ·
-    prompt <b>${t.prompt_n ?? '?'}</b> tok at <b>${(t.prompt_per_second??0).toFixed(1)}</b>/s ·
-    generated <b>${t.predicted_n ?? '?'}</b> tok at <b>${(t.predicted_per_second??0).toFixed(1)}</b>/s
-    <br>reasoning off · schema-constrained · guards applied · no network</div>`;
-}
-
-// The profile rules that fired, one line each under the verdict: which fact on
-// whose profile, what in the case, and the quoted line that supports it.
-function escalationLines(d){
-  const e = d.escalation;
-  if (!e || !e.fired || !e.fired.length) return '';
-  const whose = d.profile === 'You' ? 'your profile' : `${esc(d.profile)}'s profile`;
-  const up = s => esc(String(s).toUpperCase());
-  return '<div class="esc">' + e.fired.map(f => {
-    const head = f.status === 'raised' ? `Raised ${up(e.original)} to ${up(e.final)}`
-      : f.status === 'supports' ? `Supports this ${esc(e.final)}`
-      : f.status === 'at_least' ? `Supports at least ${esc(f.cap)}`
-      : 'Flagged, no change';
-    const keys = f.keys.map(k =>
-      `<span class="cite" data-k="${esc(k)}">${esc(k)}</span>`).join('');
-    return `<div class="esc-line esc-${esc(f.status)}">
-      <div><b>${head}</b> · ${esc(f.fact)} on ${whose}, with ${esc(f.symptom)}</div>
-      <div class="q">“${esc(f.quote)}”</div>
-      <div class="src">${keys}<span class="rid">rule ${esc(f.rule)}</span></div></div>`;
-  }).join('') + '</div>';
-}
-
-function render(d){
-  const r = d.result;
-  let html = banner(d) + escalationLines(d) + `
-    <h3>Why</h3><div>${esc(r.rationale||'')}</div>
-    <h3>Red flags</h3><div class="flag">${list(r.red_flags)}</div>
-    <h3>What to do</h3>${list(r.next_steps)}`;
-
-  if (r.follow_up_questions && r.follow_up_questions.length)
-    html += `<h3>Questions</h3>${list(r.follow_up_questions)}`;
-
-  html += `<h3>Sources</h3><div>` +
-    (d.citations.length
-      ? d.citations.map(c => `<span class="cite" data-k="${c.key}">${c.key}</span>`).join('')
-      : '<span style="font-size:var(--t-sm);color:var(--dim)">none cited</span>') + `</div>`;
-
-  return html + removed(d.dropped || {}, (d.flagged||{}).next_steps || []) + timing(d);
-}
-
-// A red that cites nothing. The urgency and its disposition are shown, because
-// a possible emergency is never withheld. Nothing else the model wrote is shown,
-// and there is no sources panel, because none of it is grounded. Only removed
-// citations are listed, since they are why nothing grounded. Profile rules still
-// show: they quote their own chunks. See post_flight in 02-pairs/guards.py.
-function renderUngrounded(d){
-  return banner(d) + escalationLines(d) +
-    `<div class="ungrounded"><div class="t">Not grounded in sources</div>` +
-    `${esc(d.ungrounded.note)}</div>` +
-    removed({citations: (d.dropped || {}).citations}, []) +
-    `<div class="meta"><b>Why:</b> ${esc(d.ungrounded.reason)}</div>` + timing(d);
-}
-
-// No verdict: out of scope, a categorical exclusion, or a child's profile.
-function renderRefused(d){
-  const title = d.child ? 'NOT ASSESSED' : 'OUT OF SCOPE';
-  const disp = d.child ? 'Child profile, no verdict given' : 'No verdict given';
-  return `<div class="verdict v-refuse"><span class="dot"></span>
-      <span><b>${title}</b><div class="disp">${disp}</div></span>
-      <span style="margin-left:auto;font:var(--t-xs) var(--mono);color:var(--dim)">
-        ${esc(d.profile||'')}</span></div>
-    <div style="margin:10px 0">${esc(d.message)}</div>
-    <div class="meta"><b>Why:</b> ${esc(d.reason)}` +
-    (d.urgency_withheld ? `<br>a <b>${esc(d.urgency_withheld)}</b> verdict was produced and withheld` : '') +
-    (d.nearest ? `<br>nearest chunks: ${esc(d.nearest.join(', '))}` : '') +
-    (d.child ? '' : '<br>this system covers chest pain only, 22 sources') + '</div>';
-}
-
-// A child word on an adult profile. Asks who this is about; refuses nothing.
-function renderConfirm(d){
-  return `<div class="verdict v-refuse"><span class="dot"></span>
-      <span><b>WHO IS THIS FOR?</b><div class="disp">No verdict yet</div></span>
-      <span style="margin-left:auto;font:var(--t-xs) var(--mono);color:var(--dim)">
-        ${esc(d.profile)}</span></div>
-    <div style="margin:10px 0">${esc(d.message)}</div>
-    <button class="cont">Continue as ${esc(d.who)}</button>`;
-}
-
-async function openChunk(key){
-  const r = await fetch('/api/chunk/' + encodeURIComponent(key));
-  if (!r.ok){ alert(key + ' does not resolve'); return; }
-  const c = await r.json();
-  $('#dk').textContent = c.key + '  ·  ' + c.token_count + ' tokens';
-  $('#dbody').textContent = c.text;
-  $('#dfoot').innerHTML =
-    `${esc(c.publisher)}<br><a href="${esc(c.url)}" target="_blank">${esc(c.url)}</a>` +
-    `<br>retrieved ${esc(c.retrieval_date)} · ${esc(c.attribution)}`;
-  $('#dlg').showModal();
-}
-$('#dx').onclick = () => $('#dlg').close();
-
-// One assessment, streamed into `box`. The same path for one person or two.
-async function assess(pid, box, confirmed){
-  const single = mode === 'single';
-  box.innerHTML = '<div class="empty">Retrieving…</div>';
-  if (single){
-    $('#retrieved').textContent = '';
-    $('#stream').textContent = '';
-    $('#streamWrap').style.display = 'block';
-  }
-  let ntok = 0;
-  try {
-    const res = await fetch('/api/triage', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({symptoms: $('#sym').value.trim(),
-                            timeline: $('#tl').value.trim(),
-                            profile: pid, confirmed_subject: !!confirmed})
-    });
-    const rd = res.body.getReader(), dec = new TextDecoder();
-    let buf = '';
-    while (true){
-      const {value, done} = await rd.read();
-      if (done) break;
-      buf += dec.decode(value, {stream:true});
-      const parts = buf.split('\n\n'); buf = parts.pop();
-      for (const p of parts){
-        if (!p.startsWith('data: ')) continue;
-        const d = JSON.parse(p.slice(6));
-        if (d.event === 'retrieved'){
-          if (single) $('#retrieved').innerHTML = `retrieved <b>${d.keys.length}</b> chunks, ` +
-            `<b>${d.tokens}</b> tokens in <b>${d.ms}ms</b><br>` +
-            d.chunks.map(c=>`${c.key} (${c.tokens}t, ${c.category})`).join('<br>');
-          box.innerHTML = '<div class="empty">Generating…</div>';
-        } else if (d.event === 'token'){
-          ntok++;
-          if (single){
-            $('#stream').textContent += d.t;
-            $('#stream').scrollTop = $('#stream').scrollHeight;
-          } else if (ntok % 8 === 1){
-            box.innerHTML = `<div class="empty">Generating… ${ntok} tokens</div>`;
-          }
-        } else if (d.event === 'warn'){
-          box.innerHTML = `<div class="warn">${esc(d.message)}</div>`;
-        } else if (d.event === 'result'){
-          box.innerHTML = d.ungrounded ? renderUngrounded(d) : render(d);
-        } else if (d.event === 'refused'){
-          box.innerHTML = renderRefused(d);
-        } else if (d.event === 'confirm_subject'){
-          box.innerHTML = renderConfirm(d);
-          box.querySelector('.cont').onclick = () => run(() => assess(pid, box, true));
-        } else if (d.event === 'error'){
-          box.innerHTML = `<div class="warn">${esc(d.message)}</div>`;
-        }
-        box.querySelectorAll('.cite').forEach(el => el.onclick = () => openChunk(el.dataset.k));
-      }
-    }
-  } finally {
-    if (single) $('#streamWrap').style.display = 'none';
-  }
-}
-
-async function run(fn){
-  busy = true; renderProfiles();
-  try { await fn(); } finally { busy = false; renderProfiles(); }
-}
-
-$('#go').onclick = () => {
-  if (!$('#sym').value.trim()) return;
-  if (mode === 'single') return run(() => assess(picked[0], $('#out')));
-  const byId = Object.fromEntries(FAMILY.map(p => [p.id, p]));
-  $('#out').innerHTML = '<div class="pair">' + picked.map((id, i) =>
-    `<div class="side"><div class="who">${'AB'[i]} · ${esc(byId[id].label)}</div>` +
-    '<div class="box"></div></div>').join('') + '</div>';
-  const boxes = [...$('#out').querySelectorAll('.box')];
-  return run(() => Promise.all(picked.map((id, i) => assess(id, boxes[i]))));
-};
-
-renderPresets(); health();
-</script>
 </body>
 </html>
