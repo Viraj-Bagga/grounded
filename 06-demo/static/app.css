@@ -246,7 +246,8 @@ ol.keys li > span:last-child { padding-top: .1875rem; }
 
 ul.plain { margin: 0; padding-left: 1.125rem; }
 ul.plain li { margin: .25rem 0; }
-li.gone s { color: var(--ink-3); text-decoration-thickness: 1.5px; }
+.gone s { color: var(--ink-3); text-decoration-thickness: 1.5px; }
+p.gone { margin: 0; }
 ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gone-head { margin: 0 0 .25rem; color: var(--ink-2); font-size: var(--t-15); }
 .gone-head .tag { margin: 0 .5rem 0 0; }

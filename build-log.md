@@ -4555,9 +4555,16 @@ yourself.", "Stay where you are.". They need no citation for the same reason
 the disposition needs none. The model's steps are not hidden: they render
 struck through, tagged "removed: written for a yellow". `RAISED_RED_STEPS` in
 `06-demo/pipeline.py`, and the compare check in `ui_check.mjs` asserts both
-halves. Not covered: a raise that ends at yellow, and the rationale, which is
-always still the model's, so a raised red can carry a "Why" that argues for a
-yellow, as these runs do.
+halves.
+
+**Then the rationale, same pass, same call.** A red bar above "no red flags
+present" reads as the system arguing against its own verdict, so a raise of any
+kind now strikes the Why out too, whole and tagged the same way, with nothing
+put in its place: the rule line above the answer already says what raised it
+and quotes its chunk. The steps are still replaced only on a raise to red,
+because those three lines are red instructions and there is no yellow
+equivalent, so a raise that ends at yellow still shows the model's steps.
+Constraint 16 carries both halves.
 
 **Also Viraj's calls, same pass.** The still-writing notice reads "Still
 writing..." in a single assessment and keeps "this side" only in a comparison.

@@ -133,7 +133,14 @@ function resultHTML(ev, ctx) {
     (goneLower.length ? `<ul class="plain">${goneLower.map(x =>
       gone(x, wrote ? `written for a ${wrote}` : "does not match a red")).join("")}</ul>` : ""));
 
-  h += section("Why", `<p>${esc(r.rationale || "")}</p>`);
+  // Constraint 16: a raise strikes the rationale out rather than leave a "Why"
+  // that argues against the verdict above it. Not clipped, so nothing is hidden.
+  const goneWhy = drop.rationale_urgency || "";
+  h += section("Why",
+    (r.rationale ? `<p>${esc(r.rationale)}</p>` : "") +
+    (goneWhy ? `<p class="gone"><s>${esc(goneWhy)}</s><span class="tag">removed: ` +
+      `${wrote ? `written for a ${esc(wrote)}` : "does not match the verdict"}</span></p>` : "") +
+    (!r.rationale && !goneWhy ? `<p class="muted">No reason given.</p>` : ""));
 
   const flags = r.red_flags || [], goneFlags = drop.red_flags || [];
   h += section("Red flags", flags.length || goneFlags.length
@@ -210,7 +217,7 @@ function errorHTML(ev) {
 
 function countRemoved(d = {}) {
   return ["red_flags", "next_steps", "next_steps_urgency", "citations", "follow_up_questions"]
-    .reduce((n, k) => n + ((d[k] || []).length), 0);
+    .reduce((n, k) => n + ((d[k] || []).length), 0) + (d.rationale_urgency ? 1 : 0);
 }
 
 function checkedHTML(ev, ctx) {

@@ -121,7 +121,7 @@ function previewHTML(pv, label) {
   const name = label || "This person";
   let h = `<h2>What the app will watch for</h2>`;
   if (pv.child) {
-    h += `<div class="kid-note" style="margin-top:0">${esc(name)} is under 16. The app will not assess them.</div>`;
+    h += `<div class="kid-note" style="margin-top:0">${esc(name)} is under 16. This app can't assess children.</div>`;
   } else if (!pv.watching.length) {
     h += `<p class="muted" style="margin:0">No profile rules apply. The model still assesses every answer, and the guards still run.</p>`;
   } else {

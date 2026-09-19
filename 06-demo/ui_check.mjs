@@ -225,6 +225,14 @@ async function compare(out) {
     check("a raised red shows the app's steps",
       ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raised.includes(t)), raised.slice(0, 300));
     check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raised), raised.slice(0, 300));
+    check("the model's rationale is struck out, whole and tagged", await p.eval(`(() => {
+      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+      const why = [...side.querySelectorAll(".sec")].find(sec => /^Why\\b/.test(sec.innerText));
+      const struck = why && why.querySelector("p.gone s");
+      return !!struck && !why.querySelector("h3 + p:not(.gone)") &&
+        struck.innerText.length > 80 && !struck.innerText.endsWith("…") &&
+        /removed: written for a/.test(why.innerText);
+    })()`) === true);
   }
   await oneLeftEdge(p, "compare");
   await p.shot(join(out, "desktop-compare.png"), true);

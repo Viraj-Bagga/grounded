@@ -240,3 +240,55 @@ change: when the escalation layer raises a verdict to red, the model's next_step
 reading: the red now carries steps that match it. The model's own steps stay visible as removed, so the swap is not
 hidden. The rationale is untouched and still reads as the model's yellow reasoning, which constraint 16 records as
 not covered.
+
+
+==================================================================================================
+2026-09-19 21:14 UTC (17:14 local) constraint 16 extended: a raise strikes out the rationale as well
+config: as above; demo server restarted 17:14 with the change; history cleared at 17:11, so these are the only
+        assessments on disk
+change: on ANY raise the model's rationale is removed and rendered struck through, whole and tagged the same way
+        as the steps. Nothing replaces it: the rule line above the answer says what raised the verdict and quotes
+        its chunk. Steps are still replaced only on a raise to red.
+
+== as printed
+  === compare  17:14:35
+  PASS  preset 5 turns Compare on by itself
+  PASS  preset 5 sets You against Mum
+  PASS  preset 5 sends by itself
+        compare, both sides, one click: 17.5 s
+  PASS  both sides answered
+  PASS  a raised red shows the app's steps
+  PASS  the model's own steps are shown as removed
+  PASS  the model's rationale is struck out, whole and tagged
+  PASS  compare: record, answers and composer share one left edge
+  all passed
+  === compare exit 0
+  === flow  17:14:56
+  PASS  a preset keeps the person picked
+  PASS  the preset fills the composer
+  PASS  the URL becomes the assessment's own
+  PASS  a verdict bar is shown
+  PASS  the checked line is shown
+  PASS  the follow-up allowance is shown before it runs out
+  PASS  the checked line opens its details
+  PASS  a source chip opens the real chunk
+        follow-up: 12.0 s
+  PASS  the follow-up reports its cache reuse
+  PASS  the allowance counts down
+  PASS  the drawer lists this assessment
+  all passed
+  === flow exit 0
+
+== the raised red, turn by turn
+-- 20260919-171437-783ea6  for You and Mum
+  You: refused, the model cited nothing, so it had no grounded source to reason from; withheld green
+  Mum: red (model said yellow), total 16.7 s
+    rule R1 raised: type 2 diabetes with "indigestion", described as "A bit" [CP-ACS-002]
+    rationale shown: ''
+    rationale removed as written for a yellow: Indigestion is a common symptom of angina and can occur in patients with coronary artery disease. However, no chest pain, shortness of breath, or other red-flag symptoms are present. Risk modifiers from profile (diabetes, CAD) increase concern but do not meet emergency criteria.
+    steps shown: ['Call emergency services now.', 'Do not drive yourself.', 'Stay where you are.']
+    steps removed: ['Monitor symptoms; if chest pain, pressure, or discomfort develops, seek immediate care.', 'Take medication as prescribed; do not stop unless directed by provider.']
+    citations kept: ['CP-PE-003', 'CP-ANG-003']
+
+reading: the red now carries only what matches it. The model's own words are all still on screen, struck
+through and tagged, and they count in the removed total on the Checked line (5 removed here).

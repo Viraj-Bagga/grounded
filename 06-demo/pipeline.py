@@ -503,8 +503,15 @@ class Engine:
             result["follow_up_questions"] = kept_q
             dropped = dict(dropped, follow_up_questions=list(
                 dropped.get("follow_up_questions") or []) + cleared)
-            # Constraint 16: the steps must match the urgency that is SHOWN.
-            # The model's steps go out as removed, so the swap is visible.
+            # Constraint 16: what is shown must match the urgency that is
+            # SHOWN. The rationale argues for the verdict the model gave, so a
+            # raise strikes it out whichever level it lands on. Both the
+            # rationale and the steps go out as removed, so nothing is hidden.
+            if result.get("rationale"):
+                dropped = dict(dropped, rationale_urgency=result["rationale"])
+                result["rationale"] = ""
+            # Steps are replaced only on a raise to red: those are the app's own
+            # words, and there is no equivalent set for a raise to yellow.
             if result["urgency"] == "red":
                 dropped = dict(dropped, next_steps_urgency=list(
                     result.get("next_steps") or []))
