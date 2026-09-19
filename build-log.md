@@ -4774,3 +4774,72 @@ in O what the model wrote instead. An ungrounded red carries the not-grounded
 note in A. The header names the model, the corpus sha256 and the prompt sha256,
 and says plainly that it is not a clinical record. Four page checks cover it,
 and an example note is in `06-demo/results/2026-09-19-soap-note.txt`.
+### 2026-09-19 Regional add-on packs, frozen and built: india and africa-ssa
+
+**Add-ons, not swaps, and not wired into retrieval.** Two experimental overlay
+packs on `corpus-base`: `regional-india` (CP-RHD, CP-TB, emergency number 108)
+and `regional-africa-ssa` (CP-TB, CP-SCACS, no single number, local emergency
+services). Viraj's call: the scope floor, the refusal wording and the "35
+sources" line all assume the narrow chest-pain corpus, so rewiring retrieval
+the night before judging was not worth the risk. The demo's region selector
+says which pack is active and what it holds, and every card says retrieval is
+unchanged. Nothing was written into `01-data`; the base registry stays US
+government public domain and frozen.
+
+**Sources verified with the pipeline's own extractor before anything was
+chunked.** WHO rheumatic heart disease, updated 24 January 2025, "Signs and
+symptoms", 12 list items. WHO tuberculosis, updated 24 March 2026, "Symptoms",
+7 items with chest pain among them. **The CDC sickle cell pages were rejected
+as unusable:** the complications page renders 2 sections and 0 list items
+because its body is client-side, and the about page has no symptom list. NHLBI's
+sickle cell symptoms page was swapped in on Viraj's call, same publisher as the
+base corpus, public domain, and its "Know when to seek emergency medical care"
+list carries acute chest syndrome in the format that retrieves.
+
+**The RHD split is Viraj's call and is recorded as data.** WHO puts acute
+rheumatic fever (fever, migrating joint pain, chorea, nodules) and rheumatic
+heart disease (chest pain, breathlessness, swelling, palpitations) under one
+heading. Chunked together they would teach retrieval that fever and joint pain
+belong to a chest case. The cut is an anchor sentence in
+`07-distribute/regional/sources.yaml`, not a heuristic, so the boundary can be
+read and argued with.
+
+**7 chunks, none over the 256 word-piece ceiling:** CP-RHD-001 (68), CP-RHD-002
+(41), CP-TB-001 (69), CP-TB-002 (140), CP-SCACS-001 (149), CP-SCACS-002 (113),
+CP-SCACS-003 (147). The NHLBI emergency list is 392 words, so it is cut in
+three, each repeating the section's own lead sentence so a chunk retrieved alone
+still says these are emergencies. **The TB chunks are byte-identical in both
+packs and share their keys**, because a key must resolve to one chunk however
+many packs are installed.
+
+**Licence per pack, and the base pack stays clean.** WHO text is CC BY-NC-SA
+3.0 IGO, from WHO's site-wide terms rather than the fact sheets, which print no
+licence line. ShareAlike makes a pack containing WHO text CC BY-NC-SA as a
+whole, so `africa-ssa` carries it even though its NHLBI rows are public domain,
+and per-source status is still recorded per registry row. **NonCommercial is in
+the manifest in plain words: these packs may not ship in a commercial product**,
+which bears on the Seed Round pitch. Each pack ships `LICENCE.txt` with WHO's
+attribution lines and the legal-code URL. claude.md's licensing section now has
+WHO as a third category and India MoHFW as excluded.
+
+**9-1-1 is annotated, never suppressed,** Viraj's call. Seven base chunks say
+9-1-1 (CP-ACS-004, 005, 006, CP-ANG-001, 002, 003, CP-PERI-001). With India
+active, opening one shows: "This source is a US page and says 9-1-1. The
+emergency number for India is 108. The source is shown unchanged." Verified
+live on CP-ANG-003.
+
+**A new pack kind, `overlay`, with checks that fail closed.** Every row licence
+cleared and dated, every key with a chunk file that still hashes to its frozen
+value and fits the ceiling, no unregistered chunk file, and a spec that names
+the pack it is layered on. **The two refusals are in the self-test now, not in a
+transcript:** a chunk edited after freezing, and a second pack claiming a key for
+different text. `selftest.py` is 56 of 56, up from 51. The node serves all four
+packs and `client.py pull regional-india` verified every file from disk.
+
+**Two text artefacts, recorded rather than edited.** "splenic sequestration
+crisis crisis" in CP-SCACS-001 is NHLBI's own sentence, which continues "crisis
+or an" after the glossary link. Spaces before punctuation are ours, from tag
+stripping around those links, and **the frozen base corpus already has 24 of
+them**, so the regional chunks were left consistent with it. The extractor
+artefact is logged for after the hackathon.
+`07-distribute/results/2026-09-19-regional-packs.txt`.

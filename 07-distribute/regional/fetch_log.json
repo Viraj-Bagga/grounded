@@ -1,0 +1,23 @@
+{
+  "nhlbi-scd": {
+    "bytes": 89936,
+    "publisher": "National Heart, Lung, and Blood Institute, NIH",
+    "retrieved": "2026-09-19",
+    "sha256": "af193d44693fcf4b",
+    "url": "https://www.nhlbi.nih.gov/health/sickle-cell-disease/symptoms"
+  },
+  "who-rhd": {
+    "bytes": 101475,
+    "publisher": "World Health Organization",
+    "retrieved": "2026-09-19",
+    "sha256": "bd1ee9fb565c248d",
+    "url": "https://www.who.int/news-room/fact-sheets/detail/rheumatic-heart-disease"
+  },
+  "who-tb": {
+    "bytes": 113002,
+    "publisher": "World Health Organization",
+    "retrieved": "2026-09-19",
+    "sha256": "e83bf57dada5cc21",
+    "url": "https://www.who.int/news-room/fact-sheets/detail/tuberculosis"
+  }
+}

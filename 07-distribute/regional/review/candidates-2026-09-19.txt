@@ -1,0 +1,102 @@
+Regional pack candidates, 2026-09-19. NOT FROZEN.
+Cuts come from sources.yaml, which records why each one is where it is.
+Review the boundaries, then freeze. Keys are immutable after that.
+
+============================================================================================
+CP-RHD-001  68 word-pieces  packs: india
+  source     who-rhd  World Health Organization
+  section    Signs and symptoms  [rheumatic_fever]
+  category   yellow
+  licence    amber  Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO.
+  why here   Acute rheumatic fever. Not a chest presentation: fever, joints, chorea.
+
+Rheumatic fever symptoms can include:
+fever
+painful joints especially knees ankles, elbows and wrists
+pain that moves between different joints
+fatigue
+jerky uncontrollable body movements called chorea
+painless nodules under the skin near joints and/or a rash consisting of pink rings with a clear centre (both rare)
+heart murmur.
+
+============================================================================================
+CP-RHD-002  41 word-pieces  packs: india
+  source     who-rhd  World Health Organization
+  section    Signs and symptoms  [valve_damage]
+  category   yellow
+  licence    amber  Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO.
+  why here   The chest presentation: chest pain, breathlessness, swelling, palpitations.
+
+Symptoms of heart valve damage that is associated with rheumatic heart disease may include:
+chest pain or discomfort
+shortness of breath
+swelling of the stomach, hands or feet
+fatigue
+rapid or irregular heartbeat.
+
+============================================================================================
+CP-TB-001  69 word-pieces  packs: india, africa-ssa
+  source     who-tb  World Health Organization
+  section    Symptoms  [symptoms]
+  category   yellow
+  licence    amber  Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO.
+  why here   The symptom list, with the qualifier that follows it. Chest pain is one item.
+
+Common symptoms of TB are:
+prolonged cough (sometimes with blood);
+chest pain;
+weakness;
+fatigue;
+weight loss;
+fever; and
+night sweats
+The symptoms people get depend on which part of the body is affected by TB. While TB usually affects the lungs, it can also involve the kidneys, brain, spine and skin.
+
+============================================================================================
+CP-TB-002  140 word-pieces  packs: india, africa-ssa
+  source     who-tb  World Health Organization
+  section    Symptoms  [infection_vs_disease]
+  category   yellow
+  licence    amber  Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO.
+  why here   Infection is not disease, and TB can be silent. Context, no symptom list.
+
+In general, people with TB infection don’t feel sick and are not contagious. Only a small proportion of people who get infected with TB will get TB disease and develop symptoms. Babies and children are at higher risk of developing the disease if they are infected.
+TB disease occurs when bacteria multiply in the body and affect different organs. TB symptoms may be mild for many months, so it is easy to spread TB to others without knowing it. Symptoms depend on which part of the body is affected. While TB usually affects the lungs, it can also affect the kidneys, brain, and spine.
+Some people with TB disease do not have any symptoms but can still spread TB.
+
+============================================================================================
+CP-SCACS-001  149 word-pieces  packs: africa-ssa
+  source     nhlbi-scd  National Heart, Lung, and Blood Institute, NIH
+  section    Know when to seek emergency medical care  [pain_and_anaemia]
+  category   red
+  licence    green  Source: NHLBI, National Institutes of Health
+  why here   Pain crisis and the anaemia emergencies.
+
+Serious symptoms of sickle cell disease are emergencies and need treatment right away.
+Severe pain. A serious pain event is sometimes called a “pain crisis,” “sickle cell crisis,” or “vaso-occlusive crisis.” Most people with sickle cell disease have this often-serious pain. It may occur in children as young as 1 year old. Serious pain linked with sickle cell disease often requires treatment in a clinic or hospital.
+Fatigue (extreme tiredness), shortness of breath, dizziness, and irregular heartbeat. These are symptoms of serious anemia. Life-threatening anemia can be caused by conditions such as a splenic sequestration crisis crisis or an aplastic crisis .
+
+============================================================================================
+CP-SCACS-002  113 word-pieces  packs: africa-ssa
+  source     nhlbi-scd  National Heart, Lung, and Blood Institute, NIH
+  section    Know when to seek emergency medical care  [acute_chest_syndrome]
+  category   red
+  licence    green  Source: NHLBI, National Institutes of Health
+  why here   ACUTE CHEST SYNDROME, the reason this source is in the pack.
+
+Serious symptoms of sickle cell disease are emergencies and need treatment right away.
+Fever. If you have a fever of more than 101.3 degrees Fahrenheit, or 38.5 degrees Celsius, seek attention from a healthcare provider and treatment with antibiotics right away. Some people need to be hospitalized for care.
+Chest pain, coughing, fever, and shortness of breath. These symptoms may be suggestive of acute chest syndrome requiring treatment in a hospital, where you may receive antibiotics, oxygen therapy , and/or a blood transfusion .
+
+============================================================================================
+CP-SCACS-003  147 word-pieces  packs: africa-ssa
+  source     nhlbi-scd  National Heart, Lung, and Blood Institute, NIH
+  section    Know when to seek emergency medical care  [stroke_and_priapism]
+  category   red
+  licence    green  Source: NHLBI, National Institutes of Health
+  why here   The remaining emergencies. Kept so the list is not quietly truncated.
+
+Serious symptoms of sickle cell disease are emergencies and need treatment right away.
+Sudden weakness, numbness on one side of the body, confusion, or trouble speaking, seeing, or walking. Call 9-1-1 if you’re showing any of these warning signs of a stroke .
+Priapism. Having an erection that lasts for 4 hours or more is an emergency. You will need to go to the hospital and see a hematologist (a doctor who specializes in blood conditions and diseases) and a urologist (a doctor who specializes in treating conditions of the reproductive and urinary systems). Priapism can lead to erectile dysfunction , so it is important to get treatment as soon as possible.
+

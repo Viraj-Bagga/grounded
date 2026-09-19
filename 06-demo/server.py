@@ -47,6 +47,7 @@ saved even if its tab closes. See pipeline.py and store.py.
 """
 
 import json
+import os
 import re
 import sys
 import threading
@@ -67,7 +68,26 @@ from store import (SEED_PEOPLE, ConversationStore, PeopleStore,  # noqa: E402
 
 PORT = 8770
 STATIC = HERE / "static"
-APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?)?/?$")
+APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions)?/?$")
+
+# The regional add-on packs, read only, for the region selector. They are NOT
+# wired into retrieval (Viraj's call 2026-09-19): selecting a region changes
+# what the page SAYS, never what the retriever reads. Everything here comes
+# from the frozen pack directory, which is what a distributed pack carries.
+REGIONAL_ROOT = Path(os.environ.get("REGIONAL_ROOT")
+                     or HERE.parent / "07-distribute" / "regional")
+
+
+def regions():
+    """[{id, title, ...}], the packs on disk. Absent packs are not an error:
+    the demo runs on the base corpus alone and says so."""
+    out = []
+    for f in sorted(REGIONAL_ROOT.glob("*/pack.json")):
+        try:
+            out.append(json.loads(f.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            continue
+    return out
 
 # BUILT EAGERLY AT STARTUP, NOT LAZILY ON FIRST REQUEST.
 #
@@ -202,6 +222,8 @@ class Handler(SimpleHTTPRequestHandler):
                                "registry": len(registry()),
                                "topics": _topics,
                                "max_followups": pipeline.MAX_FOLLOWUPS})
+        if path == "/api/regions":
+            return self._json({"regions": regions(), "retrieval": "base corpus only"})
         if path == "/api/people":
             return self._json({"people": [describe(p) for p in PEOPLE.list()]})
         m = re.match(r"^/api/people/([\w-]+)$", path)

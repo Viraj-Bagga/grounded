@@ -1,0 +1,102 @@
+2026-09-19 22:55 UTC regional add-on packs: sources verified, chunked, rehearsed. NOT FROZEN.
+what: two EXPERIMENTAL overlay packs on corpus-base, built under 07-distribute/regional/. india (CP-RHD, CP-TB,
+      emergency 108) and africa-ssa (CP-TB, CP-SCACS, no single number). Not wired into retrieval, Viraj's call:
+      the scope floor, the refusal wording and the "35 sources" line all assume the narrow chest-pain corpus.
+      Nothing is written into 01-data. The base registry stays US government public domain and frozen.
+
+== sources verified before chunking, with the pipeline's own extractor (01-data/build_corpus.extract_main)
+  WHO rheumatic heart disease, updated 24 January 2025
+      "Signs and symptoms" -> 12 list items. Extracts cleanly.
+      The heading merges TWO presentations: acute rheumatic fever (fever, migrating joint pain, chorea, skin
+      nodules) and rheumatic heart disease (chest pain, breathlessness, swelling, palpitations). Viraj's call:
+      split at "Symptoms of heart valve damage that is associated with rheumatic heart disease may include:".
+  WHO tuberculosis, updated 24 March 2026
+      "Symptoms" -> 7 list items, chest pain among them. Extracts cleanly.
+  CDC sickle cell, REJECTED as unusable
+      cdc.gov/sickle-cell/complications/index.html -> 2 sections, 0 list items. The body is client-side, and
+      the pipeline fetches static HTML, so there is nothing to chunk.
+      cdc.gov/sickle-cell/about/index.html -> no symptom list; acute chest syndrome named once in prose.
+  NHLBI sickle cell symptoms, SWAPPED IN on Viraj's call
+      "Know when to seek emergency medical care" -> 6 items, one of which is acute chest syndrome in the
+      format that retrieves. US government work, public domain, the publisher most of the base corpus uses.
+
+== licence, recorded per pack
+  WHO text is CC BY-NC-SA 3.0 IGO. The fact sheets print no licence line: the terms come from WHO's site-wide
+  terms of use, checked 2026-09-19, and that is what the pack records. ShareAlike makes a pack containing WHO
+  text CC BY-NC-SA as a whole; NonCommercial means it may not ship in a commercial product, which is a real
+  constraint on the Seed Round pitch. Per-source licence status is still recorded per registry row, so the
+  public-domain NHLBI rows inside africa-ssa remain identifiable. Each pack ships LICENCE.txt with the
+  attribution lines WHO requires and the legal-code URL.
+
+== chunk candidates, none over the 256 word-piece ceiling (hard constraint 2)
+india: 4 chunks, 4 new, 0 changed
+  CP-RHD-001       68 wp  amber  aa92174e5b079638  rheumatic_fever
+  CP-RHD-002       41 wp  amber  f4692578d63e203e  valve_damage
+  CP-TB-001        69 wp  amber  9aa12c741adac648  symptoms
+  CP-TB-002       140 wp  amber  eb2832177a3ebed3  infection_vs_disease
+  dry run, nothing written
+
+africa-ssa: 5 chunks, 5 new, 0 changed
+  CP-TB-001        69 wp  amber  9aa12c741adac648  symptoms
+  CP-TB-002       140 wp  amber  eb2832177a3ebed3  infection_vs_disease
+  CP-SCACS-001    149 wp  green  f78e68f852c760f9  pain_and_anaemia
+  CP-SCACS-002    113 wp  green  ce6ccb5b6fcae7c1  acute_chest_syndrome
+  CP-SCACS-003    147 wp  green  99c064de32f68e6e  stroke_and_priapism
+  dry run, nothing written
+
+  CP-TB-001 and CP-TB-002 are byte-identical in both packs and carry the same keys: a key must resolve to one
+  chunk however many packs are installed (hard constraint 9). The overlay check enforces that.
+
+== two text artefacts, both recorded rather than silently edited
+  "splenic sequestration crisis crisis" in CP-SCACS-001 is NHLBI's own text: their sentence continues
+  "crisis or an" after the glossary link. Quoted verbatim.
+  Spaces before punctuation ("a stroke .") come from our tag stripping around NHLBI glossary links. The FROZEN
+  BASE CORPUS has 24 of them already (CP-ANG-001, CP-ANG-002, CP-ANG-003, CP-ANG-010 and others), so the
+  regional chunks are left consistent with it and the extractor artefact is logged for after the hackathon.
+
+== rehearsed end to end outside the repo, because freezing keys is Viraj's call
+  build_regional.py freeze --out <scratch>   -> chunks/, citations.csv, PACK.md, pack.json, LICENCE.txt, spec
+  build_pack.py regional-india.json regional-africa-ssa.json --packs <scratch>
+      regional-india@2026.09.19 (overlay) 8.80 kB, 4 keys, 2 sources, licence amber, all dated
+      regional-africa-ssa@2026.09.19 (overlay) 10.99 kB, 5 keys, 2 sources
+      check: no key means two things: 2 key(s) shared byte-identically (CP-TB-001, CP-TB-002 with
+             regional-india), checked against 1 other pack
+  both failure paths refused, as they must:
+      a chunk edited after freezing -> "CP-TB-001: the chunk text hashes to fa2353214713612a, not the frozen
+        9aa12c741adac648. It changed after it was frozen."
+      another pack claiming the same key for different text -> "a key must resolve to one chunk (hard
+        constraint 9): CP-TB-001 means something else in regional-africa-ssa@2026.09.19"
+
+== the demo, node 06-demo/ui_check.mjs regions, all passed
+  PASS  the region page lists the packs
+  PASS  it says retrieval does not change
+  PASS  it states the licence and that it is not for commercial use
+  PASS  it gives the region's emergency number
+  PASS  choosing a region marks it active
+  PASS  the sidebar says which region is on
+  PASS  a US chunk that says 9-1-1 carries the region's number
+  The annotation, verified on CP-ANG-003 with India active: "This source is a US page and says 9-1-1. The
+  emergency number for India is 108. The source is shown unchanged." Annotated, never suppressed.
+
+== FROZEN AND BUILT, on Viraj's go-ahead, 2026-09-19 23:05 UTC
+  build_regional.py freeze
+      india       4 chunks -> 07-distribute/regional/india/       (chunks, citations.csv, PACK.md,
+                                                                   pack.json, LICENCE.txt, spec)
+      africa-ssa  5 chunks -> 07-distribute/regional/africa-ssa/
+  build_pack.py 07-distribute/specs/regional-{india,africa-ssa}.json
+      regional-india@2026.09.19        8,815 bytes  pack_sha256 96bc484d7cb911c3...
+      regional-africa-ssa@2026.09.19  11,022 bytes  pack_sha256 2ae230ac1803cd88c...
+      africa-ssa's check: 2 keys shared byte-identically with regional-india, checked against 2 other packs
+  the node serves all four packs, the two overlays carrying requires=corpus-base and CC BY-NC-SA 3.0 IGO
+  client.py pull regional-india over loopback: every file hashed from disk and matched its manifest entry,
+      pack_sha256 recomputed from the files on disk
+
+== the refusals are now in the self-test, not just in a transcript
+  python 07-distribute/selftest.py -> 56/56 checks passed (51 before)
+  T17 adds: the frozen regional pack passes every overlay check; it records what it is layered on and that
+  retrieval is untouched; a chunk edited after freezing is refused (constraint 1); a second pack claiming that
+  key for different text is refused (constraint 9); an overlay with no `requires` is refused.
+
+== still open
+  The packs are not wired into retrieval, by decision. Widening retrieval means recalibrating the scope floor,
+  the refusal wording and the "35 sources" line, and that is not a night-before change.

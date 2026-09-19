@@ -263,10 +263,14 @@ The corpus is redistributed inside the app, so this is distribution, not linking
 - MedlinePlus **health topic page summaries** only (`medlineplus.gov/<topic>.html`)
 - NHLBI, NIDDK, NIMH, NINDS, CDC
 
+**Cleared with conditions, regional add-on packs only (2026-09-19):**
+- **WHO fact sheets** (`who.int/news-room/fact-sheets/...`). **CC BY-NC-SA 3.0 IGO**, from WHO's site-wide terms of use; the fact sheets themselves print no licence line, and the packs record that. **ShareAlike: chunking is adaptation, so any pack containing WHO text is CC BY-NC-SA as a whole.** **NonCommercial: such a pack may not ship in a commercial product**, which bears on the Seed Round pitch exactly as StatPearls' NC does. Attribution in WHO's own form: `[Title]. Geneva: World Health Organization; [Year]. Licence: CC BY-NC-SA 3.0 IGO.` **Licence is recorded PER PACK**, and **the base pack stays US government public domain: nothing WHO is ever appended to `01-data/citations.csv`.** Built as the `regional-india` and `regional-africa-ssa` overlay packs in `07-distribute/regional/`, frozen 2026-09-19.
+
 **Excluded, do not add back:**
 - **MedlinePlus Medical Encyclopedia** (`medlineplus.gov/ency/...`). A.D.A.M. content, licensed to NLM for MedlinePlus use only. Copyrighted. This is the trap, because the `/ency/` pages have the best clinical detail.
 - **StatPearls.** CC BY-NC-ND 4.0. ND forbids derivatives and chunking is a derivative. NC separately conflicts with the Seed Round pitch.
 - **Schmitt-Thompson Clinical Content protocols.** Commercially licensed, including to developers building RAG triage. The approach is usable, the text is not.
+- **India MoHFW.** Viraj's check 2026-09-19: its sites carry inconsistent copyright policies and the main ministry site requires written permission. WHO covers the same ground under a licence that is actually stated.
 - **AHA, Mayo, Merck Manuals, UpToDate, WebMD.** Copyrighted. Note MedlinePlus links out to AHA and Mayo; a `.gov` URL does not make the target public domain.
 
 Every source needs publisher, URL, retrieval date and licence recorded. A citation without a retrieval date is not reproducible.

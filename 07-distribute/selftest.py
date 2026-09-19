@@ -17,6 +17,8 @@ One test per claim the README makes.
 from __future__ import annotations
 
 import argparse
+import csv
+import hashlib
 import http.client
 import json
 import os
@@ -41,6 +43,7 @@ import server as node_mod  # noqa: E402
 BUILD, CLIENT, PY = HERE / "build_pack.py", HERE / "client.py", sys.executable
 REAL_REGISTRY = REPO / "01-data" / "citations.csv"
 REAL_DB = REPO / "04-retrieval" / "corpus.db"
+REAL_OVERLAY = HERE / "regional" / "india"
 
 RESULTS = []
 NODE_LOG = []
@@ -493,6 +496,77 @@ def main() -> int:
     rc, out = run(BUILD, write_spec(TMP / "c-drift.json", id="test-corpus-drift", **spec), "--packs", cpacks)
     check("an index whose chunk text drifted from the freeze is refused (constraint 1)",
           rc == 1 and "CP-ACS-001" in out and "frozen chunk_sha256" in out)
+
+    section("T17  overlay packs: a regional add-on is frozen, and stays frozen")
+    # The two checks that make an overlay safe. Both were exercised by hand on
+    # 2026-09-19 and belong here instead: an add-on whose text can drift, or
+    # whose keys can mean two things, is worse than no add-on, because a
+    # citation key has to resolve to one chunk however many packs are on the
+    # phone (hard constraint 9) and a frozen chunk must stay frozen (1).
+    if not (REAL_OVERLAY / "citations.csv").exists():
+        check("the frozen india overlay is on disk to test against", False,
+              f"{REAL_OVERLAY} has no citations.csv: run build_regional.py freeze")
+    else:
+        opacks = TMP / "overlay-packs"
+        reg_rows = list(csv.DictReader(
+            (REAL_OVERLAY / "citations.csv").read_text(encoding="utf-8").splitlines()))
+        keys = [r["key"] for r in reg_rows]
+
+        def overlay_spec(pid, root, version="1"):
+            files = [{"path": "citations.csv", "source": str(root / "citations.csv")},
+                     {"path": "LICENCE.txt", "source": str(REAL_OVERLAY / "LICENCE.txt")}]
+            files += [{"path": f"chunks/{k}.txt", "source": str(root / "chunks" / f"{k}.txt")}
+                      for k in keys]
+            return dict(id=pid, version=version, kind="overlay", title="Overlay copy",
+                        requires="corpus-base",
+                        license={"name": "CC BY-NC-SA 3.0 IGO", "status": "amber",
+                                 "note": "Contains WHO text: NonCommercial and ShareAlike."},
+                        files=files)
+
+        rc, out = run(BUILD, write_spec(TMP / "o-a.json", **overlay_spec("test-overlay-a", REAL_OVERLAY)),
+                      "--packs", opacks)
+        check("the frozen regional pack passes every overlay check", rc == 0,
+              out.strip().splitlines()[-1] if rc else "")
+        check("it records the pack it is layered on and that retrieval is untouched",
+              rc == 0 and '"requires": "corpus-base"' in
+              (opacks / "test-overlay-a" / "1" / "manifest.json").read_text(encoding="utf-8")
+              and '"wired_into_retrieval": false' in
+              (opacks / "test-overlay-a" / "1" / "manifest.json").read_text(encoding="utf-8"))
+
+        # 1. A chunk edited after it was frozen.
+        edited = TMP / "overlay-edited"
+        shutil.copytree(REAL_OVERLAY, edited, dirs_exist_ok=True)
+        first = edited / "chunks" / f"{keys[0]}.txt"
+        first.write_text(first.read_text(encoding="utf-8") + " tampered\n", encoding="utf-8")
+        rc, out = run(BUILD, write_spec(TMP / "o-edit.json",
+                                        **overlay_spec("test-overlay-edited", edited)),
+                      "--packs", opacks)
+        check("a chunk edited after freezing is refused (constraint 1)",
+              rc == 1 and keys[0] in out and "It changed after it was frozen" in out, out[-200:])
+
+        # 2. Another pack claiming one of those keys for different text.
+        claim = TMP / "overlay-claim"
+        (claim / "chunks").mkdir(parents=True, exist_ok=True)
+        text = "A different chunk that claims a key another pack already uses.\n"
+        (claim / "chunks" / f"{keys[0]}.txt").write_text(text, encoding="utf-8")
+        row = dict(reg_rows[0], chunk_sha256=hashlib.sha256(text.encode()).hexdigest()[:16],
+                   token_count="11")
+        with open(claim / "citations.csv", "w", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(reg_rows[0]))
+            w.writeheader()
+            w.writerow(row)
+        spec = overlay_spec("test-overlay-claim", claim)
+        spec["files"] = [f for f in spec["files"]
+                         if f["path"] in ("citations.csv", "LICENCE.txt", f"chunks/{keys[0]}.txt")]
+        rc, out = run(BUILD, write_spec(TMP / "o-claim.json", **spec), "--packs", opacks)
+        check("a second pack claiming that key for different text is refused (constraint 9)",
+              rc == 1 and "resolve to one chunk" in out and keys[0] in out, out[-200:])
+
+        # 3. An add-on that does not say what it is layered on is not an add-on.
+        spec = overlay_spec("test-overlay-noreq", REAL_OVERLAY)
+        spec.pop("requires")
+        rc, out = run(BUILD, write_spec(TMP / "o-noreq.json", **spec), "--packs", opacks)
+        check("an overlay with no `requires` is refused", rc == 1 and "layered on" in out, out[-160:])
 
     node.shutdown()
     proxy.shutdown()

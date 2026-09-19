@@ -9,6 +9,7 @@
 //   node 06-demo/ui_check.mjs people OUTDIR         add, edit and delete a person through the form
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
+//   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
 //   node 06-demo/ui_check.mjs review OUTDIR IDS     the finish review's screenshots (six ids, comma-separated)
 //
@@ -369,6 +370,61 @@ async function reread(out, cid) {
   await p.close();
 }
 
+// The regional add-on packs. They are not wired into retrieval, so the page
+// must say so, and a cited US chunk that says 9-1-1 must carry the region's
+// own number rather than be hidden.
+async function regions(out) {
+  const p = await tab();
+  await p.size(DESKTOP);
+  await p.go("/regions");
+  const names = await p.text(".packs");
+  check("the region page lists the packs", /Base corpus only/.test(names) && /India/.test(names)
+    && /Sub-Saharan Africa/.test(names), names.slice(0, 160));
+  check("it says retrieval does not change", /do not\s+change the answers/i.test(await p.text("#main .notice"))
+    && /Unchanged\. The model still reads the base corpus only\./.test(names));
+  check("it states the licence and that it is not for commercial use",
+    /CC BY-NC-SA 3\.0 IGO/.test(names) && /Not for commercial use/.test(names));
+  check("it gives the region's emergency number", /\b108\b/.test(names)
+    && /no single number: local emergency services/.test(names));
+  await p.shot(join(out, "desktop-regions.png"), true);
+  await p.click('[data-region="india"]');
+  await sleep(300);
+  check("choosing a region marks it active", await p.eval(
+    `[...document.querySelectorAll('.pack.on')].map(e => e.innerText).join(' ').includes('India')`));
+  check("the sidebar says which region is on", /India/.test(await p.text("#region-link")));
+  await p.shot(join(out, "desktop-regions-india.png"), true);
+
+  // The annotation, on a real cited chunk. One assessment, then the first
+  // cited key whose text names 9-1-1.
+  await p.go("/?p=self");
+  await p.click('[data-preset="0"]');
+  await sendAndWait(p, "assessment for a citation");
+  const key = await p.eval(`(async () => {
+    const keys = [...document.querySelectorAll("#thread .cite")].map(b => b.dataset.k);
+    for (const k of keys) {
+      const c = await fetch("/api/chunk/" + k).then(r => r.ok ? r.json() : null).catch(() => null);
+      if (c && /\\b9-?1-?1\\b/.test(c.text)) return k;
+    }
+    return null;
+  })()`);
+  if (!key) {
+    check("a cited chunk names 9-1-1, so the annotation can be checked", true, "none cited this run");
+    console.log("      no cited chunk names 9-1-1 in this run, annotation not exercised");
+  } else {
+    await p.click(`#thread .cite[data-k="${key}"]`);
+    await p.until("document.querySelector('#sheet[open]')", 10000);
+    const foot = await p.text("#sheet-foot");
+    check("a US chunk that says 9-1-1 carries the region's number", /9-1-1/.test(foot)
+      && /\b108\b/.test(foot) && /shown unchanged/.test(foot), `${key}: ${foot.slice(0, 200)}`);
+    await p.shot(join(out, "desktop-region-annotation.png"));
+    await p.click("#sheet-x");
+  }
+  await p.size(PHONE);
+  await p.go("/regions");
+  await p.shot(join(out, "mobile-regions.png"), true);
+  await p.close();
+}
+
 // A stream that drops mid-answer, as two did once on 2026-09-19 with the server
 // still finishing and saving both. The page's stream reader is made to fail
 // after a few reads; the server is untouched. The page must say the answer is
@@ -466,7 +522,7 @@ const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const chrome = await launch();
 try {
-  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop }[mode];
+  const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop, regions }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

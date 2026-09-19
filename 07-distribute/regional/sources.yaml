@@ -1,0 +1,184 @@
+# Regional add-on packs. EXPERIMENTAL, and add-ons in the strict sense: a pack
+# is an OVERLAY on corpus-base, never a swap. Selecting India gives the base
+# corpus plus the India overlay.
+#
+# NOT WIRED INTO RETRIEVAL, Viraj's call 2026-09-19. The scope floor, the
+# refusal wording and the "35 sources" line all assume the narrow chest-pain
+# corpus, and rewiring that the night before judging risks the demo. These
+# packs are built, verified and distributed. The region selector in the demo
+# says which pack is active and what it holds, and says plainly that retrieval
+# still uses the base corpus alone.
+#
+# LICENCE IS RECORDED PER PACK. The base pack is US government public domain
+# and stays that way: nothing here is ever appended to 01-data/citations.csv.
+# A pack that contains WHO text carries CC BY-NC-SA 3.0 IGO, because chunking
+# is adaptation and ShareAlike follows the adaptation. NonCommercial rides with
+# it: such a pack may not ship in a commercial product.
+
+packs:
+
+  india:
+    name: "India"
+    title: "India add-on: rheumatic heart disease and tuberculosis"
+    description: >
+      Two presentations that matter in India and are absent from the base
+      corpus. Layered on corpus-base, which supplies everything else.
+    region: IN
+    requires: corpus-base
+    sources: [who-rhd, who-tb]
+    emergency_number: "108"
+    emergency_note: >
+      The emergency number in this region is 108. Chunks in the base corpus
+      are US sources and say 9-1-1. They are shown as they are, annotated,
+      never edited or suppressed: hiding an inconsistency in a cited source is
+      worse than showing it.
+    license:
+      name: "CC BY-NC-SA 3.0 IGO"
+      status: amber
+      commercial: false
+      plain: >
+        This pack contains World Health Organization text, so the whole pack
+        is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial
+        product, and that is a real constraint on the Seed Round pitch, not a
+        formality. ShareAlike: anything derived from it carries the same
+        licence. The base corpus pack is unaffected and stays public domain.
+
+  africa-ssa:
+    name: "Sub-Saharan Africa"
+    title: "Sub-Saharan Africa add-on: tuberculosis and sickle cell acute chest syndrome"
+    description: >
+      TB and the acute chest syndrome of sickle cell disease, both common in
+      the region and both absent from the base corpus.
+    region: SSA
+    requires: corpus-base
+    sources: [who-tb, nhlbi-scd]
+    emergency_number: null
+    emergency_note: >
+      There is no single emergency number across this region, so the pack
+      names none and says "local emergency services". Base chunks that say
+      9-1-1 are shown as they are, annotated, never edited or suppressed.
+    license:
+      name: "CC BY-NC-SA 3.0 IGO"
+      status: amber
+      commercial: false
+      plain: >
+        This pack contains World Health Organization text, so the whole pack
+        is CC BY-NC-SA 3.0 IGO, NonCommercial and ShareAlike, even though the
+        sickle cell source in it is a US government work in the public domain.
+        Per-source licences are recorded per row in the pack's registry. It
+        may not ship in a commercial product. The base corpus pack is
+        unaffected and stays public domain.
+
+# One entry per source document. `blocks` declares the chunk cuts as data:
+# each block names the section and the text it runs from and to, so a boundary
+# is a recorded decision rather than something a heuristic found.
+
+sources:
+
+  who-rhd:
+    topic: rheumatic_heart_disease
+    key_prefix: CP-RHD
+    title: "Rheumatic heart disease"
+    publisher: "World Health Organization"
+    url: https://www.who.int/news-room/fact-sheets/detail/rheumatic-heart-disease
+    updated: "24 January 2025"
+    license_status: amber
+    license_note: >
+      CC BY-NC-SA 3.0 IGO. The fact sheet itself prints no licence line: the
+      terms come from WHO's site-wide terms of use, checked 2026-09-19.
+      ShareAlike makes any pack containing this text CC BY-NC-SA, and
+      NonCommercial forbids shipping it in a commercial product.
+    attribution: "Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO."
+    selectors: ["main", "#main-content", "article", ".sf-detail-body-wrapper"]
+    blocks:
+      # SPLIT ON VIRAJ'S CALL 2026-09-19. WHO puts two different presentations
+      # under one "Signs and symptoms" heading. Chunked together they would
+      # teach retrieval that fever and joint pain belong to a chest case.
+      - suffix: "001"
+        subtopic: rheumatic_fever
+        category: yellow
+        section: "Signs and symptoms"
+        from: "Rheumatic fever symptoms can include:"
+        to: "Symptoms of heart valve damage"
+        note: "Acute rheumatic fever. Not a chest presentation: fever, joints, chorea."
+      - suffix: "002"
+        subtopic: valve_damage
+        category: yellow
+        section: "Signs and symptoms"
+        from: "Symptoms of heart valve damage"
+        to: null
+        note: "The chest presentation: chest pain, breathlessness, swelling, palpitations."
+
+  who-tb:
+    topic: tuberculosis
+    key_prefix: CP-TB
+    title: "Tuberculosis"
+    publisher: "World Health Organization"
+    url: https://www.who.int/news-room/fact-sheets/detail/tuberculosis
+    updated: "24 March 2026"
+    license_status: amber
+    license_note: >
+      CC BY-NC-SA 3.0 IGO. The fact sheet itself prints no licence line: the
+      terms come from WHO's site-wide terms of use, checked 2026-09-19.
+      ShareAlike makes any pack containing this text CC BY-NC-SA, and
+      NonCommercial forbids shipping it in a commercial product.
+    attribution: "Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO."
+    selectors: ["main", "#main-content", "article", ".sf-detail-body-wrapper"]
+    blocks:
+      - suffix: "001"
+        subtopic: symptoms
+        category: yellow
+        section: "Symptoms"
+        from: "Common symptoms of TB are:"
+        to: null
+        note: "The symptom list, with the qualifier that follows it. Chest pain is one item."
+      - suffix: "002"
+        subtopic: infection_vs_disease
+        category: yellow
+        section: "Symptoms"
+        from: "In general, people with TB infection"
+        to: "Common symptoms of TB are:"
+        note: "Infection is not disease, and TB can be silent. Context, no symptom list."
+
+  nhlbi-scd:
+    topic: sickle_cell_disease
+    key_prefix: CP-SCACS
+    title: "Sickle Cell Disease - Symptoms"
+    publisher: "National Heart, Lung, and Blood Institute, NIH"
+    url: https://www.nhlbi.nih.gov/health/sickle-cell-disease/symptoms
+    updated: ""
+    license_status: green
+    license_note: >
+      US government work, public domain, the same publisher as most of the
+      base corpus. Swapped in for the CDC sickle cell pages on 2026-09-19:
+      CDC's complications page renders no content as static HTML and its
+      about page has no symptom list, so neither can be chunked.
+    attribution: "Source: NHLBI, National Institutes of Health"
+    selectors: ["main", "#main-content"]
+    # The emergency section runs to 392 word-pieces, over the 256 ceiling
+    # (hard constraint 2), so it is cut into three. Each carries the section's
+    # own lead sentence, repeated verbatim, so a chunk retrieved on its own
+    # still says these are emergencies. `lead` does that.
+    lead: "Serious symptoms of sickle cell disease are emergencies and need treatment right away."
+    blocks:
+      - suffix: "001"
+        subtopic: pain_and_anaemia
+        category: red
+        section: "Know when to seek emergency medical care"
+        from: "Severe pain."
+        to: "Fever."
+        note: "Pain crisis and the anaemia emergencies."
+      - suffix: "002"
+        subtopic: acute_chest_syndrome
+        category: red
+        section: "Know when to seek emergency medical care"
+        from: "Fever."
+        to: "Sudden weakness"
+        note: "ACUTE CHEST SYNDROME, the reason this source is in the pack."
+      - suffix: "003"
+        subtopic: stroke_and_priapism
+        category: red
+        section: "Know when to seek emergency medical care"
+        from: "Sudden weakness"
+        to: "Learn more about these"
+        note: "The remaining emergencies. Kept so the list is not quietly truncated."

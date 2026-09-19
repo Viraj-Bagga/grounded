@@ -1,0 +1,27 @@
+India add-on: rheumatic heart disease and tuberculosis
+
+LICENCE: CC BY-NC-SA 3.0 IGO
+Legal code: https://creativecommons.org/licenses/by-nc-sa/3.0/igo/
+
+This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product, and that is a real constraint on the Seed Round pitch, not a formality. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain.
+
+COMMERCIAL USE IS NOT PERMITTED under this licence.
+
+ATTRIBUTION, one line per source, as the licensor requires:
+
+  Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO.
+    World Health Organization
+    https://www.who.int/news-room/fact-sheets/detail/rheumatic-heart-disease
+    licence status: amber
+
+  Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO.
+    World Health Organization
+    https://www.who.int/news-room/fact-sheets/detail/tuberculosis
+    licence status: amber
+
+WHERE THE LICENCE COMES FROM:
+
+  CC BY-NC-SA 3.0 IGO. The fact sheet itself prints no licence line: the terms come from WHO's site-wide terms of use, checked 2026-09-19. ShareAlike makes any pack containing this text CC BY-NC-SA, and NonCommercial forbids shipping it in a commercial product.
+
+The base corpus pack this one is layered on is a separate pack, US
+government public domain, and is not affected by this licence.

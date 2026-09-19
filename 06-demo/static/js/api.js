@@ -18,6 +18,7 @@ const q = encodeURIComponent;
 
 export const api = {
   health: () => j("/api/health"),
+  regions: () => j("/api/regions"),
   people: () => j("/api/people"),
   person: id => j(`/api/people/${q(id)}`),
   createPerson: p => j("/api/people", put("POST", p)),

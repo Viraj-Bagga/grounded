@@ -46,7 +46,7 @@ const PRESETS = [
 ];
 
 const S = {
-  health: null, people: [], convs: [],
+  health: null, people: [], convs: [], regions: [], region: null,
   picked: ["self"], compare: false,
   conv: null, live: {}, liveSaid: null,
   draft: { text: "", timeline: "", showTl: false },
@@ -67,6 +67,7 @@ function route() {
   const path = location.pathname;
   let m;
   if ((m = path.match(/^\/c\/([\w-]+)\/?$/))) return showConversation(m[1]);
+  if (/^\/regions\/?$/.test(path)) return showRegions();
   if (/^\/people\/?$/.test(path)) return showPeople();
   if (path === "/people/new") return showPersonForm(null);
   if ((m = path.match(/^\/people\/([\w-]+)\/?$/))) return showPersonForm(m[1]);
@@ -605,6 +606,75 @@ function pollBusy(id) {
   }, 2000);
 }
 
+// ------------------------------------------------------------------ regions
+
+// EXPERIMENTAL add-on packs, and the page says what they are: extra sources,
+// built and distributable, NOT wired into retrieval. Selecting one changes
+// what this page tells you about emergency numbers and nothing else. Viraj's
+// call 2026-09-19, because rewiring retrieval the night before judging would
+// put the scope floor and the refusal wording at risk.
+function regionCard(r, active) {
+  const topics = [...new Set((r.chunks || []).map(c => c.topic))].join(", ").replace(/_/g, " ");
+  const pubs = [...new Set((r.chunks || []).map(c => c.publisher))];
+  return `<div class="pack${active ? " on" : ""}">
+    <div class="pack-h"><b>${esc(r.title)}</b>${active ? '<span class="tag">active</span>' : ""}</div>
+    <p class="muted">${esc(r.description || "")}</p>
+    <dl class="pack-d">
+      <dt>Adds</dt><dd>${fmt((r.chunks || []).length)} chunks: ${esc(topics)}
+        <div class="keys-row">${(r.chunks || []).map(c =>
+          `<span class="mono">${esc(c.key)}</span>`).join("")}</div></dd>
+      <dt>Sources</dt><dd>${pubs.map(esc).join("; ")}</dd>
+      <dt>Emergency</dt><dd>${r.emergency_number
+        ? `<b>${esc(r.emergency_number)}</b>` : "no single number: local emergency services"}</dd>
+      <dt>Licence</dt><dd>${esc((r.license || {}).name || "?")}.
+        ${(r.license || {}).commercial === false
+          ? "<b>Not for commercial use.</b>" : ""} ${esc((r.license || {}).plain || "")}</dd>
+      <dt>Retrieval</dt><dd>Unchanged. The model still reads the base corpus only.</dd>
+    </dl>
+    <button class="btn ${active ? "plain" : "primary"}" type="button" data-region="${esc(r.id)}"
+      ${active ? "disabled" : ""}>${active ? "Active" : "Use this region"}</button>
+  </div>`;
+}
+
+async function showRegions() {
+  S.conv = null;
+  document.title = "Regions · Triage";
+  renderChips([]);
+  try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
+  renderHistory();
+  const active = S.regions.find(r => r.id === S.region);
+  $("#main").innerHTML = `<div class="page">
+    <h1 class="pg-h">Regions</h1>
+    <div class="notice">${icon("info")}<span><b>These packs are experimental and do not
+      change the answers.</b> The model reads the base corpus, ${fmt(S.health ? S.health.sources : 0)}
+      chest pain sources, whichever region is chosen. A region pack is extra material, built and
+      ready to distribute, and it changes what this page tells you about emergency numbers.</span></div>
+    ${S.regions.length ? "" : `<p class="muted">No region packs are on this machine yet.</p>`}
+    <div class="packs">
+      <div class="pack${S.region ? "" : " on"}">
+        <div class="pack-h"><b>Base corpus only</b>${S.region ? "" : '<span class="tag">active</span>'}</div>
+        <p class="muted">Chest pain, US government sources, public domain. What the model reads.</p>
+        <button class="btn ${S.region ? "primary" : "plain"}" type="button" data-region=""
+          ${S.region ? "" : "disabled"}>${S.region ? "Use the base corpus alone" : "Active"}</button>
+      </div>
+      ${S.regions.map(r => regionCard(r, active && active.id === r.id)).join("")}
+    </div>
+  </div>`;
+  $("#main").querySelectorAll("[data-region]").forEach(b => b.onclick = () => {
+    S.region = b.dataset.region || null;
+    try { localStorage.setItem("region", S.region || ""); } catch { /* private window */ }
+    showRegions();
+    renderRegionRow();
+  });
+}
+
+function renderRegionRow() {
+  const el = $("#region-link");
+  if (!el) return;
+  const r = S.regions.find(x => x.id === S.region);
+  el.querySelector(".n").textContent = r ? (r.name || r.title) : "Base only";
+}
+
 // ------------------------------------------------------------------- people
 
 async function showPeople() {
@@ -659,7 +729,15 @@ async function openChunk(key) {
   $("#sheet-k").textContent = c.key;
   $("#sheet-n").textContent = `${fmt(c.token_count)} tokens`;
   $("#sheet-body").textContent = c.text;
-  $("#sheet-foot").innerHTML = `<b>${esc(c.publisher)}</b>` +
+  const region = S.regions.find(r => r.id === S.region);
+  const otherNumber = /\b9-?1-?1\b/.test(c.text || "");
+  $("#sheet-foot").innerHTML =
+    (region && otherNumber ? `<div class="sheet-note">${icon("info")}<span>` +
+      (region.emergency_number
+        ? `This source is a US page and says 9-1-1. The emergency number for ${esc(region.name || region.title)} is <b>${esc(region.emergency_number)}</b>.`
+        : `This source is a US page and says 9-1-1. ${esc(region.name || region.title)} has no single emergency number: use local emergency services.`) +
+      ` The source is shown unchanged.</span></div>` : "") +
+    `<b>${esc(c.publisher)}</b>` +
     `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.url)}</a>` +
     `<span>Retrieved ${esc(c.retrieval_date)} · ${esc(c.attribution)}</span>`;
   dlg.showModal();
@@ -670,6 +748,9 @@ $("#sheet").addEventListener("click", e => { if (e.target === $("#sheet")) $("#s
 // --------------------------------------------------------------------- boot
 
 async function health() {
+  try { S.region = localStorage.getItem("region") || null; } catch { S.region = null; }
+  try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
+  renderRegionRow();
   try { S.health = await api.health(); } catch { S.health = null; }
   renderStatus();
 }

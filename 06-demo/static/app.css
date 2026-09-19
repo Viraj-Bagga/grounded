@@ -321,6 +321,22 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .link-btn { border: 0; background: transparent; color: var(--action); font-weight: 700; font-size: var(--t-14);
   padding: .25rem 0; cursor: pointer; justify-self: start; }
 .link-btn:hover { text-decoration: underline; text-underline-offset: .18em; }
+.pg-h { font-size: var(--t-24); margin: 0 0 1rem; letter-spacing: -.01em; }
+.packs { display: grid; gap: 1rem; margin-top: 1.25rem; }
+.pack { border: 1px solid var(--rule); border-radius: var(--r); padding: 1rem; display: grid; gap: .5rem; }
+.pack.on { border-color: var(--ink); }
+.pack-h { display: flex; align-items: center; gap: .5rem; font-size: var(--t-17); }
+.pack-h .tag { border-color: var(--ink); color: var(--ink); }
+.pack-d { display: grid; grid-template-columns: max-content 1fr; gap: .375rem .75rem; margin: .25rem 0 .5rem; }
+.pack-d dt { font-weight: 700; font-size: var(--t-14); color: var(--ink-2); }
+.pack-d dd { margin: 0; font-size: var(--t-15); }
+.keys-row { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .25rem; }
+.keys-row .mono { font: var(--t-12)/1.6 var(--mono); border: 1px solid var(--rule); padding: 0 .25rem; }
+.pack .btn { justify-self: start; }
+.sheet-note { display: flex; gap: .5rem; align-items: flex-start; background: var(--well);
+  padding: .5rem .625rem; border-radius: var(--r); font-size: var(--t-14); margin-bottom: .5rem; }
+.sheet-note .i { flex: none; margin-top: .125rem; }
+
 /* The clinical export, under the last answer. */
 .export { display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: baseline;
   border-top: 1px solid var(--rule); padding-top: .75rem; margin: 0 0 1.5rem; }

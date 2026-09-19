@@ -1,0 +1,59 @@
+{
+  "id": "india",
+  "name": "India",
+  "title": "India add-on: rheumatic heart disease and tuberculosis",
+  "description": "Two presentations that matter in India and are absent from the base corpus. Layered on corpus-base, which supplies everything else.",
+  "region": "IN",
+  "requires": "corpus-base",
+  "emergency_number": "108",
+  "emergency_note": "The emergency number in this region is 108. Chunks in the base corpus are US sources and say 9-1-1. They are shown as they are, annotated, never edited or suppressed: hiding an inconsistency in a cited source is worse than showing it.",
+  "license": {
+    "name": "CC BY-NC-SA 3.0 IGO",
+    "status": "amber",
+    "commercial": false,
+    "plain": "This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product, and that is a real constraint on the Seed Round pitch, not a formality. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain."
+  },
+  "wired_into_retrieval": false,
+  "chunks": [
+    {
+      "key": "CP-RHD-001",
+      "topic": "rheumatic_heart_disease",
+      "subtopic": "rheumatic_fever",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/rheumatic-heart-disease",
+      "license_status": "amber",
+      "attribution": "Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO.",
+      "token_count": 68
+    },
+    {
+      "key": "CP-RHD-002",
+      "topic": "rheumatic_heart_disease",
+      "subtopic": "valve_damage",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/rheumatic-heart-disease",
+      "license_status": "amber",
+      "attribution": "Rheumatic heart disease. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO.",
+      "token_count": 41
+    },
+    {
+      "key": "CP-TB-001",
+      "topic": "tuberculosis",
+      "subtopic": "symptoms",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/tuberculosis",
+      "license_status": "amber",
+      "attribution": "Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO.",
+      "token_count": 69
+    },
+    {
+      "key": "CP-TB-002",
+      "topic": "tuberculosis",
+      "subtopic": "infection_vs_disease",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/tuberculosis",
+      "license_status": "amber",
+      "attribution": "Tuberculosis. Geneva: World Health Organization; 2026. Licence: CC BY-NC-SA 3.0 IGO.",
+      "token_count": 140
+    }
+  ]
+}

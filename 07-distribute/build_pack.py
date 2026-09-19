@@ -31,6 +31,13 @@ KIND CHECKS, all fail closed:
           chunk once regional packs exist).
   model   the GGUF header parses and matches the architecture and quant the
           spec expects, and the licence text ships inside the pack.
+  overlay a regional add-on: a registry and its chunk files, no index. Every
+          row is licence cleared and dated, every key has a chunk file whose
+          text still hashes to its frozen chunk_sha256 and fits the 256
+          word-piece ceiling, no chunk file is unregistered, and the spec
+          names the pack this one is layered on. A key shared with another
+          pack must carry byte-identical text, because constraint 9 needs a
+          key to resolve to ONE chunk however many packs are installed.
   other   generic: snapshot, hash, declared licence.
 
 A file may pin its expected sha256 in the spec, and any licence text a spec
@@ -378,6 +385,118 @@ def check_corpus(spec: dict, staged: dict, packs_root: Path, notes: list):
     return block, sources
 
 
+def check_overlay(spec: dict, staged: dict, packs_root: Path, notes: list):
+    """A regional add-on pack: layered ON the pack it requires, never a swap.
+
+    It carries no index, so nothing here touches sqlite. The demo does not
+    retrieve from it (Viraj's call 2026-09-19); what it must guarantee is that
+    the text is licence-cleared, dated, unmodified since it was frozen, and
+    that its keys do not mean two different things once two packs are in.
+    """
+    if "citations.csv" not in staged:
+        raise BuildError("an overlay pack needs a file named citations.csv")
+    requires = str(spec.get("requires") or "").strip()
+    if not requires:
+        raise BuildError("an overlay pack must name the pack it is layered on, "
+                         "as \"requires\": it is an add-on, not a corpus on its own")
+    rows = read_registry(staged["citations.csv"])
+    if not rows:
+        raise BuildError("citations.csv has no rows")
+    lacking = [c for c in REGISTRY_COLUMNS if c not in rows[0]]
+    if lacking:
+        raise BuildError(f"citations.csv lacks columns {lacking}")
+
+    problems, reg = [], {}
+    for r in rows:
+        if r["key"] in reg:
+            problems.append(f"key {r['key']} appears twice in citations.csv")
+        reg[r["key"]] = r
+    uncleared = [f"{r['key']} ({r['license_status'] or 'blank'})" for r in rows
+                 if r["license_status"] not in LICENCE_CLEARED]
+    if uncleared:
+        problems.append("not licence-cleared (hard constraint 6): " + ", ".join(uncleared))
+    undated = [r["key"] for r in rows if not r["retrieval_date"].strip()]
+    if undated:
+        problems.append("no retrieval date, so not reproducible: " + ", ".join(undated))
+
+    # The chunk files themselves: present, unmodified, and inside the ceiling.
+    staged_chunks = {k: v for k, v in staged.items() if k.startswith("chunks/")}
+    for key, r in reg.items():
+        path = staged_chunks.get(f"chunks/{key}.txt")
+        if path is None:
+            problems.append(f"{key} is in citations.csv with no chunks/{key}.txt in the pack")
+            continue
+        text = path.read_text(encoding="utf-8")
+        got = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+        if got != r["chunk_sha256"]:
+            problems.append(f"{key}: the chunk text hashes to {got}, not the frozen "
+                            f"{r['chunk_sha256']}. It changed after it was frozen.")
+        try:
+            if int(r["token_count"]) > 256:
+                problems.append(f"{key}: {r['token_count']} word-pieces, over the 256 ceiling "
+                                f"(hard constraint 2). Split it; never truncate.")
+        except ValueError:
+            problems.append(f"{key}: token_count {r['token_count']!r} is not a number")
+    for path in sorted(staged_chunks):
+        key = Path(path).stem
+        if key not in reg:
+            problems.append(f"{path} is in the pack but not in citations.csv")
+
+    # Constraint 9 across packs: a key must resolve to one chunk. The same key
+    # in two packs is fine when the text is the same byte for byte, which is
+    # how the shared TB chunks ride in both regions.
+    others, shared, clashes = 0, [], []
+    for mf in sorted(packs_root.glob("*/*/" + pl.MANIFEST)):
+        if not (pl.NAME_RE.match(mf.parent.name) and pl.NAME_RE.match(mf.parent.parent.name)):
+            continue
+        try:
+            om = json.loads(mf.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            problems.append(f"cannot read {display(mf)} to check key collisions")
+            continue
+        if om.get("kind") not in ("corpus", "overlay") or om.get("id") == spec["id"]:
+            continue
+        others += 1
+        try:
+            orows = {r["key"]: r for r in
+                     read_registry(mf.parent / pl.FILES_DIR / "citations.csv")}
+        except (OSError, ValueError, BuildError) as e:
+            problems.append(f"cannot read the keys of {om.get('id')} to check collisions: {e}")
+            continue
+        for key in sorted(set(orows) & set(reg)):
+            if orows[key]["chunk_sha256"] == reg[key]["chunk_sha256"]:
+                shared.append(f"{key} with {om.get('id')}")
+            else:
+                clashes.append(f"{key} means something else in {om.get('id')}@{om.get('version')}")
+    if clashes:
+        problems.append("a key must resolve to one chunk (hard constraint 9): "
+                        + "; ".join(clashes))
+    if problems:
+        raise BuildError("overlay checks failed:\n    - " + "\n    - ".join(problems))
+
+    groups = {}
+    for r in rows:
+        g = (r["source_id"], r["publisher"], r["url"], r["retrieval_date"],
+             r["license_status"], r["attribution"])
+        groups.setdefault(g, []).append(r["key"])
+    sources = [{"source_id": g[0], "publisher": g[1], "url": g[2], "retrieval_date": g[3],
+                "license_status": g[4], "attribution": g[5], "keys": keys}
+               for g, keys in groups.items()]
+
+    block = dict(spec.get("overlay") or {})
+    block.update({"requires": requires, "keys": len(rows),
+                  "topics": sorted({r["topic"] for r in rows}),
+                  "wired_into_retrieval": False})
+    worst = "amber" if any(r["license_status"] == "amber" for r in rows) else "green"
+    notes.append(f"overlay on {requires}: {len(rows)} keys, {len(sources)} sources, "
+                 f"licence {worst}, all dated, all inside the 256 word-piece ceiling")
+    notes.append(f"every chunk text still hashes to its frozen chunk_sha256")
+    notes.append(f"no key means two things: {len(shared)} key(s) shared byte-identically"
+                 + (f" ({', '.join(shared)})" if shared else "")
+                 + f", checked against {others} other pack(s)")
+    return block, sources
+
+
 # --------------------------------------------------------------- licence
 
 def verbatim_quotes(obj):
@@ -471,11 +590,13 @@ def build(spec_path: Path, packs_root: Path) -> int:
             extra["model"] = check_model(spec, staged, notes)
         elif spec["kind"] == "corpus":
             extra["corpus"], lic["sources"] = check_corpus(spec, staged, packs_root, notes)
+        elif spec["kind"] == "overlay":
+            extra["overlay"], lic["sources"] = check_overlay(spec, staged, packs_root, notes)
 
         entries.sort(key=lambda e: e["path"])
         manifest = {"format": pl.FORMAT, "id": pid, "version": ver,
                     "kind": spec["kind"], "title": spec["title"]}
-        for k in ("description", "language", "region"):
+        for k in ("description", "language", "region", "requires"):
             if k in spec:
                 manifest[k] = spec[k]
         manifest["built"] = pl.utc_now()

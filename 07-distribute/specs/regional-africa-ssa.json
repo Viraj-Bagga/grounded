@@ -1,0 +1,60 @@
+{
+  "id": "regional-africa-ssa",
+  "version": "2026.09.19",
+  "kind": "overlay",
+  "title": "Sub-Saharan Africa add-on: tuberculosis and sickle cell acute chest syndrome",
+  "description": "TB and the acute chest syndrome of sickle cell disease, both common in the region and both absent from the base corpus. EXPERIMENTAL. An add-on layered on the base corpus, never a swap. Not wired into retrieval: the demo shows what this pack holds and keeps retrieving from the base corpus alone.",
+  "language": "en",
+  "region": "SSA",
+  "requires": "corpus-base",
+  "license": {
+    "name": "CC BY-NC-SA 3.0 IGO",
+    "status": "amber",
+    "note": "This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO, NonCommercial and ShareAlike, even though the sickle cell source in it is a US government work in the public domain. Per-source licences are recorded per row in the pack's registry. It may not ship in a commercial product. The base corpus pack is unaffected and stays public domain.",
+    "verbatim": [
+      "LICENCE: CC BY-NC-SA 3.0 IGO"
+    ]
+  },
+  "overlay": {
+    "emergency_number": null,
+    "emergency_note": "There is no single emergency number across this region, so the pack names none and says \"local emergency services\". Base chunks that say 9-1-1 are shown as they are, annotated, never edited or suppressed."
+  },
+  "files": [
+    {
+      "path": "citations.csv",
+      "source": "07-distribute/regional/africa-ssa/citations.csv"
+    },
+    {
+      "path": "PACK.md",
+      "source": "07-distribute/regional/africa-ssa/PACK.md"
+    },
+    {
+      "path": "LICENCE.txt",
+      "source": "07-distribute/regional/africa-ssa/LICENCE.txt"
+    },
+    {
+      "path": "pack.json",
+      "source": "07-distribute/regional/africa-ssa/pack.json"
+    },
+    {
+      "path": "chunks/CP-TB-001.txt",
+      "source": "07-distribute/regional/africa-ssa/chunks/CP-TB-001.txt"
+    },
+    {
+      "path": "chunks/CP-TB-002.txt",
+      "source": "07-distribute/regional/africa-ssa/chunks/CP-TB-002.txt"
+    },
+    {
+      "path": "chunks/CP-SCACS-001.txt",
+      "source": "07-distribute/regional/africa-ssa/chunks/CP-SCACS-001.txt"
+    },
+    {
+      "path": "chunks/CP-SCACS-002.txt",
+      "source": "07-distribute/regional/africa-ssa/chunks/CP-SCACS-002.txt"
+    },
+    {
+      "path": "chunks/CP-SCACS-003.txt",
+      "source": "07-distribute/regional/africa-ssa/chunks/CP-SCACS-003.txt"
+    }
+  ]
+}
