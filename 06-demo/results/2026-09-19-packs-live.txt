@@ -1,0 +1,176 @@
+================================================================================
+A REGION PACK CROSSING FROM THE DISTRIBUTION NODE TO THIS DEVICE
+Date:   2026-09-19
+Build:  06-demo/packs.py calling 07-distribute/client.py's cmd_pull in process
+        node: python 07-distribute/server.py on 127.0.0.1:8790
+        demo: python 06-demo/server.py on 127.0.0.1:8770
+        installs into 06-demo/data/packs, which starts empty and is gitignored
+Command: node 06-demo/ui_check.mjs packs 06-demo/results/2026-09-19-packs
+================================================================================
+
+WHY THIS EXISTS. "Use this region" used to be instant and nothing showed, so
+the distribution node existed only in a terminal transcript. The pack now
+arrives over HTTP and the page shows it happening and keeps the evidence.
+
+THE VERIFICATION IS NOT REIMPLEMENTED. packs.install calls client.cmd_pull with
+its stdout captured line by line. That is the reference client running exactly
+as it ships: index, manifest, per-file download, hash FROM DISK, pack_sha256
+recomputed from the files, manifest.json written LAST. Nothing in 06-demo
+decides whether a pack is good.
+
+--------------------------------------------------------------------------------
+1. THE CHECK
+--------------------------------------------------------------------------------
+  PASS  the page names the distribution node
+  PASS  the node is reachable
+  PASS  the base corpus offers no download
+  PASS  an uninstalled pack offers a download with its size
+  PASS  and its card says the pack is on the node, not here
+  PASS  the card says it is installed here, with the file count and size
+  PASS  and that every file was hashed from disk against the manifest
+  PASS  and shows the pack digest
+  PASS  the button becomes Use this region
+  PASS  retrieval still says it is unchanged
+  PASS  an installed pack can then be made active
+  PASS  the sidebar follows
+  PASS  and the base corpus can be chosen again
+  PASS  the install survives a reload
+  all passed
+
+--------------------------------------------------------------------------------
+2. THE PULL, LINE BY LINE, AS THE CLIENT PRINTED IT
+--------------------------------------------------------------------------------
+  pull regional-india@2026.09.19 (overlay) from http://127.0.0.1:8790
+    8 files, 8.81 kB (8,815 bytes), licence CC BY-NC-SA 3.0 IGO [amber]
+    pack_sha256 96bc484d7cb911c3e02634fbf13dd38c5e7e30b712f934b7ea952322be6ecce7
+    LICENCE.txt  1.48 kB
+      transferred 1.48 kB in 0.00 s
+      sha256 416e07ed040bb2989ebce9e16c624eb34ea393d4b0bf6b760a446cffa7c90633
+        hashed from disk in 0.0 s: matches the manifest
+    PACK.md  1.81 kB
+      sha256 efa4d780eaadb8384b1fc3d845071ac180c9dff188b552522ed126f466b678ff
+        hashed from disk in 0.0 s: matches the manifest
+    chunks/CP-RHD-001.txt  329 B
+      sha256 aa92174e5b079638bf0495c18c43664155b002704dd61299cd03f74446db6d6b
+        hashed from disk in 0.0 s: matches the manifest
+    chunks/CP-RHD-002.txt  213 B
+      sha256 f4692578d63e203e80bc88e4c01a2b4af0834eb143c4a7f6e1676d0593c55e3c
+        hashed from disk in 0.0 s: matches the manifest
+    chunks/CP-TB-001.txt  302 B
+      sha256 9aa12c741adac6483a20b47d265f9467fba082c7c1fad8038f2253681547f258
+        hashed from disk in 0.0 s: matches the manifest
+    chunks/CP-TB-002.txt  665 B
+      sha256 eb2832177a3ebed3d33cfc2f8c3f9ff9fc7983829cdfb1fdb69e1946e1ddfcf8
+        hashed from disk in 0.0 s: matches the manifest
+    citations.csv  1.25 kB
+      sha256 20cda1bc20ead52e9495839357e94ed22bf8ad45c9cefbe4df892270c4bf09a7
+        hashed from disk in 0.0 s: matches the manifest
+    pack.json  2.77 kB
+      sha256 df4a461eec387aa1d7b7c99788c8dbc87b5c1df1280966edc34396101e0081a7
+        hashed from disk in 0.0 s: matches the manifest
+  INSTALLED regional-india@2026.09.19 at 06-demo/data/packs/regional-india/2026.09.19
+    transferred 8.81 kB in 0.0 s including hashing
+    every file hashed from disk and matched its manifest entry
+    pack_sha256 recomputed from the files on disk: 96bc484d7cb911c3e02634fbf13dd38c5e7e30b712f934b7ea952322be6ecce7
+
+  Whole pull, end to end: 13 ms.
+
+--------------------------------------------------------------------------------
+3. THE BAR IS HONEST, NOT USEFUL. SAY SO.
+--------------------------------------------------------------------------------
+  regional-india       8,815 bytes    8 files
+  regional-africa-ssa 11,022 bytes    9 files
+
+  Kilobytes over loopback. The progress bar is real and it is over in about
+  13 ms, so at a desk it flashes. THE PANEL THAT REPLACES IT IS THE POINT and
+  it stays on the card: "Installed on this device. 8 files, 8.81 kB, every one
+  hashed from disk against the manifest", with the pack digest under it. The
+  evidence that the bytes were checked outlives the animation, which is the
+  only part a judge can actually read.
+
+  The model pack is 2.84 GB and would show a real bar. It is not wired into
+  this page: 06-demo/packs.py only offers packs whose id starts "regional-".
+
+--------------------------------------------------------------------------------
+4. WHAT IS ON WHICH MACHINE
+--------------------------------------------------------------------------------
+  THE NODE serves 07-distribute/packs and is untouched by any of this:
+    corpus-base, model-nemotron3-nano-4b-q4km, regional-africa-ssa, regional-india
+
+  THIS DEVICE, after the check, holds only what it pulled:
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/chunks/CP-SCACS-001.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/chunks/CP-SCACS-002.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/chunks/CP-SCACS-003.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/chunks/CP-TB-001.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/chunks/CP-TB-002.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/citations.csv
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/LICENCE.txt
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/pack.json
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/files/PACK.md
+    06-demo/data/packs/regional-africa-ssa/2026.09.19/manifest.json
+
+  INSTALLED MEANS manifest.json EXISTS. That is the client's definition and the
+  only one. It is written last, after every file has verified, so its presence
+  is the proof. 06-demo/packs.py never writes it.
+
+--------------------------------------------------------------------------------
+5. THE NODE STOPPED, WHICH IS THE REALISTIC DESK FAILURE
+--------------------------------------------------------------------------------
+  /api/regions with the node down: 0.9 to 2.4 ms. Connection refused is
+  instant, so the page does not hang waiting for a node that is not there.
+
+  notice        "The distribution node is not running. Installed packs still
+                 work. To offer downloads, start it with
+                 python 07-distribute/server.py."
+  uninstalled   "Not on the node"  (disabled)
+  installed     "Installed on this device. 9 files, 11.02 kB, every one hashed
+                 from disk against the manifest ... Use this region"
+
+  An install attempted with the node down:
+    [error] the distribution node at http://127.0.0.1:8790 is not answering.
+            Start it with: python 07-distribute/server.py
+
+  AN INSTALLED PACK DOES NOT STOP WORKING WHEN THE NODE GOES AWAY. That is the
+  point of a pack, and the page has to behave that way or the claim is empty.
+
+--------------------------------------------------------------------------------
+6. INTEGRITY FAILURE: ALREADY COVERED, NOT REBUILT
+--------------------------------------------------------------------------------
+  Two different failures, and only one of them reaches the client:
+
+  A FILE THAT GOES BAD ON THE NODE'S OWN DISK never reaches a client at all.
+  Measured here: a byte appended to citations.csv in a copy of the packs
+  directory, manifest untouched, and the node WITHDREW regional-africa-ssa from
+  /packs by itself. The client then reports it is not on the node. That is the
+  node's "verified before advertised" rule doing its job.
+
+  A BIT FLIPPED IN TRANSIT is the client's job and 07-distribute/selftest.py
+  already covers it: T06 "a bit flipped in transit is refused", with a
+  poisoning proxy between client and node. Not rebuilt here. The page renders
+  that outcome as a hatched panel reading "The bytes did not match the
+  manifest. Nothing was installed.", in the same hold grey as every other
+  refusal, never in a triage colour.
+
+--------------------------------------------------------------------------------
+7. RETRIEVAL IS UNCHANGED, AND EVERY CARD STILL SAYS SO
+--------------------------------------------------------------------------------
+  Installing a pack puts files in 06-demo/data/packs and changes what this page
+  says about emergency numbers. The model still reads the base corpus alone.
+  The check asserts the line verbatim on the installed card:
+    "Unchanged. The model still reads the base corpus only."
+
+--------------------------------------------------------------------------------
+8. WHAT THIS DOES NOT SHOW
+--------------------------------------------------------------------------------
+  A network. Node and client are on the same machine, so the rate measures the
+  software path and not wifi. 07-distribute/demo.sh says the same thing about
+  its own numbers; a network figure needs a second device.
+  A large pack. Nothing here has pulled the 2.84 GB model through this page.
+  Resume after a drop. client.py does it with Range and If-Range and
+  selftest.py covers it; at 8.81 kB there is nothing to resume.
+
+SCREENSHOTS in 06-demo/results/2026-09-19-packs/
+  packs-before.png     both packs on the node, Download with the size, base has none
+  packs-installed.png  one installed with its verified panel, one still to download
+  packs-active.png     an installed pack chosen
+  packs-node-down.png  the node stopped: installed still works, the rest says why

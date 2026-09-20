@@ -38,6 +38,7 @@ THE API
   POST   /api/conversations/<id>/turn     one turn for one side, streamed
   GET    /api/chunk/<key>                 the real chunk text and its source
   POST   /api/transcribe                  speech to text, on this machine
+  POST   /api/regions/<id>/install        pull a pack from the distribution node, streamed
 
 VOICE IS INPUT, NOT A SHORTCUT. /api/transcribe returns text and nothing else.
 It never starts an assessment. The transcript lands in the composer for the
@@ -73,6 +74,7 @@ from urllib.request import urlopen
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import packs  # noqa: E402
 import pipeline  # noqa: E402
 import soap  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
 import voice  # noqa: E402
@@ -248,7 +250,16 @@ class Handler(SimpleHTTPRequestHandler):
                                "topics": _topics,
                                "max_followups": pipeline.MAX_FOLLOWUPS})
         if path == "/api/regions":
-            return self._json({"regions": regions(), "retrieval": "base corpus only"})
+            # Each pack carries whether it is INSTALLED ON THIS DEVICE and what
+            # the node offers. Those are different places: a pack sitting in
+            # 07-distribute/packs is on the node, not here, and the whole point
+            # of the page is that you can watch it cross.
+            rs = regions()
+            st = packs.state([r.get("id") for r in rs if r.get("id")])
+            for r in rs:
+                r["pack"] = st["regions"].get(r.get("id"), {})
+            return self._json({"regions": rs, "retrieval": "base corpus only",
+                               "node": st["node"], "node_ok": st["node_ok"]})
         if path == "/api/people":
             return self._json({"people": [describe(p) for p in PEOPLE.list()]})
         m = re.match(r"^/api/people/([\w-]+)$", path)
@@ -349,7 +360,46 @@ class Handler(SimpleHTTPRequestHandler):
         m = re.match(r"^/api/conversations/([\w-]+)/turn$", path)
         if m:
             return self._turn(m.group(1), body)
+
+        # PULL A PACK FROM THE DISTRIBUTION NODE, streamed so the page can show
+        # it arriving. The verification is 07-distribute/client.py's own, run
+        # in process: index, manifest, per-file download, hash FROM DISK,
+        # pack_sha256 recomputed from the files, manifest.json written last.
+        # Nothing here decides whether a pack is good. Retrieval is untouched.
+        m = re.match(r"^/api/regions/([\w-]+)/install$", path)
+        if m:
+            return self._install(m.group(1))
         return self._json({"error": "not found"}, 404)
+
+    def _install(self, region_id):
+        send = self._sse()
+        try:
+            packs.install(region_id, send)
+        except packs.Refused as e:
+            send("error", {"message": str(e), "integrity": False})
+        except Exception as e:
+            send("error", {"message": f"the install failed: {e}", "integrity": False})
+
+    def _sse(self):
+        """Open a server-sent event stream and return its send function. A
+        closed tab must not take the process down, so a dead socket is noted
+        once and every later write is dropped."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        gone = {"yes": False}
+
+        def send(event, payload=None):
+            if gone["yes"]:
+                return
+            try:
+                self.wfile.write(
+                    f"data: {json.dumps({'event': event, **(payload or {})})}\n\n".encode())
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                gone["yes"] = True
+        return send
 
     def _turn(self, cid, body):
         conv = CONVERSATIONS.get(cid)

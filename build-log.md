@@ -5708,3 +5708,69 @@ wifi address each remember their own.
 **The full `regions` check was NOT re-run**, because it drives a live
 assessment and another instance had llama-server. The cleanup it now performs
 is the same click the probe verified. Re-run it when the model is free.
+
+### 2026-09-19 The regions page downloads its packs, and shows the hashes landing
+
+"Use this region" was instant and nothing showed, so the distribution node
+existed only in a terminal transcript. The button is now per pack and says
+where the pack is: **Download with its size** when the node has it and this
+device does not, **Use this region** once it is installed, **Active** when it
+is chosen. The base corpus never shows a Download: it ships with the app.
+
+**The verification is the reference client's, not a second copy.**
+`06-demo/packs.py` calls `07-distribute/client.py`'s own `cmd_pull` in process,
+with its stdout captured line by line, so the page reports exactly what the
+client did: index, manifest, per-file download, **hash from disk**,
+`pack_sha256` recomputed from the files, `manifest.json` written last. Nothing
+in `06-demo` decides whether a pack is good. **Installed means manifest.json
+exists**, which is the client's definition and the only one, and this code
+never writes it.
+
+**Two different places, which is the whole demo.** `07-distribute/packs` is the
+NODE. `06-demo/data/packs` is THIS DEVICE, and it starts empty. The card says
+"on the node, not on this device yet" until it is pulled.
+
+**The bar is honest and it is not useful, so the panel is what stays.** The
+regional packs are 8,815 and 11,022 bytes over loopback and the whole pull is
+**13 ms**. A progress bar on that flashes. What remains on the card afterwards
+is the evidence: "Installed on this device. 8 files, 8.81 kB, every one hashed
+from disk against the manifest", with the pack digest under it. A judge can
+read that; they cannot read a 13 ms animation. The 2.84 GB model pack would
+show a real bar and is deliberately not offered here: only ids beginning
+`regional-` are.
+
+**The node going down is the realistic desk failure and it is handled.**
+`/api/regions` answers in 0.9 to 2.4 ms with the node stopped, because
+connection refused is instant, so nothing hangs. The page says "The
+distribution node is not running. Installed packs still work.", an uninstalled
+pack reads "Not on the node", and **an installed pack keeps working**, which it
+has to or the claim is empty.
+
+**Integrity failures: one is the node's job and one is the client's, and both
+were already covered.** A file that goes bad on the node's own disk never
+reaches a client: measured here by appending a byte to a copy of
+`citations.csv`, and the node **withdrew the pack from `/packs` by itself**. A
+bit flipped in transit is the client's job and `07-distribute/selftest.py` T06
+already covers it with a poisoning proxy, so it was not rebuilt. The page
+renders that outcome as a hatched panel, "The bytes did not match the manifest.
+Nothing was installed.", in the same hold grey as every other refusal and never
+in a triage colour.
+
+**Retrieval is unchanged and every card still says so**, verbatim, asserted by
+the check: "Unchanged. The model still reads the base corpus only." Installing
+a pack puts files on disk and changes what the page says about emergency
+numbers. Nothing else.
+
+**Two things this broke and fixed.** The `regions` check clicked
+`[data-region="india"]`, which no longer exists until india is installed; it now
+pulls the pack first, which is also what a person would have to do. And the
+first run of `packs.install` **recursed until the stack blew**: the emit handler
+printed, that print went to the captured stdout, and the sink fed it back in.
+The sink now refuses re-entrant writes and passes them to the real stdout
+instead, so a caller that logs still logs.
+
+**A third terminal is needed now:** `python 07-distribute/server.py`. Without it
+the page still works and says why.
+
+Results: `06-demo/results/2026-09-19-packs-live.txt`, four screenshots beside
+it. Check: `node 06-demo/ui_check.mjs packs OUTDIR`, 14 assertions.

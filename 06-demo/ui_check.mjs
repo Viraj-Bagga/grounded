@@ -10,6 +10,7 @@
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
+//   node 06-demo/ui_check.mjs packs OUTDIR          a pack downloaded from the distribution node and verified
 //   node 06-demo/ui_check.mjs phone OUTDIR URL      a phone on the wifi: over the network, touch, 390x844
 //   node 06-demo/ui_check.mjs voice OUTDIR [URL]    the microphone, with a known WAV played into it
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
@@ -510,6 +511,15 @@ async function regions(out) {
   check("it gives the region's emergency number", /\b108\b/.test(names)
     && /no single number: local emergency services/.test(names));
   await p.shot(join(out, "desktop-regions.png"), true);
+  // A pack has to be ON THIS DEVICE before it can be chosen, since 2026-09-19:
+  // an uninstalled card offers Download, not "Use this region". Pull it first
+  // if it is not here, which is also what a person would have to do.
+  if (await p.count('[data-install="india"]')) {
+    await p.click('[data-install="india"]');
+    await p.until(`document.querySelector("#pack-india .dl.ok")`, 60000, 100);
+    check("india installs from the distribution node before it can be chosen",
+      /every one hashed from disk against the manifest/.test(await p.text("#pack-india .dl.ok")));
+  }
   await p.click('[data-region="india"]');
   await sleep(300);
   check("choosing a region marks it active", await p.eval(
@@ -849,6 +859,78 @@ async function voice(out, url) {
   await p.close();
 }
 
+// A PACK CROSSING FROM THE NODE TO THIS DEVICE. Needs the distribution node
+// on 8790 (python 07-distribute/server.py) and at least one pack not yet
+// installed here; clear them with: rm -rf 06-demo/data/packs
+//
+// The download itself is over in well under a second, because the regional
+// packs are kilobytes and the node is on loopback. What this really checks is
+// that the page shows WHERE the pack is at each step and keeps the evidence:
+// every file hashed from disk against the manifest, and the pack digest
+// recomputed from the files. Retrieval must still say it is unchanged.
+async function packsFlow(out) {
+  const p = await tab();
+  await p.size(DESKTOP);
+  await p.go("/regions");
+
+  const notices = await p.eval(`[...document.querySelectorAll("#main .notice")].map(e => e.innerText).join(" | ")`);
+  check("the page names the distribution node", /distribution node at http/.test(notices), notices.slice(0, 200));
+  check("the node is reachable", await p.count(".node-dot.on") === 1,
+    "start it with: python 07-distribute/server.py");
+
+  const base = await p.eval(`document.querySelector(".packs .pack").innerText`);
+  check("the base corpus offers no download", !/Download/.test(base) && /always installed/.test(base),
+    base.slice(0, 160));
+
+  const target = await p.eval(`(() => {
+    const b = document.querySelector("[data-install]");
+    return b ? { id: b.dataset.install, label: b.innerText } : null;
+  })()`);
+  if (!target) {
+    check("a pack is available to download", false, "every pack is already installed; rm -rf 06-demo/data/packs");
+    await p.close();
+    return;
+  }
+  check("an uninstalled pack offers a download with its size",
+    /^Download\s·\s[\d.]+ (B|kB|MB|GB)$/.test(target.label.trim()), target.label);
+  check("and its card says the pack is on the node, not here",
+    /on the node, not on this device yet/.test(await p.text(`#pack-${target.id}`)));
+  await p.shot(join(out, "packs-before.png"), true);
+
+  await p.click(`[data-install="${target.id}"]`);
+  await p.until(`document.querySelector("#pack-${target.id} .dl.ok")`, 60000, 100);
+  const panel = await p.text(`#pack-${target.id} .dl.ok`);
+  check("the card says it is installed here, with the file count and size",
+    /Installed on this device/.test(panel) && /\d+ files/.test(panel), panel.slice(0, 200));
+  check("and that every file was hashed from disk against the manifest",
+    /every one hashed from disk against the manifest/.test(panel), panel.slice(0, 200));
+  check("and shows the pack digest", /pack_sha256 [0-9a-f]{24}/.test(panel), panel.slice(0, 200));
+  check("the button becomes Use this region",
+    /Use this region/.test(await p.text(`#pack-${target.id} .pack-act`)));
+  check("retrieval still says it is unchanged",
+    /Unchanged\. The model still reads the base corpus only\./.test(await p.text(`#pack-${target.id}`)));
+  await p.shot(join(out, "packs-installed.png"), true);
+
+  await p.click(`#pack-${target.id} [data-region]`);
+  await sleep(400);
+  check("an installed pack can then be made active",
+    await p.count(`#pack-${target.id}.on`) === 1);
+  check("the sidebar follows", !/Base only/.test(await p.text("#region-link")));
+  await p.shot(join(out, "packs-active.png"), true);
+
+  // Put it back, the way the regions check now does.
+  await p.click('.packs .pack [data-region=""]');
+  await sleep(300);
+  check("and the base corpus can be chosen again",
+    (await p.eval(`localStorage.getItem("region") || ""`)) === "");
+
+  // A reload proves it is on disk and not in the page's head.
+  await p.go("/regions");
+  check("the install survives a reload",
+    /Installed on this device/.test(await p.text(`#pack-${target.id}`)));
+  await p.close();
+}
+
 const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 // Only the voice check needs an AudioContext that runs without a click.
@@ -857,7 +939,7 @@ const chrome = await launch(mode === "voice"
   ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone, voice }[mode];
+                regions, phone, voice, packs: packsFlow }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

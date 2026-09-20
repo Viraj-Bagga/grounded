@@ -366,6 +366,34 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .packs { display: grid; gap: 1rem; margin-top: 1.25rem; }
 .pack { border: 1px solid var(--rule); border-radius: var(--r); padding: 1rem; display: grid; gap: .5rem; }
 .pack.on { border-color: var(--ink); }
+/* THE DOWNLOAD, AND THE EVIDENCE IT LEAVES. The packs are kilobytes over
+   loopback so the bar is over in well under a second: it is honest, not
+   useful. The panel that replaces it is the point, because "every file hashed
+   from disk against the manifest" is the claim the node exists to support. */
+.pack-act { display: grid; gap: .625rem; justify-items: start; }
+.pack-act .btn { justify-self: stretch; }
+.dl { width: 100%; display: grid; gap: .375rem; border: 1px solid var(--rule);
+  border-radius: var(--r); padding: .625rem .75rem; background: var(--well); }
+.dl p { margin: 0; font-size: var(--t-14); }
+.dl .sm { font-size: var(--t-12); color: var(--ink-3); }
+.dl .bar { height: .5rem; background: var(--rule-2); border-radius: 2px; overflow: hidden; }
+.dl .bar span { display: block; height: 100%; background: var(--action);
+  transition: width .12s linear; }
+.dl-f { list-style: none; margin: 0; padding: 0; display: grid; gap: .125rem; }
+.dl-f li { display: flex; gap: .625rem; align-items: baseline; font-size: var(--t-12); }
+.dl-f .p { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; color: var(--ink-2); }
+.dl-f .mono { color: var(--ink-3); }
+/* Verified, and refused. Neither is a triage colour: red, amber and green
+   belong to the urgency bars. Installed is ink on paper, a failure is the
+   hatched hold used for refusals everywhere else. */
+.dl.ok { background: var(--paper); border-color: var(--ink); }
+.dl.bad { background: var(--hold); color: var(--on-hold); border-color: var(--hold); }
+.dl.bad .sm { color: var(--on-hold); opacity: .85; }
+.node-dot { width: .625rem; height: .625rem; flex: none; margin-top: .3125rem;
+  border: 1.5px solid var(--ink-3); background: transparent; }
+.node-dot.on { background: var(--ink); border-color: var(--ink); }
+.muted.sm { font-size: var(--t-12); margin: 0; }
 .pack-h { display: flex; align-items: center; gap: .5rem; font-size: var(--t-17); }
 .pack-h .tag { border-color: var(--ink); color: var(--ink); }
 .pack-d { display: grid; grid-template-columns: max-content 1fr; gap: .375rem .75rem; margin: .25rem 0 .5rem; }

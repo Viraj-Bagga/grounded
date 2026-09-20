@@ -2,7 +2,7 @@
 // composer. No framework and no build step; it has to run with the laptop
 // offline, from 06-demo/server.py.
 
-import { api, streamTurn } from "./api.js";
+import { api, streamTurn, streamInstall } from "./api.js";
 import { answerHTML, pendingHTML, esc, fmt, secs } from "./answer.js";
 import { peopleListHTML, personFormHTML, bindPersonForm, facts, ruleName } from "./people.js";
 import { icon } from "./icons.js";
@@ -62,6 +62,9 @@ const S = {
   // The microphone's own state. `heard` lives on the draft instead, because it
   // belongs to the words in the box and has to travel with them.
   voice: { rec: null, elapsed: 0, busy: false, error: null },
+  // One entry per pack being pulled from the distribution node, keyed by
+  // region id: { running, done, total, nfiles, files:[{path,sha256}], error }.
+  installing: {},
   flash: null, autoSend: false,
 };
 const touch = matchMedia("(pointer: coarse)").matches;
@@ -812,10 +815,76 @@ function pollBusy(id) {
 // what this page tells you about emergency numbers and nothing else. Viraj's
 // call 2026-09-19, because rewiring retrieval the night before judging would
 // put the scope floor and the refusal wording at risk.
+// Bytes the way the node and the client say them, so the page and the
+// terminal transcript never disagree about how big a pack is.
+function bytes(n) {
+  n = Number(n || 0);
+  if (n < 1000) return `${n} B`;
+  if (n < 1e6) return `${(n / 1e3).toFixed(2)} kB`;
+  if (n < 1e9) return `${(n / 1e6).toFixed(2)} MB`;
+  return `${(n / 1e9).toFixed(2)} GB`;
+}
+
+// THE BUTTON SAYS WHERE THE PACK IS. Not installed and the node has it:
+// Download, with what it costs. Installed: Use this region. Chosen: Active.
+// The base corpus never appears here; it ships with the app and is not a
+// download, which is why its card is written out separately below.
+function packButton(r, active) {
+  const p = r.pack || {};
+  const job = S.installing[r.id];
+  if (job && job.running)
+    return `<button class="btn primary" type="button" disabled>Downloading\u2026</button>`;
+  if (!p.installed) {
+    if (!p.offered)
+      return `<button class="btn" type="button" disabled>Not on the node</button>
+        <p class="muted sm">${S.nodeOk === false
+          ? `The distribution node at ${esc(S.node || "")} is not running.`
+          : "This pack is not being served."}</p>`;
+    return `<button class="btn primary" type="button" data-install="${esc(r.id)}"
+      >Download \u00b7 ${bytes(p.size)}</button>`;
+  }
+  return `<button class="btn ${active ? "plain" : "primary"}" type="button"
+    data-region="${esc(r.id)}" ${active ? "disabled" : ""}
+    >${active ? "Active" : "Use this region"}</button>`;
+}
+
+// What arrived, while it is arriving. The packs are small and on loopback, so
+// this is over in well under a second: the bar is honest rather than useful.
+// THE PANEL BELOW IT IS THE POINT and it stays, because the evidence that
+// every file was hashed from disk is worth more than the animation.
+function packProgress(r) {
+  const job = S.installing[r.id];
+  const p = r.pack || {};
+  if (job && job.error) {
+    return `<div class="dl bad">
+      <p><b>${job.integrity ? "The bytes did not match the manifest."
+        : "The download did not finish."}</b> Nothing was installed.</p>
+      <p class="mono sm">${esc(job.error)}</p></div>`;
+  }
+  if (job && job.running) {
+    const pct = job.total ? Math.round((100 * job.done) / job.total) : 0;
+    return `<div class="dl">
+      <div class="bar" role="progressbar" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>
+      <p class="sm">${bytes(job.done)} of ${bytes(job.total)} \u00b7
+        ${fmt(job.files.length)} of ${fmt(job.nfiles)} files hashed from disk</p>
+      ${job.files.length ? `<ul class="dl-f">${job.files.slice(-6).map(f =>
+        `<li><span class="p">${esc(f.path)}</span>` +
+        `<span class="mono">${esc((f.sha256 || "").slice(0, 12))}</span></li>`).join("")}</ul>` : ""}
+    </div>`;
+  }
+  if (!p.installed) return "";
+  return `<div class="dl ok">
+    <p><b>Installed on this device.</b> ${fmt(p.installed_files)} files,
+      ${bytes(p.installed_size)}, every one hashed from disk against the manifest.</p>
+    <p class="mono sm">pack_sha256 ${esc((p.installed_sha256 || "").slice(0, 24))}\u2026</p>
+  </div>`;
+}
+
 function regionCard(r, active) {
   const topics = [...new Set((r.chunks || []).map(c => c.topic))].join(", ").replace(/_/g, " ");
   const pubs = [...new Set((r.chunks || []).map(c => c.publisher))];
-  return `<div class="pack${active ? " on" : ""}">
+  const p = r.pack || {};
+  return `<div class="pack${active ? " on" : ""}" id="pack-${esc(r.id)}">
     <div class="pack-h"><b>${esc(r.title)}</b>${active ? '<span class="tag">active</span>' : ""}</div>
     <p class="muted">${esc(r.description || "")}</p>
     <dl class="pack-d">
@@ -829,41 +898,122 @@ function regionCard(r, active) {
         ${(r.license || {}).commercial === false
           ? "<b>Not for commercial use.</b>" : ""} ${esc((r.license || {}).plain || "")}</dd>
       <dt>Retrieval</dt><dd>Unchanged. The model still reads the base corpus only.</dd>
+      <dt>Pack</dt><dd>${p.installed
+        ? `installed here, version ${esc(p.installed_version || "?")}`
+        : p.offered
+          ? `${bytes(p.size)} in ${fmt(p.files)} files, on the node, not on this device yet`
+          : "not available from the node"}</dd>
     </dl>
-    <button class="btn ${active ? "plain" : "primary"}" type="button" data-region="${esc(r.id)}"
-      ${active ? "disabled" : ""}>${active ? "Active" : "Use this region"}</button>
+    <div class="pack-act">${packProgress(r)}${packButton(r, active)}</div>
   </div>`;
+}
+
+// S.regions plus where the distribution node is and whether it answered.
+// One loader, because the regions page and the first paint both need it.
+async function loadRegions() {
+  try {
+    const d = await api.regions();
+    S.regions = d.regions || [];
+    S.node = d.node;
+    S.nodeOk = d.node_ok;
+  } catch {
+    S.regions = [];
+    S.nodeOk = false;
+  }
 }
 
 async function showRegions() {
   S.conv = null;
-  document.title = "Regions · Triage";
-  try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
+  document.title = "Regions \u00b7 Triage";
+  await loadRegions();
   renderHistory();
   const active = S.regions.find(r => r.id === S.region);
+  const nodeLine = S.nodeOk
+    ? `Packs come from the distribution node at <span class="mono">${esc(S.node || "")}</span>,
+       over the network, with no internet. Every file is hashed from disk against the pack's
+       manifest before anything counts as installed.`
+    : `<b>The distribution node is not running.</b> Installed packs still work.
+       To offer downloads, start it with
+       <span class="mono">python 07-distribute/server.py</span>.`;
   $("#main").innerHTML = `<div class="page">
     <h1 class="pg-h">Regions</h1>
     <div class="notice">${icon("info")}<span><b>These packs are experimental and do not
       change the answers.</b> The model reads the base corpus, ${fmt(S.health ? S.health.sources : 0)}
       chest pain sources, whichever region is chosen. A region pack is extra material, built and
       ready to distribute, and it changes what this page tells you about emergency numbers.</span></div>
+    <div class="notice"><span class="node-dot${S.nodeOk ? " on" : ""}"></span><span>${nodeLine}</span></div>
     ${S.regions.length ? "" : `<p class="muted">No region packs are on this machine yet.</p>`}
     <div class="packs">
       <div class="pack${S.region ? "" : " on"}">
         <div class="pack-h"><b>Base corpus only</b>${S.region ? "" : '<span class="tag">active</span>'}</div>
         <p class="muted">Chest pain, US government sources, public domain. What the model reads.</p>
-        <button class="btn ${S.region ? "primary" : "plain"}" type="button" data-region=""
-          ${S.region ? "" : "disabled"}>${S.region ? "Use the base corpus alone" : "Active"}</button>
+        <dl class="pack-d"><dt>Pack</dt><dd>ships with the app, always installed</dd></dl>
+        <div class="pack-act"><button class="btn ${S.region ? "primary" : "plain"}" type="button" data-region=""
+          ${S.region ? "" : "disabled"}>${S.region ? "Use the base corpus alone" : "Active"}</button></div>
       </div>
       ${S.regions.map(r => regionCard(r, active && active.id === r.id)).join("")}
     </div>
   </div>`;
-  $("#main").querySelectorAll("[data-region]").forEach(b => b.onclick = () => {
+  bindPacks($("#main"));
+}
+
+function bindPacks(root) {
+  root.querySelectorAll("[data-region]").forEach(b => b.onclick = () => {
     S.region = b.dataset.region || null;
     try { localStorage.setItem("region", S.region || ""); } catch { /* private window */ }
     showRegions();
     renderRegionRow();
   });
+  root.querySelectorAll("[data-install]").forEach(b => b.onclick = () => install(b.dataset.install));
+}
+
+// Only this card's buttons and progress, so a download does not redraw the
+// page under the person's finger five times a second.
+function paintPack(rid) {
+  const card = document.getElementById(`pack-${rid}`);
+  const r = S.regions.find(x => x.id === rid);
+  if (!card || !r) return;
+  const act = card.querySelector(".pack-act");
+  if (!act) return;
+  act.innerHTML = packProgress(r) + packButton(r, S.region === rid);
+  bindPacks(card);
+}
+
+// PULL A PACK FROM THE NODE. The verification is the reference client's, run
+// on the server; this only shows what it reports. A pack is installed when its
+// manifest.json exists, which the client writes last, after every file has
+// hashed. Retrieval does not change and the card keeps saying so.
+async function install(rid) {
+  if (S.installing[rid] && S.installing[rid].running) return;
+  const job = S.installing[rid] = { running: true, done: 0, total: 0, nfiles: 0, files: [] };
+  paintPack(rid);
+  await streamInstall(rid, ev => {
+    switch (ev.event) {
+      case "start": job.total = ev.size || 0; job.nfiles = ev.files || 0; break;
+      case "verified":
+        job.files.push({ path: ev.path, sha256: ev.sha256 });
+        job.done = ev.done || job.done;
+        break;
+      case "error":
+        job.error = ev.message || "the install failed";
+        job.integrity = !!ev.integrity;
+        job.running = false;
+        break;
+      case "dropped":
+        job.error = "the connection dropped before the install finished";
+        job.running = false;
+        break;
+      case "done": job.running = false; break;
+      default: return;                      // line, file: the bar moves on verified
+    }
+    paintPack(rid);
+  });
+  job.running = false;
+  // Re-read from the server rather than believing the stream: installed means
+  // manifest.json is on disk, and only the server can say that.
+  await loadRegions();
+  if (!job.error) delete S.installing[rid];
+  if (location.pathname === "/regions") showRegions();
 }
 
 function renderRegionRow() {
@@ -946,13 +1096,13 @@ $("#sheet").addEventListener("click", e => { if (e.target === $("#sheet")) $("#s
 
 async function health() {
   try { S.region = localStorage.getItem("region") || null; } catch { S.region = null; }
-  try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
+  await loadRegions();
   // BASE IS THE DEFAULT AND A STALE ID DOES NOT OVERRIDE IT. The region is
   // remembered per origin, so a pack chosen once on one address stays chosen
   // there. If the id no longer names a pack on this machine, it is not a
   // region: drop it rather than sit in a state where the sidebar says "Base
   // only" while S.region is still set.
-  if (S.region && !S.regions.some(r => r.id === S.region)) {
+  if (S.region && !S.regions.some(r => r.id === S.region && (r.pack || {}).installed)) {
     S.region = null;
     try { localStorage.removeItem("region"); } catch { /* private window */ }
   }

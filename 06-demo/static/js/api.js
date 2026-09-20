@@ -49,6 +49,34 @@ export async function streamTurn(cid, body, onEvent) {
     onEvent({ event: r.status === 409 ? "busy" : "error", message: b.error || r.statusText });
     return;
   }
+  return pump(r, onEvent);
+}
+
+// Pull a region pack from the distribution node, streamed the same way a turn
+// is, so the page can show the bytes arriving and each file's sha256 landing.
+// The events are start, line, file, verified, done and error.
+export async function streamInstall(id, onEvent) {
+  let r;
+  try {
+    r = await fetch(`/api/regions/${q(id)}/install`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+    });
+  } catch {
+    onEvent({ event: "error", message: "The app server could not be reached." });
+    return;
+  }
+  if (!r.ok) {
+    let b = {};
+    try { b = await r.json(); } catch { /* not JSON */ }
+    onEvent({ event: "error", message: (b && b.error) || r.statusText });
+    return;
+  }
+  return pump(r, onEvent);
+}
+
+// The shared server-sent-event reader. One implementation, because a second
+// copy is a second place for the framing to drift.
+async function pump(r, onEvent) {
   const reader = r.body.getReader();
   const dec = new TextDecoder();
   let buf = "";
