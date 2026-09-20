@@ -263,18 +263,29 @@ function showNew() {
     ? `<div class="kid-note">${esc(kid.map(k => k.label).join(" and "))} ${kid.length > 1 ? "are" : "is"}` +
       ` under 16. This app can't assess children.</div>` : "";
   const src = S.health ? `${fmt(S.health.sources)} government sources` : "government sources";
-  // NEARLY BLANK: no profile card, no rule line, no heading. Three quiet
-  // presets and one line of scope, both bottom-aligned above the composer.
-  // The scope line has to stay on the first screen and above the composer: it
-  // carries "the model runs on the laptop, not on this phone" when the page is
-  // opened over the wifi, and ui_check asserts exactly that.
+  // NEARLY BLANK: no profile card, no rule line, no heading. Three presets and
+  // two lines of scope, CENTRED in the space above the composer rather than
+  // pinned to its bottom edge. Viraj's call 2026-09-19 from the phone: bottom
+  // alignment left the top two thirds of a 390x844 screen empty, which reads
+  // as a void with content fallen to the floor rather than as an empty state.
+  //
+  // THE SCOPE BLOCK IS TWO LINES, NOT ONE. What this is, then how it runs.
+  // They are different kinds of statement and ran together as one sentence.
+  // The second is quieter because it is the honesty note, and it has to stay
+  // on the first screen and above the composer: over the wifi it carries "the
+  // model runs on the laptop, not on this phone" and ui_check asserts both
+  // that wording and its position.
   $("#main").innerHTML = `<div class="page blank">${compareHint}${kidNote}
     <ul class="picks">${PRESETS.map((p, i) =>
-      `<li><button type="button" data-preset="${i}">${esc(p[0])}` +
-      `<span class="n">${i + 1}</span></button></li>`).join("")}</ul>
-    <p class="scope">Chest pain only · ${src} · ${remoteViewer()
-      ? "the model runs on the laptop, not on this phone"
-      : "runs on this device"}, no internet</p>
+      `<li><button type="button" data-preset="${i}">` +
+      `<span class="lbl">${esc(p[0])}</span>` +
+      `<span class="n">${i + 1}</span>${icon("chevron")}</button></li>`).join("")}</ul>
+    <div class="scope">
+      <p class="what">Chest pain only · ${src}</p>
+      <p class="how">${remoteViewer()
+        ? "The model runs on the laptop, not on this phone"
+        : "Runs on this device"} · no internet</p>
+    </div>
   </div>` + composerHTML({ first: true });
   $("#main").querySelectorAll("[data-preset]").forEach(b => b.onclick = () => usePreset(+b.dataset.preset));
   bindComposer();
@@ -936,6 +947,15 @@ $("#sheet").addEventListener("click", e => { if (e.target === $("#sheet")) $("#s
 async function health() {
   try { S.region = localStorage.getItem("region") || null; } catch { S.region = null; }
   try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
+  // BASE IS THE DEFAULT AND A STALE ID DOES NOT OVERRIDE IT. The region is
+  // remembered per origin, so a pack chosen once on one address stays chosen
+  // there. If the id no longer names a pack on this machine, it is not a
+  // region: drop it rather than sit in a state where the sidebar says "Base
+  // only" while S.region is still set.
+  if (S.region && !S.regions.some(r => r.id === S.region)) {
+    S.region = null;
+    try { localStorage.removeItem("region"); } catch { /* private window */ }
+  }
   renderRegionRow();
   try { S.health = await api.health(); } catch { S.health = null; }
   renderStatus();

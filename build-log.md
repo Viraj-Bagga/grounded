@@ -5647,3 +5647,64 @@ microphone or any other voice.
 Run: `01-data/eval/runs/2026-09-19-whisper-real-voice.txt`, with every
 transcript. Harness: `01-data/eval/audio/record.sh`,
 `01-data/eval/rescore_real_voice.py`.
+
+### 2026-09-19 Five fixes from the phone, and a region nobody chose
+
+Viraj on a handset over the wifi. All five done and checked at 390x844:
+`06-demo/results/2026-09-19-empty-state/`.
+
+**1. The empty screen was a void with content on the floor.** `.page.blank` was
+`justify-content: flex-end`, so at 390x844 the top two thirds were blank and
+everything sat against the composer. Now `center`. The scope block still has to
+stay above the composer and on the first screen, which the phone check asserts
+by rect, and centring keeps it there.
+
+**Centred on desktop too, deliberately.** At 1440x900 three buttons in the
+middle of the paper looks sparse, and a width-scoped rule would fix it.
+Viraj's call: leave it centred. **One layout is better than two, and a sparse
+wide screen is cheaper than a second rule to maintain.** Not a bug; do not
+"fix" it later without asking.
+
+**2. The scope line was two statements in one sentence.** "Chest pain only, 35
+government sources" is what this is; "the model runs on the laptop, no
+internet" is the honesty note. Two lines now, in one `.scope` container so the
+existing assertion on its text still reads both, and the second is `--ink-3`
+against the first's `--ink-2`.
+
+**3. The voice line was the user reading our implementation notes.** It said
+"Voice needs a secure connection. Browsers only allow the microphone on the
+laptop itself, not over a plain address on the wifi." Two lines about browser
+secure contexts. Now one: **"Voice only works on the laptop, not over the
+wifi."** Where it works is the part a person can act on. Why is in voice.py and
+in this log, which is where it belongs.
+
+**4. The presets did not look tappable.** Hairline-separated transparent text
+reads as a list of headings, and nobody taps a heading. Now bordered, 6px like
+every other control, with the drawn chevron on the right and the keypad numeral
+kept on desktop.
+
+**5. THE SIDEBAR SAID "Sub-Saharan Africa" AND NOBODY HAD CHOSEN IT.** The
+default in code is and always was base: `localStorage.getItem("region") || null`.
+Verified on a fresh browser. What actually happened is that **the `regions`
+ui_check clicks `[data-region="india"]` and never puts it back**, and the
+region is remembered in localStorage per origin, so whatever browser ran that
+check kept a region selected afterwards, on that address, indefinitely. A
+check that changes persistent app state and walks away is how a demo ends up
+showing a region nobody chose. **The check now clicks back to base and asserts
+both localStorage and the sidebar.**
+
+**Hardened while in there: a stale pack id no longer half-applies.** If the id
+in localStorage names no pack on this machine, `S.regions.find` returned
+undefined, so the sidebar read "Base only" while `S.region` was still set and
+the regions page thought a region was active. It is now dropped on load.
+Probed directly, no model involved: fresh browser defaults to base and stores
+nothing, a chosen region sticks across a reload, the base button clears it, and
+`region=atlantis` is dropped.
+
+**To clear it on a phone that already has one:** Region, then "Use the base
+corpus alone". It is per origin, so the laptop's 127.0.0.1 and the phone's
+wifi address each remember their own.
+
+**The full `regions` check was NOT re-run**, because it drives a live
+assessment and another instance had llama-server. The cleanup it now performs
+is the same click the probe verified. Re-run it when the model is free.

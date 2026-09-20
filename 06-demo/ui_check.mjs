@@ -545,6 +545,16 @@ async function regions(out) {
   await p.size(PHONE);
   await p.go("/regions");
   await p.shot(join(out, "mobile-regions.png"), true);
+
+  // PUT IT BACK. The region is remembered in localStorage per origin, so this
+  // check used to leave India selected in whatever browser ran it, and the
+  // sidebar would still say so days later. A check that changes persistent app
+  // state and walks away is how a demo ends up showing a region nobody chose.
+  await p.click('[data-region=""]');
+  await sleep(300);
+  check("the check leaves the base corpus selected, as it found it",
+    await p.eval(`(localStorage.getItem("region") || "") === ""`));
+  check("the sidebar is back to Base only", /Base only/.test(await p.text("#region-link")));
   await p.close();
 }
 
@@ -772,7 +782,8 @@ async function voice(out, url) {
     // navigator.mediaDevices does not exist there. Measured 2026-09-19.
     check("no microphone over the wifi", await p.count("#mic") === 0);
     const why = await p.text("#heard-slot");
-    check("the page says why", /secure connection/i.test(why), why);
+    check("the page says why, in one line", /only works on the laptop/i.test(why)
+      && why.split("\n").filter(Boolean).length === 1, why);
     await p.shot(join(out, "voice-phone-no-mic.png"));
     await p.close();
     return;

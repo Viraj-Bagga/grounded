@@ -34,9 +34,11 @@ export const wasEdited = (sent, heard) => norm(sent) !== norm(heard);
 
 // Why the microphone is not offered here. One reason, in the page's own voice.
 export function micBlocked(health) {
+  // ONE SHORT LINE. Viraj's call 2026-09-19: two lines about browser secure
+  // contexts is the user reading our implementation notes. Where it works is
+  // the part they can act on; why is in voice.py and the build log.
   if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
-    return "Voice needs a secure connection. Browsers only allow the microphone on the "
-      + "laptop itself, not over a plain address on the wifi.";
+    return "Voice only works on the laptop, not over the wifi.";
   if (health && health.remote)
     return "Voice runs on the laptop, so the microphone is only offered there.";
   if (health && health.voice && !health.voice.ok)
