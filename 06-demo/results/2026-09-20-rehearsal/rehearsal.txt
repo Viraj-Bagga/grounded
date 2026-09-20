@@ -1,0 +1,199 @@
+========================================================================
+REHEARSAL: one end-to-end run in the state a judge meets
+========================================================================
+date    2026-09-20T06:16:50.607Z
+out     06-demo/results/2026-09-20-rehearsal
+start   field: 0 pending, 0 already sent
+        base:  0 assessments, 0 devices
+        slots: 0:idle 1:idle
+
+────────────────────────────────────────────────────────────────────────
+STEP 1. The empty screen, desktop and phone
+    3 presets offered
+    history: Assessments you make appear here, saved on this device.
+    06-demo/results/2026-09-20-rehearsal/01-empty-desktop.png
+    06-demo/results/2026-09-20-rehearsal/02-empty-phone.png
+    ⏱  1.5 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.1. Preset: Crushing chest pressure (You)
+    answer   RED     "RED / Call emergency services now"
+             sources: CP-ACS-003, CP-ANG-003
+             Checked / 18 s / read 608, 675 cached / wrote 147
+      click to answer: 18.5 s
+    06-demo/results/2026-09-20-rehearsal/03-preset-1.png
+    ⏱  19.3 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.2. Preset: Sharp pain breathing in (Aunt Sue)
+    answer   RED     "RED / Call emergency services now"
+             sources: CP-PE-004, CP-PE-001, CP-PERI-002, CP-ANG-001, CP-PERI-001
+             rule: Raised to red: breast cancer on Aunt Sue's profile, with "worse" on "deep breath" / “cancer and cancer treatments including chemotherapy and
+             Checked / 18 s / read 526, 675 cached / wrote 190 / 5 removed
+      click to answer: 18.6 s
+    06-demo/results/2026-09-20-rehearsal/04-preset-2.png
+    ⏱  19.3 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.3. Preset: Indigestion (You and Mum)
+    A
+    You    GREEN   "GREEN / Self-care, and the signs that change the answer"
+             sources: CP-ACS-003, CP-ANG-003
+             Checked / 25 s / read 650, 675 cached / wrote 154
+    B
+    Mum    YELLOW  "YELLOW / Be seen today"
+             sources: CP-ACS-002, CP-ANG-003
+             rule: Raised to yellow: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" / “Silent heart attacks are more common in olde
+             Checked / 24 s / read 4, 1,332 cached / wrote 140 / 1 removed
+      click to answer: 25.4 s
+    06-demo/results/2026-09-20-rehearsal/05-preset-3.png
+    ⏱  26.2 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 3. A follow-up on the Aunt Sue assessment
+    answer: RED "RED / Call emergency services now"
+    cache: Checked / 9.9 s / 1,390 cached, read 43 / wrote 173
+      follow-up: 10.7 s
+    06-demo/results/2026-09-20-rehearsal/06-follow-up.png
+    ⏱  11.5 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 4. Open a citation and confirm the chunk resolves
+    clicked CP-PE-004
+    chunk text: 822 chars, "Certain medical conditions can raise your chance of developing VTE. Some conditions are more closely linked to…"
+    source line: https://www.nhlbi.nih.gov/health/venous-thromboembolism/causes · Retrieved 2026-09-15 · Source: NHLBI, National Institutes of Health
+    06-demo/results/2026-09-20-rehearsal/07-citation.png
+    ⏱  0.8 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 5. Download a regional pack and confirm the integrity check
+    downloaded africa-ssa (11022 bytes) in 1.2 s
+    installed sha256, recomputed from this device's files: 2ae230ac1803cd88c7ca1491fa0750a3…
+    node published:                                        ?…
+    INTEGRITY: MISMATCH
+    per-file sha256 lines on screen: 1
+    06-demo/results/2026-09-20-rehearsal/08-packs-before.png
+    06-demo/results/2026-09-20-rehearsal/09-packs-after.png
+    ⏱  2.1 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 6. The caseload: add someone, assess them, mark them seen
+    added Dad: Dad · 71, male · chest tightness on the walk up from the field
+    assessed: YELLOW in 21.8 s
+    linked to the caseload row automatically: yes
+    after Mark seen: 0 waiting, 1 seen today
+    06-demo/results/2026-09-20-rehearsal/10-caseload-waiting.png
+    06-demo/results/2026-09-20-rehearsal/11-caseload-seen.png
+    ⏱  23.8 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 7. Sync to base and confirm what arrives
+    4 waiting to send before
+      Sending 4 to http://127.0.0.1:8781…
+      Landed at base: 20260920-021653-d53b4a · aea5d347e754…
+      Landed at base: 20260920-021712-1a07bc · fcda77504a51…
+      Landed at base: 20260920-021732-bc412e · 23e9d0362be9…
+      Landed at base: 20260920-021813-0a823f · 732f97c90a57…
+      4 sent.
+    still waiting after: 0
+    base now holds: 4 assessments from 1 device(s)
+    0.9 s to send 4
+    06-demo/results/2026-09-20-rehearsal/12-sync-before.png
+    06-demo/results/2026-09-20-rehearsal/13-sync-after.png
+    ⏱  1.7 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 8. The base register, and do the counts match what was sent
+    tally: 4 assessed · 2 red · 4 need review · synced 02:18 from 1 device
+    field sent 4, base holds 4: MATCH
+    every assessment made in this rehearsal is at base: yes
+    red 2, yellow 2, green 1, refused 0
+    needs review 4, still waiting in the field 0
+    06-demo/results/2026-09-20-rehearsal/14-base-register.png
+    06-demo/results/2026-09-20-rehearsal/15-base-phone.png
+    ⏱  1.0 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 9. Download a SOAP note
+    6295 chars in 0.0 s, saved 06-demo/results/2026-09-20-rehearsal/soap-note.txt
+    sections: 4 of 4
+    header names the model and the corpus: yes
+    says it is not a clinical record: yes
+    carries citation keys: yes
+    carries what the guards removed: yes
+    06-demo/results/2026-09-20-rehearsal/16-soap-link.png
+    ⏱  0.8 s
+
+========================================================================
+WHAT A DESK VISIT COSTS
+========================================================================
+  1     The empty screen, desktop and phone                   1.5 s
+  2.1   Preset: Crushing chest pressure (You)                19.3 s
+  2.2   Preset: Sharp pain breathing in (Aunt Sue)           19.3 s
+  2.3   Preset: Indigestion (You and Mum)                    26.2 s
+  3     A follow-up on the Aunt Sue assessment               11.5 s
+  4     Open a citation and confirm the chunk resolves        0.8 s
+  5     Download a regional pack and confirm the integri      2.1 s
+  6     The caseload: add someone, assess them, mark the     23.8 s
+  7     Sync to base and confirm what arrives                 1.7 s
+  8     The base register, and do the counts match what       1.0 s
+  9     Download a SOAP note                                  0.8 s
+        TOTAL                                               109.0 s  (1.8 min)
+
+  of which the model: 100.1 s across 5 generations (3 presets, 1 follow-up, 1 caseload)
+  everything else:    8.8 s
+
+VERDICTS SHOWN
+  Crushing chest pressure (You)         RED  18.5 s
+  Sharp pain breathing in (Aunt Sue)    RED  18.6 s
+  Indigestion (You and Mum)            A
+You GREEN | B
+Mum YELLOW  25.4 s
+  Caseload: Dad                         YELLOW  21.8 s
+
+WHAT BROKE
+  nothing
+
+16 screenshots in 06-demo/results/2026-09-20-rehearsal
+
+========================================================================
+TWO CORRECTIONS AND ONE FINDING, ADDED AFTER THE RUN
+========================================================================
+
+1. STEP 5's "INTEGRITY: MISMATCH" IS WRONG. It is a bug in this harness, not
+   in the pack install. The node namespaces its packs: packs.py's node_id()
+   maps a region id to "regional-<id>", and the harness looked the pack up by
+   the bare region id, found nothing, and compared a real hash against
+   undefined. Checked by hand against the live node with the right id:
+
+     installed, recomputed from this device's files: 2ae230ac1803cd88c7ca1491fa0750a3…
+     published by the node:                          2ae230ac1803cd88c7ca1491fa0750a3…
+     INTEGRITY: MATCH
+
+   rehearsal.mjs is fixed and the fixed lookup was verified against the live
+   node for both packs. The number in the step above is left as it was
+   printed rather than edited, because a results file that quietly agrees with
+   itself afterwards is worth nothing.
+
+2. "per-file sha256 lines on screen: 1" undercounts. The page shows each
+   file's hash as it lands during the install and then collapses to the
+   pack-level summary once it is done, so counting after the fact sees one.
+   The live per-file verification is in 06-demo/results/2026-09-19-packs/.
+
+3. FINDING, not a break: A FOLLOW-UP HIDES THE FIRST TURN'S RULE AND REMOVALS
+   FROM THE BASE REGISTER. Aunt Sue's row shows "—" in Attention. Her first
+   turn was raised to red by R4 with 5 guard removals; her follow-up was a
+   plain red with none. base_server.row() summarises the LAST turn per side,
+   so the register shows R4:supports and 0 removed, and the detail page shows
+   the last turn too.
+
+     turn 1  result  red  rules=['R4:raised']   dropped={next_steps: 4, rationale: 1}
+     turn 2  result  red  rules=['R4:supports'] dropped={}
+     register row: rules=['R4:supports'] removed=0  ->  Attention renders "—"
+
+   The data is all at base; the summary drops it. It matters twice over: a
+   supervisor scanning the register cannot see that an assessment was
+   escalated or modified, and the OUTSTANDING rule counts `removed`, so an
+   assessment whose only flag was a guard removal on an earlier turn stops
+   being outstanding once a follow-up lands. Not fixed. Viraj's call whether
+   the row should summarise the WHOLE assessment rather than its last turn.
