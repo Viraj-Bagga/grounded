@@ -141,6 +141,54 @@ def clean_person(data):
                   conditions=_clean_list(data.get("conditions"), "conditions", errors),
                   medications=_clean_list(data.get("medications"), "medications", errors))
 
+    # ---- RECORD FIELDS. NONE OF THESE REACH THE MODEL. ----
+    # profile_text reads age, sex, conditions, medications and surgery, and
+    # nothing else, so everything below is record-keeping a clinician wants and
+    # the prompt never sees. selftest_profile_text.py asserts that, byte for
+    # byte, against the seeded household.
+    #
+    # medications STAYS A LIST OF STRINGS. The schedule is a PARALLEL field,
+    # not a richer medications list, because profile_text does
+    # ", ".join(p["medications"]) and turning those into objects would silently
+    # change every cached prompt. Viraj's call 2026-09-20: changing the prompt
+    # to add a feature the model never reads would be the worst trade available.
+    record = {}
+    pid = " ".join(str(data.get("patient_id") or "").split())
+    if pid:
+        if len(pid) > 40:
+            errors["patient_id"] = "Keep the patient ID under 40 characters."
+        else:
+            record["patient_id"] = pid
+    sched = data.get("medication_schedule")
+    if isinstance(sched, dict) and sched:
+        clean = {}
+        for name, times in sched.items():
+            name = " ".join(str(name or "").split())
+            times = " ".join(str(times or "").split())
+            if name and times:
+                clean[name[:60]] = times[:60]
+        if clean:
+            record["medication_schedule"] = clean
+    notes = str(data.get("history_notes") or "").strip()
+    if notes:
+        if len(notes) > 600:
+            errors["history_notes"] = "Keep the notes under 600 characters."
+        else:
+            record["history_notes"] = notes
+    seen = " ".join(str(data.get("last_seen_by") or "").split())
+    if seen:
+        if len(seen) > 80:
+            errors["last_seen_by"] = "Keep it under 80 characters."
+        else:
+            record["last_seen_by"] = seen
+    seen_on = " ".join(str(data.get("last_seen_on") or "").split())
+    if seen_on:
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", seen_on):
+            errors["last_seen_on"] = "Use a date like 2026-09-20."
+        else:
+            record["last_seen_on"] = seen_on
+    person.update(record)
+
     surgery = data.get("surgery")
     if isinstance(surgery, dict) and (surgery.get("what") or surgery.get("weeks_ago") not in (None, "")):
         what = " ".join(str(surgery.get("what") or "").split())

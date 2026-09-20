@@ -84,6 +84,32 @@ export function personFormHTML(p, isNew, conversationsFor) {
               <div class="err" hidden>${icon("alert")}<span></span></div></div>
           </div>
         </section>
+        <section>
+          <h2>Record</h2>
+          <p class="hint" style="margin:-.25rem 0 .875rem">Record-keeping for a clinician.
+            <b>None of this is shown to the model</b>: the profile it reads is the panel on the right,
+            and nothing below changes it.</p>
+          <div class="pair-f">
+            <div class="f" data-f="patient_id"><label for="f-pid">Patient ID</label>
+              <input class="inp" id="f-pid" maxlength="40" value="${esc(p.patient_id || "")}">
+              <div class="err" hidden>${icon("alert")}<span></span></div></div>
+            <div class="f" data-f="last_seen_on"><label for="f-seen-on">Last seen by a clinician</label>
+              <input class="inp" id="f-seen-on" type="date" value="${esc(p.last_seen_on || "")}">
+              <div class="err" hidden>${icon("alert")}<span></span></div></div>
+          </div>
+          <div class="f" data-f="last_seen_by"><label for="f-seen-by">Who saw them</label>
+            <input class="inp" id="f-seen-by" maxlength="80" value="${esc(p.last_seen_by || "")}">
+            <div class="err" hidden>${icon("alert")}<span></span></div></div>
+          <div class="f" data-f="medication_schedule"><label for="f-sched">Medication schedule</label>
+            <div class="hint">One a line, as <code>metformin: 500mg twice daily</code>.
+              The medicines themselves stay in the list above, which is what the model reads.</div>
+            <textarea class="inp" id="f-sched" rows="3">${esc(Object.entries(p.medication_schedule || {})
+              .map(([k, v]) => `${k}: ${v}`).join("\n"))}</textarea>
+            <div class="err" hidden>${icon("alert")}<span></span></div></div>
+          <div class="f" data-f="history_notes"><label for="f-notes">History notes</label>
+            <textarea class="inp" id="f-notes" rows="4" maxlength="600">${esc(p.history_notes || "")}</textarea>
+            <div class="err" hidden>${icon("alert")}<span></span></div></div>
+        </section>
         <div class="actions">
           <button class="btn primary" type="submit">${isNew ? "Add person" : "Save changes"}</button>
           <a class="btn quiet" href="/people" data-link>Cancel</a>
@@ -155,6 +181,19 @@ export function bindPersonForm(root, p, isNew, { go, onSaved, openChunk }) {
       conditions: state.conditions,
       medications: state.medications,
       surgery: surg ? { what: root.querySelector("#f-what").value, weeks_ago: root.querySelector("#f-weeks").value } : null,
+      // RECORD FIELDS. They ride along on the same save and the server keeps
+      // them beside the profile, never inside it. The preview panel is built
+      // from profile_text, so adding any of this must leave the panel alone;
+      // 06-demo/selftest_profile_text.py is what proves it.
+      patient_id: root.querySelector("#f-pid").value,
+      last_seen_by: root.querySelector("#f-seen-by").value,
+      last_seen_on: root.querySelector("#f-seen-on").value,
+      history_notes: root.querySelector("#f-notes").value,
+      medication_schedule: Object.fromEntries(
+        root.querySelector("#f-sched").value.split("\n")
+          .map(l => l.split(/:(.*)/s))
+          .filter(x => x.length > 1 && x[0].trim() && x[1].trim())
+          .map(x => [x[0].trim(), x[1].trim()])),
     };
   };
 
