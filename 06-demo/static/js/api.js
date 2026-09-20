@@ -29,6 +29,11 @@ export const api = {
   conversation: id => j(`/api/conversations/${q(id)}`),
   createConversation: ids => j("/api/conversations", put("POST", { person_ids: ids })),
   chunk: key => j(`/api/chunk/${q(key)}`),
+  queue: () => j("/api/queue"),
+  enqueue: (person_id, reason) => j("/api/queue", put("POST", { person_id, reason })),
+  markSeen: (entry, conversation_id) =>
+    j(`/api/queue/${q(entry)}/done`, put("POST", { conversation_id })),
+  unqueue: entry => j(`/api/queue/${q(entry)}`, { method: "DELETE" }),
 };
 
 // One turn for one side, streamed as server-sent events. onEvent gets every

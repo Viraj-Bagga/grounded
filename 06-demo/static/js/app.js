@@ -6,6 +6,7 @@ import { api, streamTurn, streamInstall } from "./api.js";
 import { answerHTML, pendingHTML, esc, fmt, secs } from "./answer.js";
 import { peopleListHTML, personFormHTML, bindPersonForm, facts, ruleName } from "./people.js";
 import { icon } from "./icons.js";
+import { queueHTML, bindQueue } from "./queue.js";
 import { Recorder, transcribe, micBlocked, micError, recordingLabel, wasEdited } from "./voice.js";
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -56,6 +57,8 @@ const NOBODY = { id: "none", label: "No profile", virtual: true, watching: [], c
 
 const S = {
   health: null, people: [], convs: [], regions: [], region: null,
+  // The caseload, refreshed with the other lists so the sidebar count is live.
+  queue: { waiting: [], done: [], counts: { waiting: 0, done: 0, done_today: 0 } },
   picked: [NOBODY.id], compare: false,
   conv: null, live: {}, liveSaid: null,
   draft: { text: "", timeline: "", showTl: false, heard: null },
@@ -83,6 +86,7 @@ function route() {
   let m;
   if ((m = path.match(/^\/c\/([\w-]+)\/?$/))) return showConversation(m[1]);
   if (/^\/regions\/?$/.test(path)) return showRegions();
+  if (/^\/queue\/?$/.test(path)) return showQueue();
   if (/^\/people\/?$/.test(path)) return showPeople();
   if (path === "/people/new") return showPersonForm(null);
   if ((m = path.match(/^\/people\/([\w-]+)\/?$/))) return showPersonForm(m[1]);
@@ -222,6 +226,11 @@ function renderHistory() {
   const onPeople = location.pathname.startsWith("/people");
   $("#people-link").setAttribute("aria-current", onPeople ? "page" : "false");
   $("#people-n").textContent = S.people.length;
+  const onQueue = location.pathname.startsWith("/queue");
+  $("#queue-link").setAttribute("aria-current", onQueue ? "page" : "false");
+  const nq = S.queue.counts.waiting;
+  $("#queue-n").textContent = nq ? `${nq} waiting` : "Empty";
+  $("#queue-link").classList.toggle("has-waiting", nq > 0);
 }
 
 function renderStatus() {
@@ -234,9 +243,10 @@ function renderStatus() {
 }
 
 async function refreshLists() {
-  const [c, p] = await Promise.all([api.conversations(), api.people()]);
+  const [c, p, q] = await Promise.all([api.conversations(), api.people(), api.queue()]);
   S.convs = c.conversations;
   S.people = p.people;
+  S.queue = q;
   renderHistory();
 }
 
@@ -1021,6 +1031,35 @@ function renderRegionRow() {
   if (!el) return;
   const r = S.regions.find(x => x.id === S.region);
   el.querySelector(".n").textContent = r ? (r.name || r.title) : "Base only";
+}
+
+// -------------------------------------------------------------------- caseload
+
+// The screen a health worker actually works down. Assess takes them to a new
+// assessment with that person already picked; the server has already attached
+// the assessment to their caseload entry, so Mark seen is the only thing left.
+async function showQueue() {
+  S.conv = null;
+  document.title = "Caseload · Triage";
+  await refreshLists();
+  $("#main").innerHTML = queueHTML(S.queue, S.people, S.flash);
+  S.flash = null;
+  bindQueue($("#main"), {
+    add: async (id, reason) => {
+      try { S.queue = await api.enqueue(id, reason); }
+      catch (e) { S.flash = e.body?.errors?.reason || "That could not be added."; }
+      await showQueue();
+    },
+    seen: async entry => {
+      S.queue = await api.markSeen(entry, null);
+      await showQueue();
+    },
+    drop: async entry => {
+      S.queue = await api.unqueue(entry);
+      await showQueue();
+    },
+    assess: id => { S.picked = [id]; S.compare = false; go("/"); },
+  });
 }
 
 // ------------------------------------------------------------------- people

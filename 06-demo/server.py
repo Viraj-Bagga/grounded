@@ -32,6 +32,10 @@ THE API
   POST   /api/people/preview              what a draft profile would turn on
   PUT    /api/people/<id>                 edit a person
   DELETE /api/people/<id>                 remove a person; their assessments stay
+  GET    /api/queue                       the caseload: waiting, done, counts
+  POST   /api/queue                       queue a person, with an optional note
+  POST   /api/queue/<entry>/done          mark one seen, optionally naming the assessment
+  DELETE /api/queue/<entry>               take one off the list
   GET    /api/conversations               history, newest first
   POST   /api/conversations               start an assessment for one person or two
   GET    /api/conversations/<id>          one assessment, every turn
@@ -76,12 +80,14 @@ sys.path.insert(0, str(HERE))
 
 import packs  # noqa: E402
 import pipeline  # noqa: E402
+import caseload  # noqa: E402  (the queue; NOT named queue.py, which
+                 # would shadow the stdlib module that concurrent.futures imports)
 import soap  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
 import voice  # noqa: E402
 from guards import is_child_profile, load_registry  # noqa: E402
 from escalation import verify_grounding  # noqa: E402
 from store import (SEED_PEOPLE, ConversationStore, PeopleStore,  # noqa: E402
-                   clean_person, profile_text)
+                   clean_person, now_iso, profile_text)
 
 PORT = 8770
 STATIC = HERE / "static"
@@ -89,7 +95,7 @@ STATIC = HERE / "static"
 # other request is small, so the cap is per route rather than one global limit.
 MAX_BODY = 200_000
 MAX_AUDIO_BODY = 4_000_000
-APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions)?/?$")
+APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions|queue)?/?$")
 
 # The regional add-on packs, read only, for the region selector. They are NOT
 # wired into retrieval (Viraj's call 2026-09-19): selecting a region changes
@@ -152,16 +158,21 @@ def registry():
 SAMPLE_IDS = {p["id"] for p in SEED_PEOPLE}
 PEOPLE = PeopleStore()
 CONVERSATIONS = ConversationStore()
+QUEUE = caseload.QueueStore()
 ENGINE = pipeline.Engine(CONVERSATIONS, retriever, registry)
 
 
 def warm_up():
     """Build everything before serving, so a first request cannot race. Refuses
-    to start if any escalation rule's quote is not verbatim in its chunk."""
+    to start if any quoted line, in an escalation rule or in the while-you-wait
+    steps, is not verbatim in the chunk it cites."""
     global _topics, _indexed
     problems = verify_grounding(registry())
     if problems:
         raise SystemExit("escalation rules are not grounded:\n  " + "\n  ".join(problems))
+    problems = pipeline.verify_while_waiting(registry())
+    if problems:
+        raise SystemExit("while-you-wait steps are not grounded:\n  " + "\n  ".join(problems))
     r = retriever()
     r.search("warm up the encoder and the index", 1, 0.5)
     # What retrieval can actually see, which is the index, not the registry:
@@ -177,6 +188,23 @@ def describe(p):
     which rules their profile turns on, and the exact text the model reads."""
     return dict(p, child=is_child_profile(p), watching=pipeline.watching(p),
                 prompt=profile_text(p), sample=p["id"] in SAMPLE_IDS)
+
+
+def queue_view():
+    """The caseload, with each person joined on and the seeded ones marked.
+
+    Entries carry no clinical content. The reason note is the worker's own
+    words about why someone is waiting, and it never reaches a prompt: an
+    assessment is built from the composer text and the profile, exactly as
+    before. See caseload.py.
+    """
+    people = {p["id"]: p for p in PEOPLE.list()}
+    waiting, done = QUEUE.list()
+    seen_today = [e for e in done if (e.get("done_at") or "")[:10] == now_iso()[:10]]
+    return {"waiting": [caseload.describe(e, people) for e in waiting],
+            "done": [caseload.describe(e, people) for e in done],
+            "counts": {"waiting": len(waiting), "done": len(done),
+                       "done_today": len(seen_today)}}
 
 
 def conversation_view(conv):
@@ -290,6 +318,8 @@ class Handler(SimpleHTTPRequestHandler):
             if key not in registry():
                 return self._json({"error": f"{key} is not in the registry"}, 404)
             return self._json(ENGINE.chunk_meta(key))
+        if path == "/api/queue":
+            return self._json(queue_view())
         if path.startswith("/api/"):
             return self._json({"error": "not found"}, 404)
         if APP_ROUTES.match(path):
@@ -337,6 +367,23 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json({"error": f"transcription failed: {e}"}, 500)
             return self._json({**heard, "id": voice.remember(heard)})
 
+        # THE CASELOAD. Queue a person, mark one seen, or take one off the
+        # list. None of this touches an assessment or a prompt.
+        if path == "/api/queue":
+            pid = str(body.get("person_id") or "")
+            if pid == "none" or not PEOPLE.get(pid):
+                return self._json({"error": "no such person"}, 404)
+            entry, errors = QUEUE.add(pid, body.get("reason"))
+            return self._json(queue_view()) if entry else \
+                self._json({"errors": errors}, 422)
+        m = re.match(r"^/api/queue/([\w-]+)/done$", path)
+        if m:
+            # The assessment it was seen in is optional and recorded when the
+            # page has one, so the base dashboard can link a case to its row.
+            entry = QUEUE.done(m.group(1), body.get("conversation_id"))
+            return self._json(queue_view()) if entry else \
+                self._json({"error": "no such caseload entry"}, 404)
+
         if path == "/api/people":
             person, errors = PEOPLE.create(body)
             return self._json(describe(person), 201) if person else \
@@ -355,7 +402,14 @@ class Handler(SimpleHTTPRequestHandler):
             people = [PEOPLE.get(i) for i in ids]
             if not 1 <= len(ids) <= 2 or len(set(ids)) != len(ids) or not all(people):
                 return self._json({"error": "choose one person, or two different people"}, 400)
-            return self._json(conversation_view(CONVERSATIONS.create(people)), 201)
+            conv = CONVERSATIONS.create(people)
+            # If this person is on the caseload, attach the assessment to their
+            # entry now. Doing it here rather than from the page means the link
+            # survives the tab closing, and the worker's one remaining job is
+            # to say they were seen. It never marks anybody done.
+            for i in ids:
+                QUEUE.link(i, conv["id"])
+            return self._json(conversation_view(conv), 201)
 
         m = re.match(r"^/api/conversations/([\w-]+)/turn$", path)
         if m:
@@ -458,6 +512,10 @@ class Handler(SimpleHTTPRequestHandler):
         return self._json(describe(person)) if person else self._json({"errors": errors}, 422)
 
     def do_DELETE(self):
+        m = re.match(r"^/api/queue/([\w-]+)$", self._route())
+        if m:
+            return self._json(queue_view()) if QUEUE.remove(m.group(1)) else \
+                self._json({"error": "no such caseload entry"}, 404)
         m = re.match(r"^/api/people/([\w-]+)$", self._route())
         if not m:
             return self._json({"error": "not found"}, 404)

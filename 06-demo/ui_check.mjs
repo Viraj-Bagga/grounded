@@ -7,6 +7,7 @@
 //   node 06-demo/ui_check.mjs compare OUTDIR        two people side by side, live
 //   node 06-demo/ui_check.mjs guards OUTDIR         child profile, child word, out of scope
 //   node 06-demo/ui_check.mjs people OUTDIR         add, edit and delete a person through the form
+//   node 06-demo/ui_check.mjs queue OUTDIR          the caseload: add, assess, mark seen
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
@@ -402,6 +403,66 @@ async function guards(out) {
   check("an out-of-scope complaint gets a hatched refusal, not a verdict",
     await p.count(".bar.hold") >= 1 && !(await p.count(".bar.red, .bar.yellow, .bar.green")));
   await p.shot(join(out, "desktop-out-of-scope.png"));
+  await p.close();
+}
+
+// THE CASELOAD, end to end and offline: add somebody, see them waiting, assess
+// them, come back, mark them seen. No model call is needed for any of it, which
+// is the point: the list is the health worker's, not the model's.
+async function queue(out) {
+  const p = await tab();
+  await p.size(DESKTOP);
+  // Start from a known state so a re-run does not pile up rows.
+  const before = await (await fetch(`${APP}/api/queue`)).json();
+  for (const e of [...before.waiting, ...before.done]) {
+    await fetch(`${APP}/api/queue/${e.id}`, { method: "DELETE" });
+  }
+  await p.go("/queue");
+  check("an empty caseload says so", /Nobody is waiting/.test(await p.text("#main")));
+  await p.shot(join(out, "desktop-caseload-empty.png"), true);
+
+  await p.eval(`(() => { const s = document.querySelector("#q-who");
+    s.value = "aunt"; s.dispatchEvent(new Event("change", { bubbles: true })); return true; })()`);
+  await p.type("#q-why", "short of breath since this morning");
+  await p.click("#q-add button[type=submit]");
+  await p.until("document.querySelectorAll('.q-list .q-item').length === 1", 10000);
+  check("a person can be added to the caseload", /Aunt Sue/.test(await p.text(".q-list")));
+  check("the note they were added with is shown",
+    /short of breath since this morning/.test(await p.text(".q-list")));
+  check("the sidebar says how many are waiting", /1 waiting/.test(await p.text("#queue-link")));
+  await p.shot(join(out, "desktop-caseload.png"), true);
+
+  // The same person cannot be queued twice from the screen that lists them.
+  check("somebody already waiting is not offered again",
+    !(await p.eval(`[...document.querySelectorAll("#q-who option")].some(o => o.value === "aunt")`)));
+
+  await p.click("[data-assess]");
+  await p.until("location.pathname === '/'", 10000);
+  check("Assess opens a new assessment for that person",
+    /Aunt Sue/.test(await p.text("[data-for-name]")), await p.text("[data-for-name]"));
+
+  // Starting the assessment is what links it to the caseload row, server-side,
+  // so the link survives the tab closing. It must NOT mark anybody seen.
+  await p.type("#ta", "Sharp pain in my left chest, worse when I breathe in.");
+  await sendAndWait(p, "caseload assessment");
+  const cid = await p.eval("location.pathname.split('/')[2]");
+  const q = await (await fetch(`${APP}/api/queue`)).json();
+  check("starting an assessment links it to the caseload row",
+    q.waiting.length === 1 && q.waiting[0].conversation_id === cid, JSON.stringify(q.counts));
+  check("starting an assessment does NOT mark them seen", q.counts.done === 0);
+
+  await p.go("/queue");
+  await p.click("[data-seen]");
+  await p.until("document.querySelectorAll('.q-list .q-item.done').length === 1", 10000);
+  check("Mark seen moves them out of waiting",
+    /Nobody is waiting/.test(await p.text("#main")));
+  check("a seen row links the assessment it was seen in",
+    await p.count(".q-item.done a[href^='/c/']") === 1);
+  check("the sidebar count goes back to empty", /Empty/.test(await p.text("#queue-link")));
+  await p.shot(join(out, "desktop-caseload-seen.png"), true);
+  await p.size(PHONE);
+  await p.go("/queue");
+  await p.shot(join(out, "phone-caseload.png"), true);
   await p.close();
 }
 
@@ -939,7 +1000,7 @@ const chrome = await launch(mode === "voice"
   ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone, voice, packs: packsFlow }[mode];
+                regions, phone, voice, packs: packsFlow, queue }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

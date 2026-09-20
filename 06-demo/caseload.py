@@ -1,0 +1,207 @@
+"""The caseload: who is waiting to be assessed, and who has been seen.
+
+NAMED caseload.py, NOT queue.py. 06-demo is first on sys.path, so a
+queue.py here shadows the stdlib `queue` that concurrent.futures and
+multiprocessing import, and the failure lands somewhere unrelated.
+
+A health worker in a village does not open the app to assess one person. They
+arrive with a list. This is that list.
+
+WHY THIS IS ITS OWN FILE AND NOT A FIELD ON A PERSON. `clean_person` validates
+and rewrites the WHOLE person on every edit, so any field it does not know
+about is dropped on the next save. Worse, the person record is what
+`profile_text` reads, and that text is part of the model's cached prompt
+(hard constraint: the seeded people must give byte-identical prompts). Queue
+state changes many times a day and has nothing to do with triage. Keeping it in
+data/queue.json means editing a person can never disturb the queue, and the
+queue can never disturb the prompt.
+
+ONE WAITING ENTRY PER PERSON. Queueing someone already waiting is not an error,
+it returns the entry they already have. Marking done archives the entry rather
+than deleting it, because "how many did you see today" is the base dashboard's
+first question and a deleted row cannot answer it.
+
+THE MODEL NEVER SEES ANY OF THIS. No part of an entry reaches a prompt.
+"""
+
+import json
+import secrets
+import threading
+import time
+from pathlib import Path
+
+from store import DATA, _write_json, now_iso
+
+REASON_MAX = 80
+
+
+def _new_id():
+    return time.strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(3)
+
+
+class QueueStore:
+    """data/queue.json: {"entries": [...]}, newest first when listed.
+
+    An entry is {id, person_id, reason, added, done, done_at, conversation_id}.
+    """
+
+    def __init__(self, path=DATA / "queue.json"):
+        self.path = path
+        self.lock = threading.Lock()
+
+    def _load(self):
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            entries = data.get("entries")
+            return entries if isinstance(entries, list) else []
+        except (OSError, ValueError):
+            return []
+
+    def _save(self, entries):
+        _write_json(self.path, {"entries": entries})
+
+    def list(self):
+        """Every entry, waiting first and newest first within each group."""
+        entries = self._load()
+        waiting = [e for e in entries if not e.get("done")]
+        done = [e for e in entries if e.get("done")]
+        waiting.sort(key=lambda e: e.get("added") or "", reverse=True)
+        done.sort(key=lambda e: e.get("done_at") or "", reverse=True)
+        return waiting, done
+
+    def waiting_for(self, person_id):
+        return next((e for e in self._load()
+                     if e.get("person_id") == person_id and not e.get("done")), None)
+
+    def add(self, person_id, reason=""):
+        """Queue a person. Returns (entry, errors). Already waiting is not an
+        error: it returns the entry that is already there."""
+        reason = " ".join(str(reason or "").split())
+        if len(reason) > REASON_MAX:
+            return None, {"reason": f"Keep the note under {REASON_MAX} characters."}
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if e.get("person_id") == person_id and not e.get("done"):
+                    return e, {}
+            entry = dict(id=_new_id(), person_id=person_id, reason=reason,
+                         added=now_iso(), done=False, done_at=None,
+                         conversation_id=None)
+            entries.append(entry)
+            self._save(entries)
+            return entry, {}
+
+    def link(self, person_id, conversation_id):
+        """Record which assessment a waiting person was seen in, without
+        marking them done. Called when an assessment STARTS, so the link
+        survives the page being closed and the worker only has to press one
+        button later. The first assessment wins: starting a second one for the
+        same waiting entry does not relabel the first."""
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if (e.get("person_id") == person_id and not e.get("done")
+                        and not e.get("conversation_id")):
+                    e["conversation_id"] = conversation_id
+                    self._save(entries)
+                    return e
+        return None
+
+    def done(self, entry_id, conversation_id=None):
+        """Mark an entry seen. Idempotent: marking a done entry done again
+        keeps the first done_at, because that is when they were actually seen."""
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if e["id"] != entry_id:
+                    continue
+                if not e.get("done"):
+                    e["done"] = True
+                    e["done_at"] = now_iso()
+                if conversation_id and not e.get("conversation_id"):
+                    e["conversation_id"] = conversation_id
+                self._save(entries)
+                return e
+        return None
+
+    def remove(self, entry_id):
+        with self.lock:
+            entries = self._load()
+            kept = [e for e in entries if e["id"] != entry_id]
+            if len(kept) == len(entries):
+                return False
+            self._save(kept)
+            return True
+
+
+def describe(entry, people_by_id):
+    """An entry with the person joined on, for the page. A person who has been
+    deleted still lists: the caseload records that they were waiting."""
+    p = people_by_id.get(entry["person_id"])
+    return dict(entry,
+                label=(p or {}).get("label") or "Removed person",
+                age=(p or {}).get("age"), sex=(p or {}).get("sex"),
+                missing=p is None)
+
+
+if __name__ == "__main__":
+    # Offline self-test against a temp file, so it never touches data/queue.json.
+    import tempfile
+    ok = fails = 0
+
+    def check(name, cond):
+        global ok, fails
+        if cond:
+            ok += 1
+            print(f"  PASS  {name}")
+        else:
+            fails += 1
+            print(f"  FAIL  {name}")
+
+    with tempfile.TemporaryDirectory() as d:
+        q = QueueStore(Path(d) / "queue.json")
+        check("an empty store lists nothing", q.list() == ([], []))
+        e1, err = q.add("mum", "chest tightness on the walk up")
+        check("a person can be queued", bool(e1) and not err)
+        check("a queued person is waiting", q.waiting_for("mum") is not None)
+        e2, _ = q.add("mum", "different note")
+        check("queueing twice returns the same entry, not a second one",
+              e2["id"] == e1["id"] and len(q.list()[0]) == 1)
+        check("the first note is kept", e2["reason"] == "chest tightness on the walk up")
+        _, err = q.add("dad", "x" * (REASON_MAX + 1))
+        check("an over-long note is refused", "reason" in err)
+        check("a refused add queues nobody", q.waiting_for("dad") is None)
+        q.add("dad", "cough")
+        check("two people wait", len(q.list()[0]) == 2)
+        done = q.done(e1["id"], "20260920-000000-abcdef")
+        check("done moves the entry out of waiting",
+              done["done"] and len(q.list()[0]) == 1 and len(q.list()[1]) == 1)
+        check("done records the assessment", done["conversation_id"] == "20260920-000000-abcdef")
+        first_at = done["done_at"]
+        again = q.done(e1["id"], "20260920-111111-abcdef")
+        check("done is idempotent and keeps the first time", again["done_at"] == first_at)
+        check("done does not overwrite the assessment it was seen in",
+              again["conversation_id"] == "20260920-000000-abcdef")
+        check("a done person can be queued again",
+              q.add("mum", "came back")[0]["id"] != e1["id"])
+        check("missing entries do not mark done", q.done("nope") is None)
+        q.add("aunt", "breathless")
+        linked = q.link("aunt", "20260920-222222-aaaaaa")
+        check("link records the assessment without marking done",
+              linked["conversation_id"] == "20260920-222222-aaaaaa" and not linked["done"])
+        check("link does not relabel an entry that already has one",
+              q.link("aunt", "20260920-333333-bbbbbb") is None
+              and q.waiting_for("aunt")["conversation_id"] == "20260920-222222-aaaaaa")
+        check("link ignores somebody who is not waiting", q.link("nobody", "x") is None)
+        check("remove takes an entry out", q.remove(e1["id"]) and len(q.list()[1]) == 0)
+        check("removing twice is False, not an error", q.remove(e1["id"]) is False)
+        # By person_id, not by list position: two adds inside the same second
+        # tie on `added` and the sort between them is not defined.
+        mum_entry = q.waiting_for("mum")
+        d1 = describe(mum_entry, {"mum": {"label": "Mum", "age": 64, "sex": "female"}})
+        check("describe joins the person on", d1["label"] == "Mum" and d1["missing"] is False)
+        d2 = describe(mum_entry, {})
+        check("a deleted person still lists", d2["missing"] is True and d2["label"] == "Removed person")
+
+    print(f"\n{ok}/{ok + fails} self-tests passed.")
+    raise SystemExit(1 if fails else 0)

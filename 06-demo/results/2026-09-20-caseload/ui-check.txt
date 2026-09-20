@@ -1,0 +1,17 @@
+PASS  an empty caseload says so
+      saved 06-demo/results/2026-09-20-caseload/desktop-caseload-empty.png
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+      saved 06-demo/results/2026-09-20-caseload/desktop-caseload.png
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+      caseload assessment: 17.6 s
+PASS  starting an assessment links it to the caseload row
+PASS  starting an assessment does NOT mark them seen
+PASS  Mark seen moves them out of waiting
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+      saved 06-demo/results/2026-09-20-caseload/desktop-caseload-seen.png
+      saved 06-demo/results/2026-09-20-caseload/phone-caseload.png
+all passed
