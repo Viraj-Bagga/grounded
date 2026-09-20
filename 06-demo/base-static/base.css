@@ -1,8 +1,16 @@
-/* BASE: the supervisor's screen. Same design language as the field app and a
-   SEPARATE FILE ON PURPOSE. base_server.py serves only this directory, so it
-   cannot reach ../static, and base has to keep working if the field app's CSS
-   is mid-edit. The token block below is a deliberate copy of the one in
-   06-demo/static/app.css; if a colour changes there, change it here too. */
+/* BASE: the supervisor's register. Built from 06-demo/BASE-DESIGN.md.
+ *
+ * A SEPARATE FILE ON PURPOSE. base_server.py serves only this directory, so it
+ * cannot reach ../static, and base has to keep working if the field app's CSS
+ * is mid-edit. The token block below is a deliberate copy of the one in
+ * 06-demo/static/app.css; if a colour changes there, change it here too.
+ *
+ * THE COLOUR RULE HOLDS. The urgency marks are the only saturated thing on
+ * this screen, on the same grounds the history list has them: they index a
+ * past bar. No row background, no count, no border and no tag carries a triage
+ * colour. No zebra striping either, because the tone system is paper, chrome
+ * and well, and a stripe would be a fourth tone.
+ */
 
 :root {
   --paper: #ffffff;
@@ -22,70 +30,167 @@
   --hatch: repeating-linear-gradient(135deg, rgb(0 0 0 / .24) 0 6px, transparent 6px 12px);
   --font: system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
-  --t-12: .75rem; --t-14: .875rem; --t-15: .9375rem; --t-17: 1.0625rem;
-  --t-24: 1.5rem; --t-30: 1.875rem;
+  --t-12: .6875rem; --t-14: .78125rem; --t-15: .84375rem; --t-17: .9375rem;
+  --t-20: 1.0625rem; --t-24: 1.1875rem;
   --tap: 2.75rem;
   --r: 6px;
 }
+@media (min-width: 60rem) {
+  :root { --t-12: .75rem; --t-14: .875rem; --t-15: .9375rem; --t-17: 1.0625rem;
+          --t-20: 1.25rem; --t-24: 1.5rem; }
+}
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--chrome); color: var(--ink); font: 400 var(--t-17)/1.5 var(--font); }
-.wrap { max-width: 70rem; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 var(--t-17)/1.5 var(--font); -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 72rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.i { width: 1.125em; height: 1.125em; fill: none; stroke: currentColor;
+  stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; vertical-align: -.2em; }
+:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
 
-header.bar { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; margin-bottom: .25rem; }
-header.bar h1 { font-size: var(--t-30); margin: 0; letter-spacing: -.01em; }
+/* ------------------------------------------------------------ page head */
+.brand { display: flex; align-items: center; gap: .5rem; padding-bottom: .75rem; }
+.brand .dot { width: .625rem; height: .625rem; background: var(--ink); }
+.brand b { font-weight: 800; }
 .role { font-weight: 700; font-size: var(--t-12); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--ink-2); border: 1px solid var(--rule-2); padding: .125rem .375rem; border-radius: var(--r); }
-.lede { color: var(--ink-2); margin: .25rem 0 1.25rem; max-width: 46rem; }
+  color: var(--ink-2); border: 1px solid var(--rule-2); padding: .0625rem .375rem; border-radius: 3px; }
+.pg-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.pg-head h1 { font: 700 var(--t-24)/1.25 var(--font); margin: 0; letter-spacing: -.01em; flex: 1; }
 
-/* The numbers a supervisor reads first. */
-.tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); margin-bottom: 1.5rem; }
-.tile { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); padding: .875rem; }
-.tile .n { font-size: var(--t-30); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.tile .k { color: var(--ink-2); font-size: var(--t-14); }
-.tile.alarm .n { color: var(--red); }
+/* A joined pair. Pressed fills with ink. */
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: var(--r); overflow: hidden; }
+.seg button { appearance: none; border: 0; background: var(--paper); color: var(--ink);
+  font: 700 var(--t-15) var(--font); min-height: 2.25rem; padding: 0 .875rem; cursor: pointer; }
+.seg button + button { border-left: 1.5px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+@media (max-width: 40rem) { .seg { width: 100%; } .seg button { flex: 1; } }
 
-h2 { font-size: var(--t-24); margin: 1.75rem 0 .5rem; }
-.muted { color: var(--ink-2); }
-.empty { background: var(--paper); border: 1px dashed var(--rule-2); border-radius: var(--r);
-  padding: 1.5rem; color: var(--ink-2); }
+/* ----------------------------------------------------------- tally line */
+/* One line, hairline above and below. Not four boxes and not a card grid. */
+.tally { margin: .75rem 0 0; padding: .625rem 0; border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule); color: var(--ink-2); font-size: var(--t-15); }
+.tally b { font-weight: 700; font-size: var(--t-20); color: var(--ink);
+  font-variant-numeric: tabular-nums; }
+.tally .sep { color: var(--rule-2); margin: 0 .25rem; }
 
-.devices { list-style: none; margin: 0 0 .5rem; padding: 0; display: grid; gap: .5rem; }
-.devices li { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r);
-  padding: .625rem .875rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-.devices .id { font: 700 var(--t-14) var(--mono); color: var(--ink-2); }
-.devices .grow { flex: 1; }
+h2 { font: 700 var(--t-14)/1.4 var(--font); color: var(--ink-2); margin: 1.75rem 0 .5rem;
+  text-transform: none; }
+h2 .n { color: var(--ink-3); font-weight: 400; margin-left: .25rem; }
 
-.cases { list-style: none; margin: 0; padding: 0; display: grid; gap: .625rem; }
-.case { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
-.case > summary { cursor: pointer; padding: .75rem .875rem; display: flex; gap: .75rem;
-  align-items: center; flex-wrap: wrap; list-style: none; }
-.case > summary::-webkit-details-marker { display: none; }
-.case > summary:hover { background: var(--chrome); }
-.case .said { flex: 1; min-width: 14rem; }
-.case .when { color: var(--ink-3); font-size: var(--t-14); font-variant-numeric: tabular-nums; }
-.case .body { border-top: 1px solid var(--rule); padding: .875rem; display: grid; gap: .875rem; }
+/* --------------------------------------------------------- new arrivals */
+.newbar { display: flex; align-items: center; gap: .625rem; margin: .75rem 0 0;
+  padding: .5rem .75rem; background: var(--well); border-radius: var(--r);
+  color: var(--ink-2); font-size: var(--t-15); }
+.link-btn { appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--action); font: 700 var(--t-15) var(--font); text-decoration: underline; }
+a.link-btn { text-decoration: none; }
 
-/* The verdict word, carried by form as well as colour, exactly as in the field app. */
-.v { font: 800 var(--t-12)/1 var(--font); letter-spacing: .04em; padding: .3125rem .4375rem;
-  border-radius: 3px; text-transform: uppercase; }
-.v.red { background: var(--red); color: var(--on-red); }
-.v.yellow { background: var(--yellow); color: var(--on-yellow); }
-.v.green { background: var(--green); color: var(--on-green); }
-.v.refused, .v.child, .v.error, .v.none { background: var(--hold) var(--hatch); color: var(--on-hold); }
+/* ----------------------------------------------------------- the marks */
+.mk { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem;
+  font: 800 var(--t-12)/1 var(--font); border-radius: 3px; }
+.mk + .mk { margin-top: .1875rem; }
+.mk.red { background: var(--red); color: var(--on-red); }
+.mk.yellow { background: var(--yellow); color: var(--on-yellow); }
+.mk.green { background: var(--green); color: var(--on-green); }
+.mk.hold { background: var(--hold) var(--hatch); color: var(--on-hold); }
+.mk.hold .i { width: .875rem; height: .875rem; }
 
-.side { border-left: 3px solid var(--rule); padding-left: .75rem; }
-.side h3 { margin: 0 0 .25rem; font-size: var(--t-17); display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
-.side dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .1875rem .75rem; font-size: var(--t-15); }
-.side dt { color: var(--ink-2); }
-.side dd { margin: 0; }
-.keys { display: flex; gap: .3125rem; flex-wrap: wrap; }
+/* ------------------------------------------------------------ the table */
+.reg { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.reg th { background: var(--chrome); position: sticky; top: 0; z-index: 1;
+  text-align: left; font: 600 var(--t-14) var(--font); color: var(--ink-2);
+  padding: .4375rem .625rem; border-bottom: 1px solid var(--rule); }
+.reg td { padding: .5rem .625rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.reg tbody tr { min-height: var(--tap); }
+.reg tbody tr:hover { background: var(--well); }
+.c-mk { width: 1.75rem; padding-right: 0 !important; }
+.c-as { width: auto; min-width: 0; }
+.c-at { width: 13rem; }
+.c-fr { width: 9rem; }
+.c-wh { width: 5.5rem; }
+.c-ac { width: 8.5rem; }
+.ttl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; font: 600 var(--t-15)/1.35 var(--font); color: var(--ink); text-decoration: none; }
+.ttl:hover { text-decoration: underline; }
+.meta { display: block; font-size: var(--t-14); color: var(--ink-2); }
+/* A reviewed row quietens its title and NOTHING else: a supervisor re-reading
+   it needs the same facts at the same strength. */
+.reg tr.seen .ttl, .rec.seen .ttl { color: var(--ink-2); }
+.dev { display: block; font: 600 var(--t-14) var(--mono); color: var(--ink-2); word-break: break-word; }
+.wk { display: block; font: 400 var(--t-14) var(--font); color: var(--ink-2); }
+.c-wh { font: 400 var(--t-14) var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.c-wh .d, .c-wh .t { display: block; }
+.c-wh .d { color: var(--ink-3); }
+
+/* tags: shapes only, never a triage colour */
+.tg { display: inline-block; font: 700 var(--t-12)/1.3 var(--font); padding: .125rem .375rem;
+  margin: 0 .25rem .25rem 0; border-radius: 3px; }
+.tg.dashed { border: 1.5px dashed var(--hold); color: var(--ink-2); }
+.tg.hatched { background: var(--hold) var(--hatch); color: var(--on-hold); }
+.tg.box { border: 1px solid var(--rule-2); color: var(--ink-2); }
+.tg.removed { border-radius: 3px; background: var(--well); color: var(--ink-3); }
+.tg.inline { display: inline-block; margin: 0 0 .5rem; }
+.none-dash { color: var(--ink-3); }
+
+.btn { min-height: var(--tap); padding: 0 .75rem; border-radius: var(--r);
+  font: 700 var(--t-15) var(--font); cursor: pointer; }
+.btn.quiet { width: 100%; background: transparent; border: 0; color: var(--ink-2);
+  text-align: left; padding: 0 .5rem; white-space: nowrap; }
+.btn.quiet:hover { background: var(--well); color: var(--ink); }
+.btn.quiet:disabled { color: var(--ink-3); cursor: default; background: none; }
+.done { display: inline-flex; align-items: center; gap: .3125rem; font-size: var(--t-14); color: var(--ink-3); }
+
+/* ------------------------------------------------- below 60rem: records */
+.narrow-only { display: none; }
+@media (max-width: 59.999rem) {
+  .wide-only { display: none; }
+  .narrow-only { display: block; }
+}
+.recs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.rec { display: grid; grid-template-columns: 1.375rem 1fr; gap: .5rem;
+  padding: .625rem .25rem; border-bottom: 1px solid var(--rule); }
+.rec:hover { background: var(--well); }
+.rc { display: grid; gap: .1875rem; min-width: 0; }
+.rec .tags { display: block; margin-top: .125rem; }
+/* The em-dash exists so a TABLE COLUMN never looks broken. A stacked row
+   has no column to hold open, so an empty tag line is simply absent. */
+.rec .tags .none-dash { display: none; }
+.rec .tags:empty { display: none; }
+.rec .act { margin-top: .25rem; }
+.rec .dev-line { display: flex; align-items: center; gap: .3125rem; }
+.rec .dev { display: inline; }
+
+/* ---------------------------------------------------------- empty states */
+.well-panel { background: var(--well); border-radius: var(--r); padding: 1.25rem; margin: .75rem 0 0; }
+.well-panel p { margin: .25rem 0 0; color: var(--ink-2); }
+.well-panel .eh { font: 700 var(--t-17) var(--font); color: var(--ink); margin: 0; text-transform: none; }
+/* Completion is told by a word and a check, never by a fourth colour. */
+.done-panel { display: flex; gap: .75rem; align-items: flex-start; }
+.done-panel .i { width: 1.25rem; height: 1.25rem; color: var(--ink); flex: none; margin-top: .125rem; }
+
+/* ------------------------------------------------------- one assessment */
+.saidq { margin: .75rem 0 1.25rem; padding: .75rem .875rem; background: var(--well);
+  border-radius: var(--r); font-size: var(--t-17); }
+.saidq .tl { display: block; margin-top: .375rem; font: 400 var(--t-14) var(--mono); color: var(--ink-2); }
+.det { border-top: 1px solid var(--rule); padding-top: .875rem; margin-top: 1.25rem; }
+.det h2 { display: flex; align-items: center; gap: .5rem; font-size: var(--t-17); color: var(--ink);
+  text-transform: none; margin: 0 0 .5rem; }
+.det .wordy { font: 800 var(--t-12) var(--font); letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-2); }
+.det h3 { font: 700 var(--t-15) var(--font); color: var(--ink-2); margin: .875rem 0 .25rem; }
+.det p, .det li { color: var(--ink); }
+.det ul, .det ol { margin: .25rem 0; padding-left: 1.25rem; }
+.rulep { background: var(--well); border-radius: var(--r); padding: .625rem .75rem; margin: .5rem 0;
+  font-size: var(--t-15); }
+.rulep .q { color: var(--ink-2); font-style: italic; }
+.keys { display: inline-flex; gap: .3125rem; flex-wrap: wrap; margin-top: .25rem; }
 .key { font: 700 var(--t-12) var(--mono); border: 1px solid var(--rule-2); color: var(--action);
   padding: .125rem .3125rem; border-radius: 3px; }
-.tag { font: 700 var(--t-12) var(--font); padding: .125rem .375rem; border-radius: 3px;
-  background: var(--well); color: var(--ink-2); }
-.tag.raised { background: var(--action-soft); color: var(--action); }
-.tag.ungrounded { background: var(--hold) var(--hatch); color: var(--on-hold); }
-.sha { font: 400 var(--t-12) var(--mono); color: var(--ink-3); word-break: break-all; }
-footer.note { margin-top: 2.5rem; color: var(--ink-2); font-size: var(--t-14); border-top: 1px solid var(--rule);
-  padding-top: .75rem; }
+.removed s { color: var(--ink-2); }
+.fine { font-size: var(--t-14); color: var(--ink-3); }
+.sha { font: 400 var(--t-12) var(--mono); color: var(--ink-3); word-break: break-all;
+  margin-top: 1.5rem; border-top: 1px solid var(--rule); padding-top: .625rem; }
+footer.note { margin-top: 2.5rem; color: var(--ink-2); font-size: var(--t-14);
+  border-top: 1px solid var(--rule); padding-top: .75rem; }

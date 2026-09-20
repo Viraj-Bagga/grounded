@@ -20,7 +20,9 @@ REFUSED with the two digests, not stored with a warning. That is the
 distribution node's rule pointed the other way: see sync.py.
 
 NOTHING IS EDITED HERE AND NOTHING IS SENT BACK. There is no PUT, no DELETE
-and no route that changes an assessment. Base reads what the field device
+and no route that changes an assessment. Mark reviewed is the one write, and
+it records that a person LOOKED: it touches no verdict, no guard and no SOAP
+note, and it never syncs back to the device. Base reads what the field device
 rendered, from the same bytes, which is why the citations and the guard
 removals survive the trip without base owning a corpus.
 """
@@ -33,6 +35,7 @@ import socket
 import sys
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -50,6 +53,10 @@ MAX_BODY = 2_000_000          # one assessment with its turns, generously
 ID_RE = re.compile(r"^[\w-]{1,64}$")
 
 _lock = threading.Lock()
+
+
+def now_iso():
+    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
 def _write(path, obj):
@@ -82,6 +89,13 @@ def store_bundle(b):
         old = _read(path, None)
         already = bool(old and old.get("sha256") == b["sha256"])
         if not already:
+            # synced_at is BASE's clock, not the device's: it is when this
+            # arrived here, which is the only thing base can vouch for. A
+            # review already recorded survives a resend, because it is a fact
+            # about this device and not about the bundle.
+            b["synced_at"] = now_iso()
+            if old and old.get("reviewed"):
+                b["reviewed"] = old["reviewed"]
             _write(path, b)
         devices = _read(DEVICES, {})
         # The latest caseload snapshot wins: base wants what is outstanding
@@ -91,6 +105,22 @@ def store_bundle(b):
                         "caseload": b.get("caseload") or {}}
         _write(DEVICES, devices)
     return b, already
+
+
+def review(aid, by=None):
+    """Record that a person looked at this. It changes NOTHING about the
+    assessment: not the verdict, not the guards, not the SOAP note. It is a
+    fact about base, which is why it lives here and never syncs back."""
+    for f in RECEIVED.glob(f"*/{aid}.json"):
+        with _lock:
+            b = _read(f, None)
+            if not b:
+                return None
+            if not b.get("reviewed"):
+                b["reviewed"] = {"at": now_iso(), "by": by or None}
+            _write(f, b)
+            return b
+    return None
 
 
 def received():
@@ -127,9 +157,24 @@ def row(b):
             "raised": bool(esc.get("changed")),
             "said": (turns[0].get("text") if turns else "") or "",
         })
+    # OUTSTANDING, per BASE-DESIGN.md section 2: not yet reviewed AND any of
+    # red, yellow, refused, or a guard removed something at any urgency. A
+    # green with a clean run is not outstanding. One rule, so the count is
+    # never arguable.
+    states = [s["state"] for s in sides]
+    needs = (any(x in ("red", "yellow") for x in states)
+             or any(x in ("refused", "child", "error") for x in states)
+             or any(s["removed"] for s in sides))
     return {"id": a["id"], "created": a.get("created"), "updated": a.get("updated"),
             "mode": a.get("mode"), "title": a.get("title") or "",
             "device": b["device"]["id"], "device_label": b["device"].get("label") or "",
+            "worker": (b["device"].get("worker") or None),
+            # Bundles stored before synced_at existed fall back to the
+            # device's own created time, which is close enough to be useful
+            # and is labelled as the sync either way.
+            "synced_at": b.get("synced_at") or b.get("created"),
+            "reviewed": b.get("reviewed"),
+            "outstanding": bool(needs and not b.get("reviewed")),
             "sha256": b["sha256"], "sides": sides}
 
 
@@ -144,7 +189,8 @@ def dashboard():
     def count(rs, state):
         return sum(1 for r in rs for s in r["sides"] if s["state"] == state)
 
-    outstanding = sum((d.get("caseload") or {}).get("waiting", 0) for d in devices.values())
+    waiting_out_there = sum((d.get("caseload") or {}).get("waiting", 0) for d in devices.values())
+    last_sync = max([r.get("synced_at") or "" for r in rows] or [""])
     return {
         "counts": {
             "assessments": len(rows),
@@ -154,8 +200,11 @@ def dashboard():
             "yellow": count(rows, "yellow"),
             "green": count(rows, "green"),
             "refused": count(rows, "refused") + count(rows, "child"),
-            "outstanding": outstanding,
+            "needs_review": sum(1 for r in rows if r["outstanding"]),
+            "needs_review_today": sum(1 for r in today_rows if r["outstanding"]),
+            "waiting_in_field": waiting_out_there,
             "devices": len(devices),
+            "last_sync": last_sync or None,
         },
         "devices": sorted(devices.values(), key=lambda d: d.get("last_seen") or "", reverse=True),
         "assessments": rows,
@@ -201,6 +250,18 @@ class Handler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
+        m = re.match(r"^/api/assessments/([\w-]+)/review$", self._route())
+        if m:
+            n = int(self.headers.get("Content-Length") or 0)
+            body = {}
+            if 0 < n <= MAX_BODY:
+                try:
+                    body = json.loads(self.rfile.read(n).decode("utf-8"))
+                except (ValueError, UnicodeDecodeError):
+                    body = {}
+            b = review(m.group(1), (body or {}).get("by"))
+            return self._json(dashboard()) if b else \
+                self._json({"error": "not received here"}, 404)
         if self._route() != "/api/receive":
             return self._json({"error": "not found"}, 404)
         n = int(self.headers.get("Content-Length") or 0)

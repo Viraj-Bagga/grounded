@@ -1,0 +1,23 @@
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+PASS  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+      saved 06-demo/results/2026-09-20-base/desktop-base-register.png
+PASS  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+      saved 06-demo/results/2026-09-20-base/desktop-base-reviewed.png
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+      saved 06-demo/results/2026-09-20-base/desktop-base-assessment.png
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+      saved 06-demo/results/2026-09-20-base/phone-base-register.png
+all passed

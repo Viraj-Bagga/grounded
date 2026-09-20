@@ -1,99 +1,354 @@
-// BASE, the supervisor's screen. Reads /api/dashboard and renders it.
+// BASE, the supervisor's register. Built from 06-demo/BASE-DESIGN.md.
 //
-// It recomputes nothing. Every verdict, citation, rule and removal on this
-// page came out of the assessment a field device saved and sent, so what a
-// supervisor reads is what the health worker read. See base_server.py.
+// ONE PERSON, AT A CLINIC, DECIDING WHO TO FOLLOW UP. They did not do these
+// assessments. So the screen leads with what needs a decision, not with volume:
+// a tally line and a table, never a card grid and never a chart.
+//
+// IT RECOMPUTES NOTHING. Every verdict, citation, rule and guard removal came
+// out of the assessment a field device saved and sent, so what a supervisor
+// reads is what the health worker read.
+//
+// ONE DEVIATION FROM THE SPEC, FORCED BY BASE BEING A SEPARATE PROCESS. The
+// spec has a row link to /c/<id>, which is the field app's own assessment page.
+// Base runs on its own port and may be on a different device entirely, so it
+// links to its own read-only view instead. Base has the assessment bytes but
+// NOT the corpus, so that view shows citation KEYS and says plainly that the
+// chunk text lives on the device that did the assessment.
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+// The drawn set, on the existing 24px grid, 1.75 stroke. `device` is the one
+// new glyph BASE-DESIGN.md section 8 allows; the rest are copies of icons.js.
+const P = {
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  none: '<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>',
+  device: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10.5 18.5h3"/>',
+  back: '<path d="m15 6-6 6 6 6"/>',
+};
+const icon = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${P[n]}</svg>`;
+
 const WORD = { red: "red", yellow: "yellow", green: "green", refused: "out of scope",
                child: "not assessed", error: "error" };
-const when = iso => {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const t = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return d >= today ? t : `${d.toLocaleDateString([], { day: "numeric", month: "short" })}, ${t}`;
+const LETTER = { red: "R", yellow: "Y", green: "G" };
+
+const dt = iso => (iso ? new Date(iso) : null);
+const hhmm = iso => dt(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+const isToday = iso => {
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  return dt(iso) >= t;
+};
+// Today shows the time. Anything older shows the day above it, on two lines.
+const whenCell = iso => iso
+  ? (isToday(iso) ? `<span class="t">${esc(hhmm(iso))}</span>`
+    : `<span class="d">${esc(dt(iso).toLocaleDateString([], { day: "numeric", month: "short" }))}</span><span class="t">${esc(hhmm(iso))}</span>`)
+  : `<span class="t">—</span>`;
+
+// Every mark carries its word as visually hidden text: the letter alone is not
+// the verdict.
+function mk(state) {
+  const l = LETTER[state];
+  const word = WORD[state] || "no answer";
+  return l
+    ? `<span class="mk ${esc(state)}" title="${esc(word)}">${l}<span class="sr-only"> ${esc(word)}</span></span>`
+    : `<span class="mk hold" title="${esc(word)}">${icon("none")}<span class="sr-only">${esc(word)}</span></span>`;
+}
+
+// Zero to four tags, no triage colour anywhere.
+function attention(r) {
+  const t = [];
+  for (const s of r.sides) {
+    if (s.ungrounded) t.push(`<span class="tg dashed">not grounded</span>`);
+    if (s.state === "refused" || s.state === "child") t.push(`<span class="tg hatched">refused</span>`);
+    if (s.raised) t.push(`<span class="tg box">raised to ${esc(s.state || "")}</span>`);
+    if (s.removed) t.push(`<span class="tg removed">${s.removed} removed</span>`);
+  }
+  return t.length ? t.join("") : `<span class="none-dash">—</span>`;
+}
+
+const people = r => r.sides.map(s => esc(s.label)).join(" and ");
+const said = r => {
+  const s = (r.sides[0] && r.sides[0].said) || r.title || "Untitled";
+  return esc(s);
 };
 
-const verdict = s => `<span class="v ${esc(s.state || "none")}">${esc(WORD[s.state] || "no answer")}</span>`;
+function fromCell(r) {
+  return `<span class="dev">${esc(r.device_label || r.device)}</span>` +
+    (r.worker ? `<span class="wk">${esc(r.worker)}</span>` : "");
+}
 
-function sideHTML(s) {
-  const tags = [
-    s.raised ? `<span class="tag raised">raised by a profile rule</span>` : "",
-    s.ungrounded ? `<span class="tag ungrounded">not grounded</span>` : "",
-  ].filter(Boolean).join(" ");
-  return `<div class="side">
-    <h3>${esc(s.label)} ${verdict(s)} ${tags}</h3>
-    <dl>
-      <dt>Sources</dt><dd>${s.citations.length
-        ? `<span class="keys">${s.citations.map(k => `<span class="key">${esc(k)}</span>`).join("")}</span>`
-        : `<span class="muted">none cited</span>`}</dd>
-      <dt>Guards</dt><dd>${s.removed
-        ? `${s.removed} item${s.removed === 1 ? "" : "s"} removed before it was shown`
-        : `<span class="muted">nothing removed</span>`}</dd>
-      ${s.rules.length ? `<dt>Rules</dt><dd>${s.rules.map(r => `<span class="tag">${esc(r)}</span>`).join(" ")}</dd>` : ""}
-    </dl>
+function actionCell(r) {
+  return r.reviewed
+    ? `<span class="done">${icon("check")}Reviewed ${esc(hhmm(r.reviewed.at))}</span>`
+    : `<button class="btn quiet" type="button" data-review="${esc(r.id)}">Mark reviewed</button>`;
+}
+
+// ------------------------------------------------------------- the table
+
+function tableHTML(rows) {
+  return `<table class="reg">
+    <thead><tr>
+      <th scope="col" class="c-mk"><span class="sr-only">Urgency</span></th>
+      <th scope="col" class="c-as">Assessment</th>
+      <th scope="col" class="c-at">Attention</th>
+      <th scope="col" class="c-fr">From</th>
+      <th scope="col" class="c-wh">When</th>
+      <th scope="col" class="c-ac"><span class="sr-only">Action</span></th>
+    </tr></thead>
+    <tbody>${rows.map(r => `<tr${r.reviewed ? ' class="seen"' : ""}>
+      <td class="c-mk">${r.sides.map(s => mk(s.state)).join("")}</td>
+      <td class="c-as"><a href="/a/${esc(r.id)}" data-link class="ttl">${said(r)}</a>
+        <span class="meta">${people(r)}</span></td>
+      <td class="c-at">${attention(r)}</td>
+      <td class="c-fr">${fromCell(r)}</td>
+      <td class="c-wh" title="${esc(r.updated || "")}">${whenCell(r.updated)}</td>
+      <td class="c-ac">${actionCell(r)}</td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+}
+
+// Below 60rem the table is REPLACED, not squeezed, on the .hist-row grammar.
+function listHTML(rows) {
+  return `<ul class="recs">${rows.map(r => `<li class="rec${r.reviewed ? " seen" : ""}">
+    <div class="rm">${r.sides.map(s => mk(s.state)).join("")}</div>
+    <div class="rc">
+      <a href="/a/${esc(r.id)}" data-link class="ttl">${said(r)}</a>
+      <span class="meta">${people(r)} · ${esc(r.updated ? hhmm(r.updated) : "")}</span>
+      <span class="meta dev-line">${icon("device")}<span class="dev">${esc(r.device_label || r.device)}</span>${r.worker ? ` · ${esc(r.worker)}` : ""}</span>
+      <span class="tags">${attention(r)}</span>
+      <span class="act">${actionCell(r)}</span>
+    </div>
+  </li>`).join("")}</ul>`;
+}
+
+const section = rows => `<div class="wide-only">${tableHTML(rows)}</div>
+  <div class="narrow-only">${listHTML(rows)}</div>`;
+
+// Needs review is read top to bottom by someone who will run out of time, so
+// the order is the priority order, not the clock.
+const BAND = { red: 0, refused: 1, child: 1, error: 1, yellow: 2, green: 3 };
+function priority(a, b) {
+  const band = r => Math.min(...r.sides.map(s => BAND[s.state] ?? 3));
+  return band(a) - band(b) || String(b.updated || "").localeCompare(String(a.updated || ""));
+}
+
+// ------------------------------------------------------------- the page
+
+const S = { window: "today", seen: null, held: null, note: 0 };
+
+function inWindow(r) {
+  return S.window === "all" || isToday(r.updated);
+}
+
+function tally(d, rows) {
+  const c = d.counts;
+  const n = rows.length;
+  const red = rows.filter(r => r.sides.some(s => s.state === "red")).length;
+  const need = rows.filter(r => r.outstanding).length;
+  const bits = [
+    `<b>${n}</b> assessed`,
+    `<b>${red}</b> red`,
+    `<b>${need}</b> need review`,
+    c.last_sync
+      ? `synced ${esc(hhmm(c.last_sync))} from <b>${c.devices}</b> ${icon("device")}${c.devices === 1 ? "device" : "devices"}`
+      : `no sync yet`,
+  ];
+  return `<p class="tally" aria-live="polite">${bits.join(" <span class=sep>·</span> ")}</p>`;
+}
+
+function emptyAll(d) {
+  return `<div class="well-panel">
+    <h2 class="eh">No device has synced to this one yet.</h2>
+    <p>A handset syncs its caseload when it is back in range. Assessments appear here when it does.</p>
   </div>`;
 }
 
-function caseHTML(c) {
-  const worst = ["red", "yellow", "green"].find(v => c.sides.some(s => s.state === v));
-  const said = (c.sides[0] && c.sides[0].said) || c.title || "Untitled";
-  return `<details class="case">
-    <summary>
-      ${c.sides.map(verdict).join(" ")}
-      <span class="said">${esc(said.length > 90 ? said.slice(0, 90) + "…" : said)}</span>
-      <span class="when">${esc(c.sides.map(s => s.label).join(" · "))} · ${esc(when(c.updated))}</span>
-    </summary>
-    <div class="body">
-      ${c.sides.map(sideHTML).join("")}
-      <p class="sha">from ${esc(c.device_label || c.device)} · assessment ${esc(c.id)}<br>verified sha256 ${esc(c.sha256)}</p>
-    </div>
-  </details>`;
+function emptyWindow(d) {
+  const last = d.counts.last_sync;
+  return `<div class="well-panel">
+    <h2 class="eh">Nothing assessed today.</h2>
+    <p>${last ? `The last sync was ${esc(dt(last).toLocaleDateString([], { day: "numeric", month: "short" }))} at ${esc(hhmm(last))}.` : ""}
+      Choose All to see earlier assessments.</p>
+  </div>`;
 }
 
 function render(d) {
-  const c = d.counts;
-  const tiles = [
-    ["Assessed today", c.today, false],
-    ["Red today", c.red_today, c.red_today > 0],
-    ["Still waiting in the field", c.outstanding, false],
-    ["Devices reporting", c.devices, false],
-    ["Assessments held", c.assessments, false],
-  ];
-  $("#main").innerHTML = `
-    <div class="tiles">${tiles.map(([k, n, alarm]) =>
-      `<div class="tile${alarm ? " alarm" : ""}"><div class="n">${n}</div><div class="k">${esc(k)}</div></div>`).join("")}</div>
+  const all = d.assessments;
+  const rows = all.filter(inWindow);
+  const needs = rows.filter(r => r.outstanding).sort(priority);
+  const seen = rows.filter(r => !r.outstanding)
+    .sort((a, b) => String(b.updated || "").localeCompare(String(a.updated || "")));
 
-    <h2>Devices</h2>
-    ${d.devices.length ? `<ul class="devices">${d.devices.map(x => `<li>
-        <strong>${esc(x.label || x.id)}</strong><span class="id">${esc(x.id)}</span>
-        <span class="grow"></span>
-        <span class="muted">${(x.caseload && x.caseload.waiting) || 0} waiting ·
-          ${(x.caseload && x.caseload.done_today) || 0} seen today · last heard ${esc(when(x.last_seen))}</span>
-      </li>`).join("")}</ul>`
-      : `<p class="empty">No device has reported yet. A field device sends its caseload when it
-         comes back into range.</p>`}
+  const head = `<div class="pg-head">
+      <h1>Caseload</h1>
+      <div class="seg" role="group" aria-label="Window">
+        <button type="button" data-win="today" aria-pressed="${S.window === "today"}">Today</button>
+        <button type="button" data-win="all" aria-pressed="${S.window === "all"}">All</button>
+      </div>
+    </div>
+    ${tally(d, rows)}`;
 
-    <h2>Assessments</h2>
-    ${d.assessments.length
-      ? `<ul class="cases">${d.assessments.map(x => `<li>${caseHTML(x)}</li>`).join("")}</ul>`
-      : `<p class="empty">Nothing has arrived yet.</p>`}`;
-}
+  // New arrivals never move a row under the reader.
+  const bar = S.note > 0 ? `<p class="newbar" role="status">
+      ${S.note} new since you opened this
+      <button class="link-btn" type="button" data-show>Show</button></p>` : "";
 
-async function load() {
-  try {
-    render(await (await fetch("/api/dashboard")).json());
-  } catch (e) {
-    $("#main").innerHTML = `<p class="empty">Base could not read its own store: ${esc(e.message)}</p>`;
+  let body;
+  if (!all.length) body = emptyAll(d);
+  else if (!rows.length) body = emptyWindow(d);
+  else {
+    const needsBlock = needs.length
+      ? `<h2>Needs review <span class="n">${needs.length}</span></h2>${section(needs)}`
+      : `<h2>Needs review <span class="n">0</span></h2>
+         <div class="well-panel done-panel">${icon("check")}
+           <div><b>Nothing needs review.</b>
+           <p>All ${rows.length} assessment${rows.length === 1 ? "" : "s"}
+             ${S.window === "today" ? "today" : "here"} have been looked at.</p></div></div>`;
+    // An empty Reviewed section does not render its heading at all.
+    const seenBlock = seen.length
+      ? `<h2>Reviewed <span class="n">${seen.length}</span></h2>${section(seen)}` : "";
+    body = needsBlock + seenBlock;
   }
+  $("#main").innerHTML = head + bar + body;
+  bind();
 }
 
-load();
-// A supervisor leaves this open on a desk. Polling is the whole interaction:
-// a device coming back into range should appear without anyone pressing
-// anything. Cheap, because base reads files and runs no model.
-setInterval(load, 4000);
+function bind() {
+  document.querySelectorAll("[data-win]").forEach(b => {
+    b.onclick = () => { S.window = b.dataset.win; render(S.held); };
+  });
+  document.querySelectorAll("[data-review]").forEach(b => {
+    b.onclick = async () => {
+      b.disabled = true;
+      try {
+        S.held = await (await fetch(`/api/assessments/${encodeURIComponent(b.dataset.review)}/review`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).json();
+        S.seen = new Set(S.held.assessments.map(r => r.id));
+        render(S.held);
+      } catch { b.disabled = false; }
+    };
+  });
+  const show = document.querySelector("[data-show]");
+  if (show) show.onclick = () => { S.held = S.pendingData || S.held; S.note = 0;
+    S.seen = new Set(S.held.assessments.map(r => r.id)); render(S.held); };
+}
+
+async function load(first) {
+  let d;
+  try { d = await (await fetch("/api/dashboard")).json(); }
+  catch (e) {
+    if (first) $("#main").innerHTML = `<div class="well-panel"><p>Base could not read its own store: ${esc(e.message)}</p></div>`;
+    return;
+  }
+  const ids = new Set(d.assessments.map(r => r.id));
+  if (!S.seen) {                       // first paint: everything is "already there"
+    S.seen = ids; S.held = d; S.note = 0;
+    return render(d);
+  }
+  const fresh = [...ids].filter(id => !S.seen.has(id));
+  if (fresh.length) {
+    // Hold them back. A supervisor reaching for Mark reviewed must not have
+    // the table reorder under their finger.
+    S.pendingData = d;
+    S.note = fresh.length;
+    const bar = document.querySelector(".newbar");
+    if (bar) bar.firstChild.textContent = `\n      ${S.note} new since you opened this\n      `;
+    else render(S.held);
+    return;
+  }
+  S.held = d;
+  render(d);
+}
+
+// ------------------------------------------------------- one assessment
+
+function detail(b) {
+  const a = b.assessment;
+  const sides = a.sides.map(s => {
+    const turns = s.turns || [];
+    const last = [...turns].reverse().find(t => ["result", "refused", "error"].includes(t.kind));
+    const ev = (last && last.event) || {};
+    const res = ev.result || {};
+    const dropped = ev.dropped || {};
+    const esc2 = ev.escalation || {};
+    const state = res.urgency || (last && last.kind === "refused" ? "refused" : null);
+    const removedRows = Object.entries(dropped).flatMap(([field, v]) =>
+      (Array.isArray(v) ? v : (v ? [v] : [])).map(x =>
+        `<li><b>${esc(field)}</b> <s>${esc(typeof x === "string" ? x : JSON.stringify(x)).slice(0, 220)}</s></li>`));
+    return `<section class="det">
+      <h2>${esc((s.profile || {}).label || "?")} ${mk(state)} <span class="wordy">${esc(WORD[state] || "no answer")}</span></h2>
+      ${ev.ungrounded ? `<p class="tg dashed inline">not grounded in sources</p>` : ""}
+      ${(esc2.fired || []).map(f => `<p class="rulep"><b>${esc(f.status === "raised" ? `Raised to ${esc2.final}` : "Rule " + f.rule)}</b>:
+        ${esc(f.fact)} with ${esc(f.symptom)}<br><span class="q">“${esc(f.quote)}”</span>
+        <span class="keys">${(f.keys || []).map(k => `<span class="key">${esc(k)}</span>`).join("")}</span></p>`).join("")}
+      ${res.rationale ? `<h3>Why</h3><p>${esc(res.rationale)}</p>` : ""}
+      ${(res.red_flags || []).length ? `<h3>Red flags</h3><ul>${res.red_flags.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${(res.next_steps || []).length ? `<h3>What to do</h3><ol>${res.next_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+      <h3>Sources</h3>
+      ${(res.citations || []).length
+        ? `<p class="keys">${res.citations.map(k => `<span class="key">${esc(k)}</span>`).join("")}</p>
+           <p class="fine">Base holds no corpus, so the chunk text is not here. It is on the device
+             that did the assessment, behind these keys.</p>`
+        : `<p class="fine">Nothing cited.</p>`}
+      ${removedRows.length ? `<h3>Removed by the guards before it was shown</h3>
+        <ul class="removed">${removedRows.join("")}</ul>` : ""}
+    </section>`;
+  }).join("");
+
+  const first = (a.sides[0] && a.sides[0].turns && a.sides[0].turns[0]) || {};
+  $("#main").innerHTML = `
+    <p><a class="link-btn" href="/" data-link>${icon("back")}All assessments</a></p>
+    <div class="pg-head"><h1>Assessment</h1></div>
+    <blockquote class="saidq">${esc(first.text || "")}
+      ${first.timeline ? `<span class="tl">${esc(first.timeline)}</span>` : ""}</blockquote>
+    ${sides}
+    <p class="sha">from ${esc(b.device.label || b.device.id)}${b.device.worker ? ` · ${esc(b.device.worker)}` : ""}
+      · assessment ${esc(a.id)}<br>verified sha256 ${esc(b.sha256)}
+      ${b.synced_at ? `<br>arrived here ${esc(new Date(b.synced_at).toLocaleString())}` : ""}</p>`;
+  bindLinks();
+}
+
+async function showDetail(id) {
+  try {
+    const b = await (await fetch(`/api/assessments/${encodeURIComponent(id)}`)).json();
+    if (b && b.assessment) return detail(b);
+  } catch { /* fall through */ }
+  $("#main").innerHTML = `<div class="well-panel"><p>That assessment has not reached this base.</p>
+    <p><a class="link-btn" href="/" data-link>All assessments</a></p></div>`;
+  bindLinks();
+}
+
+function bindLinks() {
+  document.querySelectorAll("a[data-link]").forEach(a => {
+    a.onclick = e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      history.pushState(null, "", a.getAttribute("href"));
+      route();
+    };
+  });
+}
+
+let timer = null;
+function route() {
+  clearInterval(timer);
+  const m = location.pathname.match(/^\/a\/([\w-]+)$/);
+  if (m) return showDetail(m[1]);
+  S.seen = null;
+  load(true);
+  // A supervisor leaves this open on a desk: a device coming back into range
+  // should appear without anyone pressing anything. Cheap, because base reads
+  // files and runs no model.
+  timer = setInterval(() => load(false), 4000);
+}
+
+addEventListener("popstate", route);
+document.addEventListener("click", e => {
+  const a = e.target.closest("a[data-link]");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  e.preventDefault();
+  history.pushState(null, "", a.getAttribute("href"));
+  route();
+});
+route();

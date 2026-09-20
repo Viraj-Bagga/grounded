@@ -9,6 +9,7 @@
 //   node 06-demo/ui_check.mjs people OUTDIR         add, edit and delete a person through the form
 //   node 06-demo/ui_check.mjs queue OUTDIR          the caseload: add, assess, mark seen
 //   node 06-demo/ui_check.mjs sync OUTDIR [BASE]     offline, queue, back in range, land at base
+//   node 06-demo/ui_check.mjs base OUTDIR [BASE]     the supervisor's register on 8781
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
@@ -562,6 +563,113 @@ async function syncFlow(out, baseUrl) {
   await p.close();
 }
 
+// BASE, the supervisor's register. Runs against base on 8781, which is a
+// SEPARATE process: nothing here touches the field app, and base being down is
+// reported as base being down rather than as a field failure.
+async function base(out, baseUrl) {
+  const BASE = (baseUrl || "http://127.0.0.1:8781").replace(/\/+$/, "");
+  let health = null;
+  try { health = await (await fetch(`${BASE}/api/health`)).json(); } catch { /* down */ }
+  if (!health || !health.ok) {
+    check(`base is running at ${BASE}`, false, "start it: python 06-demo/base_server.py");
+    return;
+  }
+  const d0 = await (await fetch(`${BASE}/api/dashboard`)).json();
+  if (!d0.assessments.length) {
+    check("base has at least one assessment to show", false,
+      "run the sync check first: node 06-demo/ui_check.mjs sync OUT");
+    return;
+  }
+  const p = await tab();
+  const at = async path => {
+    await p.send("Page.navigate", { url: BASE + path });
+    await p.until("document.readyState === 'complete' && !document.querySelector('.fine')", 30000);
+    await sleep(500);
+  };
+
+  await p.size(DESKTOP);
+  await at("/");
+  check("base leads with a tally line, not a card grid",
+    await p.count(".tally") === 1 && await p.count(".tile") === 0);
+  // Six columns per table, and there is one table per section.
+  check("the register is a real table with column headers", await p.eval(`(() => {
+    const tables = [...document.querySelectorAll(".wide-only .reg")];
+    return tables.length >= 1 && tables.every(t => t.querySelectorAll("thead th").length === 6);
+  })()`) === true, String(await p.count(".wide-only .reg thead th")));
+  check("it splits into Needs review and Reviewed",
+    /Needs review/.test(await p.text("#main")));
+  // The spec's colour rule: the urgency marks are the ONLY saturated thing.
+  check("every urgency mark carries its word, not just a letter",
+    await p.eval(`[...document.querySelectorAll(".reg .mk")].every(m =>
+      (m.getAttribute("title") || "").length > 2 && m.querySelector(".sr-only"))`) === true);
+  check("no tag carries a triage colour", await p.eval(`(() => {
+    const bad = ["rgb(200, 38, 29)", "rgb(242, 183, 5)", "rgb(28, 122, 67)"];
+    return [...document.querySelectorAll(".tg")].every(t => {
+      const s = getComputedStyle(t);
+      return !bad.includes(s.backgroundColor) && !bad.includes(s.color);
+    });
+  })()`) === true);
+  await p.shot(join(out, "desktop-base-register.png"), true);
+
+  // Needs review is read top to bottom by someone who runs out of time, so red
+  // must come before yellow whatever the clock says.
+  // A COMPARE ROW CARRIES TWO MARKS, so the row's band is the worst of them,
+  // exactly as the page computes it. Reading only the first mark scores a
+  // green-beside-yellow row as green and fails a page that is sorted right.
+  check("Needs review is in priority order, red before yellow", await p.eval(`(() => {
+    const rows = [...document.querySelectorAll(".wide-only .reg")][0].querySelectorAll("tbody tr");
+    const one = m => m.classList.contains("red") ? 0 : m.classList.contains("hold") ? 1
+      : m.classList.contains("yellow") ? 2 : 3;
+    const band = r => Math.min(...[...r.querySelectorAll(".mk")].map(one));
+    const bands = [...rows].map(band);
+    return bands.every((b, i) => i === 0 || bands[i - 1] <= b) ? true : bands.join(",");
+  })()`) === true);
+
+  const before = await p.count("[data-review]");
+  await p.click("[data-review]");
+  await p.until(`document.querySelectorAll("[data-review]").length < ${before}`, 10000);
+  check("Mark reviewed moves a row out of Needs review", true);
+  check("a reviewed row says when it was reviewed",
+    /Reviewed \d\d:\d\d/.test(await p.text("#main")), (await p.text("#main")).slice(0, 200));
+  // It must change the record and NOT the assessment.
+  const rowNow = (await (await fetch(`${BASE}/api/dashboard`)).json())
+    .assessments.find(r => r.reviewed);
+  check("reviewing is recorded at base", !!rowNow && !!rowNow.reviewed.at);
+  const bundle = await (await fetch(`${BASE}/api/assessments/${rowNow.id}`)).json();
+  check("reviewing does not change the assessment's verified digest",
+    bundle.sha256 === rowNow.sha256 && bundle.sha256.length === 64);
+  await p.shot(join(out, "desktop-base-reviewed.png"), true);
+
+  await p.click("[data-win='all']");
+  await sleep(400);
+  check("the Today/All control switches window",
+    await p.eval(`document.querySelector("[data-win='all']").getAttribute("aria-pressed") === "true"`) === true);
+
+  // One assessment, read-only, with what base can and cannot show.
+  await p.click(".ttl");
+  await p.until("/^\\/a\\//.test(location.pathname)", 10000);
+  await sleep(600);
+  const det = await p.text("#main");
+  check("an assessment opens read-only at base", /Assessment/.test(det));
+  check("it carries the citation keys", await p.count(".key") >= 1 || /Nothing cited/.test(det));
+  check("it says plainly that base holds no corpus",
+    /Base holds no corpus/.test(det) || /Nothing cited/.test(det), det.slice(0, 300));
+  check("it shows the verified digest it arrived with", /verified sha256 [0-9a-f]{64}/.test(det));
+  await p.shot(join(out, "desktop-base-assessment.png"), true);
+
+  // Below 60rem the table is REPLACED, not squeezed.
+  await p.size(PHONE);
+  await at("/");
+  check("the table is not rendered on a phone",
+    await p.eval(`getComputedStyle(document.querySelector(".wide-only")).display`) === "none");
+  check("records are rendered instead", await p.count(".rec") >= 1);
+  check("nothing overflows sideways at 390px",
+    await p.eval("document.documentElement.scrollWidth <= window.innerWidth"),
+    String(await p.eval("document.documentElement.scrollWidth")));
+  await p.shot(join(out, "phone-base-register.png"), true);
+  await p.close();
+}
+
 // Adds, then deletes, one throwaway person. It finds that person by exact name
 // through the API and will not delete anyone from the seeded household: an
 // earlier version matched "Sam" by substring, hit the "Sample" tag on You, and
@@ -1096,7 +1204,7 @@ const chrome = await launch(mode === "voice"
   ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone, voice, packs: packsFlow, queue, sync: syncFlow }[mode];
+                regions, phone, voice, packs: packsFlow, queue, sync: syncFlow, base }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

@@ -4,19 +4,21 @@
 <title>Base · Triage</title>
 <link rel="stylesheet" href="/base.css">
 <!--
-  BASE. What arrived from the field, and nothing else.
+  BASE. A register of what arrived from the field, and nothing else.
 
-  This page has no model, no corpus and no retriever behind it. Everything it
-  shows was rendered on a field device and carried here inside a verified
-  bundle, which is why the citations and the guard removals are the field
-  device's own and not something base recomputed. See base_server.py.
+  No model, no corpus, no retriever behind this page. Everything it shows was
+  rendered on a field device and carried here inside a bundle base verified
+  against its own sha256, which is why the citations and the guard removals
+  are the field device's own and not something base recomputed.
+
+  Built from 06-demo/BASE-DESIGN.md. See base.js for the one deviation, forced
+  by base being a separate process on its own port.
 -->
 <div class="wrap">
-  <header class="bar"><h1>Base</h1><span class="role">Supervisor</span></header>
-  <p class="lede">Assessments that have arrived from field devices. Nothing here is edited and
-    nothing is sent back: base shows what the worker's device showed them, from the same bytes.</p>
-  <div id="main"><p class="muted">Loading…</p></div>
+  <div class="brand"><span class="dot" aria-hidden="true"></span><b>Triage</b><span class="role">Base</span></div>
+  <div id="main"><p class="fine">Loading…</p></div>
   <footer class="note">Base holds no model and no corpus. Every verdict, citation and guard action
-    on this page was produced on the field device that sent it.</footer>
+    here was produced on the field device that sent it. Marking something reviewed records that a
+    person looked; it changes nothing about the assessment and never goes back to the device.</footer>
 </div>
 <script type="module" src="/base.js"></script>

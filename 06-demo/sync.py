@@ -103,6 +103,12 @@ class SyncState:
             if not d.get("device_label"):
                 d["device_label"] = socket.gethostname().split(".")[0] or "field device"
                 changed = True
+            if "worker" not in d:
+                # Who is carrying the handset. Optional, and NULL RENDERS AS
+                # NOTHING at base rather than "Unknown": an unnamed worker is
+                # missing information, not a person called Unknown.
+                d["worker"] = ""
+                changed = True
             if not d.get("base_url"):
                 d["base_url"] = DEFAULT_BASE
                 changed = True
@@ -117,13 +123,15 @@ class SyncState:
         with self.lock:
             return dict(self._read() or self._d)
 
-    def set_base(self, url):
+    def set_base(self, url, worker=None):
         url = str(url or "").strip().rstrip("/")
         if not url.startswith(("http://", "https://")):
             return None, "Base needs an http:// or https:// address."
+        worker = " ".join(str(worker or "").split())[:40]
         with self.lock:
             d = self._read()
             d["base_url"] = url
+            d["worker"] = worker
             _write_json(self.path, d)
             return url, None
 
@@ -145,7 +153,8 @@ def bundle_for(conv, state, caseload_counts):
     return {
         "bundle": BUNDLE_VERSION,
         "created": now_iso(),
-        "device": {"id": d["device_id"], "label": d["device_label"]},
+        "device": {"id": d["device_id"], "label": d["device_label"],
+                   "worker": d.get("worker") or ""},
         "caseload": dict(caseload_counts or {}),
         "assessment": conv,
         "sha256": digest_of(conv),

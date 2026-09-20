@@ -219,7 +219,8 @@ def sync_view():
     d = SYNC.get()
     todo = sync.pending(CONVERSATIONS.all(), SYNC)
     return {"base_url": d["base_url"],
-            "device": {"id": d["device_id"], "label": d["device_label"]},
+            "device": {"id": d["device_id"], "label": d["device_label"],
+                       "worker": d.get("worker") or ""},
             "pending": [{"id": c["id"], "sha256": h,
                          "updated": c.get("updated"),
                          "people": [(s.get("profile") or {}).get("label") for s in c.get("sides", [])]}
@@ -410,7 +411,7 @@ class Handler(SimpleHTTPRequestHandler):
         # The flush is streamed like a turn is, because the honest thing to
         # show a worker is each assessment landing, not a spinner.
         if path == "/api/sync/base":
-            url, err = SYNC.set_base(body.get("base_url"))
+            url, err = SYNC.set_base(body.get("base_url"), body.get("worker"))
             return self._json(sync_view()) if url else self._json({"error": err}, 422)
         if path == "/api/sync/flush":
             send = self._sse()
