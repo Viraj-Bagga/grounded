@@ -81,7 +81,43 @@ async function installFakeMic(p, wav) {
   })()`);
 }
 
+// Is anything answering the DevTools port right now?
+async function debugPortUp() {
+  try { await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json(); return true; }
+  catch { return false; }
+}
+
+// WAIT FOR THE PORT TO GO QUIET BEFORE TRUSTING IT.
+//
+// This is the bug that produced every flaky failure on the night of
+// 2026-09-19: a mode would fail its FIRST navigation with "timed out waiting
+// for document.readyState", burn the full 180 s, and then pass when run on its
+// own. The teardown killed Chrome and slept a flat 500 ms. When the previous
+// browser took longer than that to let go of 9333, the next mode's launch()
+// polled /json/version, got an answer from the DYING browser, opened a tab in
+// it, and then watched that tab never load because its browser was exiting.
+//
+// Four of the twelve modes failed this way in one suite run, all of them at
+// their first navigation and all of them for exactly 181 s. A fixed sleep
+// cannot fix it, because the thing being waited for is a process exiting, not
+// a duration passing. So both ends now wait on the observable condition.
+async function waitForPortFree(ms = 15000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    if (!(await debugPortUp())) return true;
+    await sleep(100);
+  }
+  return false;
+}
+
 async function launch(extra = []) {
+  // A browser left over from a previous mode still owns the port. Connecting
+  // to it looks like success and fails 180 s later, so refuse to start until
+  // it has gone.
+  if (await debugPortUp() && !(await waitForPortFree())) {
+    throw new Error(`something is already on the DevTools port ${PORT}. `
+      + `Another ui_check is running, or one has not exited. Run one at a time.`);
+  }
   // Thrown away in the finally below. Left behind, these are about 45 MB each,
   // and 73 of them filled the disk on 2026-09-19, the night before judging.
   const profile = mkdtempSync(join(tmpdir(), "ui-check-"));
@@ -1212,8 +1248,11 @@ try {
   console.log(`FAIL  ${e.message}`);
 } finally {
   chrome.kill();
-  // Chrome writes its profile out as it exits, so give it a moment first.
-  await sleep(500);
+  // Wait for the browser to actually let go of the DevTools port, not for an
+  // arbitrary 500 ms. See waitForPortFree: the flat sleep is what made the
+  // next mode in a suite attach to a dying browser. Chrome also writes its
+  // profile out as it exits, so this is the same wait for both purposes.
+  await waitForPortFree();
   if (chrome.profile) rmSync(chrome.profile, { recursive: true, force: true });
 }
 console.log(`${failures ? `${failures} failed` : "all passed"}`);

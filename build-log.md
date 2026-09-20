@@ -5774,3 +5774,162 @@ the page still works and says why.
 
 Results: `06-demo/results/2026-09-19-packs-live.txt`, four screenshots beside
 it. Check: `node 06-demo/ui_check.mjs packs OUTDIR`, 14 assertions.
+
+### 2026-09-20 The base register, specced, and the One Saturated Field Rule extended
+
+The other instance is building the field-and-base sync and said the supervisor
+dashboard would be a plain table tonight for lack of design time. Specced it
+instead so it can build without designing: `06-demo/BASE-DESIGN.md`, 354 lines,
+layout at both sizes, every component, every cell, four empty states, the one
+new icon's path.
+
+**It is a register, not a dashboard of charts.** No graphs and no card grid.
+DESIGN.md forbids the card grid outright, and a chart of five assessments is
+decoration. A tally line and a table in `.page.wide`, table from 60rem and
+stacked `.hist-row` records below it, because a six-column table on a phone is
+unreadable and the house already has a list form for this content.
+
+**THE ONE SATURATED FIELD RULE IS NOW EXTENDED, Viraj's call.** It said the
+urgency bar is the only saturated field, with one exception: "the small red and
+yellow marks in the history list ... because they index past bars." A register
+row indexes a past bar identically, so `.mk` is allowed there on the same
+grounds. **DESIGN.md now carries it**, in the rule and in the matching Don't.
+Nothing else on that screen may take a triage colour: not a row fill, not a
+count, not a tag. Completion is told by words and a check icon, never green.
+
+**"Outstanding" is defined so the count is never arguable.** Not reviewed, and
+any of: red including raised and not-grounded reds, yellow, refused, or a guard
+removed anything at any urgency. **A green with a clean run is not
+outstanding.** Marking reviewed changes no verdict and no SOAP note; it records
+that someone looked.
+
+**Four fields the sync must add,** named once so they are not invented twice:
+`device {id, label}`, `worker` (null renders as nothing, never "Unknown"),
+`synced_at`, `reviewed {at, by} | null`. Everything else derives from
+`summary()` and the turn events that already exist.
+
+**Three details worth keeping.** The important figure is marked by weight, not
+colour, because colour is not available to it. The row is not a link: the title
+is an anchor and the action is a button, since an anchor with a button inside is
+invalid and unusable by keyboard. And a sync never inserts rows into a table
+someone is reading; it offers "n new since you opened this" and merges only when
+pressed, so nobody has the table reorder under their finger as they reach for
+Mark reviewed.
+
+**Left out deliberately, and the spec says why rather than just omitting it:
+per-worker and per-device performance.** A supervisor screen that ranks health
+workers is a different product with a different ethics problem, and nobody asked
+for it. Viraj agreed. Also out: charts, undo on Mark reviewed, sortable columns,
+and any edit path. The base reads the caseload; it does not rewrite what a
+worker was shown in the field.
+
+**Boundary note.** 06-demo/ is the other instance's from 2026-09-20.
+BASE-DESIGN.md was the carve-out. DESIGN.md was edited on Viraj's explicit
+instruction after checking it was clean and untouched since the previous
+evening.
+
+### 2026-09-20 The field-and-base architecture: caseload, sync, base, records
+
+Four pieces, built in the order the demo sentence needs rather than the order
+product logic suggests. Viraj's call on the sequencing after I argued for it:
+the sentence is **wifi off, triage in the field, wifi on, data appears at
+base**, and that needs the queue and the sync before it needs records.
+
+**The rule that governed all of it: base cannot break the field app.** It is
+its own process on 8781, its own data directory, its own static directory, and
+it imports nothing from the triage path. No llama-server, no retriever, no
+encoder, no guards, no registry. If base is broken at 8am the field demo still
+runs, and the field demo is what gets judged. It also means base can run on a
+second device, which is how the offline claim gets staged honestly: base on
+Viraj's phone over its hotspot, and the laptop's wifi genuinely turned off.
+
+**1. The caseload** (`06-demo/caseload.py`, `/queue`). A list a health worker
+works down: add with a note, tap Assess, mark seen. It is its OWN STORE and not
+a field on a person, because `clean_person` rewrites the whole person on every
+edit and would drop an unknown field, and the person record is what
+`profile_text` reads. Named `caseload.py` and not `queue.py`, because 06-demo is
+first on `sys.path` and a `queue.py` there shadows the stdlib module
+`concurrent.futures` imports. Starting an assessment links it to the caseload
+row server-side, so the link survives the tab closing and the worker's one
+remaining job is to say they were seen.
+
+**2. Sync, one direction** (`06-demo/sync.py`, `/sync`). Nothing is edited at
+base and nothing is pushed down, so there is no conflict to resolve and none is
+implemented. The integrity is the distribution node's rule pointed the other
+way: a bundle claims a sha256 over the canonical JSON of the assessment, and
+base recomputes it from the bytes that actually arrived. **A mismatch is
+refused, not stored and flagged**, verified live by changing one word of a case
+and getting HTTP 422 back. The digest is also the identity, which is what makes
+a flaky link safe: a resend is a no-op, and the outbox clears only on a verified
+acceptance. An unreachable base stops at the first failure and says so once.
+
+**3. Base** (`06-demo/base_server.py`, port 8781). Verify-before-accept, then
+store, then show. It recomputes nothing: the bundle carries the saved assessment
+verbatim, which is why the citations and the guard removals arrive as the field
+device rendered them without base owning a corpus.
+
+**4. The register**, rebuilt from `06-demo/BASE-DESIGN.md`. That spec appeared
+at 00:50, written by the other instance and addressed to whoever built base,
+after I had already improvised a screen of five stat tiles. It is better than
+what I had and I took it whole: a tally line and a real table rather than a card
+grid, Needs review and Reviewed, priority order rather than clock order because
+a supervisor reads top to bottom and stops when they run out of time, attention
+tags in shapes with no triage colour, the urgency marks the only saturated thing
+on the screen, Today/All, stacked records below 60rem, and Mark reviewed. Its
+**outstanding rule is sharper than mine**: not yet reviewed and any of red,
+yellow, refused, or a guard removed something at any urgency; a green with a
+clean run is not outstanding.
+
+**The spec and Viraj's rule conflicted and I stopped rather than pick.** The
+spec puts base at `/base` inside the field app's sidebar and top bar; Viraj had
+said twice that base is a separate surface on its own port. Both cannot hold. He
+confirmed separate process wins, partly because a route inside the field app
+cannot run on a second device, which is the whole point. **One forced
+deviation** follows from that: the spec has a row link to `/c/<id>`, the field
+app's own page, so base renders its own read-only view instead. Base has the
+assessment bytes but NOT the corpus, so that view shows citation KEYS and says
+plainly that the chunk text is on the device that did the assessment. Saying it
+is the point.
+
+**5. Records, thin** (`06-demo/selftest_profile_text.py`). A patient ID, a
+medication schedule, history notes, who last saw them and when. **`medications`
+stays a list of strings and the schedule is a parallel field**, because
+`profile_text` joins that list and a richer one would silently change every
+cached prompt. 25 offline self-tests write the six seeded people's prompt text
+out byte for byte rather than computing it, add every record field to each of
+them at once and require the prompt to come back identical. Verified live too:
+saving Mum's whole record leaves her prompt byte-identical.
+
+**Checks.** `queue` 12, `sync` 11, `base` 17, plus 21 caseload and 25 profile
+self-tests. The whole pre-existing suite was re-run twice to prove the field app
+was untouched. Results in `06-demo/results/2026-09-20-*`.
+
+**Every ui_check failure tonight was the harness or me, never the product, and
+chasing them down found two real bugs worth keeping.**
+
+**A flat 500 ms teardown sleep, which is now a fixed bug in `ui_check.mjs`.**
+The teardown killed Chrome and slept half a second for it to release DevTools
+port 9333. When it took longer, the next mode's `launch()` polled the port, got
+an answer from the DYING browser, opened a tab in it, and watched that tab never
+load. It surfaces as `timed out waiting for document.readyState`, always on a
+mode's FIRST navigation, always for exactly 181 s, and it passes when the mode
+is re-run alone, which is what made it look like flakiness for hours. **A fixed
+sleep cannot fix it, because the thing being waited for is a process exiting,
+not a duration passing.** Both ends now wait on the port itself, and `launch`
+refuses to start while something else still owns it.
+
+**A stuck llama-server slot, which is not a bug but is a trap.** Killing a check
+mid-generation leaves the slot it was using PROCESSING, at about 100% of a core,
+indefinitely. With `-np 2` the compare beat needs both slots, so it waits 300 s
+for a second answer that is never coming. **Check `/slots` before believing a
+failure**, and restart llama-server after aborting a run:
+
+    curl -s localhost:8080/slots | python3 -c "import json,sys;print([(s['id'],s['is_processing']) for s in json.load(sys.stdin)])"
+
+**And one that was plainly mine.** The first `reread` run failed because my
+`kill` silently did not take and the replacement llama-server could not bind
+8080, so nothing had restarted and there was no lost cache to re-read. Correct
+behaviour, wrong test.
+
+**Run one ui_check at a time**, and take the final number from a run with a
+freshly restarted llama-server.
