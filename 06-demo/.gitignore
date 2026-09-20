@@ -4,3 +4,4 @@ _backup/
 __pycache__/
 .impeccable/review/
 .impeccable/hook.cache.json
+base-data/
