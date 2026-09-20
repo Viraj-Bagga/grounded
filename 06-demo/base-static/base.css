@@ -183,8 +183,12 @@ a.link-btn { text-decoration: none; }
 .det p, .det li { color: var(--ink); }
 .det ul, .det ol { margin: .25rem 0; padding-left: 1.25rem; }
 /* Each turn is its own block, so a follow-up sits under the answer it
-   followed rather than replacing it. */
-.turn-block { border-left: 3px solid var(--rule); padding-left: .875rem; margin: .875rem 0; }
+   followed rather than replacing it. SEPARATED BY A HAIRLINE ABOVE, not by a
+   thick left bar: the house separates with hairlines and tone, and the one
+   border-left in the field app is 1.5px between segmented buttons. The first
+   turn needs no rule because the side's own heading is directly above it. */
+.turn-block { margin: .875rem 0 0; padding-top: .875rem; border-top: 1px solid var(--rule); }
+.turn-block:first-of-type { margin-top: .5rem; padding-top: 0; border-top: 0; }
 .turn-h { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
   font: 700 var(--t-15) var(--font); color: var(--ink-2); margin: 0 0 .5rem; }
 .det h4 { font: 700 var(--t-14) var(--font); color: var(--ink-2); margin: .75rem 0 .25rem; }
