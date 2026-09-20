@@ -179,7 +179,7 @@ Violating any of these silently breaks something downstream. They are not prefer
 
       **That was one run each, and one of the seven does not hold on repeats.** Three runs each later the same night: six were refused 3 of 3, headache included. **"My tooth is killing me and the side of my face aches", 0.291, one of the four 0.25 newly admits, was triaged red in 2 of 3 runs**, citing CP-PERI-002 and CP-PERI-001 by exact key, with "chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward" asserted as the patient's. The red-flag guard kept it, because its lexicon has no chest-pain, pleuritic or positional term. Same hole as the toddler: an adjacent chunk defeats the post-flight check. A floor of 0.30 would refuse this query pre-flight and leave 0.014 of margin under the worst in-scope query measured. That is a call, not a fix. Run: `06-demo/results/2026-09-18-leading-key-live.txt`, section C.
 
-      **The one that got through was a hole the floor never closed by design.** "My toddler has a fever and is pulling at her ear", 0.341, was **triaged red**, citing CP-PNA-001, with the rationale "possible meningitis". **"meningitis" appears in no chunk.** But CP-PNA-001 genuinely says "Young children, older adults... are at risk" and lists fever, so the key resolves and the citation guard is right to pass it. **That is the limit of the post-flight check: it fires only on EMPTY citations, so an adjacent-but-wrong chunk defeats it.** Raising the floor does not fix this, it only catches this one query by luck of a number. **This query is now refused before generation by the paediatric exclusion, verified live 2026-09-18. The limit itself is not fixed** and applies to any out-of-scope subject no exclusion names. Extending the grounding check to the rationale would catch the invented "meningitis"; that is roadmap.
+      **The one that got through was a hole the floor never closed by design.** "My toddler has a fever and is pulling at her ear", 0.341, was **triaged red**, citing CP-PNA-001, with the rationale "possible meningitis". **"meningitis" appears in no chunk.** But CP-PNA-001 genuinely says "Young children, older adults... are at risk" and lists fever, so the key resolves and the citation guard is right to pass it. **That is the limit of the post-flight check: it fires only on EMPTY citations, so an adjacent-but-wrong chunk defeats it.** Raising the floor does not fix this, it only catches this one query by luck of a number. **This query is now refused before generation by the paediatric exclusion, verified live 2026-09-18. The limit itself is not fixed** and applies to any out-of-scope subject no exclusion names. Extending the grounding check to the rationale would catch the invented "meningitis"; that is roadmap, and HE01 is the second and stronger argument for it (design gaps).
 
       **Lowering to 0.25 cost the ectopic case its floor coverage.** "My stomach hurts and my period is late" scores 0.321: refused by the floor at 0.40 and 0.33, **not refused at 0.25**. For part of 2026-09-18 only the post-flight check caught it (yellow withheld, 42.3 s).
 
@@ -356,7 +356,25 @@ Runs: `01-data/eval/runs/2026-09-19-heldout-{base,tuned}-{matched,retrieval}.txt
 
 **The three presets were run live through the real demo path before the swap**, 3 runs each, 12 sides, zero refusals, zero errors, every verdict identical across its three runs: crushing chest pressure **RED 3/3** on You; sharp pain breathing in **RED 3/3** on Aunt Sue, the model saying yellow and R4 raising it; indigestion **GREEN 3/3** on You beside **YELLOW 3/3** on Mum, raised by R1. `06-demo/results/2026-09-19-tuned-presets-live/`.
 
-**THE TOP OPEN RISK IS NOW UNDER-TRIAGE, and it is one case.** On the tuned model, **HE01, textbook ACS, expected red, comes back yellow 3 of 3 under retrieval chunks**, where the base was red 3 of 3. Red drops 12/12 to 9/12 in that condition and all three lost completions are that one case. On matched chunks the same case is red 3 of 3, so retrieval is handing it something it reads down rather than the tune losing ACS outright. **This is the direction the whole project exists to avoid and it is invisible in the headline number.** It needs Viraj's eye. None of the three demo presets exercises it.
+**THE TOP OPEN ITEM IS UNDER-TRIAGE ON HE01, AND IT IS A RETRIEVAL FAULT.** Diagnosed 2026-09-19, not fixed, deliberately not fixed that night. Full working in `01-data/eval/runs/2026-09-19-he01-undertriage-diagnosis.txt`.
+
+HE01 is a 63-year-old woman, forty minutes of upper back and left shoulder ache, breathless at rest, drained and queasy, and the case says outright **"There is no real chest pain."** It is the atypical presentation that kills women, and the held-out set keys it to CP-ACS-006 for that reason. The split is deterministic, 3 of 3 in both directions at temperature 0.2:
+
+| condition | chunks in the prompt | verdict |
+|---|---|---|
+| matched, base and tuned | CP-ACS-006, CP-ACS-003 | red 3/3 |
+| retrieval, base | CP-ACS-003, CP-PERI-002, CP-ANG-003 | red 3/3 |
+| retrieval, **tuned** | the same three | **yellow 3/3** |
+
+**The mechanism, and it is not the model.** Every finding in the case appears in CP-ANG-003's angina symptom list: shoulders and back, shortness of breath, extreme tiredness, nausea, weakness. And across all three retrieved chunks **there is exactly one call to action in the entire prompt**, CP-ANG-003's "Call 9-1-1 if you feel **chest discomfort** that does not go away with rest or medicine." CP-ACS-003 and CP-PERI-002 contain none at all. So the single escalation trigger in context is conditioned on the one symptom this patient explicitly does not have, and the tuned model says so in its own rationale: "the retrieved context says to call 9-1-1 if chest discomfort does not go away with rest, and does not say to call for anything else". **That is faithful reading of an inadequate context, not a failure of category assignment.** Matched chunks give red 3/3, so the tune has not lost ACS.
+
+**CP-ACS-006 ranks 5th and is cut by top-3.** It is the chunk written for exactly this presentation: "These symptoms can happen together with chest pain **or without any chest pain**", plus an unconditional "It is important to call 9-1-1 if you have these symptoms". With it in the prompt the tuned model says red and quotes it.
+
+**THE BASE'S RED ON THIS CASE WAS NEVER A REAL PASS.** On the identical three chunks it said red every run by asserting chest discomfort the case denies, and in one run sweating that is not in the case either: "Chest discomfort that does not go away with rest or medicine is a red flag", "Symptoms include chest discomfort, shortness of breath, sweating". **It manufactured the finding CP-ANG-003's trigger requires.** Right verdict, fabricated reason, and it scores identically to a real red. **So the tune did not introduce this. It removed a blanket red that was hiding a retrieval gap that was always there**, and the honest reading of red 12/12 on the base is that at least one of those twelve was luck.
+
+Two secondary observations, not the diagnosis. **The tuned model's own steps say red under its yellow label**: runs 1 and 3 return three consecutive "Call emergency services now" with `urgency: yellow`, and nothing reconciles that, because constraint 16 fires on a profile raise and not on a model contradicting itself. **And the rationale loops**, the same two sentences five and six times in those runs, only on this case and only under retrieval chunks. Possibly an artefact of a 120-pair run, on 1 of 22 cases.
+
+None of the three demo presets exercises this.
 
 **Green is still the weak side, 62.5% on matched chunks**, and it is the same side the corpus is thin on: seven of nine conditions have no green chunk at all (design gaps). The 12 wrong green completions all went to yellow, never to red, so the failure is over-caution, not danger.
 
@@ -380,9 +398,34 @@ Runs: `01-data/eval/runs/2026-09-19-heldout-{base,tuned}-{matched,retrieval}.txt
 
 This is the page's wording, word for word (`DISPOSITION` in `06-demo/static/js/answer.js`). The table was changed to match the page on 2026-09-19, Viraj's call, because the page is what a person reads.
 
+**A SHORT CHUNK OUTRANKS A LONGER CORRECT ONE, and HE01 is the clearest case of it yet.** Hybrid retrieval, alpha 0.5, on the HE01 query, top 5 of 35:
+
+```
+1. CP-ACS-003   0.9656   retrieved
+2. CP-PERI-002  0.8439   retrieved, NEVER CITED by either model, matches nothing in the case
+3. CP-ANG-003   0.7738   retrieved, and the chunk that reads the case down
+4. CP-PERI-001  0.6824
+5. CP-ACS-006   0.6264   the chunk the case is keyed to, CUT BY TOP-3
+```
+
+**CP-PERI-002 is three lines**: sharp pleuritic pain, fast heartbeat, fever. The patient has none of the four. It takes rank 2 at 0.84 and costs CP-ACS-006 its slot. CP-ACS-006 carries every symptom in the case and the only unconditional "call 9-1-1" in the corpus for a heart attack without chest pain, and it scores 0.63 because its symptom words are diluted by two paragraphs about hospital screening and women's outcomes.
+
+**The scoring rewards density, and correctness is not dense.** A bare symptom list is nearly all signal by length; a chunk that explains WHEN the symptoms matter has to spend words explaining. Those explanatory words are exactly what makes it the right chunk and exactly what sinks its score. Constraint 7 already caps chunks at 256 word-pieces for latency, and nothing anywhere rewards a chunk for carrying its own call to action.
+
+Same shape as CP-PERI-002 defeating the red-flag guard on the toothache (constraint 13) and as the BM25 match on "going" and "down" pulling CP-PNA-002 into the stairs preset. **Three separate incidents, one cause.** Not being fixed tonight, Viraj's call. Candidates when it is: top-k above 3, which costs about 3.1 s per 100 tokens under constraint 7; a length-aware score; or promoting any chunk that carries an escalation instruction when the query looks cardiac. All three need measuring, none has been measured.
+
 **The green side is under-sourced.** Government health sites cover what kills people, so costochondritis and chest wall pain are thin. Same side the model has no evidence on. Both problems point the same direction.
 
 **Seven of nine conditions have no green chunk at all, recorded 2026-09-19 at 35 chunks.** Heart attack, angina, blood clots, pneumonia, heart inflammation and pleurisy are all red or yellow, and the chest pain overview is uncategorised. Only GERD and panic have green chunks, and nothing else. For those seven, no chunk supports a green, so retrieval cannot ground one whatever the model does. Viraj's finding. Noted, not being fixed now. Per condition: `01-data/eval/runs/2026-09-19-green-by-condition.txt`. It does not account for all of the red bias: the no-chunk angina probe came back red with no corpus at all (Current state).
+
+**NOTHING CHECKS THE RATIONALE, and two separate incidents now turn on that.** Constraint 11's guard screens `red_flags`, and constraint 12's screens `next_steps`. **The Why is unscreened**, so a fabricated finding is dropped when it appears as a red flag and rendered when the same fabrication appears as prose.
+
+The two incidents:
+
+- **The toddler, 2026-09-18.** Triaged red citing CP-PNA-001, rationale "possible meningitis". The word appears in no chunk. The key resolves, so the citation guard passes it correctly, and nothing looks at the sentence. Constraint 13 has the detail.
+- **HE01, 2026-09-19, and this one is worse.** The base model reached red by asserting "chest discomfort that does not go away with rest" and, in another run, "sweating", on a case that says "There is no real chest pain" and mentions no sweating. **Both are findings the case actively CONTRADICTS**, which constraint 11 calls strictly worse than an unsupported one. They sat in the rationale, so nothing dropped them, and they produced the correct verdict, so nothing scored them wrong either.
+
+**That is the argument.** A fabrication in `red_flags` costs a wrong verdict and gets caught. A fabrication in the rationale can buy a RIGHT verdict and is invisible to the guards, to the eval, and to a judge reading the screen. `ungrounded_findings` and `contradicted_findings` in `validate_pairs.py` already exist and are already reused by both guards, so the mechanism is there; what is missing is pointing them at the Why. Cost is unmeasured and it fails closed like the others, which means deciding what to render when the whole rationale goes. Not tonight.
 
 **No negative discriminators anywhere in the corpus.** Nothing states that pain which is positional, reproducible on palpation, or worse on inspiration argues against a cardiac cause. Those are what rule cardiac out. Consumer health sites do not teach people what is benign.
 

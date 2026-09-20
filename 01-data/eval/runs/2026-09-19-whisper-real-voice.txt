@@ -1,0 +1,84 @@
+================================================================================
+WHISPER ON A REAL VOICE: base.en AGAINST small.en
+Date:   2026-09-19
+Voice:  Viraj, recorded with 01-data/eval/audio/record.sh
+Build:  whisper.cpp v1.9.4 from source, CPU (-ng), 4 threads
+        48 kHz mono capture, resampled to 16 kHz the way the page does
+Against: 01-data/eval/runs/2026-09-19-whisper-model-choice.txt (synthetic)
+================================================================================
+
+THE CLIPS
+  preset1   preset1-crushing.wav           8.73 s   peak 0.395   rms 0.04856
+  preset2   preset2-pleuritic.wav          9.21 s   peak 0.501   rms 0.06214
+  preset3   preset3-indigestion.wav        4.73 s   peak 0.418   rms 0.04850
+  extra1    extra1-medications.wav        11.41 s   peak 0.471   rms 0.05814
+  extra2    extra2-negations.wav           9.24 s   peak 0.543   rms 0.06506
+                                          43.31 s total
+
+  For comparison, the synthetic set measured peak 0.779 to 0.928 and
+  rms 0.109 to 0.164. A real room should read lower on both. The
+  silence floor in voice.py refuses under peak 0.01.
+
+--------------------------------------------------------------------------------
+1. WORD ERROR RATE, numbers normalised so 'twenty' and '20' agree
+--------------------------------------------------------------------------------
+  model                 WER%   errs  words   safety misses
+  base.en               4.63      5    108               2
+                    extra1:angina extra1:ramipril
+  small.en-q5_1         5.56      6    108               3
+                    extra1:angina extra1:ramipril preset2:worse
+  small.en              5.56      6    108               3
+                    extra1:angina extra1:ramipril preset2:worse
+  base.en-q5_1          6.48      7    108               2
+                    extra1:angina extra1:ramipril
+
+--------------------------------------------------------------------------------
+2. EVERY TRANSCRIPT, IN FULL. This is the evidence; the table is a summary.
+--------------------------------------------------------------------------------
+
+  [preset1]  said: Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.
+    ! base.en-q5_1     14277 ms  Heavy pressure in the middle of my chest that is not let up for almost half an hour. I feel sick and I am sweating.
+    ! base.en            414 ms  Heavy pressure in the middle of my chest that is not let up for almost half an hour. I feel sick and I am sweating.
+    ! small.en-q5_1     1078 ms  Heavy pressure in the middle of my chest that is not let up for almost half an hour. I feel sick and I am sweating.
+    ! small.en          1264 ms  Heavy pressure in the middle of my chest that is not let up for almost half an hour. I feel sick and I am sweating.
+
+  [preset2]  said: Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.
+    ! base.en-q5_1       437 ms  Short pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.
+    ! base.en            411 ms  Short pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.
+    ! small.en-q5_1     1093 ms  Sharp pain in my left chest wears when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.
+    ! small.en          1125 ms  Sharp pain in my left chest wears when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.
+
+  [preset3]  said: A bit of indigestion after lunch, nothing much.
+      base.en-q5_1       321 ms  A bit of indigestion after lunch, nothing much.
+      base.en            335 ms  A bit of indigestion after lunch, nothing much.
+      small.en-q5_1      846 ms  A bit of indigestion after lunch, nothing much.
+      small.en           947 ms  A bit of indigestion after lunch, nothing much.
+
+  [extra1]  said: I take nitroglycerin for my angina and I had a stent fitted two years ago. I am also on ramipril for my blood pressure.
+    ! base.en-q5_1       432 ms  I take nitroglycerin for my angia and I had a stent fitted two years ago. I am also on Raimi Pro for my blood pressure.
+    ! base.en            441 ms  I take nitroglycerin for my angia and I had a stent fitted two years ago. I am also on Ramy Pro for my blood pressure.
+    ! small.en-q5_1     1138 ms  I take nitroglycerin for my angia and I had a stent fitted two years ago. I am also on remupril for my blood pressure.
+    ! small.en          1133 ms  I take nitroglycerin for my angia and I had a stent fitted two years ago. I am also on remupril for my blood pressure.
+
+  [extra2]  said: I am not pregnant. No fever, no cough. It is not the left side, it is the right side, and it started three days ago.
+    ! base.en-q5_1       425 ms  I'm not pregnant, no fever, no cough. It is not the left side, it is the right side and it started three days ago.
+    ! base.en            416 ms  I am not pregnant, no fever, no cough. It is not the left side, it is the right side and it started three days ago.
+    ! small.en-q5_1     1139 ms  I'm not pregnant, no fever, no cough. It is not the left side, it is the right side and it started three days ago.
+    ! small.en          1090 ms  I'm not pregnant, no fever, no cough. It is not the left side, it is the right side and it started three days ago.
+
+--------------------------------------------------------------------------------
+3. WHAT THIS DECIDES, AND WHAT IT DOES NOT
+--------------------------------------------------------------------------------
+  DECIDES: whether base.en-q5_1 still holds on a real voice in a real
+  room. On the synthetic set it tied small.en at 3.2x less size, 2x less
+  RAM and 2.2x the speed. If small pulls ahead HERE on extra1, which is
+  the clinical vocabulary line, that is the case for spending the 181 MB.
+
+  DOES NOT DECIDE: anything about a phone microphone, any other voice,
+  or any other room. Five clips from one speaker is a sanity check on a
+  choice already made, not a benchmark.
+
+  A MISS IN extra2 IS THE WORST OUTCOME ON THIS PAGE. A dropped 'not' or
+  a swapped left and right is a wrong verdict or a guard that does not
+  fire, and no downstream check can catch it. The composer being
+  editable is what stands between that and the screen.

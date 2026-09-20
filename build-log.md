@@ -5542,3 +5542,48 @@ chunks. Worth watching as a possible artefact of a 120-pair run.
 
 Not a tune regression in category assignment, not pericarditis, not the prompt
 (same sha 26e4f4ff), not sampling (3 of 3 both ways at temperature 0.2).
+
+### 2026-09-19 HE01 written into claude.md as the top open item, and two gaps named
+
+Viraj's call: record it, do not fix retrieval tonight.
+
+**Current state's top open item is now HE01 with the mechanism**, not just the
+score. The deterministic table, the single chest-pain-conditioned trigger in a
+three-chunk prompt, CP-ACS-006 at rank 5 cut by top-3, and the model's own
+sentence saying the context "does not say to call for anything else".
+
+**And it says plainly that the base's red on this case was never a real pass.**
+The base reached red on the identical chunks by asserting chest discomfort the
+case denies and sweating the case never mentions. Right verdict, fabricated
+reason, scores identically to a real red. So the honest reading of the base's
+red 12/12 is that at least one of the twelve was luck, and the tune did not
+introduce this failure, it removed the blanket red that was hiding it.
+
+**Two design gaps promoted out of asides into named entries.**
+
+**A short chunk outranks a longer correct one.** CP-PERI-002 is three lines,
+matches nothing in HE01, is never cited by either model, and takes rank 2 at
+0.84, costing CP-ACS-006 its slot at 0.63. The scoring rewards density and
+correctness is not dense: a bare symptom list is nearly all signal by length,
+while a chunk that explains WHEN symptoms matter must spend words explaining,
+and those words are both what makes it right and what sinks its score. **Three
+incidents, one cause:** this, CP-PERI-002 defeating the red-flag guard on the
+toothache, and BM25 matching "going" and "down" to pull CP-PNA-002 into the
+stairs preset. Candidates recorded, none measured: top-k above 3 at about 3.1 s
+per 100 tokens under constraint 7, a length-aware score, or promoting any chunk
+carrying an escalation instruction on a cardiac-looking query.
+
+**Nothing checks the rationale.** Constraint 11 screens `red_flags`, constraint
+12 screens `next_steps`, the Why is unscreened. So the same fabrication is
+dropped as a red flag and rendered as prose. Two incidents now: the toddler's
+invented "meningitis", and HE01's chest discomfort and sweating, which are
+findings the case actively CONTRADICTS, the category constraint 11 calls
+strictly worse than unsupported. **The sharp version of the argument: a
+fabrication in `red_flags` costs a wrong verdict and gets caught, and a
+fabrication in the rationale can buy a RIGHT verdict and is invisible to the
+guards, to the eval and to a judge.** `ungrounded_findings` and
+`contradicted_findings` already exist and are already shared by both guards, so
+what is missing is pointing them at the Why. Undecided and unmeasured: what to
+render when the whole rationale goes.
+
+Nothing was fixed. Retrieval, the guards and the corpus are untouched.
