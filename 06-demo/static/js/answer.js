@@ -228,6 +228,9 @@ function checkedHTML(ev, ctx) {
   else if (c.re_read) read = `re-read ${fmt((t.prompt_n || 0) + (c.reused || 0))}, ${fmt(c.reused)} cached`;
   else read = `${fmt(c.reused)} cached, read ${fmt(t.prompt_n)}`;
   const bits = ["<b>Checked</b>", secs(ev.total_ms || 0), read, `wrote ${fmt(t.predicted_n)}`];
+  // Spoken turns say so on the face of the line, not only inside the details.
+  // It is a provenance fact about the words, so it reads before the timings.
+  if (ev.heard) bits.splice(1, 0, `heard ${secs(ev.heard.ms)}`);
   if (removed) bits.push(`<b>${removed} removed</b>`);
   const why = !ev.first && c.re_read
     ? `<span class="why">The model lost this conversation and re-read it.</span>`
@@ -241,6 +244,12 @@ function checkedHTML(ev, ctx) {
 function detailsHTML(ev, ctx) {
   const t = ev.timings || {}, c = ev.cache || {}, d = ev.dropped || {};
   const rows = [
+    // Only on a turn that was spoken. Transcription happens before any of the
+    // rest, on this machine, so it sits above Retrieve and carries whether the
+    // person corrected what the microphone heard.
+    ...(ev.heard ? [["Heard", `${ev.heard.seconds} s of speech in ${secs(ev.heard.ms)}, `
+      + `${ev.heard.model} on this machine; `
+      + (ev.heard.edited ? "edited before sending" : "sent unchanged")]] : []),
     ["Retrieve", ev.first ? `${secs(ev.retrieval_ms || 0)}, ${fmt(ev.retrieved_tokens)} tokens of sources`
       : "reused the first turn's sources, no retrieval"],
     ["Read", `${fmt(t.prompt_n)} tokens in ${secs(t.prompt_ms || 0)}` +

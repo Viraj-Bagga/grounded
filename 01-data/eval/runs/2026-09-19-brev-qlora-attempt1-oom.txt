@@ -1,0 +1,132 @@
+# EPIC 3 STEP 5, ATTEMPT 1: QLoRA on the 120 pairs. ATTACH PASSED, TRAINING FAILED ON CUDA OOM.
+# instance  steel26-qlora, massedcompute_A6000_plus (massedcompute_A6000_base no longer exists; Brev renamed
+#           the family, same $0.68/hr, 12 vCPUs instead of 6). RTX A6000 49 GB, 62 GB RAM, 12 vCPU,
+#           driver 580.126.09, Python 3.10.12. created 17:32:02 EDT, delete confirmed 17:56:00 EDT.
+#           About 24 min billed, about $0.27. Of that, about 11 min was wasted on two failed delete
+#           attempts of mine: 'brev delete --yes' is not a flag, and piping yes into it did nothing.
+#           The verb that works is a plain 'brev delete <name>'.
+# model     nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16 downloaded on the instance, model.safetensors sha256
+#           55d4e2519456c4a9bddf596b0748d630e3b2ce6ff6f4c2b7ed3e07e2b00dad42, matching the known-good.
+# data      02-pairs/review/candidates-120.jsonl, md5 3484abc4403702aa37b0578b977a4de3 on both ends.
+# NOT TRAINED. No adapter, no merged model, no loss. The first backward pass never completed.
+
+=== setup: versions and weights
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+== host
+Linux brev-fzvdn5w4d 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+Python 3.10.12
+NVIDIA RTX A6000, 49140 MiB, 580.126.09
+== pip install (trl peft bitsandbytes transformers accelerate huggingface_hub)
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script transformers is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script trl is installed in '/home/shadeform/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+== versions
+python        3.10.12
+torch         2.14.0+cu130
+transformers  5.17.0
+trl           1.13.0
+peft          0.21.0
+bitsandbytes  0.50.2
+accelerate    1.15.0
+datasets      5.0.1
+torch CUDA    13.0, device available: True
+== model download (nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16 -> ~/nemotron)
+[32m✓ Downloaded[0m
+  path: /home/shadeform/nemotron
+total 7777964
+drwxr-xr-x  3 shadeform shadeform       4096 Sep 19 21:37 .
+drwxrwxr-x 10 shadeform shadeform       4096 Sep 19 21:37 ..
+-rw-r--r--  1 shadeform shadeform       2708 Sep 19 21:37 bias.md
+drwxr-xr-x  3 shadeform shadeform       4096 Sep 19 21:37 .cache
+-rw-r--r--  1 shadeform shadeform      10504 Sep 19 21:37 chat_template.jinja
+-rw-r--r--  1 shadeform shadeform       1430 Sep 19 21:37 config.json
+-rw-r--r--  1 shadeform shadeform      12119 Sep 19 21:37 configuration_nemotron_h.py
+-rw-r--r--  1 shadeform shadeform       3133 Sep 19 21:37 explainability.md
+-rw-r--r--  1 shadeform shadeform        171 Sep 19 21:37 generation_config.json
+== weights sha256 (expect 55d4e2519456c4a9bddf596b0748d630e3b2ce6ff6f4c2b7ed3e07e2b00dad42)
+55d4e2519456c4a9bddf596b0748d630e3b2ce6ff6f4c2b7ed3e07e2b00dad42  /home/shadeform/nemotron/model.safetensors
+== SETUP DONE
+
+=== step 3, attach (PASSED)
+torch 2.14.0+cu130  transformers 5.17.0
+gpu NVIDIA RTX A6000, 51 GB
+bitsandbytes 0.50.2  peft 0.21.0  trl 1.13.0
+
+data: 120 pairs -> 124 examples, tokens min 915 median 1235 max 1633, 153810 per epoch
+verdicts: {'yellow': 61, 'red': 32, 'green': 31}
+[transformers] The following generation flags are not valid and may be ignored: ['top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+loaded 4-bit: 3.22 GB on device
+
+LoRA matched 50 modules: {'up_proj': 17, 'down_proj': 17, 'q_proj': 4, 'k_proj': 4, 'v_proj': 4, 'o_proj': 4}
+trainable 10,119,168 of 2,408,601,184 (0.420%)
+
+ATTACH STAGE COMPLETE. Nothing trained.
+attach exit 0
+
+=== step 4, train (FAILED: CUDA out of memory in the first backward)
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `mamba_chunk_scan_combined` is falling back to its reference PyTorch implementation because `mamba_ssm` is not installed. This is correct but much slower; install `mamba_ssm` for the optimized kernel.
+[W919 21:43:35.628323040 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 19327352832 bytes (free: 5283053568, total: 50897289216).
+[W919 21:43:35.628684218 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 19327352832 bytes (free: 5283053568, total: 50897289216).
+Traceback (most recent call last):
+  File "/home/shadeform/brev_train_qlora.py", line 190, in <module>
+    main()
+  File "/home/shadeform/brev_train_qlora.py", line 159, in main
+    result = trainer.train()
+  File "/home/shadeform/.local/lib/python3.10/site-packages/transformers/trainer.py", line 1520, in train
+    return inner_training_loop(
+  File "/home/shadeform/.local/lib/python3.10/site-packages/transformers/trainer.py", line 1602, in _inner_training_loop
+    self._run_epoch(
+  File "/home/shadeform/.local/lib/python3.10/site-packages/transformers/trainer.py", line 1842, in _run_epoch
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+  File "/home/shadeform/.local/lib/python3.10/site-packages/trl/trainer/sft_trainer.py", line 1905, in training_step
+    return super().training_step(*args, **kwargs)
+  File "/home/shadeform/.local/lib/python3.10/site-packages/transformers/trainer.py", line 2044, in training_step
+    self.accelerator.backward(loss, **kwargs)
+  File "/home/shadeform/.local/lib/python3.10/site-packages/accelerate/accelerator.py", line 2861, in backward
+    loss.backward(**kwargs)
+  File "/home/shadeform/.local/lib/python3.10/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/shadeform/.local/lib/python3.10/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/shadeform/.local/lib/python3.10/site-packages/torch/autograd/graph.py", line 1072, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 18.00 GiB. GPU 0 has a total capacity of 47.40 GiB of which 4.92 GiB is free. Including non-PyTorch memory, this process has 42.47 GiB memory in use. Of the allocated memory 24.18 GiB is allocated by PyTorch, and 17.97 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+train exit 1
+end 17:43:37 EDT
+
+=== diagnosis
+The dataset built correctly: 124 examples, EOS appended, completion-only labels,
+nothing dropped, 30 optimizer steps planned. The model loaded in 4-bit at 3.22
+GB and LoRA matched 50 of 50. The failure is activation memory, not the adapter.
+
+  Tried to allocate 18.00 GiB. 47.40 GiB capacity, 4.92 GiB free.
+  24.18 GiB allocated by PyTorch, 17.97 GiB reserved but unallocated.
+
+Two things in that, and they are separable:
+  1. ACTIVATIONS. 24 GiB of activations for a 4B model at batch 1 and about
+     1,200 tokens is far more than a dense transformer would use. transformers
+     5.17's nemotron_h runs reference PyTorch fallbacks for every Mamba2 kernel,
+     which materialise intermediates the fused kernels never hold. 21 of the 42
+     blocks are Mamba2.
+  2. FRAGMENTATION. 17.97 GiB was reserved and unused, which is more than the
+     18 GiB the backward asked for. PyTorch's own message names the fix.
+
+Not retried, per Viraj's instruction: report and delete rather than debug on the
+meter.
+
+What attempt 2 should change, cheapest first:
+  a. PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Addresses cause 2 alone.
+  b. gradient_checkpointing_kwargs={"use_reentrant": False}. Checkpointing was
+     requested both ways (prepare_model_for_kbit_training and SFTConfig), but
+     with PEFT and the reentrant default it silently does nothing unless the
+     inputs require grad. This is the likeliest single cause of 24 GiB.
+  c. If both still OOM: an 80 GB card. A100 80GB is roughly $1.50 to $2.00/hr
+     against $0.68, so about three times the rate for a 20 minute run.
+  d. NOT shortening the prompts. Their length is the retrieved context, and
+     training on shorter context than the app sends is train/serve skew.
+
+Also found, unrelated to the OOM: this TRL's SFTConfig has no warmup_ratio, so
+the run had no warmup. Use warmup_steps on the next attempt.

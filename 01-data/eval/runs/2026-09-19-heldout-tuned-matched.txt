@@ -1,0 +1,75 @@
+
+==============================================================================
+HELD-OUT SCORE  label=tuned-120pairs  chunks=matched  runs=3
+started 2026-09-19T20:45:03  elapsed 20.4 min
+gguf            03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf
+set             HELDOUT-EVAL-v1.json sha 6d1af06eb393d4af
+system prompt   02-pairs/system_prompt.txt sha 26e4f4ff
+sampling        temperature 0.2, schema on, enable_thinking=false, max_tokens 1024
+reasoning leaks 0  (constraint 5: must be 0)
+errors/unparsed 1
+raw completions 01-data/eval/runs/2026-09-19-heldout-tuned-matched.jsonl
+==============================================================================
+
+OVERALL, per completion: 53/65 = 81.5%
+OVERALL, majority of 3 per case: 18/22 = 81.8%
+cases that gave the same verdict all 3 runs: 20/22
+
+PER CASE
+  id    cond      exp     run1    run2    run3     cites(valid/entries)   refused?
+  HE01  CP-ACS    red     red     red     red      6/6                    0/3
+  HE02  CP-PE     red     red     red     red      9/9                    0/3
+  HE03  CP-ANG    yellow  yellow  yellow  yellow   9/9                    0/3
+  HE04  CP-ANG    yellow  yellow  yellow  yellow   9/9                    0/3
+  HE05  CP-PERI   yellow  yellow  yellow  yellow   6/6                    0/3
+  HE06  CP-PLEU   yellow  yellow  yellow  yellow   6/6                    0/3
+  HE07  CP-PNA    yellow  yellow  yellow  yellow   6/6                    0/3
+  HE08  CP-PE     yellow  yellow  yellow  yellow   6/6                    0/3
+  HE09  CP-GERD   yellow  yellow  yellow  yellow   6/6                    0/3
+  HE10  CP-GERD   green   green   green   green    6/6                    0/3
+  HE11  CP-GERD   green   yellow* yellow* yellow*  6/6                    0/3
+  HE12  CP-GERD   green   yellow* yellow* yellow*  3/3                    0/3
+  HE13  CP-GERD   green   yellow* yellow* yellow*  6/6                    0/3
+  HE14  CP-GERD   green   green   green   green    6/6                    0/3
+  HE15  CP-PANIC  green   green   green   ERR*     4/4                    0/3
+  HE16  CP-PANIC  green   green   green   green    6/6                    0/3
+  HE17  CP-PANIC  green   green   green   green    6/6                    0/3
+  HE18  CP-PANIC  green   green   green   green    6/6                    0/3
+  HE19  CP-DIFF   green   green   yellow* yellow*  3/3                    0/3
+  HE20  CP-DIFF   green   yellow* green   green    3/3                    0/3
+  HE21  CP-PERI   red     red     red     red      8/8                    0/3
+  HE22  CP-PNA    red     red     red     red      3/3                    0/3
+  * = wrong. cites is valid keys / citation entries, summed over the runs.
+  refused? = runs this would have been refused post-flight, constraint 13
+    (a yellow or green that cites nothing; a red is never withheld).
+
+CONFUSION, per completion (rows expected, columns given)
+               red  yellow   green   total
+  red           12       0       0      12
+  yellow         0      21       0      21
+  green          0      12      20      32
+  given         12      33      20      65
+
+PER CONDITION, per completion
+  condition  cases    n  correct     acc   verdicts given
+  CP-ACS         1    3        3  100.0%   red 3
+  CP-ANG         2    6        6  100.0%   yellow 6
+  CP-DIFF        2    6        3   50.0%   green 3, yellow 3
+  CP-GERD        6   18        9   50.0%   green 6, yellow 12
+  CP-PANIC       4   11       11  100.0%   green 11
+  CP-PE          2    6        6  100.0%   red 3, yellow 3
+  CP-PERI        2    6        6  100.0%   red 3, yellow 3
+  CP-PLEU        1    3        3  100.0%   yellow 3
+  CP-PNA         2    6        6  100.0%   red 3, yellow 3
+
+PER EXPECTED VERDICT, per completion
+  red      12/12  = 100.0%
+  yellow   21/21  = 100.0%
+  green    20/32  =  62.5%
+
+GROUNDING (constraint 13's post-flight condition, scored not applied)
+  non-red answers citing nothing that resolves: 0/53  -> would be refused
+  red answers citing nothing that resolves:     0/12  -> shown as a flagged red
+
+ERRORS / UNPARSED
+  HE15 run3: Unterminated string starting at: line 1 column 5067 (char 5066)

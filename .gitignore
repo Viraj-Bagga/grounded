@@ -3,3 +3,15 @@ node_modules/
 *.gguf
 03-model/hf-bf16/
 __pycache__/
+03-model/merged-120pairs/
+03-model/adapter-120pairs/
+03-model/whisper/src/
+03-model/whisper/bin/
+03-model/whisper/*.bin
+# The F16 conversion staging dir: a dangling symlink to the deleted merge plus
+# 16 MB of NVIDIA tokenizer files that are re-downloadable and already ignored
+# in 03-model/hf-bf16. README.txt and the small configs are kept, because they
+# record what was substituted and why.
+03-model/convert-src-120pairs/model.safetensors
+03-model/convert-src-120pairs/tokenizer.json
+03-model/convert-src-120pairs/tokenizer_config.json

@@ -1,0 +1,179 @@
+# 2026-09-19  Epic 3 step 5: the 120-pair fine-tune through the conversion chain
+#
+# date    2026-09-19, evening, on the M4, macOS Low Power Mode ON
+# what    merged bf16 -> F16 GGUF -> imatrix -> Q4_K_M, RUNBOOK.md sections 3 to 5
+# input   03-model/merged-120pairs/model.safetensors
+#           sha256 1393cc3141428418ffa06053d9acd0ee0339598116426fd578a45e0a6b757eea
+#           (LoRA r16 a32, 6 targets, 120 pairs / 124 examples, 2 epochs, 30 steps,
+#            trained bf16 not 4-bit, see build-log 2026-09-19)
+# tools   repo .venv python 3.14.7, torch 2.11.0, numpy 2.2.6 (the runbook's versions)
+#         converter /tmp/llama.cpp HEAD e613ef2   (the 09-18 run used 4fea119)
+#         binaries  Homebrew llama.cpp, same as the 09-18 run
+# result  PASS. Every gate in the runbook passed, no numpy warnings, no surprises.
+
+================================================================================
+0. DISK
+================================================================================
+Started at 13 GiB free against a chain needing about 10.7 GB, so two deletions
+were scheduled into the middle of the chain rather than done afterwards.
+
+  before                                             13 GiB
+  rm 03-model/hf-bf16/model.safetensors   (7.4 GiB)  20 GiB
+    the BASE bf16 weights, sha256 55d4e2519456c4a9..., re-downloadable in about
+    14 minutes by section 2 of the runbook. The rest of 03-model/hf-bf16 was
+    KEPT: config.json, tokenizer files, the two .py modeling files.
+  after convert                                     9.4 GiB
+  rm 03-model/merged-120pairs/model.safetensors      23 GiB
+    done AFTER the F16 gate passed, so the F16 was known good before the only
+    copy of the merge went. The adapter (40 MB) is kept, so the merge can be
+    rebuilt from it.
+  after quantize                                     20 GiB
+
+================================================================================
+1. THE STAGING DIRECTORY, and why the merge was not converted in place
+================================================================================
+transformers 5.17 wrote metadata beside the merge that is NOT what section 3 was
+proven with:
+
+  * merged config.json has NO hybrid_override_pattern. It has 5.x's
+    layers_block_type, plus a block of MoE defaults (n_routed_experts,
+    moe_intermediate_size, mtp_layers_block_type) that do not apply to this
+    model. The current converter reads either key, checked in
+    conversion/nemotron.py lines 243 and 274, so this would probably have
+    worked. It was not used anyway.
+  * merged tokenizer_config.json is 364 bytes: 5.x's minimal TokenizersBackend
+    form, no added_tokens_decoder, no add_bos_token, no chat template. The base
+    one is 188 KB and carries all of it.
+  * merged has no special_tokens_map.json.
+
+So 03-model/convert-src-120pairs/ holds a symlink to the merged weights and
+copies of NVIDIA's own metadata from 03-model/hf-bf16. Checked first, so this is
+a substitution and not a hope:
+
+  tokenizer.json is BYTE-IDENTICAL in both, sha 623c34567aebb185.
+  merged/chat_template.jinja vs the template embedded in the base
+    tokenizer_config.json: 26 diff lines, every one a blank line 5.x inserted.
+    No template logic differs.
+
+LoRA merging changes weights, not architecture or vocabulary. The point is that
+the only thing separating this conversion from the proven 2026-09-18 one is the
+weights.
+
+================================================================================
+2. CONVERT, F16 (runbook section 3)
+================================================================================
+  .venv/bin/python /tmp/llama.cpp/convert_hf_to_gguf.py ./03-model/convert-src-120pairs \
+    --outfile ./03-model/base/tuned-120pairs-F16.gguf --outtype f16
+
+  59.6 s, exit 0, n_tensors = 263, 7,957,646,752 bytes
+  sha256 da37114e2714b1fcfc82d41f9bfc0048a48f0ee83b0dc996efd4bf99d5c54c56
+  "Model successfully exported to ..."
+
+  Only the one harmless warning the runbook names:
+    Duplicated key name 'tokenizer.ggml.add_bos_token', overwriting
+  NONE of the three RuntimeWarnings from gguf/quants.py that mark the corrupt
+  q8_0 path. f16 never enters that code, which is the whole reason for it.
+
+================================================================================
+3. GATE: does the F16 generate? (runbook section 3.1)
+================================================================================
+  llama-server -m ./03-model/base/tuned-120pairs-F16.gguf --jinja -np 1 -ngl 0 -c 4096
+
+  content           'OK'
+  reasoning_content None      <- constraint 5, enable_thinking=false was honoured
+  finish_reason     'stop'    <- not 'length', so it is not the repeat-one-token
+                                 failure the corrupt q8_0 produced
+  usage             22 prompt, 2 completion
+
+  PASS. Conversion is proven, so any later corruption is the quantizer's.
+  The merged safetensors was deleted at this point and not before.
+
+================================================================================
+4. IMATRIX (runbook section 4)
+================================================================================
+  llama-imatrix -m ./03-model/base/tuned-120pairs-F16.gguf \
+    -f 03-model/imatrix/calibration.txt \
+    -o ./03-model/imatrix/imatrix-tuned-120pairs.dat --chunks 32 -ngl 0 -c 512
+
+  67.77 s per pass, 11 min 12 s total, 2,221,472 bytes
+  sha256 cd4b41c4dde044fc7090dcb221442585255016e82e5a712a1d35ab52d3cb3711
+
+  Final estimate: PPL = 5.5983 +/- 0.13649
+
+  Calibration file UNCHANGED from the base build, deliberately: same 116 KiB of
+  system prompt, 22 frozen chunks and pipeline-test pairs. A different
+  calibration would have been a second variable.
+
+  The PPL health check, and what it does and does not say:
+    corrupt python-q8_0, 09-18      390,043            broken
+    llama-quantize q8_0 from F16    5.9045 +/- 0.1515  the base model
+    THIS, F16 of the fine-tune      5.5983 +/- 0.1365  healthy
+  Five figures means a broken model. This is not five figures, which is all it
+  was consulted for. It is NOT a base-versus-tuned result: the 5.9045 row was
+  measured on a q8_0 and this one on an F16, so the two differ in quantisation
+  as well as in weights. Do not quote 5.90 -> 5.60 as an improvement.
+
+  The cosmetic GGUF-format warning appeared as documented:
+    save_imatrix: saving imatrix using GGUF format with a different suffix
+  llama-quantize from the same build read it without complaint.
+
+================================================================================
+5. QUANTIZE, Q4_K_M (runbook section 5)
+================================================================================
+  llama-quantize --imatrix ./03-model/imatrix/imatrix-tuned-120pairs.dat \
+    ./03-model/base/tuned-120pairs-F16.gguf \
+    ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf Q4_K_M 8
+
+  42.7 s
+  load_imatrix: loaded 92 importance matrix entries computed on 32 chunks
+  WARNING: 51 of 263 tensor(s) required fallback quantization
+  model size 7581.48 MiB (16.01 BPW) -> quant size 2698.12 MiB (5.70 BPW)
+
+  Every path carried a leading ./ so the digit-leading-path stoi bug could not
+  fire. 92 entries is full coverage (16 attention + 34 MLP + 42 Mamba2).
+  51 fallbacks is identical to the base artifact: ncols 3136 is not divisible
+  by 256, so those tensors take q5_0 or q8_0.
+
+  OUTPUT  03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf
+          2,837,073,312 bytes
+          sha256 5522122946357ba92ac61573bf23339012d552ff5473dbacfe3afaddce7d5479
+
+  Size against the two known-good artifacts, which is the check that nothing
+  structural went wrong:
+    shipped base, 09-12                     2,837,072,864   baseline
+    base rebuilt from F16 with imatrix      2,837,073,184   +320
+    THIS, the fine-tune                     2,837,073,312   +448
+  The +128 over the base rebuild is the longer imatrix filename written into
+  the quantize.imatrix.file metadata key. It is not weight difference.
+
+  Provenance read back out of the output GGUF:
+    general.architecture           = nemotron_h
+    general.file_type              = 15
+    quantize.imatrix.file          = ./03-model/imatrix/imatrix-tuned-120pairs.dat
+    quantize.imatrix.dataset       = 03-model/imatrix/calibration.txt
+    quantize.imatrix.entries_count = 92
+    quantize.imatrix.chunks_count  = 32
+    n_tensors                      = 263
+
+================================================================================
+6. GATE: does the Q4_K_M generate? (runbook section 6)
+================================================================================
+  llama-server -m ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf \
+    --jinja -np 2 -ngl 0 -c 8192 --port 8080
+
+  content 'OK', reasoning_content None, finish_reason 'stop'.  PASS.
+
+================================================================================
+WHAT THIS PROVES, AND WHAT IT DOES NOT
+================================================================================
+PROVES: the fine-tuned model survives the same conversion chain the base does,
+loads under llama-server on CPU, honours the reasoning switch, and stops.
+
+DOES NOT PROVE: anything about the verdicts. Loading is not proof; the corrupt
+q8_0 loaded too. Runbook section 7's acceptance test is a SAMENESS test and is
+the wrong test here, because the whole point of the adapter is that the verdicts
+should move. The right test is the frozen 22-case held-out set, base against
+tuned, which is step 6 and has not been run at the time of writing.
+
+ALSO NOT MEASURED: tok/s on this artifact. Low Power Mode was on for everything
+above, so no latency number here belongs in the demo notes.

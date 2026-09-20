@@ -152,6 +152,23 @@ def _subjective(side):
                          indent="      ", first=f"   {_when(t.get('at'))}  {tag}: "))
         if t.get("timeline"):
             out.append(_wrap(t["timeline"], indent="         ", first="      Timeline: "))
+        # SPOKEN OR TYPED. A clinician reading quoted words is entitled to know
+        # a machine heard them, and whether the patient corrected it. Decided
+        # server-side in voice.provenance by comparing what arrived against what
+        # was transcribed, so this is a fact rather than the page's claim. The
+        # transcript is shown whenever it differs from the words that were sent.
+        h = t.get("heard")
+        if h:
+            out.append(_wrap(
+                f"spoken, not typed. Transcribed on this machine by whisper.cpp "
+                f"{h.get('model')} in {h.get('ms', 0) / 1000:.1f} s from "
+                f"{h.get('seconds')} s of speech, then "
+                + ("CORRECTED by the patient before sending."
+                   if h.get("edited") else "sent unchanged."),
+                indent="         ", first="      Source: "))
+            if h.get("edited") and h.get("heard"):
+                out.append(_wrap(f'"{h["heard"]}"', indent="         ",
+                                 first="      Heard as: "))
     out.append("")
     out.append("   Profile, as the model read it:")
     for line in str(side.get("profile_text") or "").splitlines():

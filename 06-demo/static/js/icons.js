@@ -18,6 +18,8 @@ const P = {
   trash: '<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   back: '<path d="m15 6-6 6 6 6"/>',
   none: '<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/>',
+  stop: '<rect x="7.5" y="7.5" width="9" height="9" rx="1"/>',
 };
 
 export function icon(name, label) {

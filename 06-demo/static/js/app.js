@@ -3,9 +3,10 @@
 // offline, from 06-demo/server.py.
 
 import { api, streamTurn } from "./api.js";
-import { answerHTML, pendingHTML, esc, fmt } from "./answer.js";
+import { answerHTML, pendingHTML, esc, fmt, secs } from "./answer.js";
 import { peopleListHTML, personFormHTML, bindPersonForm, facts, ruleName } from "./people.js";
 import { icon } from "./icons.js";
+import { Recorder, transcribe, micBlocked, micError, recordingLabel, wasEdited } from "./voice.js";
 
 const $ = (s, el = document) => el.querySelector(s);
 
@@ -16,10 +17,16 @@ const $ = (s, el = document) => el.querySelector(s);
 // because it came back red like the first preset, so it duplicated it. Both
 // texts and what they taught are in the build-log if either is ever wanted
 // back; the stairs rewording of 2026-09-19 is recorded in claude.md.
+// The fourth field is who the preset is for. A single id is a DEFAULT: it
+// applies when nobody is picked, which is the state the app now opens in, and
+// it never overrides a person the user chose. An array is a pairing and always
+// applies, because it is a whole demo beat. Viraj's call 2026-09-19: the beats
+// keep running on a profile now that a typed question carries none.
 const PRESETS = [
   ["Crushing chest pressure",
    "Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.",
-   "T+0:00 began while sitting watching television. T+0:04 spread to the jaw. T+0:11 sweating and nausea. T+0:26 unchanged after resting."],
+   "T+0:00 began while sitting watching television. T+0:04 spread to the jaw. T+0:11 sweating and nausea. T+0:26 unchanged after resting.",
+   "self"],
   // BEAT 3. Retrieval reliably supplies CP-PERI-002 here, and its
   // "Fast heartbeat / Fever" lines are the ones the model copies onto patients
   // who have neither, so the grounding guard has something real to catch. The
@@ -27,7 +34,8 @@ const PRESETS = [
   // depend on the subtlest branch in the code, which is denial handling.
   ["Sharp pain when breathing in",
    "Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.",
-   "T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion."],
+   "T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion.",
+   "self"],
   // BEAT 3, REFRAMED 2026-09-19: same symptom, two people. One click turns
   // Compare on, sets You against Mum and sends (Viraj's call, so the whole beat
   // is one click at the desk). Mum gets a red that R1 escalated (her diabetes,
@@ -40,15 +48,24 @@ const PRESETS = [
    "A bit of indigestion after lunch, nothing much.", "", ["self", "mum"]],
 ];
 
+// NO PROFILE is the default and is not a person: it is not in the store, not on
+// the People page, and cannot be edited. A question asked against it carries no
+// age, sex, conditions or medications, so no escalation rule can fire.
+const NOBODY = { id: "none", label: "No profile", virtual: true, watching: [], child: false,
+                 conditions: [], medications: [] };
+
 const S = {
   health: null, people: [], convs: [], regions: [], region: null,
-  picked: ["self"], compare: false,
+  picked: [NOBODY.id], compare: false,
   conv: null, live: {}, liveSaid: null,
-  draft: { text: "", timeline: "", showTl: false },
+  draft: { text: "", timeline: "", showTl: false, heard: null },
+  // The microphone's own state. `heard` lives on the draft instead, because it
+  // belongs to the words in the box and has to travel with them.
+  voice: { rec: null, elapsed: 0, busy: false, error: null },
   flash: null, autoSend: false,
 };
 const touch = matchMedia("(pointer: coarse)").matches;
-const byId = id => S.people.find(p => p.id === id);
+const byId = id => (id === NOBODY.id ? NOBODY : S.people.find(p => p.id === id));
 
 // ------------------------------------------------------------------- routing
 
@@ -88,34 +105,79 @@ $("#menu").onclick = () => drawer(!$("#side").classList.contains("open"));
 $("#scrim").onclick = () => drawer(false);
 addEventListener("keydown", e => { if (e.key === "Escape") drawer(false); });
 
-function renderChips(active, pair = S.compare) {
-  const people = S.people;
-  $("#chips").innerHTML = people.map(p => {
-    const slot = active.indexOf(p.id);
-    return `<button class="chip" type="button" data-person="${esc(p.id)}" aria-pressed="${slot >= 0}">` +
-      `${esc(p.label)}${p.child ? '<span class="u16">Under 16</span>' : ""}` +
-      (pair && slot >= 0 ? `<span class="ab">${"AB"[slot]}</span>` : "") + `</button>`;
-  }).join("") +
-    `<span class="sep" aria-hidden="true"></span>` +
-    `<button class="chip tool only-wide" type="button" data-compare aria-pressed="${S.compare}">${icon("compare")}Compare</button>` +
-    `<a class="chip tool add" href="/people/new" data-link aria-label="Add a person">${icon("plus")}</a>`;
-  $("#chips").querySelectorAll("[data-person]").forEach(b => b.onclick = () => pickPerson(b.dataset.person));
-  $("#chips [data-compare]").onclick = toggleCompare;
-  const narrow = $("#compare-narrow");
-  narrow.setAttribute("aria-pressed", S.compare);
-  narrow.onclick = toggleCompare;
-  const on = $("#chips [aria-pressed=true]");
-  if (on) {
-    const box = $("#chips"), l = on.offsetLeft, r = l + on.offsetWidth;
-    if (l < box.scrollLeft || r > box.scrollLeft + box.clientWidth) box.scrollLeft = l - 8;
+// ---------------------------------------------------- who this is for
+
+// One line above the composer, not a chip row across the top. It is touched
+// once an assessment, not once a screen, so it sits where the thumb already is
+// and the top of the phone goes back to being paper. Viraj's call 2026-09-19.
+function forWhoHTML(ids = S.picked, pair = S.compare, live = false) {
+  const people = ids.map(byId).filter(Boolean);
+  const label = !people.length ? NOBODY.label
+    : people.length === 2
+      ? people.map((p, i) => `${esc(p.label)}<span class="ab">${"AB"[i]}</span>`).join(" ")
+      : esc(people[0].label);
+  if (live) {
+    return `<div class="forwho" aria-label="Who this is for"><span>For</span>` +
+      `<span class="nm" data-for-name>${label}</span></div>`;
   }
+  return `<button class="forwho" type="button" id="forwho" aria-haspopup="dialog">` +
+    `<span>For</span><span class="nm" data-for-name>${label}</span>${icon("chevron")}</button>`;
 }
+
+function bindForWho() {
+  const b = $("#main #forwho");
+  if (b) b.onclick = openPicker;
+}
+
+function pickerHTML() {
+  const rows = [NOBODY, ...S.people].map(p => {
+    const slot = S.picked.indexOf(p.id);
+    const on = slot >= 0;
+    const sub = p.virtual ? "A general question, with no profile behind it" : facts(p);
+    return `<li><button type="button" data-person="${esc(p.id)}" aria-pressed="${on}">` +
+      `<span class="nm">${esc(p.label)}${p.child ? '<span class="u16">Under 16</span>' : ""}</span>` +
+      `<span class="fx">${esc(sub)}</span>` +
+      (on ? (S.compare ? `<span class="slot">${"AB"[slot]}</span>` : `<span class="tick">${icon("check")}</span>`) : "") +
+      `</button></li>`;
+  }).join("");
+  const hint = S.compare
+    ? `<p class="pk-hint">Pick two people. The same question is asked about both, side by side.</p>` : "";
+  return `<button class="pk-tool" type="button" data-compare aria-pressed="${S.compare}">${icon("compare")}` +
+    `Compare two people<span class="state">${S.compare ? "On" : "Off"}</span></button>${hint}` +
+    `<ul class="pk">${rows}</ul>` +
+    `<ul class="pk"><li><a href="/people/new" data-link>${icon("plus")}<span class="nm">Add a person</span></a></li>` +
+    `<li><a href="/people" data-link><span class="nm">Everyone and their profiles</span></a></li></ul>`;
+}
+
+function renderPicker() {
+  $("#picker-body").innerHTML = pickerHTML();
+  $("#picker-body [data-compare]").onclick = () => { toggleCompare(true); renderPicker(); };
+  $("#picker-body").querySelectorAll("[data-person]").forEach(b => b.onclick = () => {
+    pickPerson(b.dataset.person);
+    if (!S.compare || S.picked.length === 2) closePicker(); else renderPicker();
+  });
+  $("#picker-body").querySelectorAll("a[data-link]").forEach(a => a.onclick = () => closePicker());
+}
+
+function openPicker() {
+  renderPicker();
+  const d = $("#picker");
+  d.showModal();
+  d.onclick = e => { if (e.target === d) closePicker(); };   // the backdrop
+}
+
+const closePicker = () => $("#picker").close();
 
 function pickPerson(id) {
   if (S.compare) {
-    let next = S.picked.includes(id) ? S.picked.filter(x => x !== id) : [...S.picked, id].slice(-2);
-    if (!next.length) next = [id];
-    S.picked = next;
+    // No profile is not a side of a comparison: picking it turns Compare off.
+    if (id === NOBODY.id) { S.compare = false; S.picked = [id]; }
+    else {
+      let next = S.picked.includes(id) ? S.picked.filter(x => x !== id)
+        : [...S.picked.filter(x => x !== NOBODY.id), id].slice(-2);
+      if (!next.length) next = [id];
+      S.picked = next;
+    }
   } else {
     S.picked = [id];
   }
@@ -123,9 +185,11 @@ function pickPerson(id) {
   if (onNew) showNew(); else go("/");
 }
 
-function toggleCompare() {
+function toggleCompare(stay = false) {
   S.compare = !S.compare;
-  S.picked = S.picked.slice(0, 1);        // the current person stays as A
+  // The current person stays as A, but "no profile" cannot be a side.
+  S.picked = S.picked.slice(0, 1).filter(id => !(S.compare && id === NOBODY.id));
+  if (stay) { if (location.pathname === "/") showNew(); else go("/"); return; }
   go("/");
 }
 
@@ -175,21 +239,6 @@ async function refreshLists() {
 
 // --------------------------------------------------------------- new assessment
 
-function whoCard(p, big) {
-  const watch = p.child ? "" : p.watching.length
-    ? `<ul class="watch">${p.watching.map(w => `<li><span class="rid">${esc(w.rule)}</span>` +
-        `<span>${esc(ruleName(w.name))}</span></li>`).join("")}</ul>`
-    : `<p class="muted" style="margin:.5rem 0 0">No profile rules apply.</p>`;
-  return `<div class="who-card">
-    ${big ? `<h1>For ${esc(p.label === "You" ? "you" : p.label)}</h1>` : `<h2 style="margin:0;font-size:var(--t-20)">${esc(p.label)}</h2>`}
-    ${p.sample ? `<div><span class="sample">Sample profile</span></div>` : ""}
-    <div class="facts">${esc(facts(p))}</div>
-    ${p.child ? `<div class="kid-note">${esc(p.label)} is under 16. This app can't assess children.</div>` : ""}
-    ${watch}
-    <a class="edit" href="/people/${esc(p.id)}" data-link>Edit ${esc(p.label === "You" ? "your profile" : p.label)}</a>
-  </div>`;
-}
-
 // True when this page was opened from another machine. The model runs on the
 // laptop either way; a phone on the wifi is a screen, and the page says so
 // rather than leave "this device" to be read as the phone.
@@ -199,26 +248,33 @@ function showNew() {
   const q = new URLSearchParams(location.search).get("p");
   if (q && byId(q)) { S.picked = [q]; S.compare = false; history.replaceState(null, "", "/"); }
   S.picked = S.picked.filter(byId);
-  if (!S.picked.length) S.picked = [S.people[0]?.id].filter(Boolean);
+  if (!S.picked.length) S.picked = [NOBODY.id];
   S.conv = null; S.live = {}; S.liveSaid = null;
   document.title = "New assessment · Triage";
-  renderChips(S.picked);
   renderHistory();
-  const people = S.picked.map(byId);
-  const head = people.length === 2
-    ? `<div class="who-pair">${people.map((p, i) => `<div><div class="who"><span class="ab">${"AB"[i]}</span>${esc(p.label)}</div>${whoCard(p, false)}</div>`).join("")}</div>`
-    : whoCard(people[0], true);
-  const compareHint = S.compare && people.length < 2
-    ? `<div class="notice">${icon("compare")}<span>Pick a second person in the bar above to compare them.</span></div>` : "";
+  const compareHint = S.compare && S.picked.filter(byId).length < 2
+    ? `<div class="notice">${icon("compare")}<span>Pick a second person to compare them.</span></div>` : "";
+  // The profile card went, but this did not go with it. A child's profile gets
+  // the scope notice BEFORE anything is typed, not only after a verdict is
+  // asked for (constraint 13). It is the one thing the empty screen still says
+  // unprompted, and only for a person it applies to.
+  const kid = S.picked.map(byId).filter(x => x && x.child);
+  const kidNote = kid.length
+    ? `<div class="kid-note">${esc(kid.map(k => k.label).join(" and "))} ${kid.length > 1 ? "are" : "is"}` +
+      ` under 16. This app can't assess children.</div>` : "";
   const src = S.health ? `${fmt(S.health.sources)} government sources` : "government sources";
-  $("#main").innerHTML = `<div class="page">${compareHint}${head}
-    <div class="try"><h2>Try one</h2><ol>${PRESETS.map((p, i) =>
-      `<li><button type="button" data-preset="${i}"><span class="key">${i + 1}</span>` +
-      `<span><span class="lbl">${esc(p[0])}</span><span class="snip">${esc(p[1])}</span></span></button></li>`).join("")}</ol></div>
+  // NEARLY BLANK: no profile card, no rule line, no heading. Three quiet
+  // presets and one line of scope, both bottom-aligned above the composer.
+  // The scope line has to stay on the first screen and above the composer: it
+  // carries "the model runs on the laptop, not on this phone" when the page is
+  // opened over the wifi, and ui_check asserts exactly that.
+  $("#main").innerHTML = `<div class="page blank">${compareHint}${kidNote}
+    <ul class="picks">${PRESETS.map((p, i) =>
+      `<li><button type="button" data-preset="${i}">${esc(p[0])}` +
+      `<span class="n">${i + 1}</span></button></li>`).join("")}</ul>
     <p class="scope">Chest pain only · ${src} · ${remoteViewer()
       ? "the model runs on the laptop, not on this phone"
-      : "runs on this device"}, no internet · up to
-      ${S.health ? S.health.max_followups : 4} follow-ups in each assessment</p>
+      : "runs on this device"}, no internet</p>
   </div>` + composerHTML({ first: true });
   $("#main").querySelectorAll("[data-preset]").forEach(b => b.onclick = () => usePreset(+b.dataset.preset));
   bindComposer();
@@ -227,7 +283,7 @@ function showNew() {
 
 function usePreset(i) {
   const [, text, tl, who] = PRESETS[i];
-  S.draft = { text, timeline: tl, showTl: !!tl };
+  S.draft = { text, timeline: tl, showTl: !!tl, heard: null };
   const pair = Array.isArray(who) ? who.filter(byId) : [];
   if (pair.length === 2) {
     // A pair is a whole demo beat: Compare on, both people, sent at once.
@@ -237,11 +293,12 @@ function usePreset(i) {
     send();
     return;
   }
+  // A single id is the preset's DEFAULT person. It applies only when nobody is
+  // picked, which is how the app opens, so the demo beats still run on a
+  // profile. It never overrides a person the user chose for themselves.
   const one = Array.isArray(who) ? pair[0] : who;
-  if (one && byId(one)) {
-    // A preset that needs a profile picks it: alone, or against You to compare.
-    S.picked = S.compare && one !== "self" ? ["self", one] : [one];
-  }
+  const nobody = !S.picked.length || (S.picked.length === 1 && S.picked[0] === NOBODY.id);
+  if (one && byId(one) && nobody) S.picked = [one];
   showNew();
   $("#ta").focus();
 }
@@ -262,9 +319,10 @@ function allowance(conv) {
   return Math.min(...anchored.map(s => s.followups_left));
 }
 
-function composerHTML({ first, left, max = 4, names, busy }) {
+function composerHTML({ first, left, max = 4, names, busy, who }) {
+  const forWho = forWhoHTML(who ? who.ids : S.picked, who ? who.pair : S.compare, who ? who.live : false);
   if (busy) {
-    return `<div class="composer"><form class="in" id="compose" autocomplete="off">
+    return `<div class="composer"><form class="in" id="compose" autocomplete="off">${forWho}
       <div class="waiting" role="status">Writing the answer. You can add more once it's done.</div>
       <div class="field-row"><label class="sr" for="ta">Waiting</label>
         <textarea class="ta" id="ta" rows="1" disabled placeholder="Waiting for the answer to finish">${esc(S.draft.text)}</textarea>
@@ -287,16 +345,125 @@ function composerHTML({ first, left, max = 4, names, busy }) {
   }
   const ph = first ? "Describe what is happening, in your own words" : "Add something, or answer a question";
   return `<div class="composer"><form class="in" id="compose" autocomplete="off">
-    ${line}
+    ${forWho}${line}
     <div class="field-row">
       <label class="sr" for="ta">${first ? "What is happening" : "Follow-up"}</label>
       <textarea class="ta" id="ta" rows="1" placeholder="${ph}">${esc(S.draft.text)}</textarea>
+      <span id="mic-slot">${micHTML()}</span>
       <button class="send" id="send" type="submit" aria-label="Send">${icon("send")}</button>
     </div>
+    <div id="heard-slot">${heardHTML(first)}</div>
     ${first ? `<div id="tl-wrap" ${S.draft.showTl ? "" : "hidden"}><label class="sr" for="tl">Timeline</label>
       <textarea class="ta tl-in" id="tl" rows="1" placeholder="Timeline, optional: T+0:00 began while sitting…">${esc(S.draft.timeline)}</textarea></div>
-      <button class="link-btn" type="button" id="tl-toggle">${S.draft.showTl ? "Remove the timeline" : "Add a timeline"}</button>` : ""}
+      <button class="link-btn" type="button" id="tl-toggle">${S.draft.showTl ? "Remove when it started" : "Add when it started"}</button>` : ""}
   </form></div>`;
+}
+
+// THE MICROPHONE. Tap to record, tap to stop. What comes back goes in the box
+// as editable text and is never sent on its own: a misheard symptom is a wrong
+// verdict, so the person reads it first. See static/js/voice.js and voice.py.
+function micHTML() {
+  if (micBlocked(S.health)) return "";
+  const v = S.voice;
+  if (v.busy)
+    return `<button class="mic working" id="mic" type="button" disabled
+      aria-label="Writing down what you said">${icon("mic")}</button>`;
+  if (v.rec)
+    return `<button class="mic on" id="mic" type="button" aria-label="Stop recording"
+      >${icon("stop")}<span class="t">${recordingLabel(v.elapsed)}</span></button>`;
+  return `<button class="mic" id="mic" type="button" aria-label="Say it instead of typing"
+    >${icon("mic")}</button>`;
+}
+
+// One line, under the composer. It carries the transcription time next to the
+// instruction to check the words, because those two belong together.
+function heardHTML(first) {
+  const v = S.voice, h = S.draft.heard;
+  if (v.error) return `<div class="heard">${esc(v.error)}</div>`;
+  if (v.busy) return `<div class="heard">Writing down what you said\u2026</div>`;
+  if (v.rec) return `<div class="heard">Listening. Tap again to stop.</div>`;
+  const blocked = micBlocked(S.health);
+  if (blocked) return first ? `<div class="heard quiet">${esc(blocked)}</div>` : "";
+  if (!h) return "";
+  const edited = wasEdited(S.draft.text, h.text);
+  return `<div class="heard">Heard in ${secs(h.ms)}${edited ? ", then edited" : ""}.
+    <b>Read it before you send.</b>
+    <span class="src">${esc(h.model)}, on this machine</span></div>`;
+}
+
+// The same sense of "first" the composer itself uses: no side has been
+// answered yet, whether or not the assessment exists on disk.
+const firstComposer = () => !S.conv || S.conv.sides.every(s => !s.anchor);
+
+// Only the mic button and the line under it. The textarea is left alone, so
+// redrawing never steals focus or moves the cursor while somebody is typing.
+function refreshVoice() {
+  const m = $("#mic-slot"); if (m) m.innerHTML = micHTML();
+  const h = $("#heard-slot"); if (h) h.innerHTML = heardHTML(firstComposer());
+  const b = $("#send"); if (b) b.disabled = sendDisabled();
+  bindMic();
+}
+
+// Send is closed while the microphone is open or the words are still being
+// written down. Sending mid-recording would assess a half-typed box and then
+// drop the transcript into an empty one.
+function sendDisabled() {
+  const ta = $("#ta");
+  return !!(S.voice.rec || S.voice.busy) || !!(ta && ta.disabled)
+    || Object.keys(S.live).some(k => !S.live[k].final);
+}
+
+function bindMic() {
+  const b = $("#mic");
+  if (!b) return;
+  b.onclick = async () => {
+    const v = S.voice;
+    if (v.busy) return;
+    if (v.rec) return v.rec.stop();
+    v.error = null;
+    const rec = new Recorder(
+      elapsed => {
+        v.elapsed = elapsed;
+        const t = $("#mic .t");            // just the seconds, 5 times a second
+        if (t) t.textContent = recordingLabel(elapsed);
+      },
+      blob => onRecorded(blob));
+    try { await rec.start(); v.rec = rec; v.elapsed = 0; }
+    catch (e) { v.error = micError(e); }
+    refreshVoice();
+  };
+}
+
+async function onRecorded(blob) {
+  const v = S.voice;
+  v.rec = null;
+  if (!blob) return refreshVoice();
+  v.busy = true;
+  refreshVoice();
+  try {
+    const heard = await transcribe(blob);
+    if (!heard.text) {
+      v.error = "Nothing was heard. Try again, closer to the microphone.";
+    } else {
+      S.draft.heard = heard;
+      const ta = $("#ta");
+      // Added to what is already in the box, not dropped over it. Somebody who
+      // typed half a sentence and then reached for the microphone keeps both.
+      const pre = (ta ? ta.value : S.draft.text).trim();
+      S.draft.text = pre ? `${pre} ${heard.text}` : heard.text;
+      if (ta) {
+        ta.value = S.draft.text;
+        grow(ta);
+        ta.focus();
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+      }
+    }
+  } catch (e) {
+    v.error = e.message || "The transcription failed.";
+  } finally {
+    v.busy = false;
+    refreshVoice();
+  }
 }
 
 function grow(ta) { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 160) + "px"; }
@@ -308,7 +475,14 @@ function bindComposer() {
   if (!form) return;
   const ta = $("#ta"), tl = $("#tl");
   grow(ta); if (tl) grow(tl);
-  ta.addEventListener("input", () => { S.draft.text = ta.value; grow(ta); });
+  ta.addEventListener("input", () => {
+    const h = S.draft.heard;
+    const was = h && wasEdited(S.draft.text, h.text);
+    S.draft.text = ta.value;
+    grow(ta);
+    // Redraw the line only when "then edited" actually flips, not per keystroke.
+    if (h && wasEdited(ta.value, h.text) !== was) refreshVoice();
+  });
   if (tl) tl.addEventListener("input", () => { S.draft.timeline = tl.value; grow(tl); });
   ta.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey && !touch) { e.preventDefault(); form.requestSubmit(); }
@@ -318,11 +492,13 @@ function bindComposer() {
     S.draft.showTl = !S.draft.showTl;
     if (!S.draft.showTl) S.draft.timeline = "";
     $("#tl-wrap").hidden = !S.draft.showTl;
-    tog.textContent = S.draft.showTl ? "Remove the timeline" : "Add a timeline";
+    tog.textContent = S.draft.showTl ? "Remove when it started" : "Add when it started";
     if (S.draft.showTl) { tl.value = ""; tl.focus(); }
   };
+  bindForWho();
+  bindMic();
   form.onsubmit = e => { e.preventDefault(); send(); };
-  const busy = ta.disabled || Object.keys(S.live).some(k => !S.live[k].final);
+  const busy = sendDisabled();
   $("#send").disabled = busy;
   if (!touch && !busy) ta.focus();
 }
@@ -331,7 +507,7 @@ function startOver() {
   const ids = S.conv ? S.conv.sides.map(s => s.person_id).filter(byId) : S.picked;
   S.picked = ids.length ? ids : ["self"];
   S.compare = S.picked.length === 2;
-  S.draft = { text: "", timeline: "", showTl: false };
+  S.draft = { text: "", timeline: "", showTl: false, heard: null };
   go("/");
 }
 
@@ -355,9 +531,13 @@ async function send() {
     S.conv = conv;
     history.pushState(null, "", `/c/${conv.id}`);
   }
-  S.draft = { text: "", timeline: "", showTl: false };
+  const heard = S.draft.heard;
+  S.draft = { text: "", timeline: "", showTl: false, heard: null };
+  S.voice.error = null;
   S.liveSaid = { text, timeline, at: new Date().toISOString() };
-  await Promise.all(conv.sides.map((_, i) => runTurn(conv.id, i, text, timeline, false)));
+  // Both sides of a comparison carry the same transcript, because it is the
+  // same sentence spoken once and assessed for two people.
+  await Promise.all(conv.sides.map((_, i) => runTurn(conv.id, i, text, timeline, false, heard)));
 }
 
 // ---------------------------------------------------------- the conversation
@@ -389,7 +569,6 @@ function sideCtx(side, final) {
 function renderConversation() {
   const conv = S.conv;
   const pair = conv.sides.length === 2;
-  renderChips(conv.sides.map(s => s.person_id), pair);
   renderHistory();
   document.title = `${conv.title || "Assessment"} · Triage`;
 
@@ -424,7 +603,10 @@ function renderConversation() {
   $("#main").innerHTML = `<div class="page${pair ? " pair" : ""}" id="thread">${h}</div>` +
     composerHTML({ first, left, busy: Object.values(S.live).some(p => !p.final) || busyOther.length > 0,
       max: S.health ? S.health.max_followups : 4,
-      names: conv.sides.map(s => s.profile.label).join(" and ") });
+      names: conv.sides.map(s => s.profile.label).join(" and "),
+      // An assessment's people are frozen when it starts, so here the line
+      // says who it is for and does not open the picker.
+      who: { ids: conv.sides.map(s => s.person_id), pair, live: true } });
   bindThread();
   bindComposer();
   scrollDown();
@@ -496,13 +678,13 @@ function bindThread() {
     }
     if (t.closest("[data-continue]") && liveEl) {
       const k = +liveEl.dataset.live, p = S.live[k];
-      return runTurn(S.conv.id, k, p.text, p.timeline, true);
+      return runTurn(S.conv.id, k, p.text, p.timeline, true, p.heard);
     }
     const sw = t.closest("[data-switch]");
     if (sw && liveEl) {
       const p = S.live[+liveEl.dataset.live];
       S.picked = [sw.dataset.switch]; S.compare = false;
-      S.draft = { text: p.text, timeline: p.timeline, showTl: !!p.timeline };
+      S.draft = { text: p.text, timeline: p.timeline, showTl: !!p.timeline, heard: p.heard };
       S.autoSend = true;
       return go("/");
     }
@@ -520,10 +702,10 @@ function scrollDown() {
 }
 
 // One side's turn, streamed into its live block.
-async function runTurn(cid, k, text, timeline, confirmed) {
+async function runTurn(cid, k, text, timeline, confirmed, heard = null) {
   const side = S.conv.sides[k];
   const p = S.live[k] = { first: !side.anchor, src: null, reading: null, readAt: 0, tokenAt: 0,
-    tokens: 0, raw: "", tail: "", checking: false, final: null, text, timeline };
+    tokens: 0, raw: "", tail: "", checking: false, final: null, text, timeline, heard };
   if (confirmed) S.liveSaid = S.liveSaid || { text, timeline, at: new Date().toISOString() };
   renderConversation();
   let frame = 0;
@@ -541,7 +723,11 @@ async function runTurn(cid, k, text, timeline, confirmed) {
     if (!p.final) soon();
   }, 250);
 
-  await streamTurn(cid, { side: k, text, timeline, confirmed_subject: confirmed }, ev => {
+  // heard_id, not the transcript. The server kept what it produced and works
+  // out for itself whether the person changed it, because the SOAP note states
+  // that to a clinician and it has to be a fact rather than the page's word.
+  await streamTurn(cid, { side: k, text, timeline, confirmed_subject: confirmed,
+                          heard_id: heard && heard.id }, ev => {
     switch (ev.event) {
       case "retrieved": case "reused": p.src = ev; break;
       case "reading": p.reading = ev; p.readAt = performance.now(); break;
@@ -641,7 +827,6 @@ function regionCard(r, active) {
 async function showRegions() {
   S.conv = null;
   document.title = "Regions · Triage";
-  renderChips([]);
   try { S.regions = (await api.regions()).regions || []; } catch { S.regions = []; }
   renderHistory();
   const active = S.regions.find(r => r.id === S.region);
@@ -682,7 +867,6 @@ function renderRegionRow() {
 async function showPeople() {
   S.conv = null;
   document.title = "People · Triage";
-  renderChips([]);
   const p = await api.people();
   S.people = p.people;
   renderHistory();
@@ -692,7 +876,6 @@ async function showPeople() {
 
 async function showPersonForm(id) {
   S.conv = null;
-  renderChips([]);
   renderHistory();
   let person = { label: "", age: "", sex: "", conditions: [], medications: [] };
   if (id) {
@@ -745,6 +928,7 @@ async function openChunk(key) {
   dlg.showModal();
 }
 $("#sheet-x").onclick = () => $("#sheet").close();
+$("#picker-x").onclick = closePicker;
 $("#sheet").addEventListener("click", e => { if (e.target === $("#sheet")) $("#sheet").close(); });
 
 // --------------------------------------------------------------------- boot

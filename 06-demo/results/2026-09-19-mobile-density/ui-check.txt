@@ -1,0 +1,165 @@
+2026-09-19  UI checks after the mobile redesign
+Four changes: the opening screen goes nearly blank, the person picker moves off
+the top bar to a line above the composer with "no profile" as the default, the
+whole scale comes down mobile first, and "Add a timeline" becomes "Add when it
+started".
+=== shots ===
+PASS  desktop: new assessment shows presets
+      saved /tmp/uicheck-after/desktop-new.png
+PASS  desktop: people list shows the household
+      saved /tmp/uicheck-after/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-after/desktop-person-mum.png
+FAIL  desktop: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-after/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved /tmp/uicheck-after/phone-new.png
+PASS  phone: people list shows the household
+      saved /tmp/uicheck-after/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-after/phone-person-mum.png
+FAIL  phone: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-after/phone-maya.png
+2 failed
+
+=== shots, re-run after restoring the child notice ===
+PASS  desktop: new assessment shows presets
+      saved /tmp/uicheck-after/desktop-new.png
+PASS  desktop: people list shows the household
+      saved /tmp/uicheck-after/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-after/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-after/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved /tmp/uicheck-after/phone-new.png
+PASS  phone: people list shows the household
+      saved /tmp/uicheck-after/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved /tmp/uicheck-after/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved /tmp/uicheck-after/phone-maya.png
+all passed
+
+=== flow ===
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved /tmp/uicheck-after/desktop-streaming.png
+PASS  a verdict bar is shown
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved /tmp/uicheck-after/desktop-answer.png
+PASS  the checked line opens its details
+      saved /tmp/uicheck-after/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved /tmp/uicheck-after/desktop-source.png
+      follow-up: 40.3 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved /tmp/uicheck-after/desktop-followup.png
+      saved /tmp/uicheck-after/phone-answer.png
+      saved /tmp/uicheck-after/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved /tmp/uicheck-after/phone-drawer.png
+all passed
+
+=== compare, the one-click beat 3 ===
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 78.0 s
+PASS  both sides answered
+PASS  a raised red shows the app's steps
+PASS  the model's own steps are shown as removed
+PASS  the model's rationale is struck out, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+      saved /tmp/uicheck-after/desktop-compare.png
+      saved /tmp/uicheck-after/phone-compare-a.png
+      saved /tmp/uicheck-after/phone-compare-b.png
+all passed
+
+=== guards ===
+      child profile: 1.0 s
+PASS  a child's profile gets NOT ASSESSED
+      saved /tmp/uicheck-after/desktop-child.png
+PASS  a child word on an adult profile asks who it is for
+      saved /tmp/uicheck-after/desktop-who-is-this-for.png
+      out of scope: 1.3 s
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+      saved /tmp/uicheck-after/desktop-out-of-scope.png
+all passed
+
+=== people ===
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved /tmp/uicheck-after/desktop-person-new.png
+PASS  the new person is saved and listed
+FAIL  the new person gets a chip
+      saved /tmp/uicheck-after/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+1 failed
+
+=== people, re-run ===
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved /tmp/uicheck-after/desktop-person-new.png
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+      saved /tmp/uicheck-after/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+all passed
+
+=== regions ===
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved /tmp/uicheck-after/desktop-regions.png
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved /tmp/uicheck-after/desktop-regions-india.png
+      assessment for a citation: 95.5 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved /tmp/uicheck-after/desktop-region-annotation.png
+      saved /tmp/uicheck-after/mobile-regions.png
+all passed
+
+=== drop ===
+PASS  a dropped stream says the answer is still being written
+PASS  the composer waits while it is written
+      saved /tmp/uicheck-after/desktop-dropped.png
+      dropped, then saved: 53.1 s
+PASS  the saved answer appears without a reload
+      saved /tmp/uicheck-after/desktop-dropped-answer.png
+all passed
+
+=== two-tabs ===
+      tab B, Grandpa: 49.1 s
+      tab A, Dad: 74.4 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 40.3 s
+FAIL  timed out waiting for document.querySelectorAll("#thread .bar, #thread .err-panel, #thread .full").length > 1
+    && !document.querySelector("[data-live] .steps4")
+1 failed
+
+=== two-tabs, re-run ===
+      tab A, Dad: 59.5 s
+FAIL  timed out waiting for document.querySelectorAll("#thread .bar, #thread .err-panel, #thread .full").length > 0
+    && !document.querySelector("[data-live] .steps4")
+1 failed
+
+=== two-tabs, re-run with ONE demo server on 8770 ===
+      tab B, Grandpa: 46.8 s
+      tab A, Dad: 198.6 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 41.5 s
+FAIL  timed out waiting for document.querySelectorAll("#thread .bar, #thread .err-panel, #thread .full").length > 1
+    && !document.querySelector("[data-live] .steps4")
+1 failed

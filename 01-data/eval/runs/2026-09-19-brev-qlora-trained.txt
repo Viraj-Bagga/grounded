@@ -1,0 +1,108 @@
+# EPIC 3 STEP 5: THE FINE-TUNE RAN. 120 pairs, 2 epochs, merged and downloaded.
+# instance  steel26-qlora3, massedcompute_A6000_plus, $0.68/hr. created 18:25:16 EDT, delete confirmed
+#           18:54:59 EDT. About 30 minutes, about $0.34. Today's Brev total, three attempts: about $0.67.
+# stack     torch 2.10.0+cu130 (pinned DOWN from the image's 2.14 so the prebuilt kernels match),
+#           mamba_ssm 2.3.2.post1 and causal_conv1d 1.7.0 from the cu13torch2.10cxx11abiTRUE cp310
+#           wheels, plus einops. transformers 5.17.0, trl 1.13.0, peft 0.21.0, trust_remote_code=False.
+# base      nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16, weights sha256 55d4e2519456c4a9..., verified.
+# data      02-pairs/review/candidates-120.jsonl, md5 3484abc4403702aa37b0578b977a4de3 both ends.
+#           120 pairs -> 124 examples, completion-only loss, prompts rendered with
+#           enable_thinking=False so the trained prompt is the prompt the app sends.
+# LoRA      50 of 50 matched: q/k/v/o 4 each, up/down 17 each. No gate_proj. 10,119,168 trainable.
+# NOT QLoRA. The base was loaded in bf16, not 4-bit. Reason below.
+# artifacts 03-model/merged-120pairs  model.safetensors sha256 1393cc3141428418ffa06053d9acd0ee0339598116426fd578a45e0a6b757eea
+#           03-model/adapter-120pairs adapter_model.safetensors sha256 eabf01c159dafaa1da8cfe6b3a9887ee93310c86450fbc5e0506091c10a57920
+#           Both match the instance byte for byte. Neither is in git.
+
+=== the probe that gated the run (4-bit, fused kernels)
+SSM kernels: {'causal_conv1d': 'fused', 'mamba_ssm': 'fused'}
+PROBE FITS. P0018, 1633 tokens, loss 2.1221
+  peak allocated 20.81 GiB, peak reserved 21.29 GiB, capacity 47.40 GiB, headroom 26.11 GiB
+  one forward+backward at 1633 tokens: 0.76 s (2149 tok/s)
+  estimate for 2 epochs over 124 examples: about 2 min at batch 1
+  SUGGESTED BATCH: 2
+
+=== training (bf16 base, fused kernels, batch 1 x accum 8, 2 epochs, warmup 3, cosine, lr 2e-4)
+loaded bf16, NOT quantized: 7.95 GB on device
+LoRA matched 50 modules: {'up_proj': 17, 'down_proj': 17, 'q_proj': 4, 'k_proj': 4, 'v_proj': 4, 'o_proj': 4}
+trainable 10,119,168 of 3,983,676,000 (0.254%)
+SFTConfig: dropped ['max_seq_length'] as unsupported in this TRL
+training: 2 epochs, 124 examples, batch 1 x accum 8, 30 optimizer steps
+=== LOSS, every logged step
+  epoch 0.06  step 1  loss 1.5787  lr 0.00e+00
+  epoch 0.13  step 2  loss 1.7443  lr 6.67e-05
+  epoch 0.19  step 3  loss 1.5368  lr 1.33e-04
+  epoch 0.26  step 4  loss 1.7446  lr 2.00e-04
+  epoch 0.32  step 5  loss 1.3891  lr 1.99e-04
+  epoch 0.39  step 6  loss 1.2742  lr 1.98e-04
+  epoch 0.45  step 7  loss 1.2877  lr 1.95e-04
+  epoch 0.52  step 8  loss 1.1500  lr 1.91e-04
+  epoch 0.58  step 9  loss 1.0848  lr 1.86e-04
+  epoch 0.65  step 10  loss 1.0267  lr 1.80e-04
+  epoch 0.71  step 11  loss 1.1619  lr 1.73e-04
+  epoch 0.77  step 12  loss 1.1605  lr 1.65e-04
+  epoch 0.84  step 13  loss 0.9152  lr 1.56e-04
+  epoch 0.90  step 14  loss 0.9647  lr 1.47e-04
+  epoch 0.97  step 15  loss 1.0457  lr 1.37e-04
+  epoch 1.00  step 16  loss 0.8314  lr 1.27e-04
+  epoch 1.06  step 17  loss 0.8435  lr 1.16e-04
+  epoch 1.13  step 18  loss 0.7656  lr 1.05e-04
+  epoch 1.19  step 19  loss 0.8335  lr 9.46e-05
+  epoch 1.26  step 20  loss 0.8932  lr 8.38e-05
+  epoch 1.32  step 21  loss 0.8116  lr 7.32e-05
+  epoch 1.39  step 22  loss 0.7677  lr 6.30e-05
+  epoch 1.45  step 23  loss 0.9057  lr 5.32e-05
+  epoch 1.52  step 24  loss 0.7009  lr 4.39e-05
+  epoch 1.58  step 25  loss 0.8407  lr 3.53e-05
+  epoch 1.65  step 26  loss 0.7170  lr 2.74e-05
+  epoch 1.71  step 27  loss 0.8120  lr 2.04e-05
+  epoch 1.77  step 28  loss 0.9104  lr 1.43e-05
+  epoch 1.84  step 29  loss 0.7080  lr 9.24e-06
+  epoch 1.90  step 30  loss 0.8364  lr 5.23e-06
+  epoch 1.97  step 31  loss 0.7456  lr 2.34e-06
+  epoch 2.00  step 32  loss 0.6851  lr 5.86e-07
+=== final train loss 1.0210 over 0.17 steps/s, 189 s
+
+=== merge
+clearing generation_config.top_p=0.95
+clearing generation_config.temperature=1.0
+merged bf16 model saved to /home/shadeform/merged
+
+=== WHY NOT QLoRA, measured in four failed runs on this instance
+With the fused Mamba2 kernel live, transformers' nemotron_h calls
+mamba2_split_conv1d_scan_combined and hands it in_proj's and out_proj's raw
+weight tensors, which the kernel multiplies itself. Under bitsandbytes those
+weights are packed 4-bit blobs, so the matmul fails on shape:
+
+  4-bit, batch 2:              mat1 and mat2 shapes cannot be multiplied (2752x7680 and 1x12042240)
+  4-bit, batch 1:              same failure at (1283x7680 and 1x12042240)   -> not batch size
+  4-bit, skip out_proj:        moves to in_proj (256x3136 and 1x205520896)
+  4-bit, skip in_proj+out_proj: same in_proj failure; footprint rose 3.36 -> 5.09 GB, so the skip
+                                partly applied, but the module the kernel touches stayed packed
+
+So the choice on one 48 GB card was: fused kernels with a bf16 base, or a 4-bit
+base with the reference fallbacks, which needed more than 47 GiB (attempts 1 and
+2). bf16 plus kernels fits in 7.95 GB of weights and trains in 189 s.
+
+WHAT IS UNCHANGED: the adapter, its six target modules, the 50 matched modules,
+rank 16, alpha 32, 2 epochs, the data, and the merge to bf16. The Q in QLoRA was
+a memory technique, and the memory came from the kernels instead. Nothing about
+what was learned depends on it.
+
+WHAT IS DIFFERENT: training saw unquantised weights, while the shipped model is
+Q4_K_M. That gap existed before in the other direction and is what step 6
+measures.
+
+=== two failures worth keeping
+1. mamba_ssm imported only after einops. The wheels were installed --no-deps to
+   stop pip pulling a different torch, which skipped a pure-Python dependency.
+   causal_conv1d imported straight away, which is what proved the ABI matched.
+2. The merge failed at save_pretrained: Nemotron's own generation_config sets
+   top_p 0.95 and temperature 1.0 with do_sample False, and transformers 5.17
+   refuses to save that. Training was already done, so a merge-only stage now
+   clears those fields rather than repeating the run.
+3. The first download filled the laptop: 1.4 GiB free against a 7.5 GB model.
+   Freed 13 GB, including 03-model/base/nemotron3-nano-4b-F16.gguf, which is an
+   intermediate regenerable from hf-bf16. 9.5 GiB free now, which is enough for
+   the F16 of the merged model but not also its Q4_K_M, so something else goes
+   before step 5 finishes.

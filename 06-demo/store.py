@@ -47,6 +47,15 @@ SEED_PEOPLE = [
     dict(id="maya", label="Maya", age=6, sex="female", conditions=[], medications=[]),
 ]
 
+# "NO PROFILE": a general question with nobody behind it, and the default since
+# 2026-09-19. It is NOT in the store: it is never written to people.json, never
+# listed on the People page, and cannot be edited or deleted. PeopleStore.get
+# returns it by id so an assessment can be started for it like anyone else.
+# With no age, no sex and no conditions, every escalation fact function returns
+# None and no rule fires, and is_child_profile is False because age is None.
+NO_PROFILE = dict(id="none", label="No profile", age=None, sex=None,
+                  conditions=[], medications=[], virtual=True)
+
 SEXES = ("female", "male")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,47}$")
 CONV_ID_RE = re.compile(r"^\d{8}-\d{6}-[0-9a-f]{6}$")
@@ -55,6 +64,12 @@ CONV_ID_RE = re.compile(r"^\d{8}-\d{6}-[0-9a-f]{6}$")
 def profile_text(p):
     """The [PATIENT PROFILE] block the model sees. Unchanged from the
     single-shot demo, so the seeded people give byte-identical prompts."""
+    if p.get("virtual"):
+        # "not given", never "none". A profile that says `medications: none` has
+        # already been measured negating a symptom asserted two lines later
+        # (constraint 11), and an absent profile is not a denial of anything.
+        return ("age: not given, sex: not given\n"
+                "conditions: not given\nmedications: not given")
     lines = [f"age: {p['age']}, sex: {p['sex']}",
              "conditions: " + (", ".join(p["conditions"]) or "none"),
              "medications: " + (", ".join(p["medications"]) or "none")]
@@ -159,6 +174,8 @@ class PeopleStore:
             return self._load()
 
     def get(self, pid):
+        if pid == NO_PROFILE["id"]:
+            return dict(NO_PROFILE)
         return next((p for p in self.list() if p["id"] == pid), None)
 
     def _new_id(self, label, existing):
@@ -180,6 +197,8 @@ class PeopleStore:
         return person, {}
 
     def update(self, pid, data):
+        if pid == NO_PROFILE["id"]:
+            return None, {"id": "No profile cannot be edited."}
         person, errors = clean_person(data)
         if errors:
             return None, errors
@@ -193,6 +212,8 @@ class PeopleStore:
         return None, {"id": "No such person."}
 
     def delete(self, pid):
+        if pid == NO_PROFILE["id"]:
+            return False
         with self.lock:
             people = self._load()
             kept = [p for p in people if p["id"] != pid]

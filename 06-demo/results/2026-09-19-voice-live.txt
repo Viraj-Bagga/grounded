@@ -1,0 +1,140 @@
+================================================================================
+VOICE INPUT, LIVE ON THE DEMO PATH
+Date:   2026-09-19
+Build:  whisper.cpp v1.9.4 from source, ggml-base.en-q5_1, CPU (-ng), 4 threads
+        llama-server 0.4.0, Q4_K_M, --jinja -np 2 -ngl 0 -c 8192
+        demo server on 127.0.0.1:8770, macOS Low Power Mode OFF
+Command: node 06-demo/ui_check.mjs voice 06-demo/results/2026-09-19-voice
+         node 06-demo/ui_check.mjs voice 06-demo/results/2026-09-19-voice http://10.6.13.168:8770
+Model choice and its numbers: 01-data/eval/runs/2026-09-19-whisper-model-choice.txt
+================================================================================
+
+A. THE LAPTOP. The microphone, end to end, with a known sentence spoken into
+   the page: "Heavy pressure in the middle of my chest that has not let up for
+   almost half an hour."  4.29 s of speech.
+
+   PASS  the composer offers a microphone
+         speaking 4.29 s into the page
+   PASS  tapping starts recording
+   PASS  send is closed while recording
+         saved 06-demo/results/2026-09-19-voice/voice-recording.png
+   PASS  the words land in the composer
+   PASS  nothing was sent
+   PASS  no answer started
+   PASS  the transcription time is shown
+   PASS  it says to check the words
+         saved 06-demo/results/2026-09-19-voice/voice-transcript.png
+   PASS  editing is recorded
+         saved 06-demo/results/2026-09-19-voice/voice-edited.png
+         spoken assessment: 10.7 s
+   PASS  the checked line says it was heard
+   PASS  the details panel has a Heard row
+   PASS  the details panel records the correction
+         saved 06-demo/results/2026-09-19-voice/voice-answer-details.png
+   PASS  the SOAP note says the symptoms were spoken
+   PASS  the SOAP note records the correction
+   PASS  the SOAP note keeps what was heard
+   PASS  the SOAP note names the model and the time
+         saved 06-demo/results/2026-09-19-voice/voice-soap.txt
+   all passed
+
+   THE CHECK THAT MATTERS is "nothing was sent" and "no answer started". Voice
+   fills the composer. It never triages. Everything else is detail around it.
+
+B. RAM AND TIMING ON THE SERVER PATH, measured on the running demo server.
+
+   demo server RSS before any transcription   486 MB
+   whisper-cli peak RSS during three runs     265 MB
+   demo server RSS after                      276 MB
+
+   The server does not grow, because transcription is a subprocess that exits.
+   The 486 to 276 drop is the OS reclaiming pages, not a leak.
+
+   6.18 s of speech  ->  528 ms      (warm)
+   25.0 s of speech  ->  829 ms      (warm)
+   6.18 s of speech  ->  455 ms      (warm)
+   6.18 s of speech  ->  969 ms      (cold, first run after boot)
+   25.0 s of speech  ->  1598 ms     (cold)
+
+   Wall time has a floor of about 0.5 s and grows slowly with length, because
+   whisper always encodes a fixed 30 s window. Model load inside that is 46 ms,
+   which is why the model is not held resident.
+
+C. OVER THE WIFI. Same server with --lan, page read at 390x844 with touch.
+
+   PASS  no microphone over the wifi
+   PASS  the page says why
+         saved 06-demo/results/2026-09-19-voice/voice-phone-no-mic.png
+   all passed
+
+   navigator.mediaDevices is undefined on a plain http address, so there is no
+   button and no way to make one work. The page says why, in grey, next to the
+   line that already says the model runs on the laptop. Screenshot:
+   06-demo/results/2026-09-19-voice/voice-phone-no-mic.png
+
+D. THE MICROPHONE CAPTURED NOTHING. Silence played into the page, same harness.
+
+   heard line: "Nothing reached the microphone. Check it is not muted, then tap again."
+   composer  : ""
+   pathname  : "/"      (nothing sent, as with any other voice path)
+
+   Without the peak floor this is where whisper returns " you", or a whole
+   invented sentence. See section 8 of the model-choice file.
+
+E. REGRESSION, same session, nothing to do with voice.
+   --- flow ---
+   PASS  a preset keeps the person picked
+   PASS  the preset fills the composer
+   PASS  the URL becomes the assessment's own
+   PASS  a verdict bar is shown
+   PASS  the checked line is shown
+   PASS  the follow-up allowance is shown before it runs out
+   PASS  the checked line opens its details
+   PASS  a source chip opens the real chunk
+   PASS  the follow-up reports its cache reuse
+   PASS  the allowance counts down
+   PASS  a finished assessment offers a SOAP note
+   PASS  the note has its four sections and its header
+   PASS  the note quotes the follow-up and carries citation keys
+   PASS  the note wraps for a printed page
+   PASS  the drawer lists this assessment
+   all passed
+   --- guards ---
+   PASS  a child's profile gets NOT ASSESSED
+   PASS  a child word on an adult profile asks who it is for
+   PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+   all passed
+   --- shots ---
+   PASS  desktop: new assessment shows presets
+   PASS  desktop: people list shows the household
+   PASS  desktop: Mum's form shows the rules her profile turns on
+   PASS  desktop: Maya's empty screen says she is not assessed
+   PASS  phone: new assessment shows presets
+   PASS  phone: people list shows the household
+   PASS  phone: Mum's form shows the rules her profile turns on
+   PASS  phone: Maya's empty screen says she is not assessed
+   all passed
+   --- compare ---
+   PASS  preset 3 turns Compare on by itself
+   PASS  preset 3 sets You against Mum
+   PASS  preset 3 sends by itself
+   PASS  both sides answered
+   PASS  compare: record, answers and composer share one left edge
+   all passed
+
+F. SCREENSHOTS in 06-demo/results/2026-09-19-voice/
+   voice-recording.png        the blue recording button, "Listening. Tap again to stop."
+   voice-transcript.png       the words in the composer, "Read it before you send."
+   voice-edited.png           "Heard in 0.5 s, then edited."
+   voice-answer-details.png   the Checked line with "heard 0.5 s" and the Heard row
+   voice-phone-no-mic.png     over the wifi: no button, and the reason
+   voice-soap.txt             the clinical export, with the spoken provenance in S
+
+G. NOT MEASURED HERE
+   A real human voice. Every clip is macOS `say`. See section 7 of the
+   model-choice file. Viraj records the three presets before judging and base
+   against small gets re-scored on that.
+   getUserMedia and the browser permission prompt: Chrome 153 headless cannot
+   play a file into its fake microphone (section 9 of the model-choice file),
+   so the check substitutes the audio source at page level. The permission
+   grant is on the pre-demo checklist next to Low Power Mode.

@@ -1,0 +1,260 @@
+================================================================================
+WHISPER MODEL CHOICE FOR VOICE INPUT (epic 5 STT)
+Date:   2026-09-19
+Host:   M4 MacBook, macOS 27.0.0, Low Power Mode off
+Build:  whisper.cpp v1.9.4, built from source with cmake -DCMAKE_BUILD_TYPE=Release
+        ggml 0.23.0 (vendored in the whisper.cpp tree, NOT the brew ggml)
+Why from source and not brew: `brew install --dry-run whisper.cpp` reports
+        "Would upgrade 3 dependencies", and two of them are llama.cpp and ggml,
+        which are the installed 0.4.0 / 0.23.0 this demo is measured on.
+        Upgrading llama.cpp the night before judging would invalidate every
+        latency number in the build log. Source build touches nothing.
+Command: whisper-cli -m <model> -f <clip> -l en -nt -np -t 4 [-ng]
+         -ng is CPU only. Without it, Metal.
+Nothing was changed in the repo to produce this file.
+================================================================================
+
+WHAT WAS MEASURED
+  13 clips, 84.76 s of audio, 6 voices (Samantha en_US, Daniel en_GB,
+  Karen en_AU, Rishi en_IN, Aman en_IN, Tessa en_ZA, Moira en_IE), generated
+  with macOS `say` at 16 kHz mono. Clips are the three demo presets, four
+  safety phrasings chosen for negation / laterality / number retention, five
+  real-world phrasings taken from the scope and guard work in claude.md, and
+  one 25 s rambling account with a drug name and an age in it.
+
+  THE LIMIT OF THIS SET, SAID PLAINLY. It is text to speech: no room noise, no
+  disfluency, no hesitation, no clipping, no phone mic. It is clean in a way a
+  desk at a hackathon is not. It is therefore valid for RANKING models against
+  each other on the same input, and it OVERSTATES absolute accuracy for every
+  model on the list. It cannot see the part of the base-to-small gap that only
+  appears on real noisy speech. Verifying that needs Viraj and a microphone.
+
+--------------------------------------------------------------------------------
+1. SIZE, SPEED, MEMORY.  Whole 13-clip set, one process per clip.
+--------------------------------------------------------------------------------
+model               size      CPU wall   CPU x_rt   Metal wall  Metal x_rt   peak RSS
+tiny.en-q5_1      30.7 MB        7.82s     0.092x        5.46s      0.064x    195 MB
+tiny.en           74.1 MB        7.41s     0.087x        4.32s      0.051x    241 MB
+base.en-q5_1      57.0 MB       12.39s     0.146x        5.40s      0.064x    265 MB
+base.en          141.1 MB       12.61s     0.149x        6.58s      0.078x    364 MB
+small.en-q5_1    181.3 MB       26.85s     0.317x       10.21s      0.120x    543 MB
+small.en         465.0 MB       30.46s     0.359x       13.43s      0.159x    832 MB
+
+  peak RSS is the max "maximum resident set size" over the 13 runs, CPU path.
+  The first Metal run of the session measured 34.39 s because it compiled
+  shaders; re-run warm it is the 4.32 s above. That is a first-launch cost on
+  any Metal path and it is why it is called out rather than averaged in.
+
+--------------------------------------------------------------------------------
+2. ACCURACY.  286 reference words. WER, and a separate count of safety words
+   (negations, laterality, numbers, drug names, guard triggers) that went missing.
+--------------------------------------------------------------------------------
+config                   WER%   errs   safety misses
+base.en-q5_1.cpu         2.10      6   l1:ramipril l1:sixty l1:two s3:twenty
+base.en-q5_1.metal       2.10      6   (identical to cpu)
+base.en.cpu              2.45      7   l1:ramipril l1:sixty l1:two s3:twenty
+base.en.metal            2.45      7   (identical to cpu)
+small.en-q5_1.cpu        2.45      7   l1:sixty l1:two r5:aches s3:twenty
+small.en-q5_1.metal      2.45      7   (identical to cpu)
+small.en.cpu             2.45      7   l1:sixty l1:two r5:aches s3:twenty
+small.en.metal           2.45      7   (identical to cpu)
+tiny.en.cpu              2.80      8   l1:ramipril l1:sixty l1:two r4:angina s3:twenty
+tiny.en-q5_1.cpu         2.80      8   + r4:stent
+tiny.en-q5_1.metal       3.50     10   + r4:stent r4:nitroglycerin
+
+  READ THE MISSES BEFORE READING THE WER. Most of them are not errors:
+    s3:twenty   "about twenty minutes" -> "about 20 minutes".  Every model.
+    l1:sixty/two "I am sixty two" -> "I am 62".               Every model.
+  Both are number normalisation and both are arguably better than the reference.
+  Discount them and the real misses are these:
+
+    r4 "I take nitroglycerin for my angina and I had a stent fitted two years ago"
+       tiny.en        -> "for my anginone"          ANGINA MANGLED
+       tiny.en-q5_1   -> also loses "stent", and on Metal loses "nitroglycerin"
+       base.en, base.en-q5_1, small.en, small.en-q5_1 -> all correct
+
+    l1 "...ramipril I think it is called..."
+       tiny.en        -> "Ramachril"
+       base.en, base.en-q5_1 -> "Ramapril"
+       small.en-q5_1  -> "Ramipril"                 ONLY small GETS IT RIGHT
+
+    l1 "...walking to the shop..."
+       small.en-q5_1  -> "walking to the shock"     small INVENTED this one
+    r5 "the side of my face aches"
+       small.en-q5_1  -> "the side of my face X"    small LOST this one
+
+    r5 "killing me and the side" -> "killing me on the side" in EVERY model.
+       That is the en_IN voice eliding, not a model difference.
+
+  So small.en buys exactly one thing on this set, the drug name, and pays for
+  it with two new errors base did not make. It is not a clear win here.
+
+  NEGATION AND LATERALITY HELD EVERYWHERE. "I am not pregnant", "No fever, no
+  cough", "It is not the left side, it is the right side", "it is not sharp",
+  "has not let up", "has not shifted" all survived in every model including
+  tiny. That is the failure that would have been worst (a flipped negation
+  flips a guard: see constraints 11 and 13) and it did not appear once.
+
+--------------------------------------------------------------------------------
+3. CHOSEN: ggml-base.en-q5_1.bin, CPU, one process per transcription.
+--------------------------------------------------------------------------------
+  57.0 MB on disk. 265 MB peak RSS. Lowest WER on this set.
+  Against small.en-q5_1 it is 3.2x smaller, 2.0x less RAM, 2.2x faster, and it
+  scored no worse. Against tiny it keeps "angina", "stent" and "nitroglycerin",
+  which are words this corpus is made of.
+  q5_1 against f16 base: 2.10% vs 2.45%, one word in 286. That is noise, not a
+  quality gain. The honest statement is NO MEASURABLE LOSS FROM QUANTISATION on
+  this set, at 40% of the size and 73% of the RAM.
+
+  WHY CPU AND NOT METAL. Metal is 2.3x faster here, but CPU is already under a
+  second (table 4) and CPU is the condition every other number in this project
+  is quoted in. Consistency is worth more than 0.4 s nobody can see. The
+  binary takes -ng, so this is one flag if it ever needs to change.
+
+--------------------------------------------------------------------------------
+4. base.en-q5_1 ON CPU, PER CLIP. This is what a person will actually wait for.
+--------------------------------------------------------------------------------
+clip     audio      wall      x_rt   peak RSS
+p3       2.97s     0.65s    0.219x   259.7 MB
+r3       2.85s     0.62s    0.219x   261.4 MB
+r5       2.49s     0.69s    0.276x   258.8 MB
+s1       3.71s     0.69s    0.187x   262.3 MB
+s4       4.09s     0.75s    0.183x   260.9 MB
+r4       4.56s     0.74s    0.162x   262.5 MB
+s2       4.91s     0.72s    0.147x   261.7 MB
+r1       5.50s     0.75s    0.137x   262.6 MB
+s3       5.85s     0.75s    0.128x   261.4 MB
+p1       6.18s     0.81s    0.131x   262.3 MB
+p2       7.99s     0.85s    0.107x   260.0 MB
+r2       8.65s     0.94s    0.109x   258.4 MB
+l1      25.00s     1.50s    0.060x   265.3 MB
+
+  x_realtime is the wrong way round to read this. The wall time has a FLOOR of
+  about 0.6 s and grows slowly, because whisper always encodes a fixed 30 s
+  window whatever the clip length. Read it as: under 1 s for anything a person
+  says in one breath, 1.5 s for a 25 s ramble. Peak RSS is flat at ~260 MB and
+  does not grow with clip length.
+
+  LOAD AND UNLOAD, SETTLED BY MEASUREMENT. whisper-cli's own timings on the
+  CPU path: model load 45 to 52 ms, encode 358 to 401 ms, total compute 568 to
+  1443 ms. Loading the model costs 46 ms. There is no case for holding 265 MB
+  resident next to a 3 GB LLM to save 46 ms. One process per transcription,
+  which also means the memory is gone the moment it returns.
+
+--------------------------------------------------------------------------------
+5. SECURE CONTEXT. Measured, not cited. Headless Chrome, same static page
+   served on 0.0.0.0, read from two origins.
+--------------------------------------------------------------------------------
+  http://127.0.0.1:8899   isSecureContext=true   mediaDevices=object    getUserMedia=function
+  http://10.6.13.168:8899 isSecureContext=false  mediaDevices=undefined getUserMedia=n/a
+
+  CONFIRMED, AND NOT WORKED AROUND. Over --lan on a phone, navigator.mediaDevices
+  does not merely refuse, it DOES NOT EXIST. The mic cannot work there. The fix
+  would be TLS with a trusted cert on a LAN IP, which is not a hackathon job.
+  The button has to be absent with a reason on that origin, not broken.
+
+--------------------------------------------------------------------------------
+6. BROWSER-SIDE AUDIO CONVERSION, so the server needs no ffmpeg.
+--------------------------------------------------------------------------------
+  MediaRecorder in Chrome gives webm/opus at 48 kHz. whisper.cpp wants 16 kHz
+  mono PCM. Tested decodeAudioData -> OfflineAudioContext(1, n, 16000) -> WAV
+  header written in JS, in real headless Chrome, on webm/opus files made with
+  ffmpeg to match what MediaRecorder produces.
+
+    p1  6.18 s: 16000 Hz mono, 193 KB, converted in 168 ms
+    l1 25.00 s: 16000 Hz mono, 781 KB, converted in 107 ms
+
+  Transcripts through the browser path are BYTE-IDENTICAL to transcripts of the
+  original WAV, on both clips, including "Ramapril" and "62". So the conversion
+  is lossless for this purpose and the demo server gains no new dependency.
+
+--------------------------------------------------------------------------------
+7. WHAT THIS DOES NOT SHOW
+--------------------------------------------------------------------------------
+  - Real speech. Every clip is synthetic. Accuracy on a real voice at a noisy
+    desk is unmeasured and will be worse than 2.10% for every model here.
+  - Whether base.en is still the right pick on real audio. The usual result is
+    that small.en pulls ahead once the audio is dirty. This set cannot see it.
+    Swapping is one env var, so it stays a 30 second experiment.
+  - Anything about a phone. This is the laptop, same as the rest of the demo.
+  - CoreML and the Apple Neural Engine, which whisper.cpp supports through a
+    separate build and would matter on a real handset. Not built, not measured.
+
+================================================================================
+ADDENDUM, same date: WHISPER INVENTS SENTENCES OUT OF NON-SPEECH.
+Found by accident. The ui_check harness was meant to play a known WAV into
+Chrome's fake microphone; the flag did not work and Chrome fed the page its own
+built-in beep instead. The transcripts below are what came back.
+Command as above, model ggml-base.en-q5_1, CPU.
+================================================================================
+
+input                              peak    what whisper returned
+digital silence, 6 s              0.000    " you"
+gaussian noise, 6 s               0.004    "(crickets chirping)"
+gaussian noise, 6 s               0.046    "(clippers whirring)"
+gaussian noise, 6 s               0.206    "(machine whirring)"
+Chrome's test beep, ~7 s          1.001    "Just like a lot of thudding, right?"
+Chrome's test beep, ~7 s          1.040    "Yeah, it's actually no it's actually doing
+                                            better because the thing is being"
+Chrome's test beep, ~7 s          0.685    "on the surface it just cools down the pad
+                                            and it's also worth for because then"
+Chrome's test beep, ~7 s          0.790    "And this is actually a lot better than this.
+                                            This is also what you're supposed to do with
+                                            computers in all air cooling."
+Chrome's test beep, ~7 s             --    "Oh, my God. Oh, it can't get us back in the
+                                            fight. It can't get us back in the fight."
+
+  For comparison, the speech clips in this set measure peak 0.779 (p3) to
+  0.928 (l1). Peak is measured over the WAV's data chunk, walking the chunk
+  list; reading from a fixed offset of 44 inflates it, because `say` emits a
+  LIST chunk first.
+
+WHAT IS AND IS NOT HANDLED
+  The parenthesised ones never reach the screen: voice.clean() returns empty
+  when the whole transcript is bracketed non-speech annotation, and the page
+  then says "Nothing was heard". A BARE HALLUCINATED SENTENCE HAS NOTHING
+  ABOUT IT TO CATCH, which is the dangerous shape and the one the beep
+  produced five times out of five.
+
+  voice.SILENCE_PEAK = 0.01 now refuses audio below that, with "nothing
+  reached the microphone". It is 78x below the quietest clip here, so it
+  cannot refuse a quiet voice, and it deterministically catches the case that
+  actually happens: a muted or dead microphone.
+
+  IT DOES NOT CATCH A HALLUCINATION FROM REAL ROOM NOISE. Nothing here claims
+  to. What catches that is that the transcript goes in the composer for the
+  person to read and fix before sending, which is the design and not a
+  consolation. Verified after the floor was added:
+
+    silence     peak 0.0000  REFUSED before the model saw it
+    noise-tiny  peak 0.0044  REFUSED before the model saw it
+    noise-low   peak 0.0457  text=''   (annotation dropped)
+    noise-mid   peak 0.2063  text=''   (annotation dropped)
+    p3          peak 0.7791  760 ms    "a bit of indigestion after lunch..."
+    p1          peak 0.8318  969 ms    "heavy pressure in the middle of my chest..."
+    l1          peak 0.9275  1735 ms   "Well, it started yesterday evening..."
+
+  NOT TUNED: whisper-cli's -nth (no-speech threshold) is left at its default
+  0.60. Raising it would make the model likelier to emit nothing, but tuning
+  it without a real-speech set is guesswork and the error it would buy is
+  suppressing quiet real speech, which is the wrong direction.
+
+================================================================================
+9. CHROME 153 CANNOT PLAY A FILE INTO ITS FAKE MICROPHONE (headless)
+================================================================================
+  --use-file-for-fake-audio-capture was tried in every combination:
+    with and without --use-fake-device-for-media-capture
+    16 kHz and 48 kHz source files
+    with and without the %noloop suffix
+    relative and absolute paths
+  All of them fed the page Chrome's built-in beep. --headless=old, which used
+  to honour the flag, is removed in Chrome 153.0.8010.48.
+
+  So `ui_check.mjs voice` replaces the audio SOURCE at page level instead:
+  navigator.mediaDevices.getUserMedia is overridden to return a stream from a
+  decoded WAV through a MediaStreamAudioDestinationNode. Everything downstream
+  is real: the button, MediaRecorder, the webm encode, decodeAudioData, the
+  16 kHz resample, the WAV writer, the POST, whisper.cpp and the composer.
+  NOT covered: getUserMedia itself and the browser permission prompt. That is
+  the one thing at the desk that needs a human to have clicked Allow once, so
+  it is on the pre-demo checklist rather than in a test.

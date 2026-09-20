@@ -5047,3 +5047,265 @@ so the merge had room.
 conversation store the demo writes to on every turn, and llama-server's own
 working set. A full disk on Saturday morning is a demo that does not start, and
 the cause would have been a test script.
+
+### 2026-09-19 The fine-tune ran. Loss 1.58 to 0.69, 189 seconds, and it is LoRA not QLoRA
+
+**The model is trained.** 120 pairs, 124 examples, 2 epochs, 30 optimizer steps,
+189 s on one A6000. Loss 1.5787 at step 1 to 0.6851 at step 32, mean 1.0210.
+Adapter 40 MB, merged bf16 7.5 GB, both downloaded and hash-verified against the
+instance. Full record in `01-data/eval/runs/2026-09-19-brev-qlora-trained.txt`.
+Instance `steel26-qlora3` deleted at 18:54:59 after 30 minutes, about $0.34.
+Three attempts tonight came to about $0.67 of the $59 credit.
+
+**Attempts 1 and 2 died of the same thing and I misread it the first time.** Both
+OOMed on a 48 GB card training a 4 B model, which should be comfortable. I
+blamed reentrant gradient checkpointing and fragmentation, fixed both, and the
+probe still asked for 47.29 GiB of 47.40. The real cause is that without
+`mamba_ssm` and `causal_conv1d` installed, transformers runs the Mamba2 mixer as
+a reference PyTorch loop that materialises the whole intermediate state for the
+backward pass. 21 of the 42 blocks are Mamba2. The fix was the missing kernels,
+not the memory flags.
+
+**The kernels do not build from source in any time worth spending, so pin torch
+down to the wheels.** Prebuilt `mamba_ssm` 2.3.2.post1 and `causal_conv1d` 1.7.0
+exist for cu13 + torch 2.10 + cxx11abiTRUE + cp310. The image ships torch 2.14,
+so torch went DOWN to 2.10.0+cu130 first and the wheels then imported. With them
+live the probe peaked at 21.29 GiB reserved with 26 GiB spare, and a
+forward+backward on the longest example took 0.76 s, 2149 tok/s. That is the
+whole difference: same card, same model, 47.29 GiB to 21.29 GiB.
+
+**Then 4-bit stopped being possible, and this is the part to remember.** With the
+fused kernel live, the mixer calls `mamba2_split_conv1d_scan_combined` and hands
+it `in_proj`'s and `out_proj`'s weight tensors to multiply itself. Under
+bitsandbytes those are packed 4-bit blobs, so it dies on shape:
+`mat1 and mat2 shapes cannot be multiplied (2752x7680 and 1x12042240)`. Batch 1
+fails identically, so it is not batch size. Excluding `out_proj` from
+quantisation moves the error to `in_proj`; excluding both leaves the `in_proj`
+error and raises the footprint 3.36 to 5.09 GB, so the exclusion partly applies
+but the tensor the kernel touches stays packed.
+
+**So on one 48 GB card you get fused kernels or a 4-bit base, not both.** I took
+the kernels and loaded the base in bf16: 7.95 GB of weights, 21 GB peak, fits
+easily. The adapter is unchanged, 50 of 50 matched modules per constraint 10,
+rank 16, alpha 32, the same six targets, the same data, merged to bf16 as
+planned. **The Q in QLoRA was a memory technique and the memory came from
+somewhere else instead.** Nothing about what the adapter learned depends on it.
+The one real difference is that training saw unquantised weights while the demo
+ships Q4_K_M, and step 6 measures exactly that.
+
+**Two smaller things.** `mamba_ssm` imported only after `einops`, which my
+`--no-deps` install had skipped; `causal_conv1d` importing on its own is what
+proved the ABI was right and stopped me deleting the instance over it. And the
+merge failed at save time because Nemotron's own `generation_config` sets
+`top_p` 0.95 and `temperature` 1.0 with `do_sample` false, which transformers
+5.17 refuses to save. Training was already finished, so the merge is now its own
+stage that clears those fields rather than a reason to repeat the run.
+
+**Not yet done:** F16 convert, imatrix, Q4_K_M, and the base-versus-tuned score
+on the frozen 22-case held-out set. 12 GiB free locally against an F16 of about
+7.9 GB plus a Q4_K_M of 2.8 GB, so `03-model/hf-bf16` or the merged safetensors
+goes before that finishes.
+
+### 2026-09-19 Voice input: whisper.cpp in the composer, and the transcript is editable
+
+Epic 5's STT, built on the laptop demo. The mic button sits in the composer,
+tap to record and tap to stop, and **what comes back goes in the box as
+editable text**. It never starts an assessment. That is the whole safety
+argument: a misheard symptom is a wrong verdict, so the person reads what the
+system heard and fixes it before assessing. `06-demo/voice.py`,
+`06-demo/static/js/voice.js`, `03-model/whisper/build.sh`.
+
+**The model is ggml-base.en-q5_1, 57 MB, chosen by measurement.** Six models on
+13 clips, 85 s of audio, 6 voices, in
+`01-data/eval/runs/2026-09-19-whisper-model-choice.txt`.
+
+| model | size | peak RSS | CPU x realtime | WER |
+|---|---|---|---|---|
+| tiny.en-q5_1 | 30.7 MB | 195 MB | 0.092x | 2.80% |
+| **base.en-q5_1** | **57.0 MB** | **265 MB** | **0.146x** | **2.10%** |
+| base.en | 141 MB | 364 MB | 0.149x | 2.45% |
+| small.en-q5_1 | 181 MB | 543 MB | 0.317x | 2.45% |
+| small.en | 465 MB | 832 MB | 0.359x | 2.45% |
+
+**tiny is out on one word:** it turned "angina" into "anginone" and dropped
+"stent", which are words this corpus is made of. **small does not earn its 3.2x
+size:** it alone got "ramipril" right, and it alone invented "walking to the
+shock" for "shop" and dropped "aches", so the WER is a wash. **q5_1 against f16
+is one word in 286**, which is noise, so the honest claim is no measurable
+quantisation loss at 40% of the size. **Negation and laterality held in every
+model** including tiny: "I am not pregnant", "No fever, no cough", "It is not
+the left side, it is the right side". That was the failure I most expected,
+because a flipped negation flips a guard, and it did not appear once.
+
+**CPU, not Metal.** Metal is 2.3x faster but CPU is already under a second and
+CPU is the condition every other number here is quoted in. One flag to change.
+
+**Load and unload was settled by measuring rather than assuming.** Model load
+is 46 ms against 265 MB resident, so there is no case for holding it next to a
+3 GB LLM. One process per transcription, and the memory is gone when it
+returns. Confirmed on the server path: whisper-cli peaked at 265 MB and the
+demo server's own RSS did not grow.
+
+**Timings, on the live server path:** 6.2 s of speech in 455 to 528 ms, 25 s in
+829 ms. Cold, before the model file is in the page cache, the same clips took
+969 ms and 1598 ms. Wall time has a floor of about 0.5 s and grows slowly,
+because whisper always encodes a fixed 30 s window whatever the clip length.
+Against a 40 s triage turn none of this is visible.
+
+**No ffmpeg on the server.** MediaRecorder gives webm/opus at 48 kHz and
+whisper wants 16 kHz mono PCM, so the page decodes and resamples with
+`decodeAudioData` into an `OfflineAudioContext` and writes the WAV header in
+JS. Verified: transcripts through that path are byte-identical to transcribing
+the original WAV, on a 6 s and a 25 s clip. It is also what a React Native
+recorder would hand over directly.
+
+**The microphone cannot work over `--lan`, confirmed rather than assumed.**
+Same page served on 0.0.0.0, read from two origins in real Chrome:
+
+```
+http://127.0.0.1:8899    isSecureContext=true   mediaDevices=object
+http://10.6.13.168:8899  isSecureContext=false  mediaDevices=undefined
+```
+
+Over the wifi `navigator.mediaDevices` does not refuse, it does not exist. The
+fix would be TLS with a trusted cert on a LAN IP, which is not a hackathon job.
+So the button is absent there with a reason, in the same voice as the rest of
+the phone wording: "Voice needs a secure connection. Browsers only allow the
+microphone on the laptop itself, not over a plain address on the wifi."
+Verified live at 390x844 over the wifi.
+
+**WHISPER INVENTS SENTENCES OUT OF NON-SPEECH, and that is the finding worth
+keeping.** Found by accident when the check harness fed Chrome's built-in beep
+instead of my file. Measured with this model:
+
+| input | what came back |
+|---|---|
+| digital silence | " you" |
+| gaussian noise, peak 0.004 | "(crickets chirping)" |
+| gaussian noise, peak 0.046 | "(clippers whirring)" |
+| gaussian noise, peak 0.206 | "(machine whirring)" |
+| Chrome's test beep | "Oh, my God. Oh, it can't get us back in the fight." |
+| Chrome's test beep, again | "This is also what you're supposed to do with computers in all air cooling." |
+
+The parenthesised ones are already dropped, because `clean()` returns empty
+when the whole transcript is bracketed non-speech annotation. **A bare
+hallucinated sentence has nothing about it to catch.** So there is now a peak
+floor: under 0.01 of full scale the audio is refused with "nothing reached the
+microphone". That is 78x below the quietest clip in the model-choice set (p3,
+peak 0.779), so it cannot refuse a quiet voice, and it catches the case that
+actually happens, which is a muted or dead microphone. **It does not catch a
+hallucination from real room noise and nothing here claims to.** What catches
+that is the person reading the box before sending, which is the design.
+
+**The transcript rides on the turn, and the SOAP note says so.** Viraj's call:
+a clinician reading quoted words is entitled to know a machine heard them and
+whether the patient corrected it. So `/api/transcribe` returns an id, the
+server keeps what it produced in a bounded in-memory ring of 32, and on the
+turn it decides `edited` itself by comparing the text that arrived against the
+text it transcribed. **It is a server-side fact, not the page's claim.** The S
+section reads:
+
+```
+   01:26 UTC  first: "heavy pressure in the middle of my chest that has not
+      let up for almost half an hour. It spread to my jaw."
+      Source: spoken, not typed. Transcribed on this machine by whisper.cpp
+         base.en-q5_1 in 0.5 s from 4.26 s of speech, then CORRECTED by the
+         patient before sending.
+      Heard as: "heavy pressure in the middle of my chest that has not let up
+         for almost half an hour."
+```
+
+**Nothing reads it on the way to the model.** The prompt is still built from
+text and timeline alone, so voice changes no verdict. The Checked line gains
+`heard 0.5 s` and the details panel gains a Heard row above Retrieve.
+
+**`brew install whisper.cpp` was not used, deliberately.** `--dry-run` reports
+"Would upgrade 3 dependencies" and two of them are llama.cpp 0.4.0 and ggml
+0.23.0, the ones every latency number in this log was measured on. Upgrading
+llama.cpp four days from judging puts `--jinja`, `-np 2` and nemotron_h support
+back in play to buy nothing. `03-model/whisper/build.sh` builds v1.9.4 from
+source, vendors the binary with its rpath repointed at `@executable_path` and
+re-signed, fetches the model, and self-tests by saying a sentence and checking
+it comes back. It touches no installed formula.
+
+**The check harness: `node 06-demo/ui_check.mjs voice OUTDIR [URL]`.** 15
+checks, all passing, live against llama-server. It proves the property that
+matters: the words land in the composer, `location.pathname` is still `/`, and
+no answer started. Then it edits the text, sends, and checks the Heard row, the
+details panel and the SOAP note.
+
+**Chrome's own fake microphone does not work in Chrome 153 headless.**
+`--use-file-for-fake-audio-capture` was tried with and without
+`--use-fake-device-for-media-capture`, at 16 kHz and 48 kHz, with and without
+`%noloop`, and with an absolute path. Every combination fed the page Chrome's
+built-in beep, which is where two of the hallucinations in the table above came
+from. `--headless=old`, which used to honour the flag, is removed in this
+version. So the check replaces the audio SOURCE at page level and everything
+downstream of it is real: the button, MediaRecorder, the webm encode,
+decodeAudioData, the resample, the WAV writer, the POST, whisper.cpp and the
+composer. **What it does not cover is getUserMedia itself and the permission
+prompt**, which is the one thing at the desk that needs a human to have clicked
+Allow once. That is now on the pre-demo checklist next to Low Power Mode.
+
+**Regression:** flow, guards, shots and compare all pass unchanged. Beat 3 ran
+in 40.8 s.
+
+**Not measured: a real voice.** Every clip in the model-choice set is macOS
+`say`, which has no room noise, no hesitation and no phone mic. It ranks models
+fairly against the same input and it overstates absolute accuracy for all of
+them. The usual result is that small.en pulls ahead once the audio is dirty,
+and this set cannot see that. Viraj is recording the three presets in his own
+voice and base against small gets re-scored on that before judging.
+
+Results: `06-demo/results/2026-09-19-voice/`,
+`01-data/eval/runs/2026-09-19-whisper-model-choice.txt`.
+
+### 2026-09-19 The tuned model scored against the base on the held-out 22
+
+**The fine-tune works, and the thing it fixed is the thing epic 2 was rewritten
+to fix.** 120 pairs, 2 epochs, the six targets of constraint 10, through the
+conversion chain to Q4_K_M, scored against the base on the frozen 22-case
+held-out set, 3 runs per case, in both chunk conditions.
+
+| condition | base | tuned |
+|---|---|---|
+| matched chunks, per completion | 29/63 = 46.0% | 53/65 = **81.5%** |
+| retrieval chunks, per completion | 27/65 = 41.5% | 50/66 = **75.8%** |
+| matched, majority of 3 | 10/22 = 45.5% | 18/22 = **81.8%** |
+
+**Yellow went from 3/19 to 21/21.** That is the whole result. The base's red
+bias is what the held-out set measures, and on matched chunks every yellow case
+but one came back red. The tuned model gets all 21 yellow completions right.
+Red stays 12/12 on matched chunks. Green moves 43.8% to 62.5%, which is the
+weakest of the three and still the under-sourced side (design gaps).
+
+**Grounding failures went to zero.** Base, matched: 9 of 33 non-red answers
+cited nothing that resolves, so constraint 13 would have refused them, and 1 of
+30 reds cited nothing. Tuned: 0 of 53 and 0 of 12. Same in the retrieval
+condition, 6 of 27 down to 0 of 57. The model no longer stops citing when it is
+reassured, which is the failure recorded under Current state as the reason
+there is no reliable two-verdict comparison.
+
+**One regression, and it is in the dangerous direction.** In the retrieval
+condition HE01, textbook ACS, expected red, comes back **yellow 3 of 3** on the
+tuned model. The base got it red 3 of 3. Red drops 12/12 to 9/12 there, and all
+three lost completions are that one case. On matched chunks the same case is
+red 3 of 3, so this is retrieval handing it something the tuned model reads
+down, not the tune losing ACS outright. **It needs Viraj's eye before this
+ships**, because an under-triaged heart attack is the one error the whole
+project is built to avoid, and it is invisible in the headline number.
+
+**Reasoning leaks 0 in all four runs** (constraint 5). Errors: 3 base matched,
+1 base retrieval, 1 tuned matched, 0 tuned retrieval, all truncation or a read
+timeout, all recorded per case.
+
+Harness `01-data/eval/heldout-eval/score_heldout.py`, raw completions kept as
+`.jsonl` beside each summary. Runs:
+`01-data/eval/runs/2026-09-19-heldout-{base,tuned}-{matched,retrieval}.txt`.
+Conversion chain, every gate of RUNBOOK.md sections 3 to 5 passing:
+`01-data/eval/runs/2026-09-19-tuned-conversion-chain.txt`.
+
+**Not decided: whether it ships.** The demo still loads
+`03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf`. Nothing about the demo
+path has been swapped, and the three presets have not been run against the
+tuned GGUF yet. Viraj's call.

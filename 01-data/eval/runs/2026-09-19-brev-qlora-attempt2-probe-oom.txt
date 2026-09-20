@@ -1,0 +1,70 @@
+# EPIC 3 STEP 5, ATTEMPT 2: both memory fixes applied, PROBE DID NOT FIT. Deleted without training.
+# instance  steel26-qlora2, massedcompute_A6000_plus, $0.68/hr. created 18:07:42 EDT, delete confirmed
+#           18:13:05 EDT. About 5.5 minutes, about $0.06. The probe is why it was 5 minutes and not 30.
+# fixes     PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True, set before torch imports, and
+#           gradient_checkpointing_kwargs={'use_reentrant': False} through prepare_model_for_kbit_training.
+#           Both confirmed live in the run output, and checkpointing reported True.
+# probe     one forward and backward on the longest example (1633 tokens), labels over the whole
+#           sequence, which is strictly more work than any real training step.
+
+== probe 18:11:32 EDT
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+torch 2.14.0+cu130  transformers 5.17.0
+gpu NVIDIA RTX A6000, 51 GB
+bitsandbytes 0.50.2  peft 0.21.0  trl 1.13.0
+data: 120 pairs -> 124 examples, tokens min 915 median 1235 max 1633, 153810 per epoch
+verdicts: {'yellow': 61, 'red': 32, 'green': 31}
+[transformers] The following generation flags are not valid and may be ignored: ['top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+loaded 4-bit: 3.22 GB on device
+gradient checkpointing: True, kwargs {'use_reentrant': False}, PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+LoRA matched 50 modules: {'up_proj': 17, 'down_proj': 17, 'q_proj': 4, 'k_proj': 4, 'v_proj': 4, 'o_proj': 4}
+trainable 10,119,168 of 2,408,601,184 (0.420%)
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `mamba_chunk_scan_combined` is falling back to its reference PyTorch implementation because `mamba_ssm` is not installed. This is correct but much slower; install `mamba_ssm` for the optimized kernel.
+[W919 22:11:45.550393436 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 10813440, total: 50897289216).
+[W919 22:11:46.042803230 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 6619136, total: 50897289216).
+[W919 22:11:47.840537939 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 2424832, total: 50897289216).
+[W919 22:11:48.628571793 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 4521984, total: 50897289216).
+[W919 22:11:48.632349217 CUDACachingAllocator.cpp:528] expandable_segments: memory mapping failed with OOM on device 0 while trying to map 20971520 bytes (free: 4521984, total: 50897289216).
+PROBE DID NOT FIT at 1633 tokens: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacity of 47.40 GiB of which 104.31 MiB is free. Including non-PyTorch memory, this process has 47.29 GiB memory in use. Of the al
+probe exit 0
+== done 18:11:49 EDT
+
+=== what the run says the cause is
+Two warnings from transformers, both in this run:
+
+  `causal_conv1d_fn` is falling back to its reference PyTorch implementation
+  because `causal_conv1d` is not installed.
+  `mamba_chunk_scan_combined` is falling back to its reference PyTorch
+  implementation because `mamba_ssm` is not installed.
+
+That is the memory. 21 of the 42 blocks are Mamba2, and the reference chunked
+scan materialises the per-chunk states the fused kernel never holds. With
+chunk_size 256, 96 heads, head_dim 80 and 8 groups, one such intermediate is
+gigabytes per layer at 1633 tokens, and gradient checkpointing does not help:
+checkpointing frees activations BETWEEN layers, while the peak here is INSIDE
+one layer's recompute.
+
+The allocator flag worked and was not the limit: expandable_segments itself
+logged mapping failures at 10 MB free, and the failing allocation was 168 MiB
+against 104 MiB free. The card was genuinely full, not fragmented.
+
+So attempt 1's diagnosis was half right. use_reentrant=False was a real bug and
+is fixed: checkpointing now reports True. It was not the binding constraint.
+
+FOR ATTEMPT 3, cheapest first:
+  1. chunk_size at load. config.json sets 256; it is an implementation detail of
+     the chunked scan, mathematically equivalent at any value, and the fallback's
+     largest intermediate scales with it. from_pretrained(..., chunk_size=64).
+     Free, no effect on what is learned. Probe 256, 128, 64, 32 in one run, each
+     about a minute, and take the first that fits with headroom.
+  2. Install mamba_ssm and causal_conv1d. This is the proper fix and it is also
+     the fast path; the same warnings say the fallbacks are "much slower", which
+     is a cost problem as well as a memory one. Risk: a CUDA source build against
+     torch 2.14+cu130, 10 to 30 minutes on the meter, and it may not have wheels.
+  3. An 80 GB card. Certain on memory, roughly 2 to 3 times the rate, and still
+     slow without the kernels.
+  NOT shortening the prompts: their length is the retrieved context, per Viraj.
+
+Also measure step time in the next probe. If the fallback is slow enough, 2
+epochs over 124 examples may cost more than the card upgrade would.

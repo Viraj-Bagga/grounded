@@ -215,14 +215,14 @@ class Engine:
 
     # ------------------------------------------------------------- the turn
 
-    def run_turn(self, cid, si, text, timeline, confirmed, send):
+    def run_turn(self, cid, si, text, timeline, confirmed, send, heard=None):
         key = (cid, si)
         with self._busy_lock:
             if key in self._busy:
                 raise Busy()
             self._busy.add(key)
         try:
-            self._turn(cid, si, text, timeline, confirmed, send)
+            self._turn(cid, si, text, timeline, confirmed, send, heard)
         finally:
             with self._busy_lock:
                 self._busy.discard(key)
@@ -254,7 +254,7 @@ class Engine:
         self.conversations.update(cid, apply)
         return left["n"]
 
-    def _turn(self, cid, si, text, timeline, confirmed, send):
+    def _turn(self, cid, si, text, timeline, confirmed, send, heard=None):
         conv = self.conversations.get(cid)
         side = conv["sides"][si]
         prof, ptext = side["profile"], side["profile_text"]
@@ -263,12 +263,21 @@ class Engine:
         n = len(side["turns"]) + 1
         t0 = time.time()
 
+        # WAS THIS SPOKEN, AND DID THE PERSON CORRECT WHAT WAS HEARD.
+        # It rides on the turn and on its event, so the live page, the saved
+        # assessment and the SOAP note all say the same thing about where the
+        # words came from. NOTHING READS IT ON THE WAY TO THE MODEL: the prompt
+        # is still built from text and timeline alone, and voice changes no
+        # verdict. None when the turn was typed, which is the common case.
+        heard_bit = {"heard": heard} if heard else {}
+
         def emit(event, payload):
-            send(event, payload if event == "token" else {**who, **payload})
+            send(event, payload if event == "token" else {**who, **heard_bit, **payload})
 
         def turn_record(kind, event, reached=False, **extra):
             return dict(n=n, at=now_iso(), text=text, timeline=timeline, kind=kind,
-                        event=event, reached_model=reached, **extra)
+                        event={**event, **heard_bit}, reached_model=reached,
+                        **heard_bit, **extra)
 
         if not first and self.followups_left(side) <= 0:
             emit("full", {"message": "This assessment has used its follow-ups. "

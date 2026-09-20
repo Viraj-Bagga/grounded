@@ -33,6 +33,12 @@ THE API
   GET    /api/conversations/<id>          one assessment, every turn
   POST   /api/conversations/<id>/turn     one turn for one side, streamed
   GET    /api/chunk/<key>                 the real chunk text and its source
+  POST   /api/transcribe                  speech to text, on this machine
+
+VOICE IS INPUT, NOT A SHORTCUT. /api/transcribe returns text and nothing else.
+It never starts an assessment. The transcript lands in the composer for the
+person to read and fix before they send it, because a misheard symptom is a
+wrong verdict. See voice.py.
 
 STREAMING IS NOT DECORATION. Generation runs at 9.5 to 10 tok/s on CPU, so a
 200-token answer is about 20 s and a whole first turn is 40 s or more. Forty
@@ -47,6 +53,8 @@ saved even if its tab closes. See pipeline.py and store.py.
 """
 
 import argparse
+import base64
+import binascii
 import json
 import os
 import socket
@@ -63,6 +71,7 @@ sys.path.insert(0, str(HERE))
 
 import pipeline  # noqa: E402
 import soap  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
+import voice  # noqa: E402
 from guards import is_child_profile, load_registry  # noqa: E402
 from escalation import verify_grounding  # noqa: E402
 from store import (SEED_PEOPLE, ConversationStore, PeopleStore,  # noqa: E402
@@ -70,6 +79,10 @@ from store import (SEED_PEOPLE, ConversationStore, PeopleStore,  # noqa: E402
 
 PORT = 8770
 STATIC = HERE / "static"
+# 60 s of 16 kHz mono 16-bit is 1.92 MB, and base64 adds a third on top. Every
+# other request is small, so the cap is per route rather than one global limit.
+MAX_BODY = 200_000
+MAX_AUDIO_BODY = 4_000_000
 APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions)?/?$")
 
 # The regional add-on packs, read only, for the region selector. They are NOT
@@ -222,7 +235,9 @@ class Handler(SimpleHTTPRequestHandler):
             # A page opened from another machine is a SCREEN: the model runs
             # here. The page words itself from this.
             remote = not str(self.client_address[0]).startswith(("127.", "::1"))
+            v_ok, v_detail = voice.available()
             return self._json({"ok": ok, "detail": detail, "remote": remote,
+                               "voice": {"ok": v_ok, "detail": v_detail},
                                "slots": ENGINE.slots.n,
                                "n_ctx": ENGINE.n_ctx, "sources": _indexed,
                                "registry": len(registry()),
@@ -234,7 +249,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json({"people": [describe(p) for p in PEOPLE.list()]})
         m = re.match(r"^/api/people/([\w-]+)$", path)
         if m:
-            p = PEOPLE.get(m.group(1))
+            # "No profile" is not a person: it has no page and no form.
+            p = None if m.group(1) == "none" else PEOPLE.get(m.group(1))
             return self._json(describe(p)) if p else self._json({"error": "no such person"}, 404)
         if path == "/api/conversations":
             return self._json({"conversations": CONVERSATIONS.summaries()})
@@ -268,9 +284,43 @@ class Handler(SimpleHTTPRequestHandler):
     # --------------------------------------------------------------- POST
     def do_POST(self):
         path = self._route()
+        limit = MAX_AUDIO_BODY if path == "/api/transcribe" else MAX_BODY
+        n = int(self.headers.get("Content-Length") or 0)
+        if n > limit:
+            # Answer 413, do not just hang up. Closing the socket while the
+            # browser is still uploading turns a readable message into a bare
+            # network error on the page, so read the body off the wire first
+            # and only refuse to swallow something absurd.
+            if n <= limit * 2:
+                left = n
+                while left > 0:
+                    chunk = self.rfile.read(min(left, 65536))
+                    if not chunk:
+                        break
+                    left -= len(chunk)
+            else:
+                self.send_header("Connection", "close")
+            return self._json({"error": "that recording is too long to send"}, 413)
         body = self._body()
         if body is None:
             return self._json({"error": "the request body is not JSON"}, 400)
+
+        # SPEECH TO TEXT, AND NOTHING ELSE. No model call, no retrieval, no
+        # conversation touched. It returns what it heard plus an id, and the
+        # page decides what to do with the words. The id is how the turn later
+        # proves the symptoms were spoken: see voice.provenance.
+        if path == "/api/transcribe":
+            try:
+                wav = base64.b64decode(body.get("audio") or "", validate=True)
+            except (binascii.Error, ValueError):
+                return self._json({"error": "the audio did not decode"}, 400)
+            try:
+                heard = voice.transcribe(wav)
+            except voice.Bad as e:
+                return self._json({"error": str(e)}, 400)
+            except Exception as e:                      # a dead binary, a full disk
+                return self._json({"error": f"transcription failed: {e}"}, 500)
+            return self._json({**heard, "id": voice.remember(heard)})
 
         if path == "/api/people":
             person, errors = PEOPLE.create(body)
@@ -312,6 +362,12 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json({"error": "keep it under 2,000 characters"}, 400)
         if si in ENGINE.busy(cid):
             return self._json({"error": "this answer is still being written"}, 409)
+        # Whether these symptoms were spoken, and whether the person corrected
+        # what was heard. Decided HERE, by comparing the text that arrived with
+        # the text this machine produced, rather than reported by the page: the
+        # SOAP note states it to a clinician, so it has to be a fact. None when
+        # the turn was typed, or when the transcript has aged out of _RECENT.
+        heard = voice.provenance(str(body.get("heard_id") or ""), text)
 
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
@@ -331,7 +387,8 @@ class Handler(SimpleHTTPRequestHandler):
                 gone["yes"] = True
 
         try:
-            ENGINE.run_turn(cid, si, text, timeline, bool(body.get("confirmed_subject")), send)
+            ENGINE.run_turn(cid, si, text, timeline, bool(body.get("confirmed_subject")),
+                            send, heard=heard)
         except pipeline.Busy:
             send("error", {"message": "This answer is still being written."})
         except Exception as e:  # never leave the page hanging on a dead server

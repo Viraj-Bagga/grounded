@@ -11,16 +11,17 @@
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
 //   node 06-demo/ui_check.mjs phone OUTDIR URL      a phone on the wifi: over the network, touch, 390x844
+//   node 06-demo/ui_check.mjs voice OUTDIR [URL]    the microphone, with a known WAV played into it
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
 //   node 06-demo/ui_check.mjs review OUTDIR IDS     the finish review's screenshots (six ids, comma-separated)
 //
 // Needs the demo server on 8770 and, for the live flows, llama-server on 8080.
 // Every check prints PASS or FAIL; the exit code is the number of failures.
 
-import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
+import { spawn, execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync, readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 let APP = "http://127.0.0.1:8770";
@@ -35,12 +36,53 @@ function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail && !ok ? `  (${detail})` : ""}`);
 }
 
-async function launch() {
+// A known sentence, spoken by the OS, played into the page's microphone.
+// Written here rather than checked in, because `say` produces exactly the
+// 16 kHz mono 16-bit WAV that whisper.cpp wants.
+const VOICE_LINE = "Heavy pressure in the middle of my chest that has not let up for almost half an hour.";
+function makeSpokenWav(dir) {
+  const wav = resolve(dir, "spoken.wav");
+  execFileSync("/usr/bin/say", ["-v", "Samantha", "-o", wav,
+    "--data-format=LEI16@16000", "--channels=1", VOICE_LINE]);
+  return wav;
+}
+
+// WHY getUserMedia IS REPLACED AND CHROME'S OWN FAKE MICROPHONE IS NOT USED.
+// --use-file-for-fake-audio-capture does not work in Chrome 153 headless:
+// measured 2026-09-19 across both flag combinations and both sample rates, the
+// page received Chrome's built-in beep every time and whisper hallucinated a
+// sentence out of it ("This is also what you're supposed to do with computers
+// in all air cooling"). --headless=old, which used to honour the flag, was
+// removed in this version. So the audio SOURCE is substituted here and
+// everything downstream of it is real: the button, MediaRecorder, the webm
+// encode, decodeAudioData, the 16 kHz resample, the WAV writer, the POST,
+// whisper.cpp, and what lands in the composer. What this does NOT cover is
+// getUserMedia itself and the browser's permission prompt, which is the one
+// thing at the desk that needs a human to have clicked Allow once.
+async function installFakeMic(p, wav) {
+  const b64 = readFileSync(wav).toString("base64");
+  return p.eval(`(async () => {
+    const bin = atob("${b64}");
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const ac = new AudioContext();
+    const decoded = await ac.decodeAudioData(bytes.buffer);
+    navigator.mediaDevices.getUserMedia = async () => {
+      const dest = ac.createMediaStreamDestination();
+      const src = ac.createBufferSource();
+      src.buffer = decoded; src.connect(dest); src.start();
+      return dest.stream;
+    };
+    return +decoded.duration.toFixed(2);
+  })()`);
+}
+
+async function launch(extra = []) {
   // Thrown away in the finally below. Left behind, these are about 45 MB each,
   // and 73 of them filled the disk on 2026-09-19, the night before judging.
   const profile = mkdtempSync(join(tmpdir(), "ui-check-"));
   const proc = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", ...extra, "about:blank"], { stdio: "ignore" });
   for (let i = 0; i < 100; i++) {
     try { await (await fetch(`http://127.0.0.1:${PORT}/json/version`)).json(); proc.profile = profile; return proc; }
     catch { await sleep(100); }
@@ -156,9 +198,10 @@ async function flow(out) {
   await p.size(DESKTOP);
   await p.go("/?p=mum");
   await p.click('[data-preset="0"]');
-  check("a preset keeps the person picked", /Mum/.test(await p.text("#chips [aria-pressed=true]")));
-  check("the preset fills the composer", await p.eval(
-    "document.querySelector('#ta').value === document.querySelector('[data-preset=\"0\"] .snip').textContent"));
+  // A preset's own person is a default for when nobody is picked; it never
+  // overrides a person the user chose, and ?p=mum chose one.
+  check("a preset keeps the person picked", /Mum/.test(await p.text("[data-for-name]")));
+  check("the preset fills the composer", (await p.eval("document.querySelector('#ta').value")).length > 40);
   await p.click("#send");
   await p.until("document.querySelector('[data-live] .steps4')", 30000);
   check("the URL becomes the assessment's own", /^\/c\//.test(await p.eval("location.pathname")));
@@ -235,9 +278,12 @@ async function compare(out) {
   const t0 = Date.now();
   await p.click('[data-preset="2"]');
   await p.until("location.pathname.startsWith('/c/') && document.querySelector('[data-live]')", 30000);
-  check("preset 3 turns Compare on by itself", await p.eval("document.querySelector('#chips [data-compare]').getAttribute('aria-pressed')") === "true");
+  check("preset 3 turns Compare on by itself", await p.eval(`(() => {
+    const t = document.querySelector("[data-for-name]").innerText.replace(/\\s+/g, " ");
+    return /You\\s*A/.test(t) && /Mum\\s*B/.test(t);
+  })()`) === true);
   check("preset 3 sets You against Mum", /^You\s*A\s*Mum\s*B$/.test(
-    (await p.eval("[...document.querySelectorAll('#chips .chip[aria-pressed=true]:not([data-compare])')].map(c => c.innerText).join(' ')")).trim()));
+    (await p.text("[data-for-name]")).trim()));
   check("preset 3 sends by itself", /^\/c\//.test(await p.eval("location.pathname")));
   await p.until(`document.querySelectorAll("#thread .bar, #thread .err-panel").length >= 2 && !document.querySelector("[data-live] .steps4")`, 300000, 300);
   await sleep(700);
@@ -354,7 +400,13 @@ async function people(out) {
   await p.until("location.pathname === '/people'", 10000);
   const made = (await (await fetch(`${APP}/api/people`)).json()).people.filter(x => x.label === name);
   check("the new person is saved and listed", made.length === 1 && (await p.text(".people")).includes(name));
-  check("the new person gets a chip", (await p.text("#chips")).includes(name));
+  // The chip row is gone; a new person has to reach the picker instead.
+  await p.go("/");
+  await p.click("#forwho");
+  await p.until("document.querySelector('#picker[open]')", 5000);
+  check("the new person is offered in the picker", (await p.text("#picker-body")).includes(name));
+  await p.click("#picker-x");
+  await p.go("/people");
   const id = made[0] && made[0].id;
   if (!id || SEEDED.has(id)) throw new Error(`refusing to delete ${id}: not the throwaway person`);
   await p.go(`/people/${id}`);
@@ -535,13 +587,30 @@ async function phone(out, base) {
   check("it closes again on the scrim",
     await p.eval("!document.querySelector('#side').classList.contains('open')"));
 
-  check("the chip row scrolls sideways instead of wrapping", await p.eval(
-    "(c => c.scrollWidth > c.clientWidth + 4)(document.querySelector('#chips'))"));
-  check("Compare stays pinned in the bar at this width", await p.eval(
-    "getComputedStyle(document.querySelector('#compare-narrow')).display !== 'none'"));
-  await p.click('#chips [data-person="mum"]');
+  // Who this is for sits above the composer now, not across the top bar.
+  check("the top bar is the menu and a new assessment, nothing else", await p.eval(
+    "document.querySelectorAll('.top button, .top a').length === 2 && !document.querySelector('#chips')"));
+  check("it opens on nobody, so a typed question carries no profile",
+    /No profile/.test(await p.text("[data-for-name]")));
+  check("the who-line is above the composer and within reach", await p.eval(`(() => {
+    const f = document.querySelector("#forwho").getBoundingClientRect();
+    const c = document.querySelector(".composer").getBoundingClientRect();
+    return f.top >= c.top - 1 && f.bottom <= window.innerHeight;
+  })()`));
+  await p.click("#forwho");
+  await p.until("document.querySelector('#picker[open]')", 5000);
   await sleep(250);
-  check("a chip selects the person it names", /Mum/.test(await p.text("#chips [aria-pressed=true]")));
+  check("the picker opens as a bottom sheet, full width", await p.eval(`(() => {
+    const r = document.querySelector("#picker").getBoundingClientRect();
+    return Math.abs(r.width - window.innerWidth) < 2 && Math.abs(r.bottom - window.innerHeight) < 2;
+  })()`));
+  check("it offers Compare and every person", await p.eval(
+    "!!document.querySelector('#picker-body [data-compare]') && document.querySelectorAll('#picker-body [data-person]').length >= 7"));
+  await p.shot(join(out, "phone-picker.png"));
+  await p.click('#picker-body [data-person="mum"]');
+  await sleep(300);
+  check("picking a person closes the sheet and names them", await p.eval("!document.querySelector('#picker').open")
+    && /Mum/.test(await p.text("[data-for-name]")));
 
   await p.click('[data-preset="0"]');
   check("a preset fills the composer", (await p.eval("document.querySelector('#ta').value")).length > 20);
@@ -655,12 +724,99 @@ async function review(out, ids) {
   await p.close();
 }
 
+// THE MICROPHONE, END TO END. Chrome's fake capture device plays a known WAV
+// into a real getUserMedia, so this exercises MediaRecorder, the 16 kHz
+// resample, /api/transcribe and whisper.cpp, not a stub. What it is really
+// here to prove is the safety property: voice FILLS THE BOX AND NEVER
+// ASSESSES. With a URL it checks the other half, that over the wifi the button
+// is absent with a reason rather than present and broken.
+async function voice(out, url) {
+  if (url) APP = url;
+  const p = await tab();
+  await p.size(url ? PHONE : DESKTOP);
+  if (url) await p.handset();
+  await p.go("/");
+
+  if (url) {
+    // A plain http address on the wifi is not a secure context, so
+    // navigator.mediaDevices does not exist there. Measured 2026-09-19.
+    check("no microphone over the wifi", await p.count("#mic") === 0);
+    const why = await p.text("#heard-slot");
+    check("the page says why", /secure connection/i.test(why), why);
+    await p.shot(join(out, "voice-phone-no-mic.png"));
+    await p.close();
+    return;
+  }
+
+  check("the composer offers a microphone", await p.count("#mic") === 1);
+  const spoken = await installFakeMic(p, makeSpokenWav(out));
+  console.log(`      speaking ${spoken} s into the page`);
+  await p.click("#mic");
+  await p.until("document.querySelector('#mic.on')", 10000);
+  check("tapping starts recording", await p.count("#mic.on") === 1);
+  check("send is closed while recording", await p.eval("document.querySelector('#send').disabled"));
+  await p.shot(join(out, "voice-recording.png"));
+  await sleep(spoken * 1000 + 900);       // let the whole sentence play through
+  await p.click("#mic");
+  await p.until("document.querySelector('#ta').value.length > 20", 60000);
+
+  const said = await p.eval("document.querySelector('#ta').value");
+  check("the words land in the composer", /middle of my chest/i.test(said), said);
+  check("nothing was sent", await p.eval("location.pathname") === "/");
+  check("no answer started", await p.count("[data-live]") === 0);
+  const heard = await p.text("#heard-slot");
+  check("the transcription time is shown", /Heard in [\d.]+ s/.test(heard), heard);
+  check("it says to check the words", /Read it before you send/.test(heard), heard);
+  await p.shot(join(out, "voice-transcript.png"));
+
+  // Correcting it is the whole point of putting it in the box, so the line
+  // says when it happened and the SOAP note keeps what was originally heard.
+  await p.eval(`(() => { const e = document.querySelector("#ta");
+    e.focus(); e.value += " It spread to my jaw.";
+    e.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`);
+  await sleep(250);
+  const edited = await p.text("#heard-slot");
+  check("editing is recorded", /then edited/.test(edited), edited);
+  await p.shot(join(out, "voice-edited.png"));
+
+  await sendAndWait(p, "spoken assessment");
+  await p.until("[...document.querySelectorAll('[data-live]')].every(e => !e.querySelector('.steps4'))", 300000, 400);
+  await p.until("!document.querySelector('[data-live]')", 60000);
+  await sleep(800);
+  const line = await p.text(".checked");
+  check("the checked line says it was heard", /heard [\d.]+ s/.test(line), line);
+  await p.click(".checked");
+  const details = await p.text(".details");
+  check("the details panel has a Heard row",
+    /Heard/.test(details) && /on this machine/.test(details), details.slice(0, 240));
+  check("the details panel records the correction",
+    /edited before sending/.test(details), details.slice(0, 240));
+  await p.shot(join(out, "voice-answer-details.png"), true);
+
+  // And the clinical export, which is the reason it rides on the turn at all.
+  const note = await p.eval(`fetch(document.querySelector(".export .link-a").href).then(r => r.text())`);
+  // The note is wrapped to a column, so a sentence can straddle a line break.
+  // Match against the collapsed text, never the laid-out text.
+  const flat = note.replace(/\s+/g, " ");
+  check("the SOAP note says the symptoms were spoken", /spoken, not typed/.test(flat));
+  check("the SOAP note records the correction", /CORRECTED by the patient before sending/.test(flat));
+  check("the SOAP note keeps what was heard", /Heard as: "/.test(flat));
+  check("the SOAP note names the model and the time",
+    /whisper\.cpp base\.en-q5_1 in [\d.]+ s from [\d.]+ s of speech/.test(flat), flat.slice(0, 400));
+  writeFileSync(join(out, "voice-soap.txt"), note);
+  console.log(`      saved ${join(out, "voice-soap.txt")}`);
+  await p.close();
+}
+
 const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
-const chrome = await launch();
+// Only the voice check needs an AudioContext that runs without a click.
+// Every other check launches with no media flags at all, exactly as before.
+const chrome = await launch(mode === "voice"
+  ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone }[mode];
+                regions, phone, voice }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

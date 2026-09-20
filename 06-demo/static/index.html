@@ -15,7 +15,7 @@
 THESIS: A triage conversation in the health worker's handset grammar: numbered, bold, one hand in bad light. It refuses the chatbot bubble stack and the soft health-app card grid.
 OWN-WORLD: Paper white, cool chrome grey, near-black ink, one action blue. Triage colours only in full-width urgency bars. Refusal hatched, not-grounded dashed, removed struck through. Atkinson Hyperlegible, its mono for keys and measurements. Square bars, keypad numerals, 6px controls, one drawn icon set.
 STORY: The person says what is happening, watches four steps work, reads the urgency first, then what to do, then why, and opens any source. Follow-ups reuse what was read and say so.
-FIRST VIEWPORT: Person chips across the top, one tap each. Empty: the person's facts, what the app watches for, three numbered presets, the composer at the bottom. Answered: a full-width urgency bar with rule lines pinned under it, then numbered steps.
+FIRST VIEWPORT: Nearly blank. Empty: paper, then bottom-aligned above the composer, three quiet presets, one line of scope, and who this is for. No profile card and no chip row. Answered: a full-width urgency bar with rule lines pinned under it, then numbered steps.
 FORM: The Health Worker's Handset, grounded list position 4, seed 18445d6f.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
@@ -40,17 +40,22 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <div class="main">
     <header class="top">
-      <button class="icon-btn only-narrow" id="menu" type="button" aria-label="Assessments and people" aria-expanded="false" aria-controls="side">
+      <button class="icon-btn" id="menu" type="button" aria-label="Assessments and people" aria-expanded="false" aria-controls="side">
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <div class="chips" id="chips" role="toolbar" aria-label="Who this is for"></div>
-      <button class="icon-btn only-narrow" id="compare-narrow" type="button" aria-label="Compare two people" aria-pressed="false">
-        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="7" height="15" rx="1"/><rect x="13.5" y="4.5" width="7" height="15" rx="1"/></svg></button>
-      <a class="icon-btn only-narrow" href="/" data-link aria-label="New assessment">
+      <span class="grow"></span>
+      <a class="icon-btn" href="/" data-link aria-label="New assessment">
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>
     </header>
     <main id="main" tabindex="-1"><div class="page"><p class="loading">Loading…</p></div></main>
   </div>
 </div>
+
+<dialog class="sheet" id="picker" aria-labelledby="picker-h">
+  <div class="sh-head"><span class="k" id="picker-h">Who is this for?</span>
+    <button class="icon-btn" id="picker-x" type="button" aria-label="Close">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sh-body" id="picker-body" style="padding:0;white-space:normal"></div>
+</dialog>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-k">
   <div class="sh-head"><span class="k" id="sheet-k"></span><span class="n" id="sheet-n"></span>
