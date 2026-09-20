@@ -202,7 +202,8 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 - **Hold Slate** (hold, white text, under the hatch): the no-verdict bars (OUT OF SCOPE, NOT ASSESSED, WHO IS THIS FOR?), the child note, the Under 16 tag. Its dashed form outlines the not-grounded note. Hold is a neutral and never reads as a fourth, milder verdict.
 
 ### Neutral
-- **Paper** (paper): the conversation, forms, controls, the source sheet, and the text colour on red, green and hold bars.
+- **Ground** (ground, #e5e2da under a two-stop gradient): the page itself, behind everything, fixed so the record scrolls over it. **Greige, not cream.** Cream with a clay accent is the house style of every generated page this year; this product keeps its deep blue and takes the beige somewhere cooler and more clinical. Added 2026-09-20.
+- **Paper** (paper, now #fcfbf8): the conversation, forms, controls, the source sheet, and the text colour on red, green and hold bars. Warmed off pure white so it sits on the ground rather than cutting out of it.
 - **Cool Chrome** (chrome): sidebar, top bar, the profile preview panel, people-row hover. A layer around the work, never inside the answer.
 - **Record Well** (well): what the person said, quiet notices, raw model output, confirm panels, hover fill on quiet controls.
 - **Ink** (ink): text, pressed chips, primary buttons, the send button, step numeral borders, the brand square and status lamp.
@@ -213,6 +214,12 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 - **Control Line** (rule-2): borders on unpressed chips, fields, citation chips and the segmented control; disabled fill.
 
 ### Named Rules
+**The Glass Means It Floats Rule.** Added 2026-09-20. Translucency is not decoration and is never applied for effect: it is the single signal that a surface sits ABOVE the record. Glass, with `backdrop-filter`, a lit top hairline and a lift: the sidebar, the top bar, the composer, the source sheet, the picker, the preset buttons on the empty screen. Solid paper, flat: the conversation, the answer, the people list, the base register. **If it scrolls with the content it is paper; if content passes under it, it is glass.** The composer is the densest glass because you type onto it. Where `backdrop-filter` is unsupported, every glass surface falls back to flat chrome; legibility never depends on the effect.
+
+**The Nothing Competes With The Verdict Rule.** The ground is quiet so the urgency bar is loud. It stays full-bleed, square, opaque and weight 800 on a greige ground, where it reads harder than it did on white. No glass, no radius and no shadow is ever applied to it.
+
+**The No Record, No Paper Rule.** The empty screen has not assessed anything, so there is nothing to put on paper: the presets float on the ground as the controls they are. Paper arrives with the first answer.
+
 **The One Saturated Field Rule.** On any screen the urgency bar is the only saturated field. The small red and yellow marks in the history list and the base register are the single allowed exception, because they index past bars. The base register was added to this exception on 2026-09-20, on the same grounds: a register row indexes a past bar exactly as a history row does. Nothing else on that screen carries a triage colour, not a row fill, not a count, not a tag.
 
 **The One Hidden-Text Class Rule.** Text that exists only for a screen reader uses **`.sr`**, in the field app and at base. There is no `.sr-only`: base briefly used that name and `app.css` ended up defining both, which is two names for one thing across 72 rendered places. Added 2026-09-20 after a read of the rendered HTML.
@@ -271,11 +278,11 @@ Flat. Depth comes from tone: chrome around paper, the well for what was said and
 - **Sheet lift, side** (`box-shadow: -8px 0 40px rgb(15 19 24 / .2)`): the source sheet as a full-height right panel from 60rem.
 
 ### Named Rules
-**The Only Overlays Cast Shadows Rule.** Nothing in the page flow has a shadow. If it does not cover the page, it is flat.
+**The Only Floating Things Cast Shadows Rule.** Restated 2026-09-20, having been "Only Overlays". Nothing that scrolls with the record has a shadow. Overlays and the glass chrome that content passes under carry one lift (`--lift`), and the paper sheet carries the same. Everything inside the record stays flat: no answer section, no row and no tag has a shadow.
 
 ## Shapes
 
-Two shapes. Things that are records or states are square: urgency bars, the rule-line frame, the said row, history marks, the brand square, the status lamp, allowance pips, step stripes, the child note. Things you press or type into have a 6px corner: buttons, chips, fields, citation chips, keypad numerals, the segmented control, notices and panels. Small inline word tags ("removed: ...", "flagged, kept") use a 3px corner and removable condition tokens 4px. Borders on controls are 1.5px; hairlines are 1px.
+Three shapes since 2026-09-20. Things that are records or states are square: urgency bars, the rule-line frame, the said row, history marks, the brand square, the status lamp, allowance pips, step stripes, the child note. Things that FLOAT take a 14px corner (`--r-float`): the paper sheet, the composer bar from 60rem, the source sheet, the picker. Things you press or type into have an 8px corner (`--r`, up from 6px): buttons, chips, fields, citation chips, keypad numerals, the segmented control, notices and panels. Small inline word tags ("removed: ...", "flagged, kept") use a 3px corner and removable condition tokens 4px. Borders on controls are 1.5px; hairlines are 1px.
 
 Three line patterns carry state: a 135deg dark hatch (black at 24%, 6px stripe, 12px period) over hold for any no-verdict state, darker rather than lighter so white text never sits on anything lighter than hold itself (6.39:1, WCAG AA at every size); a 1.5px dashed hold border for the not-grounded note; a 1.5px strikethrough in ink-3 for anything a guard removed, always followed by a tag naming why. A dashed tag border marks a Sample profile and a dashed step stripe marks a skipped step.
 
@@ -365,7 +372,9 @@ Viraj to put in his own voice.
 - **Don't** put what the person said in a chat bubble, or align it right.
 - **Don't** group answer sections into rounded cards or a card grid.
 - **Don't** fill a button or a selected state with blue.
-- **Don't** add shadows to anything that does not cover the page.
+- **Don't** add shadows to anything that scrolls with the record. A lift belongs to floating chrome and to the paper sheet, nothing else.
+- **Don't** put glass on the urgency bar, or on anything inside the answer. Glass says "this floats", and the verdict does not float.
+- **Don't** let legibility depend on `backdrop-filter`. Every glass surface has a flat fallback.
 - **Don't** use emoji or text glyphs as icons.
 - **Don't** reword the dispositions, refusal messages or rule lines; they are Viraj's copy.
 - **Don't** show the raw model stream by default.
