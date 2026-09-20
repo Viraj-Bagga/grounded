@@ -182,6 +182,14 @@ a.link-btn { text-decoration: none; }
 .det h3 { font: 700 var(--t-15) var(--font); color: var(--ink-2); margin: .875rem 0 .25rem; }
 .det p, .det li { color: var(--ink); }
 .det ul, .det ol { margin: .25rem 0; padding-left: 1.25rem; }
+/* Each turn is its own block, so a follow-up sits under the answer it
+   followed rather than replacing it. */
+.turn-block { border-left: 3px solid var(--rule); padding-left: .875rem; margin: .875rem 0; }
+.turn-h { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  font: 700 var(--t-15) var(--font); color: var(--ink-2); margin: 0 0 .5rem; }
+.det h4 { font: 700 var(--t-14) var(--font); color: var(--ink-2); margin: .75rem 0 .25rem; }
+.saidq.small { font-size: var(--t-15); margin: .25rem 0 .625rem; padding: .5rem .625rem; }
+
 .rulep { background: var(--well); border-radius: var(--r); padding: .625rem .75rem; margin: .5rem 0;
   font-size: var(--t-15); }
 .rulep .q { color: var(--ink-2); font-style: italic; }

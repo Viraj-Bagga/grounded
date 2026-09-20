@@ -1,0 +1,41 @@
+A BASE ROW SUMMARISES THE WHOLE ASSESSMENT, NOT ITS LAST TURN
+2026-09-20, fixing the finding from the rehearsal.
+
+THE BUG. base_server.row() read only the last shown turn, so a follow-up
+erased everything the first turn did. Aunt Sue's row in the rehearsal:
+
+  turn 1  result  red  rules=[R4:raised]    dropped={next_steps: 4, rationale: 1}
+  turn 2  result  red  rules=[R4:supports]  dropped={}
+  row showed: rules=[R4:supports] removed=0  ->  Attention rendered "—"
+
+It bit twice. A supervisor scanning the register could not see that the
+assessment had been escalated or modified. And because the outstanding rule
+counts removals, anything flagged only by a guard removal stopped being
+outstanding the moment a follow-up landed.
+
+THE FIX. Rules are the union across every turn, keeping the strongest status
+per rule, so a rule that RAISED once stays "raised" even if it only supported
+a later turn. Removals are summed across every turn. Ungrounded is true if any
+turn was. Citations are the union. The MARK is still the last shown verdict,
+because that is what the assessment currently says; everything else
+accumulates. The outstanding rule is judged across every verdict the
+assessment has shown, which is the safe direction: something that was red and
+is now green still needs a person to have looked at it.
+
+The detail page shows EVERY turn, each with its own rule line, red flags,
+steps, sources and struck-out removals, with the follow-up's own words above
+it. It used to show the last turn only.
+
+MEASURED, same assessment, after the fix:
+
+  state        red        (still the latest verdict)
+  every state  [red, red]
+  turns        2
+  rules        [R4:raised]   raised: True
+  removed      5             (was 0)
+  citations    CP-PERI-002, CP-ANG-001, CP-PERI-001
+  outstanding  True
+
+On screen the row now reads "raised to red   5 removed" where it read "—".
+
+node 06-demo/ui_check.mjs base: 17 of 17, unchanged.

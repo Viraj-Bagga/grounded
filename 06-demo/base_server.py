@@ -133,35 +133,80 @@ def received():
     return out
 
 
+def _removed_in(ev):
+    return sum(len(v) if isinstance(v, list) else (1 if v else 0)
+               for v in (ev.get("dropped") or {}).values())
+
+
+# Which status wins when the same rule fires on more than one turn. A rule that
+# RAISED a verdict once is the fact worth surfacing, even if it only supported
+# a later one.
+_STATUS_RANK = {"raised": 0, "flag": 1, "at_least": 2, "supports": 3, "noted": 4}
+
+
 def row(b):
-    """One assessment as the dashboard lists it. Everything here comes out of
-    the assessment the field device saved; nothing is recomputed."""
+    """One assessment as the dashboard lists it.
+
+    A ROW SUMMARISES THE WHOLE ASSESSMENT, NOT ITS LAST TURN. Until the
+    rehearsal on 2026-09-20 this read only the last shown turn, so a follow-up
+    erased the first turn's escalation and guard removals from the register:
+    Aunt Sue's row showed "—" in Attention although her first turn had been
+    raised to red by R4 with 5 removals, and because the outstanding rule counts
+    removals, an assessment flagged only by a guard removal stopped being
+    outstanding as soon as a follow-up landed. The data was always here; the
+    summary was throwing it away.
+
+    So: rules are the union across every turn, removals are summed across every
+    turn, ungrounded is true if ANY turn was, and citations are the union.
+
+    The MARK is still the last shown verdict, because that is what the
+    assessment currently says. Everything else accumulates.
+
+    Nothing here is recomputed. It all comes out of what the field device saved.
+    """
     a = b["assessment"]
     sides = []
     for s in a.get("sides", []):
         turns = s.get("turns", [])
-        last = next((t for t in reversed(turns) if t.get("kind") in ("result", "refused", "error")), None)
-        ev = (last or {}).get("event") or {}
-        res = ev.get("result") or {}
-        dropped = ev.get("dropped") or {}
-        removed = sum(len(v) if isinstance(v, list) else (1 if v else 0)
-                      for v in dropped.values())
-        esc = ev.get("escalation") or {}
+        shown = [t for t in turns if t.get("kind") in ("result", "refused", "error")]
+        removed = 0
+        ungrounded = False
+        cites, best = [], {}
+        for t in shown:
+            ev = t.get("event") or {}
+            removed += _removed_in(ev)
+            ungrounded = ungrounded or bool(ev.get("ungrounded"))
+            for k in ((ev.get("result") or {}).get("citations") or []):
+                if k not in cites:
+                    cites.append(k)
+            for f in ((ev.get("escalation") or {}).get("fired") or []):
+                prev = best.get(f["rule"])
+                if prev is None or _STATUS_RANK.get(f["status"], 9) < _STATUS_RANK.get(prev, 9):
+                    best[f["rule"]] = f["status"]
+        # Every verdict this assessment has shown, so the outstanding rule can
+        # judge the whole thing rather than only where it ended up.
+        every = [sync.side_state({"turns": [t]}).get("state") for t in shown]
         sides.append({
             "label": (s.get("profile") or {}).get("label") or "?",
             "state": sync.side_state(s).get("state"),
-            "ungrounded": bool(ev.get("ungrounded")),
-            "citations": res.get("citations") or [],
+            "states": [x for x in every if x],
+            "turns": len(shown),
+            "ungrounded": ungrounded,
+            "citations": cites,
             "removed": removed,
-            "rules": [f"{f['rule']}:{f['status']}" for f in (esc.get("fired") or [])],
-            "raised": bool(esc.get("changed")),
+            "rules": [f"{r}:{st}" for r, st in best.items()],
+            "raised": any(st == "raised" for st in best.values()),
             "said": (turns[0].get("text") if turns else "") or "",
         })
     # OUTSTANDING, per BASE-DESIGN.md section 2: not yet reviewed AND any of
     # red, yellow, refused, or a guard removed something at any urgency. A
     # green with a clean run is not outstanding. One rule, so the count is
     # never arguable.
-    states = [s["state"] for s in sides]
+    #
+    # Judged across EVERY turn, not just the last. An assessment that was red
+    # and is now green still needs a person to have looked at it, and that is
+    # the safe direction for the one screen a supervisor triages from.
+    states = [x for s in sides for x in (s["states"] or [s["state"]])]
     needs = (any(x in ("red", "yellow") for x in states)
              or any(x in ("refused", "child", "error") for x in states)
              or any(s["removed"] for s in sides))

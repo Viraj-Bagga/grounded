@@ -269,36 +269,57 @@ async function load(first) {
 
 // ------------------------------------------------------- one assessment
 
+// ONE TURN, WHOLE. The detail page shows EVERY turn, not just the last: a
+// follow-up must not hide the rule that raised the first answer or the lines
+// the guards took out of it. Same reason the register row now sums across
+// turns. See base_server.row().
+function turnHTML(t, n, total) {
+  const ev = t.event || {};
+  const res = ev.result || {};
+  const dropped = ev.dropped || {};
+  const e = ev.escalation || {};
+  const state = res.urgency || (t.kind === "refused" ? "refused" : t.kind === "error" ? "error" : null);
+  const removedRows = Object.entries(dropped).flatMap(([field, v]) =>
+    (Array.isArray(v) ? v : (v ? [v] : [])).map(x =>
+      `<li><b>${esc(field)}</b> <s>${esc(typeof x === "string" ? x : JSON.stringify(x)).slice(0, 220)}</s></li>`));
+  return `<div class="turn-block">
+    <h3 class="turn-h">${total > 1 ? `Turn ${n} of ${total}` : "The answer"}
+      ${mk(state)} <span class="wordy">${esc(WORD[state] || "no answer")}</span></h3>
+    ${n > 1 && t.text ? `<blockquote class="saidq small">${esc(t.text)}</blockquote>` : ""}
+    ${ev.ungrounded ? `<p class="tg dashed inline">not grounded in sources</p>` : ""}
+    ${ev.message && t.kind !== "result" ? `<p>${esc(ev.message)}</p>` : ""}
+    ${(e.fired || []).map(f => `<p class="rulep"><b>${esc(f.status === "raised" ? `Raised to ${e.final}` : "Rule " + f.rule)}</b>:
+      ${esc(f.fact)} with ${esc(f.symptom)}<br><span class="q">“${esc(f.quote)}”</span>
+      <span class="keys">${(f.keys || []).map(k => `<span class="key">${esc(k)}</span>`).join("")}</span></p>`).join("")}
+    ${res.rationale ? `<h4>Why</h4><p>${esc(res.rationale)}</p>` : ""}
+    ${(res.red_flags || []).length ? `<h4>Red flags</h4><ul>${res.red_flags.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${(res.next_steps || []).length ? `<h4>What to do</h4><ol>${res.next_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+    ${(res.citations || []).length
+      ? `<h4>Sources</h4><p class="keys">${res.citations.map(k => `<span class="key">${esc(k)}</span>`).join("")}</p>`
+      : ""}
+    ${removedRows.length ? `<h4>Removed by the guards before it was shown</h4>
+      <ul class="removed">${removedRows.join("")}</ul>` : ""}
+  </div>`;
+}
+
 function detail(b) {
   const a = b.assessment;
   const sides = a.sides.map(s => {
-    const turns = s.turns || [];
-    const last = [...turns].reverse().find(t => ["result", "refused", "error"].includes(t.kind));
-    const ev = (last && last.event) || {};
-    const res = ev.result || {};
-    const dropped = ev.dropped || {};
-    const esc2 = ev.escalation || {};
-    const state = res.urgency || (last && last.kind === "refused" ? "refused" : null);
-    const removedRows = Object.entries(dropped).flatMap(([field, v]) =>
-      (Array.isArray(v) ? v : (v ? [v] : [])).map(x =>
-        `<li><b>${esc(field)}</b> <s>${esc(typeof x === "string" ? x : JSON.stringify(x)).slice(0, 220)}</s></li>`));
+    const turns = (s.turns || []).filter(t => ["result", "refused", "error"].includes(t.kind));
+    const state = turns.length ? (() => {
+      const l = turns[turns.length - 1];
+      return (l.event && l.event.result && l.event.result.urgency)
+        || (l.kind === "refused" ? "refused" : l.kind === "error" ? "error" : null);
+    })() : null;
+    const removed = turns.reduce((n, t) => n + Object.values((t.event || {}).dropped || {})
+      .reduce((m, v) => m + (Array.isArray(v) ? v.length : (v ? 1 : 0)), 0), 0);
     return `<section class="det">
-      <h2>${esc((s.profile || {}).label || "?")} ${mk(state)} <span class="wordy">${esc(WORD[state] || "no answer")}</span></h2>
-      ${ev.ungrounded ? `<p class="tg dashed inline">not grounded in sources</p>` : ""}
-      ${(esc2.fired || []).map(f => `<p class="rulep"><b>${esc(f.status === "raised" ? `Raised to ${esc2.final}` : "Rule " + f.rule)}</b>:
-        ${esc(f.fact)} with ${esc(f.symptom)}<br><span class="q">“${esc(f.quote)}”</span>
-        <span class="keys">${(f.keys || []).map(k => `<span class="key">${esc(k)}</span>`).join("")}</span></p>`).join("")}
-      ${res.rationale ? `<h3>Why</h3><p>${esc(res.rationale)}</p>` : ""}
-      ${(res.red_flags || []).length ? `<h3>Red flags</h3><ul>${res.red_flags.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      ${(res.next_steps || []).length ? `<h3>What to do</h3><ol>${res.next_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
-      <h3>Sources</h3>
-      ${(res.citations || []).length
-        ? `<p class="keys">${res.citations.map(k => `<span class="key">${esc(k)}</span>`).join("")}</p>
-           <p class="fine">Base holds no corpus, so the chunk text is not here. It is on the device
-             that did the assessment, behind these keys.</p>`
-        : `<p class="fine">Nothing cited.</p>`}
-      ${removedRows.length ? `<h3>Removed by the guards before it was shown</h3>
-        <ul class="removed">${removedRows.join("")}</ul>` : ""}
+      <h2>${esc((s.profile || {}).label || "?")} ${mk(state)} <span class="wordy">${esc(WORD[state] || "no answer")}</span>
+        ${turns.length > 1 ? `<span class="tag">${turns.length} turns</span>` : ""}
+        ${removed ? `<span class="tag">${removed} removed in total</span>` : ""}</h2>
+      ${turns.map((t, i) => turnHTML(t, i + 1, turns.length)).join("")}
+      <p class="fine">Base holds no corpus, so the chunk text is not here. It is on the device
+        that did the assessment, behind these keys.</p>
     </section>`;
   }).join("");
 
