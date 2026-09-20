@@ -4,7 +4,10 @@ node_modules/
 03-model/hf-bf16/
 __pycache__/
 03-model/merged-120pairs/
-03-model/adapter-120pairs/
+# The adapter itself is COMMITTED: 40 MB, and it is the output of the Brev
+# training run, so ignoring it means one disk failure loses the day's work.
+# Its 17 MB tokenizer.json is not, being the same file as everywhere else.
+03-model/adapter-120pairs/tokenizer.json
 03-model/whisper/src/
 03-model/whisper/bin/
 03-model/whisper/*.bin
