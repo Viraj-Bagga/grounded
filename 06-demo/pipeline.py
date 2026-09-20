@@ -71,9 +71,79 @@ MAX_FOLLOWUPS = 4
 # under a red disposition and contradicts it. Measured 2026-09-19 on the
 # one-click comparison. These replace them. They are the app's own words, like
 # the disposition, so they carry no citation. Viraj's wording.
+# The app's own steps when a profile rule raises a verdict to red.
+#
+# "Stay where you are." WAS CUT 2026-09-20. It appears in no chunk and nothing
+# in the corpus supports it: not a position, not a place, not waiting. It read
+# as sensible advice and was invented, and an invented line in the app's own
+# steps is the one thing this product cannot afford, since every other clinical
+# claim on the page carries a key. Viraj wrote it and Viraj cut it.
+#
+# The two that remain both survive the same test. "Call emergency services now"
+# is the disposition restated, not a clinical claim, and it takes the region's
+# number where there is one. "Do not drive yourself" is grounded: CP-ACS-004
+# says "Do not drive to the hospital or let someone else drive you."
 RAISED_RED_STEPS = ("Call emergency services now.",
-                    "Do not drive yourself.",
-                    "Stay where you are.")
+                    "Do not drive yourself.")
+
+# WHILE YOU WAIT, AND ONLY WHERE THE CORPUS ACTUALLY SAYS SOMETHING.
+#
+# Audited 2026-09-20 across all 35 chunks. ONE of them carries advice for the
+# minutes between calling and help arriving, and it is about heart attack.
+# Eight of the nine conditions have nothing, and the page says so rather than
+# filling the gap with three plausible lines. Quotes are verbatim and
+# verify_while_waiting refuses to start the server if one drifts, which is the
+# same rule constraint 15's escalation quotes live under.
+#
+# LEFT OUT DELIBERATELY, all three from the same audit:
+#   "Never delay calling 9-1-1, taking aspirin or doing anything else you think
+#     might help."  Names a medication. Not a step, and the medication guard
+#     would drop it anyway.
+#   "feels better with sitting up and leaning forward" (CP-PERI-002). A SYMPTOM
+#     DESCRIPTION, not advice. Turning it into advice is an inference the
+#     corpus does not make, and constraint 14 forbids that move for contrast
+#     axes. Viraj's call to leave it.
+#   Anything about rest. 16 mentions across the corpus and a DIAGNOSTIC
+#     CRITERION in all 16: "pain relieved by rest" is what separates angina
+#     from a heart attack. Turning it into a step is the constraint 11 failure
+#     exactly, chunk content placed in a field about what the patient should do.
+WHILE_WAITING = {
+    "CP-ACS": (
+        ("CP-ACS-004", "An ambulance is the best and safest way to get to the hospital."),
+        ("CP-ACS-004", "Every minute matters."),
+    ),
+}
+
+
+def while_waiting(urgency, keys):
+    """[{key, text}] for a shown red whose sources cover a condition the corpus
+    has while-you-wait advice for. Empty for everything else, and the page says
+    the corpus holds none rather than inventing any."""
+    if urgency != "red":
+        return []
+    out = []
+    for k in keys or ():
+        for entry in WHILE_WAITING.get(str(k).rsplit("-", 1)[0], ()):
+            if entry not in out:
+                out.append(entry)
+    return [{"key": k, "text": t} for k, t in out]
+
+
+def verify_while_waiting(registry=None, chunks_dir=None):
+    """Problems, empty when every quote is verbatim in its chunk. Same shape
+    and same startup gate as escalation.verify_grounding."""
+    chunks_dir = Path(chunks_dir) if chunks_dir else ROOT / "01-data" / "chunks"
+    problems = []
+    for fam, entries in WHILE_WAITING.items():
+        for key, quote in entries:
+            if registry is not None and key not in registry:
+                problems.append(f"while-you-wait: {key} is not in the registry")
+            path = chunks_dir / f"{key}.txt"
+            if not path.exists():
+                problems.append(f"while-you-wait: {key} has no chunk file")
+            elif quote not in path.read_text(encoding="utf-8"):
+                problems.append(f"while-you-wait: not verbatim in {key}: {quote[:60]!r}")
+    return problems
 TURN_BUDGET = 520       # tokens set aside per follow-up: its message and an answer
 MAX_TOKENS = 1024
 MIN_ANSWER = 300        # below this the answer could be cut off mid-JSON
@@ -528,6 +598,8 @@ class Engine:
 
         cites = [self.chunk_meta(k) for k in result.get("citations", [])]
         ev = {"result": result, "ungrounded": ungrounded, "escalation": escalation,
+              "while_waiting": while_waiting(result.get("urgency"),
+                                             result.get("citations") or []),
               "dropped": dropped, "flagged": flagged, "citations": [c for c in cites if c],
               "gen_ms": gen_ms, "check_ms": int((time.time() - tc) * 1000),
               "retrieval_ms": retrieval_ms, "ttft_ms": ttft,

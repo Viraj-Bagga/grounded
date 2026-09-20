@@ -213,7 +213,7 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 - **Control Line** (rule-2): borders on unpressed chips, fields, citation chips and the segmented control; disabled fill.
 
 ### Named Rules
-**The One Saturated Field Rule.** On any screen the urgency bar is the only saturated field. The small red and yellow marks in the history list are the single allowed exception, because they index past bars.
+**The One Saturated Field Rule.** On any screen the urgency bar is the only saturated field. The small red and yellow marks in the history list and the base register are the single allowed exception, because they index past bars. The base register was added to this exception on 2026-09-20, on the same grounds: a register row indexes a past bar exactly as a history row does. Nothing else on that screen carries a triage colour, not a row fill, not a count, not a tag.
 
 **The Ink Selects Rule.** Pressed person chips, compare tabs, the sex toggle, primary buttons and send fill with ink. Blue is for pointing at something (a link, a key, a focus), never for choosing.
 
@@ -354,7 +354,7 @@ Viraj to put in his own voice.
 - **Do** self-host every font and asset; nothing loads from a CDN.
 
 ### Don't:
-- **Don't** put a triage colour anywhere except the urgency bar and the history marks.
+- **Don't** put a triage colour anywhere except the urgency bar, the history marks and the base register's marks.
 - **Don't** render a refusal, a not-grounded answer, a rule line or a removal in red, yellow or green, or style a refusal so it could pass for a milder verdict.
 - **Don't** put what the person said in a chat bubble, or align it right.
 - **Don't** group answer sections into rounded cards or a card grid.

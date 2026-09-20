@@ -1,0 +1,127 @@
+================================================================================
+TWO CORPUS AUDITS: the emergency number, and while-you-wait guidance
+Date:   2026-09-20
+Scope:  all 35 frozen chunks in 01-data/chunks, plus 75 saved model results
+        in 06-demo/data/conversations
+Read only. Nothing was changed to produce this file.
+================================================================================
+
+--------------------------------------------------------------------------------
+1. THE EMERGENCY NUMBER. Seven chunks hardcode a US number.
+--------------------------------------------------------------------------------
+  CP-ACS-004   3 mentions   "Call 9-1-1 for emergency medical care, even if you
+                             are not sure that you're having a heart attack."
+  CP-ACS-005   1            "If you don't know whether your chest pain is angina
+                             or a heart attack, call 9-1-1."
+  CP-ACS-006   1            "It is important to call 9-1-1 if you have these
+                             symptoms."
+  CP-ANG-001   1            "If you can't tell whether your chest pain is a heart
+                             attack, call 9-1-1 right away."
+  CP-ANG-002   1            "If you have chest pain that does not go away, call
+                             9-1-1 immediately."
+  CP-ANG-003   1            "Call 9-1-1 if you feel chest discomfort that does not
+                             go away with rest or medicine."
+  CP-PERI-001  1            "If you have chest pain or severe shortness of breath,
+                             or your symptoms get worse, call 9-1-1 or seek
+                             medical help right away."
+
+  ONE MORE, WHICH NEEDS NOTHING. CP-ANG-010 calls unstable angina "a medical
+  emergency" and names no number. No other chunk mentions 911, 999, 112 or any
+  other number.
+
+  THE MODEL REPEATS IT, AND NARROWLY. Across 75 saved model results:
+    next_steps   14 results, and EXACTLY ONE distinct string in all 14:
+                   "Call 9-1-1 immediately"
+    rationale    13 results, 8 distinct sentences, every one of the form
+                   "The retrieved context ... says to call 9-1-1 if ..."
+
+  THE TWO ARE NOT THE SAME CASE.
+    In next_steps it INSTRUCTS THE PATIENT and is wrong outside the US.
+    In the rationale it REPORTS WHAT A US SOURCE SAYS, which is true. The
+    chunk is shown unedited and the citation carries the regional annotation
+    already. Substituting inside that sentence would misquote a source this
+    project deliberately does not edit. Viraj's call 2026-09-20: leave it.
+
+  NOTHING TO REPLACE IN THE DISPOSITION. DISPOSITION.red is already "Call
+  emergency services now" and names no number, and neither does
+  RAISED_RED_STEPS. So the work there is an ADDITION, not a substitution.
+
+--------------------------------------------------------------------------------
+2. WHILE-YOU-WAIT GUIDANCE. One chunk in thirty-five.
+--------------------------------------------------------------------------------
+  CP-ACS-004 IS THE ONLY CHUNK IN THE CORPUS that says anything about the
+  minutes between calling for help and help arriving:
+
+    "An ambulance is the best and safest way to get to the hospital."
+    "Do not drive to the hospital or let someone else drive you."
+    "Every minute matters."
+    "EMS personnel can check how you are doing and start tests and lifesaving
+     medicines right away."
+    "People who arrive by ambulance often get faster treatment at the hospital."
+
+  EIGHT OF NINE CONDITIONS HAVE NONE.
+    CP-ACS    6 chunks   CP-ACS-004 only
+    CP-ANG   12 chunks   none
+    CP-DIFF   1          none
+    CP-GERD   3          none
+    CP-PANIC  3          none
+    CP-PE     4          none
+    CP-PERI   2          none
+    CP-PLEU   1          none
+    CP-PNA    3          none
+  Everything those eight contain is "call someone", which is the disposition,
+  not while-you-wait.
+
+  NO POSITIONING ADVICE EXISTS ANYWHERE. Searched lean, sit up, upright, lie
+  down, position, posture, loosen, elevate across all 35 chunks. ONE hit:
+
+    CP-PERI-002: "Chest pain that feels sharp, gets worse with breathing, and
+                  feels better with sitting up and leaning forward"
+
+  That is a SYMPTOM DESCRIPTION, not advice. Turning it into "sit up and lean
+  forward" is an inference the corpus does not make, and it is the same move
+  constraint 14 forbids for contrast axes: not paraphrased, not implied, the
+  actual sentence. Viraj's call 2026-09-20: leave it out.
+
+  "REST" IS A DIAGNOSTIC CRITERION IN ALL 16 OF ITS MENTIONS, never advice.
+  CP-ACS-005, CP-ANG-001/002/003/005/006/007/008/009/010/011/012, CP-PE-003.
+  Every one is of the form "pain relieved by rest" or "pain during rest",
+  which is what separates angina from a heart attack. Turning it into a step
+  would be the constraint 11 failure exactly: chunk content placed in a field
+  about what the patient should do.
+
+  A MEDICATION TRAP IN THE ONE GOOD CHUNK. CP-ACS-004 also says "Never delay
+  calling 9-1-1, taking aspirin or doing anything else you think might help."
+  It names a drug. Not usable as a step, and the medication guard would drop
+  it anyway. Not touched.
+
+  WHAT EXISTS FOR THE "WHEN IT CHANGES" HALF, grounded:
+    CP-DIFF-001  "Get immediate medical care if you have chest pain that does
+                  not go away, crushing pain or pressure in the chest, or chest
+                  pain along with nausea, sweating, dizziness"
+    CP-PERI-001  "...or your symptoms get worse, call 9-1-1 or seek medical
+                  help right away"
+    CP-PE-001    "Call your healthcare provider right away if you think you may
+                  have symptoms of VTE."
+    CP-GERD-001  "...if your symptoms don't get better with over-the-counter
+                  medicines or lifestyle changes"  (names medicines)
+
+--------------------------------------------------------------------------------
+3. THE APP'S OWN RED STEPS, MEASURED AGAINST THE CORPUS
+--------------------------------------------------------------------------------
+  "Call emergency services now."   the disposition restated, not a clinical
+                                   claim. Takes the region's number now.
+  "Do not drive yourself."         GROUNDED. CP-ACS-004: "Do not drive to the
+                                   hospital or let someone else drive you."
+  "Stay where you are."            IN NO CHUNK. Not a position, not a place,
+                                   not waiting. Invented, and it reads as
+                                   sensible advice, which is what made it
+                                   dangerous: every other clinical claim on the
+                                   page carries a key and this one did not.
+                                   CUT 2026-09-20, Viraj's call, his line.
+
+  A KNOWN LIMIT, NOT FIXED. "Do not drive yourself" is grounded in an ACS
+  chunk. RAISED_RED_STEPS also fires on raises that cite PE chunks (rules R4
+  and R5), where that line is not grounded in what was cited. It is sound
+  general advice for anyone being told to call an ambulance, but it is not
+  cited for those cases. Worth a decision later.
