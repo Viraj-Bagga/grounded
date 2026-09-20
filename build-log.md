@@ -5309,3 +5309,101 @@ Conversion chain, every gate of RUNBOOK.md sections 3 to 5 passing:
 `03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf`. Nothing about the demo
 path has been swapped, and the three presets have not been run against the
 tuned GGUF yet. Viraj's call.
+
+### 2026-09-19 The three presets on the tuned GGUF, through the real demo path
+
+Not the eval harness: headless Chrome clicking the preset buttons a judge
+clicks, against `06-demo/server.py` on 8770 and llama-server on 8080 loaded
+with `TUNED-120pairs-imatrix-Q4_K_M.gguf`, 35-chunk corpus, `-np 2 -ngl 0`.
+Three runs each, every run a fresh assessment. Harness
+`06-demo/preset_runs.mjs`, results and nine screenshots in
+`06-demo/results/2026-09-19-tuned-presets-live/`.
+
+**12 sides, 12 answers, zero refusals, zero errors, and every verdict identical
+across its three runs.** That stability is itself new. Nothing has to be clicked
+twice.
+
+| preset | on | shown | model said | rules | grounded |
+|---|---|---|---|---|---|
+| 1 Crushing chest pressure | You | **RED 3/3** | red | none | 2 keys |
+| 2 Sharp pain breathing in | Aunt Sue | **RED 3/3** | **yellow** | R4 raised | 5 keys |
+| 3 Indigestion | You | **GREEN 3/3** | green | none | 1 to 2 keys |
+| 3 Indigestion | Mum | **YELLOW 3/3** | green | R1 raised | 2 to 3 keys |
+
+**Beat 1 and beat 2 are unchanged and better grounded.** Preset 1 is the same
+red, now citing CP-ACS-003 and CP-ANG-003 every run.
+
+**Preset 2 got stronger.** The base said red by itself and R4 could only say
+"Backs up this red". The tuned model says **yellow**, and R4 raises it to red,
+so the page shows a real raise: "Raised to red: breast cancer on Aunt Sue's
+profile", the quoted CP-PE-004 line, the app's three red steps, and the model's
+own three steps struck out and tagged "removed: written for a yellow". Four
+removals on the Checked line. That is the profile layer doing visible work
+rather than agreeing with a model that says red to everything.
+
+**Beat 3 as written is dead, and what replaced it is better.** The beat was
+Mum's escalated red next to You refused for citing nothing. The tune took
+grounding failures to zero, so **You is never refused: it comes back GREEN,
+grounded, 3 of 3.** Mum comes back green from the model and R1 raises her to
+YELLOW, 3 of 3. So the screen is now **green next to yellow, same sentence, two
+people**, which is the "family profile changes the answer" beat that was cut on
+2026-09-17 because both profiles returned red. It is the two-verdict comparison
+that Current state says was never reliably achievable.
+
+**What that costs.** The guards beat claimed three live demonstrations and the
+tuned model stopped supplying all three:
+
+- **A fabricated red flag dropped: gone.** On the base, Aunt Sue's case had
+  `fever` and `fast heartbeat` copied out of CP-PERI-002 and dropped on screen
+  (`2026-09-19-multiturn-latency.txt`). The tuned model returns one red flag,
+  "Sharp chest pain at rest, worse on breathing in", which is the patient's own
+  words. Nothing to drop, 0 of 3 runs.
+- **Follow-up questions cleared off a red: gone.** The model returns
+  `follow_up_questions: []` already.
+- **An invented citation key refused: gone.** Every key in all 12 sides resolved.
+
+The guards are not broken and nothing was weakened. They have nothing to catch,
+which is the good outcome and the worse demo. What fires instead is constraint
+16, on every raise, and it is visible: 1 to 4 removals per answer with reasons.
+
+**The thing to fix before this ships: a raise to yellow shows steps written for
+a green.** Constraint 16 replaces the steps only on a raise to RED, because
+there is no yellow equivalent. That was written when raises to yellow were
+rare. It is now the main beat, and the result is Mum's **YELLOW "Be seen today"
+banner sitting directly above the model's green steps**:
+
+    run 1  "Call your GP if it happens more than twice a week"
+    run 2  "Seek assessment if indigestion becomes frequent"
+    run 3  "Sit down for a few minutes and eat the rest of the meal"
+
+Three of three. The third is the bad one: "Be seen today" above "eat the rest of
+the meal". This is the same failure constraint 16 exists to prevent and it is
+the class of thing a medical-track judge finds first. The rationale IS struck
+out on a yellow raise, so Mum's Why section renders as a fully crossed-out
+paragraph with nothing in its place, which is per spec and reads oddly under a
+yellow where there is no red banner to carry it.
+
+**Smaller wart on preset 2:** the model's "Call emergency services now" is
+struck out as "written for a yellow" and the app's identical "Call emergency
+services now." is shown above it, so the same sentence appears twice, once live
+and once crossed out.
+
+**Timing is far better than the documented numbers and I cannot credit the tune
+for it.** Generation ran 19.8 to 21.8 tok/s on the single-side presets against
+the 9.5 to 10 tok/s in claude.md, and the one-click comparison finished in 14.2
+to 25.7 s against the recorded 86 s. Low Power Mode was OFF tonight and was ON
+for the 86 s measurement. Tonight's own evals, run earlier this evening, show
+base and tuned at the same 6.2 and 6.4 tok/s median, so **the model is not the
+variable, the machine state is.** The claude.md latency numbers look pessimistic
+and want one clean re-measure with Low Power Mode off before Saturday. Cold runs
+were 18 to 22 s and the third run of each preset was 10 to 13 s on a warm prefix
+cache, so a judge's first click is the 20 s one.
+
+**Still open, from the eval and not touched here:** HE01, textbook ACS under
+retrieval chunks, comes back yellow 3 of 3 on the tuned model where the base was
+red 3 of 3. None of these three presets exercises it. It needs Viraj's eye
+before the swap.
+
+**Nothing was swapped.** The demo still loads
+`03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf`. The tuned GGUF was reached
+by pointing llama-server at it, which is the only thing these runs changed.

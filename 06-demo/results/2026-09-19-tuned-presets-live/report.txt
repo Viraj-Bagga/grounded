@@ -1,0 +1,238 @@
+# The three demo presets through the real demo path
+#
+# date    2026-09-20T01:41:44.223Z
+# model   TUNED-120pairs-imatrix-Q4_K_M.gguf   (on llama-server at 127.0.0.1:8080)
+# path    headless Chrome -> 06-demo/server.py on 8770 -> llama-server on 8080
+# corpus  35 chunks, registry 35, topics chest_pain
+# server  2 slots of 4096 tokens
+# runs    3 per preset, each a fresh assessment, one click to send
+# NOTE    SCREEN is what the page rendered. Everything under it is the
+#         saved assessment, which is why the page rendered it.
+
+==============================================================================
+PRESET 1: Crushing chest pressure   on You   (beat 2, the red result)
+==============================================================================
+
+  RUN 1  Crushing chest pressure  (22.0 s wall, one click to answer)
+    You
+      SCREEN: RED  "RED / Call emergency services now"
+      model said red, shown red
+      grounded: yes, 2 source chip(s): CP-ACS-003, CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 327 ms, first token 13075 ms, generate 20689 ms, guards 6 ms, total 21023 ms
+      rates: prompt 57.6 tok/s, generate 21.8 tok/s, 167 tokens out, 399 tokens of chunk in
+      checked line: "Checked / 21 s / read 608, 675 cached / wrote 167"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset1-run1.png   assessment 20260919-214144-565b1c
+
+  RUN 2  Crushing chest pressure  (19.2 s wall, one click to answer)
+    You
+      SCREEN: RED  "RED / Call emergency services now"
+      model said red, shown red
+      grounded: yes, 2 source chip(s): CP-ACS-003, CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 198 ms, first token 10332 ms, generate 18091 ms, guards 0 ms, total 18290 ms
+      rates: prompt 69.6 tok/s, generate 21.3 tok/s, 166 tokens out, 399 tokens of chunk in
+      checked line: "Checked / 18 s / read 608, 675 cached / wrote 166"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset1-run2.png   assessment 20260919-214207-bf0bc3
+
+  RUN 3  Crushing chest pressure  (11.4 s wall, one click to answer)
+    You
+      SCREEN: RED  "RED / Call emergency services now"
+      model said red, shown red
+      grounded: yes, 2 source chip(s): CP-ACS-003, CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 185 ms, first token 2105 ms, generate 10231 ms, guards 1 ms, total 10417 ms
+      rates: prompt 15.8 tok/s, generate 20.8 tok/s, 170 tokens out, 399 tokens of chunk in
+      checked line: "Checked / 10 s / read 4, 1,279 cached / wrote 170"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset1-run3.png   assessment 20260919-214227-d6fc8e
+
+==============================================================================
+PRESET 2: Sharp pain when breathing in   on Aunt Sue   (beat 3, the guards firing)
+==============================================================================
+
+  RUN 1  Sharp pain when breathing in  (21.0 s wall, one click to answer)
+    Aunt Sue
+      SCREEN: RED  "RED / Call emergency services now"
+      model said yellow, shown red  (RAISED by the profile layer)
+      grounded: yes, 5 source chip(s): CP-PE-004, CP-PE-001, CP-PERI-002, CP-ANG-001, CP-PERI-001
+      rule R4 RAISED: cancer or chemotherapy with pain on breathing
+        fact "breast cancer" + symptom ""worse" on "deep breath""  -> CP-PE-004, CP-PE-001
+      rule line on screen: "Raised to red: breast cancer on Aunt Sue's profile, with "worse" on "deep breath" / “cancer and cancer treatments including chemotherapy and surgery” / CP-PE-004 / CP-PE-001 / rule R4"
+      guards removed: 
+      - rationale_urgency: "Sharp chest pain at rest, worse on breathing in, eased by sitting up and leaning forward. The retrieved context lists this pattern for cardiac pain and says ch
+        why: rationale written for the model's lower verdict (c16)
+      - next_steps_urgency: "Call emergency services now"
+      - next_steps_urgency: "Call your breast cancer team today"
+      - next_steps_urgency: "Call emergency services if the pain comes on at rest and does not settle"
+        why: steps written for the model's lower verdict (c16)
+      struck through on screen: 4 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 433 ms, first token 11338 ms, generate 19457 ms, guards 3 ms, total 19894 ms
+      rates: prompt 53.7 tok/s, generate 19.8 tok/s, 162 tokens out, 348 tokens of chunk in
+      checked line: "Checked / 20 s / read 526, 675 cached / wrote 162 / 4 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset2-run1.png   assessment 20260919-214239-2420eb
+
+  RUN 2  Sharp pain when breathing in  (20.5 s wall, one click to answer)
+    Aunt Sue
+      SCREEN: RED  "RED / Call emergency services now"
+      model said yellow, shown red  (RAISED by the profile layer)
+      grounded: yes, 5 source chip(s): CP-PE-004, CP-PE-001, CP-PERI-002, CP-ANG-001, CP-PERI-001
+      rule R4 RAISED: cancer or chemotherapy with pain on breathing
+        fact "breast cancer" + symptom ""worse" on "deep breath""  -> CP-PE-004, CP-PE-001
+      rule line on screen: "Raised to red: breast cancer on Aunt Sue's profile, with "worse" on "deep breath" / “cancer and cancer treatments including chemotherapy and surgery” / CP-PE-004 / CP-PE-001 / rule R4"
+      guards removed: 
+      - rationale_urgency: "Sharp chest pain at rest, worse on inspiration, relieved by sitting forward. The retrieved context lists this pattern for heart inflammation and says chest pai
+        why: rationale written for the model's lower verdict (c16)
+      - next_steps_urgency: "Call emergency services now"
+      - next_steps_urgency: "Call 9-1-1 if the pain comes on at rest and does not go away"
+      - next_steps_urgency: "Seek assessment today if it comes on at rest and does not go away"
+        why: steps written for the model's lower verdict (c16)
+      struck through on screen: 4 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 293 ms, first token 10209 ms, generate 19118 ms, guards 1 ms, total 19413 ms
+      rates: prompt 62.6 tok/s, generate 20.4 tok/s, 183 tokens out, 348 tokens of chunk in
+      checked line: "Checked / 19 s / read 526, 675 cached / wrote 183 / 4 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset2-run2.png   assessment 20260919-214301-82f960
+
+  RUN 3  Sharp pain when breathing in  (11.9 s wall, one click to answer)
+    Aunt Sue
+      SCREEN: RED  "RED / Call emergency services now"
+      model said yellow, shown red  (RAISED by the profile layer)
+      grounded: yes, 5 source chip(s): CP-PE-004, CP-PE-001, CP-PERI-002, CP-ANG-001, CP-PERI-001
+      rule R4 RAISED: cancer or chemotherapy with pain on breathing
+        fact "breast cancer" + symptom ""worse" on "deep breath""  -> CP-PE-004, CP-PE-001
+      rule line on screen: "Raised to red: breast cancer on Aunt Sue's profile, with "worse" on "deep breath" / “cancer and cancer treatments including chemotherapy and surgery” / CP-PE-004 / CP-PE-001 / rule R4"
+      guards removed: 
+      - rationale_urgency: "Sharp chest pain at rest, worse on inspiration, eased by sitting forward. The retrieved context lists this pattern for heart inflammation and says chest pain a
+        why: rationale written for the model's lower verdict (c16)
+      - next_steps_urgency: "Call emergency services now"
+      - next_steps_urgency: "Call 9-1-1 if the pain comes on suddenly or you become breathless at rest"
+        why: steps written for the model's lower verdict (c16)
+      struck through on screen: 3 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 217 ms, first token 2942 ms, generate 10650 ms, guards 1 ms, total 10869 ms
+      rates: prompt 5.5 tok/s, generate 20.5 tok/s, 159 tokens out, 348 tokens of chunk in
+      checked line: "Checked / 11 s / read 4, 1,197 cached / wrote 159 / 3 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset2-run3.png   assessment 20260919-214322-2335ac
+
+==============================================================================
+PRESET 3: Indigestion (You and Mum)   on You vs Mum   (beat 3, same symptom two people)
+==============================================================================
+
+  RUN 1  Indigestion (You and Mum)  (25.7 s wall, one click to answer)
+    You
+      SCREEN: GREEN  "GREEN / Self-care, and the signs that change the answer"
+      model said green, shown green
+      grounded: yes, 1 source chip(s): CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 313 ms, first token 2752 ms, generate 23800 ms, guards 0 ms, total 24114 ms
+      rates: prompt 1.5 tok/s, generate 6.3 tok/s, 133 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 24 s / read 4, 1,321 cached / wrote 133"
+    Mum
+      SCREEN: YELLOW  "YELLOW / Be seen today"
+      model said green, shown yellow  (RAISED by the profile layer)
+      grounded: yes, 2 source chip(s): CP-ACS-002, CP-ANG-003
+      rule R1 RAISED: diabetes with mild or vague symptoms
+        fact "type 2 diabetes" + symptom ""indigestion", described as "A bit""  -> CP-ACS-002
+      rule line on screen: "Raised to yellow: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" / “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes"
+      guards removed: 
+      - rationale_urgency: "Indigestion after a meal with no other symptoms. The retrieved context lists heartburn or indigestion as a possible angina symptom, but it is the only one ment
+        why: rationale written for the model's lower verdict (c16)
+      struck through on screen: 1 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 309 ms, first token 10996 ms, generate 24405 ms, guards 0 ms, total 24715 ms
+      rates: prompt 60.7 tok/s, generate 10.6 tok/s, 143 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 25 s / read 661, 675 cached / wrote 143 / 1 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset3-run1.png   assessment 20260919-214335-f1eeb6
+
+  RUN 2  Indigestion (You and Mum)  (17.7 s wall, one click to answer)
+    You
+      SCREEN: GREEN  "GREEN / Self-care, and the signs that change the answer"
+      model said green, shown green
+      grounded: yes, 2 source chip(s): CP-ANG-003, CP-ACS-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 318 ms, first token 1389 ms, generate 16114 ms, guards 0 ms, total 16432 ms
+      rates: prompt 5.1 tok/s, generate 10.3 tok/s, 153 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 16 s / read 4, 1,321 cached / wrote 153"
+    Mum
+      SCREEN: YELLOW  "YELLOW / Be seen today"
+      model said green, shown yellow  (RAISED by the profile layer)
+      grounded: yes, 3 source chip(s): CP-ACS-002, CP-ANG-003, CP-ACS-003
+      rule R1 RAISED: diabetes with mild or vague symptoms
+        fact "type 2 diabetes" + symptom ""indigestion", described as "A bit""  -> CP-ACS-002
+      rule line on screen: "Raised to yellow: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" / “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes"
+      guards removed: 
+      - rationale_urgency: "Indigestion after a meal with no other symptoms. The retrieved context lists heartburn or indigestion among the symptoms of angina, but it does not describe it
+        why: rationale written for the model's lower verdict (c16)
+      struck through on screen: 1 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 311 ms, first token 1389 ms, generate 16320 ms, guards 0 ms, total 16632 ms
+      rates: prompt 4.9 tok/s, generate 10.4 tok/s, 157 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 17 s / read 4, 1,332 cached / wrote 157 / 1 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset3-run2.png   assessment 20260919-214401-bda4d7
+
+  RUN 3  Indigestion (You and Mum)  (14.2 s wall, one click to answer)
+    You
+      SCREEN: GREEN  "GREEN / Self-care, and the signs that change the answer"
+      model said green, shown green
+      grounded: yes, 1 source chip(s): CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 259 ms, first token 593 ms, generate 12369 ms, guards 0 ms, total 12629 ms
+      rates: prompt 7.7 tok/s, generate 10.3 tok/s, 122 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 13 s / read 4, 1,321 cached / wrote 122"
+    Mum
+      SCREEN: YELLOW  "YELLOW / Be seen today"
+      model said green, shown yellow  (RAISED by the profile layer)
+      grounded: yes, 3 source chip(s): CP-ACS-002, CP-ANG-003, CP-ACS-003
+      rule R1 RAISED: diabetes with mild or vague symptoms
+        fact "type 2 diabetes" + symptom ""indigestion", described as "A bit""  -> CP-ACS-002
+      rule line on screen: "Raised to yellow: type 2 diabetes on Mum's profile, with "indigestion", described as "A bit" / “Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes"
+      guards removed: 
+      - rationale_urgency: "Indigestion after lunch, with no chest pain, heaviness, or discomfort, and no associated breathlessness or sweating. The retrieved context lists indigestion am
+        why: rationale written for the model's lower verdict (c16)
+      struck through on screen: 1 block(s)
+      sections shown: What to do, Why, Red flags, Sources
+      timing: retrieval 253 ms, first token 592 ms, generate 12989 ms, guards 0 ms, total 13243 ms
+      rates: prompt 7.5 tok/s, generate 10.7 tok/s, 134 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 13 s / read 4, 1,332 cached / wrote 134 / 1 removed"
+      saved 06-demo/results/2026-09-19-tuned-presets-live/preset3-run3.png   assessment 20260919-214420-e62f06
+
+==============================================================================
+SUMMARY, what a judge sees
+==============================================================================
+
+PRESET 1: Crushing chest pressure
+  run 1  You      RED      model=red             grounded     cites=2 removed=0 rules=-  21.0s
+  run 2  You      RED      model=red             grounded     cites=2 removed=0 rules=-  18.3s
+  run 3  You      RED      model=red             grounded     cites=2 removed=0 rules=-  10.4s
+  tally: You: RED 3/3
+  wall clock, click to both answers: 22.0, 19.2, 11.4 s
+
+PRESET 2: Sharp pain when breathing in
+  run 1  Aunt Sue RED      model=yellow  RAISED  grounded     cites=5 removed=4 rules=R4:raised  19.9s
+  run 2  Aunt Sue RED      model=yellow  RAISED  grounded     cites=5 removed=4 rules=R4:raised  19.4s
+  run 3  Aunt Sue RED      model=yellow  RAISED  grounded     cites=5 removed=3 rules=R4:raised  10.9s
+  tally: Aunt Sue: RED 3/3
+  wall clock, click to both answers: 21.0, 20.5, 11.9 s
+
+PRESET 3: Indigestion (You and Mum)
+  run 1  You      GREEN    model=green           grounded     cites=1 removed=0 rules=-  24.1s
+  run 1  Mum      YELLOW   model=green   RAISED  grounded     cites=2 removed=1 rules=R1:raised  24.7s
+  run 2  You      GREEN    model=green           grounded     cites=2 removed=0 rules=-  16.4s
+  run 2  Mum      YELLOW   model=green   RAISED  grounded     cites=3 removed=1 rules=R1:raised  16.6s
+  run 3  You      GREEN    model=green           grounded     cites=1 removed=0 rules=-  12.6s
+  run 3  Mum      YELLOW   model=green   RAISED  grounded     cites=3 removed=1 rules=R1:raised  13.2s
+  tally: You: GREEN 3/3   Mum: YELLOW 3/3
+  wall clock, click to both answers: 25.7, 17.7, 14.2 s
