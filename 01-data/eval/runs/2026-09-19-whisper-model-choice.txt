@@ -258,3 +258,98 @@ WHAT IS AND IS NOT HANDLED
   NOT covered: getUserMedia itself and the browser permission prompt. That is
   the one thing at the desk that needs a human to have clicked Allow once, so
   it is on the pre-demo checklist rather than in a test.
+
+================================================================================
+10. CONFIRMED ON A REAL VOICE. base.en-q5_1 STAYS. Viraj's call, 2026-09-19.
+    Full run, with every transcript: 2026-09-19-whisper-real-voice.txt
+    Audio: 01-data/eval/audio/, five lines, 43.31 s, Viraj's voice, real room.
+================================================================================
+
+THE ROOM IS REAL, AND IT SHOWS IN THE LEVELS
+  synthetic set    peak 0.779 to 0.928    rms 0.109 to 0.164
+  real voice       peak 0.395 to 0.543    rms 0.0485 to 0.0651
+  About half the peak and a third of the rms. This is the input the synthetic
+  set could not produce, which is the whole reason for the re-run. Well clear
+  of the 0.01 silence floor.
+
+AS SCORED
+  model              WER%   errs   words
+  base.en            4.63      5     108
+  small.en-q5_1      5.56      6     108
+  small.en           5.56      6     108
+  base.en-q5_1       6.48      7     108     <- the model that ships
+
+  READ THE ERRORS BEFORE READING THE RANKING. Two of base.en-q5_1's seven are
+  "I'm" for "I am" in extra2. That is a CONTRACTION, not a mishearing: it
+  changes no meaning and no guard. Both small variants make it too. base.en
+  alone wrote "I am", and that single difference is the whole reason it sits
+  at the top of this table.
+
+WITH THAT CONTRACTION DISCOUNTED, WHICH IS THE HONEST COMPARISON
+  base.en           5 errors   4.63%
+  base.en-q5_1      5 errors   4.63%
+  small.en-q5_1     4 errors   3.70%
+  small.en          4 errors   3.70%
+
+  So on real audio SMALL IS AHEAD BY ONE WORD IN 108, and q5_1 costs base
+  nothing at all. The ranking in the table above is an artefact of a
+  contraction; this is what the models actually did.
+
+WHERE THAT ONE WORD IS, AND WHY IT DOES NOT BUY small.en A PLACE
+  extra1, said: "...I am also on ramipril for my blood pressure."
+    base.en-q5_1    "I am also on Raimi Pro for my blood pressure"
+    base.en         "I am also on Ramy Pro for my blood pressure"
+    small.en-q5_1   "I am also on remupril for my blood pressure"
+    small.en        "I am also on remupril for my blood pressure"
+
+  NOBODY GETS ramipril RIGHT. Small renders it as one wrong word; base splits
+  it into two, which is the extra error. Small is closer, not correct.
+
+  THE SYNTHETIC SET OVERSTATED SMALL. There, small got BOTH nitroglycerin and
+  ramipril exactly right and base got neither, which looked like a clean
+  two-word advantage on clinical vocabulary and was the one argument for
+  spending 181 MB. On a real voice that advantage collapses to a fraction of
+  one word: both families get "nitroglycerin" right, and neither gets
+  "ramipril". The case for small was built on `say` output and did not
+  survive contact with a microphone.
+
+  Also on preset2 the two families made DIFFERENT single errors, not a
+  different number of them: base "Short" for "Sharp", small "wears" for
+  "worse". The safety-miss column in the run file reads 3 for small against 2
+  for base only because that list contains "worse" and not "sharp". That is
+  the word list, not a finding, and it should not be read as small being
+  worse on safety words.
+
+THE MISS THAT WOULD HAVE MATTERED DID NOT HAPPEN, IN ANY MODEL
+  extra2, said: "I am not pregnant. No fever, no cough. It is not the left
+  side, it is the right side, and it started three days ago."
+
+  All four models kept every one: not x2, no x2, left x1, right x1, three x1.
+  A dropped "not" makes `excluded_subject` miss a pregnancy denial or makes a
+  patient who says "No fever" acquire one (constraints 11 and 13). A swapped
+  left and right is a fabricated finding nothing downstream can catch. None of
+  it happened, on the quietest recording in the set, in any of the four.
+
+DECISION: base.en-q5_1. Viraj's call, and now on evidence rather than on the
+  assumption that base would hold.
+    57 MB against 181 MB          3.2x
+    265 MB RSS against 543 MB     2.0x
+    0.4 s against 1.1 s per clip  2.5x on this set
+  bought for one word in 108, on a drug name NEITHER model transcribes
+  correctly, in an app that does not prescribe and that puts every word in an
+  editable box before it is sent. If the corpus ever grows a medication
+  section, this is the first thing to re-open.
+
+ONE TIMING IS NOT A MODEL PROPERTY
+  base.en-q5_1 on preset1 reads 14277 ms. The next line, base.en on the same
+  clip, is 414 ms, and every other base.en-q5_1 clip is 321 to 437 ms. That is
+  a cold first invocation of the run, with the model file not yet in the page
+  cache. Another instance was also running llama-server generations at the
+  time, so contention may be in it as well. Do not quote 14.2 s as a
+  transcription time: the warm figures in this file and in
+  06-demo/results/2026-09-19-voice-live.txt are the real ones.
+
+STILL NOT MEASURED
+  One speaker, one room, one microphone, five clips. This is a sanity check on
+  a choice already made, not a benchmark, and it says nothing about a phone
+  microphone or any other voice.

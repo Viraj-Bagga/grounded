@@ -5250,12 +5250,11 @@ Allow once. That is now on the pre-demo checklist next to Low Power Mode.
 **Regression:** flow, guards, shots and compare all pass unchanged. Beat 3 ran
 in 40.8 s.
 
-**Not measured: a real voice.** Every clip in the model-choice set is macOS
-`say`, which has no room noise, no hesitation and no phone mic. It ranks models
-fairly against the same input and it overstates absolute accuracy for all of
-them. The usual result is that small.en pulls ahead once the audio is dirty,
-and this set cannot see that. Viraj is recording the three presets in his own
-voice and base against small gets re-scored on that before judging.
+**Not measured yet at the time of writing: a real voice.** Every clip in the
+model-choice set is macOS `say`, which has no room noise, no hesitation and no
+phone mic. **Re-scored on Viraj's voice later the same day and the choice
+held**, see the entry below: the expected result was that small.en pulls ahead
+once the audio is dirty, and it did not.
 
 Results: `06-demo/results/2026-09-19-voice/`,
 `01-data/eval/runs/2026-09-19-whisper-model-choice.txt`.
@@ -5587,3 +5586,64 @@ what is missing is pointing them at the Why. Undecided and unmeasured: what to
 render when the whole rationale goes.
 
 Nothing was fixed. Retrieval, the guards and the corpus are untouched.
+
+### 2026-09-19 The whisper model choice, re-scored on a real voice. base.en-q5_1 stays.
+
+The model choice of earlier today was made on macOS `say` output. Viraj
+recorded five lines in his own voice, in the room he will demo in, with
+`01-data/eval/audio/record.sh`. **The room is real and the levels say so:**
+peak 0.395 to 0.543 against the synthetic set's 0.779 to 0.928, and rms 0.0485
+to 0.0651 against 0.109 to 0.164. About half the peak and a third of the rms.
+
+**Decision: base.en-q5_1 stays. Viraj's call, now on evidence.**
+
+**The synthetic set had overstated small, which is the point of doing this.**
+There, small.en got both `nitroglycerin` and `ramipril` exactly right and base
+got neither, and that clean two-word lead on clinical vocabulary was the only
+argument for spending 181 MB against 57 MB. On a real voice it collapses: both
+families get `nitroglycerin`, and **neither gets `ramipril`**. Base splits it
+into "Raimi Pro" and "Ramy Pro", small writes "remupril". Small is closer, not
+correct.
+
+**Read the errors, not the ranking.** As scored the table is base.en 4.63,
+small.en-q5_1 5.56, small.en 5.56, base.en-q5_1 6.48, which puts the shipping
+model last. **Two of its seven errors are `"I'm"` for `"I am"`**, a contraction
+that changes no meaning and no guard, and both small variants make it too.
+`base.en` alone wrote "I am", and that one difference is the entire reason it
+tops the table. Discount it and it is base 4.63% against small 3.70%, which is
+**one word in 108**, and q5_1 costs base nothing at all.
+
+So the trade bought is 3.2x the size, 2.0x the RAM and 2.5x the time, for one
+word, on a drug name nothing transcribes correctly, in an app that does not
+prescribe and puts every word in an editable box first. **Re-open it if the
+corpus ever grows a medication section.**
+
+**The miss that would have mattered did not happen, in any model.** extra2 was
+written to test exactly that: "I am not pregnant. No fever, no cough. It is not
+the left side, it is the right side, and it started three days ago." All four
+kept every one, not x2, no x2, left, right and three. A dropped "not" makes
+`excluded_subject` miss a pregnancy denial, or gives a fever to a patient who
+denied one (constraints 11 and 13). A swapped left and right is a fabricated
+finding nothing downstream can catch. None of it happened, on the quietest
+recording in the set.
+
+**One number in that run is not a transcription time.** base.en-q5_1 on preset1
+reads 14277 ms; base.en on the same clip on the next line is 414 ms and every
+other base.en-q5_1 clip is 321 to 437 ms. Cold first invocation, model file not
+yet in the page cache, and another instance was running llama-server
+generations at the time so contention may be in it too. The warm figures are
+the real ones.
+
+**One thing to be careful of in the harness.** The safety-miss column reads 3
+for small against 2 for base, which looks like small being worse on words that
+matter. It is not. On preset2 each family made exactly one error, a different
+one: base "Short" for "Sharp", small "wears" for "worse". The list contains
+"worse" and not "sharp". That is the word list, not a finding.
+
+**Still one speaker, one room, one microphone, five clips.** A sanity check on
+a choice already made, not a benchmark, and it says nothing about a phone
+microphone or any other voice.
+
+Run: `01-data/eval/runs/2026-09-19-whisper-real-voice.txt`, with every
+transcript. Harness: `01-data/eval/audio/record.sh`,
+`01-data/eval/rescore_real_voice.py`.
