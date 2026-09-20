@@ -128,8 +128,14 @@ const section = rows => `<div class="wide-only">${tableHTML(rows)}</div>
 // Needs review is read top to bottom by someone who will run out of time, so
 // the order is the priority order, not the clock.
 const BAND = { red: 0, refused: 1, child: 1, error: 1, yellow: 2, green: 3 };
+// A SIDE THAT NEVER ANSWERED SORTS WITH THE REFUSALS, NOT WITH THE GREENS.
+// It renders the same hold mark a refusal does, and it needs a person for the
+// same reason: the system produced nothing, so someone has to. Falling through
+// to the green band buried a half-finished compare at the bottom of the list,
+// which the base check caught on 2026-09-20.
+const bandOf = state => BAND[state] ?? 1;
 function priority(a, b) {
-  const band = r => Math.min(...r.sides.map(s => BAND[s.state] ?? 3));
+  const band = r => Math.min(...r.sides.map(s => bandOf(s.state)));
   return band(a) - band(b) || String(b.updated || "").localeCompare(String(a.updated || ""));
 }
 

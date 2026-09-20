@@ -1,0 +1,281 @@
+2026-09-20 final regression: the field app and base, every no-argument mode
+config:  llama-server TUNED-120pairs-imatrix-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192,
+         RESTARTED CLEAN with both slots idle; field 8770; base 8781; 35 chunks
+build:   main at ce9ec42
+why:     four pieces landed tonight (caseload, sync, base, records). The field
+         demo is what gets judged, so every pre-existing mode is re-run to
+         prove none of them cost it anything.
+
+RUN THIS UNDISTURBED. Earlier attempts failed three ways and none was the
+product. All three are now understood:
+  1. A flat 500 ms teardown sleep let the next mode attach to a Chrome that
+     had not released DevTools port 9333. Four modes failed their FIRST
+     navigation, each for exactly 181 s. Fixed: both ends wait on the port.
+  2. Killing a check mid-generation leaves an llama-server SLOT PROCESSING
+     at ~100% of a core forever. With -np 2 the compare beat needs both,
+     so it waits 300 s for an answer that is never coming. Check /slots.
+  3. Killing a check's node process ORPHANS its Chrome, which then owns
+     9333. The next mode now says so in 15 s instead of hanging, which is
+     the fix working, but the orphan still has to be cleaned up.
+
+=== offline self-tests, no server needed
+  06-demo/caseload.py                  21/21 self-tests passed.
+  06-demo/selftest_profile_text.py     25/25 self-tests passed.
+  02-pairs/guards.py                   87/87 self-tests passed (fixtures shared with guards.ts).
+  02-pairs/escalation.py               34/34 self-tests passed.
+  02-pairs/selftest_validator.py       24/24 self-tests passed.
+  03-model/qlora_config.py             gate_proj correctly rejected: target_modules match nothing: ['gate_proj']
+
+=== shots  01:50:28
+PASS  desktop: new assessment shows presets
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/desktop-new.png
+PASS  desktop: people list shows the household
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/phone-new.png
+PASS  phone: people list shows the household
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-20-field-and-base-final/shots/phone-maya.png
+all passed
+=== shots exit 0  01:50:34
+
+=== people  01:50:34
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved 06-demo/results/2026-09-20-field-and-base-final/people/desktop-person-new.png
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+      saved 06-demo/results/2026-09-20-field-and-base-final/people/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+all passed
+=== people exit 0  01:50:38
+
+=== guards  01:50:38
+      child profile: 1.0 s
+PASS  a child's profile gets NOT ASSESSED
+      saved 06-demo/results/2026-09-20-field-and-base-final/guards/desktop-child.png
+PASS  a child word on an adult profile asks who it is for
+      saved 06-demo/results/2026-09-20-field-and-base-final/guards/desktop-who-is-this-for.png
+      out of scope: 1.0 s
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+      saved 06-demo/results/2026-09-20-field-and-base-final/guards/desktop-out-of-scope.png
+all passed
+=== guards exit 0  01:50:43
+
+=== flow  01:50:43
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/desktop-streaming.png
+PASS  a verdict bar is shown
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/desktop-answer.png
+PASS  the checked line opens its details
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/desktop-source.png
+      follow-up: 7.3 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/desktop-followup.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/phone-answer.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved 06-demo/results/2026-09-20-field-and-base-final/flow/phone-drawer.png
+all passed
+=== flow exit 0  01:51:20
+
+=== compare  01:51:20
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 47.4 s
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps
+        1 Call emergency services if the indigestion comes on with chest pain, pressure or breathlessness, or if you feel faint or dizzy
+        2 Seek assessment today if it happens regularly or is accompanied by other symptoms
+PASS  compare: record, answers and composer share one left edge
+      saved 06-demo/results/2026-09-20-field-and-base-final/compare/desktop-compare.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/compare/phone-compare-a.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/compare/phone-compare-b.png
+all passed
+=== compare exit 0  01:52:10
+
+=== two-tabs  01:52:10
+      tab A, Dad: 36.9 s
+      tab B, Grandpa: 39.0 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 14.3 s
+      tab A follow-up: 17.9 s
+PASS  both follow-ups reused their own cache
+      saved 06-demo/results/2026-09-20-field-and-base-final/two-tabs/desktop-tab-a.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/two-tabs/desktop-tab-b.png
+all passed
+=== two-tabs exit 0  01:53:09
+
+=== drop  01:53:09
+FAIL  timed out waiting for document.readyState === 'complete' && !document.querySelector('.loading')
+1 failed
+=== drop exit 1  01:56:09
+
+=== regions  01:56:09
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved 06-demo/results/2026-09-20-field-and-base-final/regions/desktop-regions.png
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved 06-demo/results/2026-09-20-field-and-base-final/regions/desktop-regions-india.png
+      assessment for a citation: 18.8 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved 06-demo/results/2026-09-20-field-and-base-final/regions/desktop-region-annotation.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/regions/mobile-regions.png
+PASS  the check leaves the base corpus selected, as it found it
+PASS  the sidebar is back to Base only
+all passed
+=== regions exit 0  01:56:32
+
+=== voice  01:56:32
+PASS  the composer offers a microphone
+      speaking 4.29 s into the page
+PASS  tapping starts recording
+PASS  send is closed while recording
+      saved 06-demo/results/2026-09-20-field-and-base-final/voice/voice-recording.png
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+      saved 06-demo/results/2026-09-20-field-and-base-final/voice/voice-transcript.png
+PASS  editing is recorded
+      saved 06-demo/results/2026-09-20-field-and-base-final/voice/voice-edited.png
+      spoken assessment: 18.8 s
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+      saved 06-demo/results/2026-09-20-field-and-base-final/voice/voice-answer-details.png
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+      saved 06-demo/results/2026-09-20-field-and-base-final/voice/voice-soap.txt
+all passed
+=== voice exit 0  01:57:00
+
+=== queue  01:57:00
+PASS  an empty caseload says so
+      saved 06-demo/results/2026-09-20-field-and-base-final/queue/desktop-caseload-empty.png
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+      saved 06-demo/results/2026-09-20-field-and-base-final/queue/desktop-caseload.png
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+      caseload assessment: 16.7 s
+PASS  starting an assessment links it to the caseload row
+PASS  starting an assessment does NOT mark them seen
+PASS  Mark seen moves them out of waiting
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+      saved 06-demo/results/2026-09-20-field-and-base-final/queue/desktop-caseload-seen.png
+      saved 06-demo/results/2026-09-20-field-and-base-final/queue/phone-caseload.png
+all passed
+=== queue exit 0  01:57:20
+
+=== sync  01:57:20
+      assessment with base unreachable: 17.7 s
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+      saved 06-demo/results/2026-09-20-field-and-base-final/sync/desktop-sync-waiting.png
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+      saved 06-demo/results/2026-09-20-field-and-base-final/sync/desktop-sync-offline.png
+PASS  the flush reports each assessment landing
+      saved 06-demo/results/2026-09-20-field-and-base-final/sync/desktop-sync-sent.png
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+      saved 06-demo/results/2026-09-20-field-and-base-final/sync/phone-sync.png
+all passed
+=== sync exit 0  01:57:43
+
+=== base  01:57:43
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+PASS  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+      saved 06-demo/results/2026-09-20-field-and-base-final/base/desktop-base-register.png
+FAIL  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+      saved 06-demo/results/2026-09-20-field-and-base-final/base/desktop-base-reviewed.png
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+      saved 06-demo/results/2026-09-20-field-and-base-final/base/desktop-base-assessment.png
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+      saved 06-demo/results/2026-09-20-field-and-base-final/base/phone-base-register.png
+1 failed
+=== base exit 1  01:57:47
+
+
+================================================================================
+SUMMARY
+================================================================================
+  Offline self-tests: 21 caseload + 25 profile_text + 87 guards + 34 escalation
+                      + 24 validator, and qlora_config's 50 matched modules.
+  ui_check:           106 pass, 2 fail across 12 modes.
+
+TWO FAILURES, ONE OF THEM REAL.
+
+1. base: "Needs review is in priority order, red before yellow". REAL, MY BUG,
+   FIXED. A compare assessment where one side never answered renders the same
+   hold mark a refusal does, but sorted into the GREEN band, because the band
+   table fell through to 3 for an unknown state. So a half-finished compare sat
+   at the BOTTOM of Needs review, which is exactly backwards: the system
+   produced nothing for that person, so it needs a human more than a green
+   does, not less. `bandOf` now falls through to the refusal band. Re-run after
+   the fix: base 17/17, all passed.
+
+   Worth noting how it was caught. The check reads the RENDERED MARKS and the
+   page sorts on the DATA, so the two disagreeing is the only reason this
+   surfaced. A check written against the same table the page uses would have
+   agreed with the bug.
+
+2. drop: the navigation timeout again, 181 s, on its first navigation. NOT a
+   regression and not understood. It passes on its own, 3/3 in 20.5 s, run
+   immediately before this suite. It is the mode that deliberately aborts a
+   stream mid-answer, so it has the heaviest teardown of the set, and it is the
+   one that has flaked most tonight. Left open rather than guessed at.
+   Re-run it alone before trusting a failure from it.
+
+THE FIELD DEMO IS UNTOUCHED. shots, people, guards, flow, compare, two-tabs,
+regions and voice all pass, which is the point of running the whole suite: four
+pieces landed tonight and none of them cost the thing that gets judged.
