@@ -51,8 +51,8 @@ function mk(state) {
   const l = LETTER[state];
   const word = WORD[state] || "no answer";
   return l
-    ? `<span class="mk ${esc(state)}" title="${esc(word)}">${l}<span class="sr-only"> ${esc(word)}</span></span>`
-    : `<span class="mk hold" title="${esc(word)}">${icon("none")}<span class="sr-only">${esc(word)}</span></span>`;
+    ? `<span class="mk ${esc(state)}" title="${esc(word)}">${l}<span class="sr"> ${esc(word)}</span></span>`
+    : `<span class="mk hold" title="${esc(word)}">${icon("none")}<span class="sr">${esc(word)}</span></span>`;
 }
 
 // Zero to four tags, no triage colour anywhere.
@@ -89,12 +89,12 @@ function actionCell(r) {
 function tableHTML(rows) {
   return `<table class="reg">
     <thead><tr>
-      <th scope="col" class="c-mk"><span class="sr-only">Urgency</span></th>
+      <th scope="col" class="c-mk"><span class="sr">Urgency</span></th>
       <th scope="col" class="c-as">Assessment</th>
       <th scope="col" class="c-at">Attention</th>
       <th scope="col" class="c-fr">From</th>
       <th scope="col" class="c-wh">When</th>
-      <th scope="col" class="c-ac"><span class="sr-only">Action</span></th>
+      <th scope="col" class="c-ac"><span class="sr">Action</span></th>
     </tr></thead>
     <tbody>${rows.map(r => `<tr${r.reviewed ? ' class="seen"' : ""}>
       <td class="c-mk">${r.sides.map(s => mk(s.state)).join("")}</td>

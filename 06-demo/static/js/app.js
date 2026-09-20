@@ -228,16 +228,23 @@ function renderHistory() {
       `<span><span class="t">${esc(c.title || "Untitled")}</span>` +
       `<span class="m">${c.sides.map(s => `${esc(s.label)}, ${esc(word(s))}`).join(" · ")} · ${time(c.updated)}</span></span></a>`).join("")).join("");
   $("#history").innerHTML = rows || `<p class="hist-empty">Assessments you make appear here, saved on this device.</p>`;
-  const onPeople = location.pathname.startsWith("/people");
-  $("#people-link").setAttribute("aria-current", onPeople ? "page" : "false");
+  // aria-current is "page" on the one you are on and ABSENT everywhere else.
+  // It used to be set to "false" on the others, which is legal but noisy, and
+  // the region link never got it at all.
+  const path = location.pathname;
+  const current = (id, on) => {
+    const el = $(id);
+    if (on) el.setAttribute("aria-current", "page");
+    else el.removeAttribute("aria-current");
+  };
+  current("#people-link", path.startsWith("/people"));
+  current("#queue-link", path.startsWith("/queue"));
+  current("#sync-link", path.startsWith("/sync"));
+  current("#region-link", path.startsWith("/regions"));
   $("#people-n").textContent = S.people.length;
-  const onQueue = location.pathname.startsWith("/queue");
-  $("#queue-link").setAttribute("aria-current", onQueue ? "page" : "false");
   const nq = S.queue.counts.waiting;
   $("#queue-n").textContent = nq ? `${nq} waiting` : "Empty";
   $("#queue-link").classList.toggle("has-waiting", nq > 0);
-  const onSync = location.pathname.startsWith("/sync");
-  $("#sync-link").setAttribute("aria-current", onSync ? "page" : "false");
   const ns = S.sync.pending.length;
   $("#sync-n").textContent = ns ? `${ns} to send` : "All sent";
   $("#sync-link").classList.toggle("has-waiting", ns > 0);
@@ -263,6 +270,43 @@ async function refreshLists() {
   S.queue = q;
   S.sync = y;
   renderHistory();
+}
+
+// WHAT A SCREEN READER IS TOLD WHEN AN ANSWER LANDS.
+//
+// Streaming is silent by design: announcing tokens would read a JSON document
+// aloud one fragment at a time. So nothing is announced until the answer is
+// complete, and then the OUTCOME is, once. The disposition is included because
+// the colour is not available to a listener and the word alone ("red") is not
+// an instruction.
+const DISPOSITION_SPOKEN = {
+  red: "Call emergency services now",
+  yellow: "Be seen today",
+  green: "Self-care, and the signs that change the answer",
+};
+
+function announce(final, who) {
+  const el = $("#announce");
+  if (!el || !final) return;
+  const name = who ? `${who}: ` : "";
+  let msg = "";
+  if (final.event === "result") {
+    const u = (final.result || {}).urgency;
+    msg = `${name}${u}. ${DISPOSITION_SPOKEN[u] || ""}.`
+      + (final.ungrounded ? " Not grounded in sources." : "")
+      + ((final.escalation || {}).changed ? " Raised by a profile rule." : "");
+  } else if (final.event === "refused") {
+    msg = `${name}no verdict. ${final.message || "This is outside what the app covers."}`;
+  } else if (final.event === "error") {
+    msg = `${name}the answer did not finish. ${final.message || ""}`;
+  } else if (final.event === "confirm_subject") {
+    msg = final.message || "Who is this for?";
+  } else {
+    return;
+  }
+  // Re-setting the same string does not re-announce, so clear it first.
+  el.textContent = "";
+  setTimeout(() => { el.textContent = msg.replace(/\s+/g, " ").trim(); }, 60);
 }
 
 // --------------------------------------------------------------- new assessment
@@ -303,7 +347,10 @@ function showNew() {
   // on the first screen and above the composer: over the wifi it carries "the
   // model runs on the laptop, not on this phone" and ui_check asserts both
   // that wording and its position.
-  $("#main").innerHTML = `<div class="page blank">${compareHint}${kidNote}
+  // THE MAIN SCREEN HAD NO h1. Every other route has one; this one is a
+  // composer, so its heading is for the document outline and screen readers
+  // rather than for the eye. Visually hidden, not absent.
+  $("#main").innerHTML = `<div class="page blank"><h1 class="sr">New assessment</h1>${compareHint}${kidNote}
     <ul class="picks">${PRESETS.map((p, i) =>
       `<li><button type="button" data-preset="${i}">` +
       `<span class="lbl">${esc(p[0])}</span>` +
@@ -613,7 +660,9 @@ function renderConversation() {
 
   const n = Math.max(...conv.sides.map(s => s.turns.length));
   const whoSaid = `For ${conv.sides.map(s => s.profile.label === "You" ? "you" : s.profile.label).join(" and ")}`;
-  let h = "";
+  // Same reason as the new-assessment screen: the page is a conversation and
+  // shows no title, but the document still needs one heading.
+  let h = `<h1 class="sr">Assessment ${esc(whoSaid.toLowerCase())}</h1>`;
   for (let i = 0; i < n; i++) {
     const t0 = conv.sides.map(s => s.turns[i]).find(Boolean);
     h += saidHTML(t0.text, t0.timeline, whoSaid, t0.at);
@@ -786,6 +835,8 @@ async function runTurn(cid, k, text, timeline, confirmed, heard = null) {
   if (!p.final) p.final = { event: "error", message: "The answer stopped before it finished." };
   paint();
   p.shown = true;
+  announce(p.final, S.conv && S.conv.sides.length === 2
+    ? (S.conv.sides[k] || {}).profile?.label : null);
 
   // Recorded outcomes come back from the server with the saved turn; a
   // question, a full assessment or a busy side stay on screen until acted on.

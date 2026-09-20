@@ -215,6 +215,12 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 ### Named Rules
 **The One Saturated Field Rule.** On any screen the urgency bar is the only saturated field. The small red and yellow marks in the history list and the base register are the single allowed exception, because they index past bars. The base register was added to this exception on 2026-09-20, on the same grounds: a register row indexes a past bar exactly as a history row does. Nothing else on that screen carries a triage colour, not a row fill, not a count, not a tag.
 
+**The One Hidden-Text Class Rule.** Text that exists only for a screen reader uses **`.sr`**, in the field app and at base. There is no `.sr-only`: base briefly used that name and `app.css` ended up defining both, which is two names for one thing across 72 rendered places. Added 2026-09-20 after a read of the rendered HTML.
+
+**The Announce The Outcome Rule.** Streaming is deliberately silent to assistive technology: announcing tokens reads a JSON document aloud a fragment at a time. Nothing is announced until an answer is complete, and then the outcome is announced once, through the single `#announce` live region, as the urgency word plus its disposition, because the colour is not available to a listener and "red" on its own is not an instruction. A refusal, an error and a "who is this for" question announce too. Nothing else on the page is a live region except base's tally line.
+
+**The Every Screen Has One h1 Rule.** Including the ones with no visible title. The new-assessment screen and an assessment are a composer and a conversation, so their `h1` is `.sr`: hidden, not absent. `aria-current="page"` marks the route you are on and is ABSENT elsewhere, never set to `"false"`.
+
 **The Ink Selects Rule.** Pressed person chips, compare tabs, the sex toggle, primary buttons and send fill with ink. Blue is for pointing at something (a link, a key, a focus), never for choosing.
 
 **The No Fourth Colour Rule.** A refusal, the not-grounded note, rule lines and guard removals are never drawn in a triage colour. They are told apart by pattern (hatch, dash, strike) and by their words.

@@ -57,10 +57,10 @@ function addHTML(people, waiting) {
   const free = people.filter(p => !already.has(p.id) && p.id !== "none");
   if (!free.length) return `<p class="lede">Everyone on the People page is already waiting.</p>`;
   return `<form class="q-add" id="q-add">
-    <label class="sr-only" for="q-who">Who is waiting</label>
+    <label class="sr" for="q-who">Who is waiting</label>
     <select id="q-who" name="person_id">${free.map(p =>
       `<option value="${esc(p.id)}">${esc(p.label)}</option>`).join("")}</select>
-    <label class="sr-only" for="q-why">Why, in a few words</label>
+    <label class="sr" for="q-why">Why, in a few words</label>
     <input id="q-why" name="reason" type="text" maxlength="80" autocomplete="off"
       placeholder="Why they are waiting, optional">
     <button class="btn primary" type="submit">${icon("plus")}Add to caseload</button>

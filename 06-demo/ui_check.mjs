@@ -251,6 +251,19 @@ async function flow(out) {
   await p.until("!document.querySelector('[data-live]')", 60000);
   await sleep(800);
   check("a verdict bar is shown", await p.count(".bar.red, .bar.yellow, .bar.green, .bar.hold") >= 1);
+  // THE ANSWER IS ANNOUNCED, AND ONLY WHEN IT IS COMPLETE. Twenty seconds of
+  // streaming is silent to a screen reader; announcing tokens would read the
+  // JSON aloud. The live region carries the urgency and its disposition,
+  // because colour is not available to a listener and "red" is not an
+  // instruction. See DESIGN.md, the Announce The Outcome Rule.
+  const announced = await p.eval(`document.querySelector("#announce[aria-live='polite']")?.textContent ?? null`);
+  const barWord = (await p.text("#thread .bar")).split("\n")[0].trim().toLowerCase();
+  check("the verdict is announced to a screen reader",
+    typeof announced === "string" && announced.toLowerCase().includes(barWord)
+    && announced.length > barWord.length, `bar "${barWord}" announced as "${announced}"`);
+  check("the live region is hidden from the eye", await p.eval(
+    `(() => { const r = document.querySelector("#announce").getBoundingClientRect();
+      return r.width <= 2 && r.height <= 2; })()`) === true);
   check("the checked line is shown", /Checked/.test(await p.text(".checked")));
   check("the follow-up allowance is shown before it runs out", /follow-ups left/.test(await p.text(".allow")));
   await p.shot(join(out, "desktop-answer.png"), true);
@@ -637,7 +650,7 @@ async function base(out, baseUrl) {
   // The spec's colour rule: the urgency marks are the ONLY saturated thing.
   check("every urgency mark carries its word, not just a letter",
     await p.eval(`[...document.querySelectorAll(".reg .mk")].every(m =>
-      (m.getAttribute("title") || "").length > 2 && m.querySelector(".sr-only"))`) === true);
+      (m.getAttribute("title") || "").length > 2 && m.querySelector(".sr"))`) === true);
   check("no tag carries a triage colour", await p.eval(`(() => {
     const bad = ["rgb(200, 38, 29)", "rgb(242, 183, 5)", "rgb(28, 122, 67)"];
     return [...document.querySelectorAll(".tg")].every(t => {

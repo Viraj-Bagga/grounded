@@ -50,7 +50,7 @@ export function syncHTML(sy, run) {
 
     <div class="sy-base">
       <form class="q-add" id="sy-form">
-        <label class="sr-only" for="sy-url">Base address</label>
+        <label class="sr" for="sy-url">Base address</label>
         <input id="sy-url" name="base_url" type="url" inputmode="url" autocomplete="off"
           value="${esc(sy.base_url)}" placeholder="http://192.168.1.20:8781">
         <button class="btn plain" type="submit">Save address</button>

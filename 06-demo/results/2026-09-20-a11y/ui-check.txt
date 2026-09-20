@@ -1,0 +1,93 @@
+=== shots
+PASS  desktop: new assessment shows presets
+PASS  desktop: people list shows the household
+PASS  desktop: Mum's form shows the rules her profile turns on
+PASS  desktop: Maya's empty screen says she is not assessed
+PASS  phone: new assessment shows presets
+PASS  phone: people list shows the household
+PASS  phone: Mum's form shows the rules her profile turns on
+PASS  phone: Maya's empty screen says she is not assessed
+all passed
+
+=== people
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+PASS  the deleted person is gone, and only them
+all passed
+
+=== guards
+PASS  a child's profile gets NOT ASSESSED
+PASS  a child word on an adult profile asks who it is for
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+all passed
+
+=== queue
+PASS  an empty caseload says so
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+PASS  starting an assessment links it to the caseload row
+PASS  starting an assessment does NOT mark them seen
+PASS  Mark seen moves them out of waiting
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+all passed
+
+=== sync
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+PASS  the flush reports each assessment landing
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+all passed
+
+=== base
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+FAIL  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+PASS  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+all passed  (re-run after updating the check for the .sr rename)
+
+=== compare
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+all passed
+
+
+================================================================================
+NOTE ON THE ONE FAILURE IN THIS FILE
+================================================================================
+"every urgency mark carries its word" failed on the first pass because the
+CHECK was stale, not the page: base's marks had just been renamed from
+.sr-only to .sr and the assertion still looked for the old class. Updated and
+re-run: base 18 of 18, all passed. Totals with that re-run: 64 pass, 0 fail.

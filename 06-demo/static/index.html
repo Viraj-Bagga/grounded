@@ -52,6 +52,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <a class="icon-btn" href="/" data-link aria-label="New assessment">
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a>
     </header>
+    <!-- THE VERDICT ARRIVES AFTER 20 SECONDS OF SILENT STREAMING. Without
+         this, a screen reader never learns it landed: the tokens are painted,
+         not announced, and announcing them would read the JSON aloud. So the
+         page announces the OUTCOME once, when the answer is complete. -->
+    <p class="sr" id="announce" role="status" aria-live="polite"></p>
     <main id="main" tabindex="-1"><div class="page"><p class="loading">Loading…</p></div></main>
   </div>
 </div>
