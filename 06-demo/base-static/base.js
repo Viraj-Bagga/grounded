@@ -139,6 +139,38 @@ function priority(a, b) {
   return band(a) - band(b) || String(b.updated || "").localeCompare(String(a.updated || ""));
 }
 
+// The arrivals bar, built in place so the rest of the page keeps its focus,
+// its scroll position and its hover.
+function showNewBar(n) {
+  let bar = document.querySelector(".newbar");
+  const label = `${n} new since you opened this`;
+  if (bar) {
+    bar.firstChild.textContent = ` ${label} `;
+    return;
+  }
+  bar = document.createElement("p");
+  bar.className = "newbar";
+  bar.setAttribute("role", "status");
+  bar.append(` ${label} `);
+  const btn = document.createElement("button");
+  btn.className = "link-btn";
+  btn.type = "button";
+  btn.dataset.show = "";
+  btn.textContent = "Show";
+  btn.onclick = mergeNew;
+  bar.append(btn);
+  const first = document.querySelector("#main h2");
+  if (first) first.before(bar); else $("#main").append(bar);
+}
+
+function mergeNew() {
+  S.held = S.pendingData || S.held;
+  S.note = 0;
+  S.pendingData = null;
+  S.seen = new Set(S.held.assessments.map(r => r.id));
+  render(S.held);
+}
+
 // ------------------------------------------------------------- the page
 
 const S = { window: "today", seen: null, held: null, note: 0 };
@@ -236,8 +268,26 @@ function bind() {
     };
   });
   const show = document.querySelector("[data-show]");
-  if (show) show.onclick = () => { S.held = S.pendingData || S.held; S.note = 0;
-    S.seen = new Set(S.held.assessments.map(r => r.id)); render(S.held); };
+  if (show) show.onclick = mergeNew;
+}
+
+// IS THE READER ACTUALLY DOING SOMETHING RIGHT NOW.
+//
+// BASE-DESIGN.md 4.7 says new arrivals must never move a row under the
+// reader's finger, and it was implemented by holding EVERY arrival behind a
+// bar. Measured 2026-09-20: base saw an arrival in under 2 s and still showed
+// a 44-row table and a tally reading 44, so the closing beat of the demo,
+// "wifi on and it appears at base", showed a thin grey line and a stale count.
+// The rule's concern is real but it only applies while someone is mid-action.
+// So: arrivals land immediately when nobody is reaching for anything, and are
+// held behind the bar only when a control here has focus or the pointer is
+// over a row. Viraj's call.
+function readerIsBusy() {
+  const a = document.activeElement;
+  const focused = a && a !== document.body && a.closest
+    && a.closest("#main") && a.matches("button, a, input, select, [tabindex]");
+  const hovered = !!document.querySelector(".reg tbody tr:hover, .rec:hover, .newbar:hover");
+  return !!(focused || hovered);
 }
 
 async function load(first) {
@@ -253,17 +303,24 @@ async function load(first) {
     return render(d);
   }
   const fresh = [...ids].filter(id => !S.seen.has(id));
-  if (fresh.length) {
-    // Hold them back. A supervisor reaching for Mark reviewed must not have
-    // the table reorder under their finger.
+  if (fresh.length && readerIsBusy()) {
+    // Only now: something is under the reader's hand, so nothing moves.
     S.pendingData = d;
     S.note = fresh.length;
-    const bar = document.querySelector(".newbar");
-    if (bar) bar.firstChild.textContent = `\n      ${S.note} new since you opened this\n      `;
-    else render(S.held);
+    // INSERTED, NOT RE-RENDERED. Re-rendering to show the bar destroyed the
+    // focused button it was protecting, so focus fell to the body and the very
+    // next poll decided the reader was idle and merged anyway: the hold lasted
+    // one tick and then did the thing it exists to prevent. The bar is now
+    // built and placed on its own, and nothing else on the page is touched.
+    showNewBar(S.note);
     return;
   }
+  // It arrives: the row, the counts and the tally together, so the page never
+  // says 44 while holding 45.
+  S.seen = ids;
   S.held = d;
+  S.note = 0;
+  S.pendingData = null;
   render(d);
 }
 

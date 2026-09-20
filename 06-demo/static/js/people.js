@@ -25,6 +25,26 @@ export function facts(p) {
   return out.join(" · ");
 }
 
+// WHAT THEY TAKE, HOW OFTEN, WHEN. The schedule was writable from the form and
+// shown nowhere, which made it a field that swallowed what a clinician typed.
+// Viraj's report 2026-09-20.
+//
+// IT IS NOT THE MEDICATIONS LINE. The list the model reads is unchanged and
+// still shown as plain names under the person's facts; this is the record
+// beside it, and 06-demo/selftest_profile_text.py asserts that none of it
+// reaches the prompt.
+export function scheduleHTML(p) {
+  const rows = Object.entries(p.medication_schedule || {});
+  const seen = p.last_seen_by || p.last_seen_on;
+  if (!rows.length && !seen && !p.patient_id) return "";
+  return `<div class="rec-block">
+    ${p.patient_id ? `<div class="rec-line"><b>Patient ID</b><span class="mono">${esc(p.patient_id)}</span></div>` : ""}
+    ${rows.length ? `<div class="rec-line"><b>Medication schedule</b><ul class="sched">${rows.map(([k, v]) =>
+      `<li><span class="drug">${esc(k)}</span><span class="when">${esc(v)}</span></li>`).join("")}</ul></div>` : ""}
+    ${seen ? `<div class="rec-line"><b>Last seen</b><span>${esc([p.last_seen_by, p.last_seen_on].filter(Boolean).join(" · "))}</span></div>` : ""}
+  </div>`;
+}
+
 export function peopleListHTML(people, flash) {
   return `<div class="page">
     ${flash ? `<p class="saved" role="status">${esc(flash)}</p>` : ""}
@@ -36,6 +56,7 @@ export function peopleListHTML(people, flash) {
     <ul class="people">${people.map(p => `<li><a href="/people/${esc(p.id)}" data-link>
       <span class="nm">${esc(p.label)}${p.child ? '<span class="u16">Under 16</span>' : ""}${p.sample ? '<span class="sample">Sample</span>' : ""}</span>
       <span class="fx">${esc(facts(p))}</span>
+      <span class="rec">${scheduleHTML(p)}</span>
       <span class="rl">${p.child ? "Not assessed by this app"
         : p.watching.length ? `Watching for ${p.watching.map(w => `<span class="rtag">${esc(w.rule)}</span>`).join("")}`
         : "No profile rules apply"}</span>

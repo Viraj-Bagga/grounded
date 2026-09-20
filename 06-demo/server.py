@@ -37,6 +37,7 @@ THE API
   POST   /api/sync/base                   point this device at a base
   POST   /api/sync/flush                  send everything pending, streamed
   POST   /api/queue                       queue a person, with an optional note
+  POST   /api/queue/<entry>/start          the worker has picked them up
   POST   /api/queue/<entry>/done          mark one seen, optionally naming the assessment
   DELETE /api/queue/<entry>               take one off the list
   GET    /api/conversations               history, newest first
@@ -73,6 +74,7 @@ import socket
 import re
 import sys
 import threading
+from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -195,6 +197,67 @@ def describe(p):
                 prompt=profile_text(p), sample=p["id"] in SAMPLE_IDS)
 
 
+# Long enough that a worker can be interrupted mid-assessment and come back to
+# it, short enough that a tap by mistake does not hold a row all day.
+ABANDON_AFTER = 30 * 60
+
+
+def _older_than(iso, seconds):
+    if not iso:
+        return True
+    try:
+        started = datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return True
+    now = datetime.now(started.tzinfo) if started.tzinfo else datetime.now()
+    return (now - started).total_seconds() > seconds
+
+
+def reconcile_caseload():
+    """Move each waiting entry to match the assessment it is linked to.
+
+    The caseload's three states are DERIVED, not stored, so they cannot drift
+    from what actually happened:
+
+      linked, and the assessment has shown something   -> SEEN
+      linked, nothing sent yet, and OLD                -> back to WAITING
+      linked, anything else                            -> IN PROGRESS
+      not linked                                       -> WAITING
+
+    ABANDONMENT IS A TIME, NOT AN EMPTINESS. The first version unlinked any
+    assessment with no turns, which is the state every assessment is in for the
+    first few seconds: tapping Assess put the person straight back to waiting
+    and in progress could never appear at all. An assessment with nothing sent
+    is a worker composing, until it has been sitting there for ABANDON_AFTER.
+
+    "Shown something" includes a refusal, because a child profile or an
+    out-of-scope complaint is a finished piece of work: the worker asked and
+    the system answered, even though the answer was no verdict.
+
+    Run before the caseload is read, so tapping Assess and coming back shows
+    the person mid-assessment rather than looking untouched. Viraj's report
+    2026-09-20.
+    """
+    waiting, _ = QUEUE.list()
+    for e in waiting:
+        cid = e.get("conversation_id")
+        if not cid:
+            # Picked up but nothing sent yet. In progress until it goes stale,
+            # then back to waiting: a tap by mistake must not hold a row all day.
+            if e.get("started_at") and _older_than(e["started_at"], ABANDON_AFTER):
+                QUEUE.unstart(e["id"])
+            continue
+        conv = CONVERSATIONS.get(cid)
+        if conv is None:
+            QUEUE.unlink(e["id"])           # the assessment is gone
+            continue
+        turns = [t for s in conv.get("sides", []) for t in s.get("turns", [])]
+        if any(t.get("kind") in ("result", "refused", "error") for t in turns):
+            QUEUE.done(e["id"], cid)        # finished -> seen
+        elif not turns and _older_than(conv.get("created"), ABANDON_AFTER):
+            QUEUE.unstart(e["id"])          # abandoned -> waiting
+
+
 def queue_view():
     """The caseload, with each person joined on and the seeded ones marked.
 
@@ -204,12 +267,16 @@ def queue_view():
     before. See caseload.py.
     """
     people = {p["id"]: p for p in PEOPLE.list()}
+    reconcile_caseload()
     waiting, done = QUEUE.list()
     seen_today = [e for e in done if (e.get("done_at") or "")[:10] == now_iso()[:10]]
-    return {"waiting": [caseload.describe(e, people) for e in waiting],
+    rows = [caseload.describe(e, people) for e in waiting]
+    active = [r for r in rows if r["status"] == "in_progress"]
+    return {"waiting": rows,
             "done": [caseload.describe(e, people) for e in done],
             "counts": {"waiting": len(waiting), "done": len(done),
-                       "done_today": len(seen_today)}}
+                       "done_today": len(seen_today),
+                       "in_progress": len(active)}}
 
 
 def sync_view():
@@ -399,6 +466,12 @@ class Handler(SimpleHTTPRequestHandler):
             entry, errors = QUEUE.add(pid, body.get("reason"))
             return self._json(queue_view()) if entry else \
                 self._json({"errors": errors}, 422)
+        m = re.match(r"^/api/queue/([\w-]+)/start$", path)
+        if m:
+            # The tap itself, before any assessment exists. See caseload.start.
+            entry = QUEUE.start(m.group(1))
+            return self._json(queue_view()) if entry else \
+                self._json({"error": "no such caseload entry"}, 404)
         m = re.match(r"^/api/queue/([\w-]+)/done$", path)
         if m:
             # The assessment it was seen in is optional and recorded when the

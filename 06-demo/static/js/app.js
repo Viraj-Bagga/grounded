@@ -797,10 +797,41 @@ async function runTurn(cid, k, text, timeline, confirmed, heard = null) {
   if (confirmed) S.liveSaid = S.liveSaid || { text, timeline, at: new Date().toISOString() };
   renderConversation();
   let frame = 0;
+  // A REPAINT MUST NOT DESTROY THE ONE CONTROL IN HERE.
+  //
+  // This used to be `el.innerHTML = liveHTML(k)` on every tick, which replaced
+  // the whole subtree four times a second. "Show what the model is writing" is
+  // the only button inside it, and a real mouse press holds for about 140 ms:
+  // if the button is destroyed between mousedown and mouseup the browser never
+  // dispatches `click` at all, so the handler never runs and the button looks
+  // dead. A synthetic .click() fires instantly and always worked, which is why
+  // no check caught it. Measured 2026-09-20: 24 mutations a second.
+  //
+  // So the steps redraw and the raw text updates, while the button itself is
+  // left alone. A full replace happens only when the block appears, disappears
+  // or is toggled, none of which happens under the pointer.
   const paint = () => {
     frame = 0;
     const el = document.querySelector(`[data-live="${k}"]`);
-    if (el && S.live[k] === p) el.innerHTML = liveHTML(k);
+    if (!el || S.live[k] !== p) return;
+    const steps = el.querySelector(".steps4");
+    const rawBlock = el.querySelector(".raw-live");
+    const wantsRaw = !!p.tokenAt;
+    if (!p.final && steps && (!!rawBlock === wantsRaw)) {
+      const fresh = document.createElement("div");
+      fresh.innerHTML = liveHTML(k);
+      const nextSteps = fresh.querySelector(".steps4");
+      if (nextSteps) steps.replaceWith(nextSteps);
+      const pre = rawBlock && rawBlock.querySelector("pre");
+      if (pre) pre.textContent = p.raw;
+      // The slow-read notice comes and goes on its own; keep it in step.
+      const notice = el.querySelector(".notice");
+      const nextNotice = fresh.querySelector(".notice");
+      if (nextNotice && !notice) el.append(nextNotice);
+      else if (notice && !nextNotice) notice.remove();
+      return;
+    }
+    el.innerHTML = liveHTML(k);
   };
   const soon = () => { if (!frame) frame = requestAnimationFrame(paint); };
   const tick = setInterval(() => {
@@ -1124,7 +1155,14 @@ async function showQueue() {
       S.queue = await api.unqueue(entry);
       await showQueue();
     },
-    assess: id => { S.picked = [id]; S.compare = false; go("/"); },
+    // Tell the caseload the worker has picked this person up BEFORE leaving
+    // the page, so the row says "being assessed" the moment they walk away
+    // from it rather than looking untouched. The assessment itself is still
+    // only created when they send.
+    assess: async (id, entryId) => {
+      if (entryId) await api.startEntry(entryId).catch(() => {});
+      S.picked = [id]; S.compare = false; go("/");
+    },
   });
 }
 
@@ -1142,8 +1180,8 @@ async function showSync() {
 function paintSync() {
   $("#main").innerHTML = syncHTML(S.sync, S.flush);
   bindSync($("#main"), {
-    setBase: async url => {
-      try { S.sync = await api.setBase(url); S.flash = null; }
+    setBase: async (url, worker) => {
+      try { S.sync = await api.setBase(url, worker); S.flash = null; }
       catch (e) { S.flush.lines = [esc(e.body?.error || "That address was not accepted.")]; }
       paintSync();
     },

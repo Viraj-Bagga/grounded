@@ -173,6 +173,21 @@ async function tab() {
       }
       throw new Error(`timed out waiting for ${expr}`);
     },
+    // A REAL PRESS, held like a hand. `.click()` fires instantly and so never
+    // noticed that a 250ms repaint was destroying the button between mousedown
+    // and mouseup, which stops the browser dispatching `click` at all. Any
+    // control that lives inside a repainting region must be tested this way.
+    async press(sel, holdMs = 140) {
+      const r = await page.eval(`(() => { const e = document.querySelector(${JSON.stringify(sel)});
+        if (!e) throw new Error("nothing matches ${sel.replace(/"/g, "")}");
+        const b = e.getBoundingClientRect();
+        return JSON.stringify({ x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }); })()`);
+      const { x, y } = JSON.parse(r);
+      await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+      await sleep(holdMs);
+      await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+      return true;
+    },
     click: sel => page.eval(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) throw new Error("no ${sel.replace(/"/g, "")}"); e.click(); return true; })()`),
     type: (sel, text) => page.eval(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); e.focus(); e.value = ${JSON.stringify(text)}; e.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`),
     text: sel => page.eval(`document.querySelector(${JSON.stringify(sel)})?.innerText ?? ""`),
@@ -247,6 +262,22 @@ async function flow(out) {
   check("the URL becomes the assessment's own", /^\/c\//.test(await p.eval("location.pathname")));
   await p.until("/tokens/.test(document.querySelector('[data-live] .steps4')?.innerText || '')", 120000);
   await p.shot(join(out, "desktop-streaming.png"));
+  // "Show what the model is writing" is the only control inside the region
+  // that repaints four times a second. Pressed like a hand, not clicked like a
+  // script: held for 140 ms across at least one repaint.
+  if (await p.count("[data-raw-toggle]")) {
+    await p.press("[data-raw-toggle]");
+    await sleep(500);
+    check("the raw stream opens on a real press, not just a synthetic click",
+      await p.count(".raw-live pre") === 1);
+    const first = await p.eval(`(document.querySelector(".raw-live pre")||{}).textContent?.length ?? 0`);
+    await sleep(1800);
+    check("the raw stream keeps updating while it is open", await p.eval(
+      `((document.querySelector(".raw-live pre")||{}).textContent?.length ?? 0) > ${first}`) === true);
+    await p.press("[data-raw-toggle]");
+    await sleep(500);
+    check("the raw stream closes again on a real press", await p.count(".raw-live pre") === 0);
+  }
   await p.until("[...document.querySelectorAll('[data-live]')].every(e => !e.querySelector('.steps4'))", 300000, 400);
   await p.until("!document.querySelector('[data-live]')", 60000);
   await sleep(800);
@@ -492,23 +523,38 @@ async function queue(out) {
   check("Assess opens a new assessment for that person",
     /Aunt Sue/.test(await p.text("[data-for-name]")), await p.text("[data-for-name]"));
 
-  // Starting the assessment is what links it to the caseload row, server-side,
-  // so the link survives the tab closing. It must NOT mark anybody seen.
+  // WAITING -> IN PROGRESS -> SEEN. Starting the assessment links it to the
+  // caseload row server-side and puts the person IN PROGRESS: they stay on the
+  // list, visibly being assessed, because a worker working a list must not
+  // have someone vanish mid-assessment. Viraj's report 2026-09-20.
+  const mid = await (await fetch(`${APP}/api/queue`)).json();
+  check("tapping Assess keeps them on the list, in progress",
+    mid.waiting.length === 1 && mid.waiting[0].status === "in_progress",
+    JSON.stringify(mid.counts));
+  // THE TAP CREATES NO ASSESSMENT. The conversation is only made when the
+  // first message is sent, so the row is in progress with nothing linked yet.
+  // That gap is exactly where someone used to look untouched.
+  check("nothing is linked yet, because no assessment exists yet",
+    mid.waiting[0].conversation_id === null, String(mid.waiting[0].conversation_id));
+  check("nobody is marked seen while it is still running", mid.counts.done === 0);
+  await p.go("/queue");
+  check("the row says it is being assessed", /Being assessed/.test(await p.text(".q-list")));
+  await p.shot(join(out, "desktop-caseload-in-progress.png"), true);
+
+  // Picking it back up and finishing it moves them to Seen on its own: the
+  // worker already did the work, and saying so twice earns nothing.
+  await p.click("[data-assess]");
+  await p.until("location.pathname === '/'", 15000);
   await p.type("#ta", "Sharp pain in my left chest, worse when I breathe in.");
   await sendAndWait(p, "caseload assessment");
   const cid = await p.eval("location.pathname.split('/')[2]");
-  const q = await (await fetch(`${APP}/api/queue`)).json();
-  check("starting an assessment links it to the caseload row",
-    q.waiting.length === 1 && q.waiting[0].conversation_id === cid, JSON.stringify(q.counts));
-  check("starting an assessment does NOT mark them seen", q.counts.done === 0);
-
   await p.go("/queue");
-  await p.click("[data-seen]");
-  await p.until("document.querySelectorAll('.q-list .q-item.done').length === 1", 10000);
-  check("Mark seen moves them out of waiting",
-    /Nobody is waiting/.test(await p.text("#main")));
+  await p.until("document.querySelectorAll('.q-list .q-item.done').length === 1", 15000);
+  const q = await (await fetch(`${APP}/api/queue`)).json();
+  check("finishing the assessment moves them to Seen by itself",
+    q.counts.done === 1 && q.counts.waiting === 0, JSON.stringify(q.counts));
   check("a seen row links the assessment it was seen in",
-    await p.count(".q-item.done a[href^='/c/']") === 1);
+    await p.count(".q-item.done a[href^='/c/']") === 1 && /^\d{8}-/.test(cid), cid);
   check("the sidebar count goes back to empty", /Empty/.test(await p.text("#queue-link")));
   await p.shot(join(out, "desktop-caseload-seen.png"), true);
   await p.size(PHONE);

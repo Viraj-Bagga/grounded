@@ -53,10 +53,14 @@ export function syncHTML(sy, run) {
         <label class="sr" for="sy-url">Base address</label>
         <input id="sy-url" name="base_url" type="url" inputmode="url" autocomplete="off"
           value="${esc(sy.base_url)}" placeholder="http://192.168.1.20:8781">
-        <button class="btn plain" type="submit">Save address</button>
+        <label class="sr" for="sy-worker">Who is carrying this device</label>
+        <input id="sy-worker" name="worker" type="text" maxlength="40" autocomplete="off"
+          value="${esc(sy.device.worker || "")}" placeholder="Your name, optional">
+        <button class="btn plain" type="submit">Save</button>
       </form>
       <p class="m">This device is <strong>${esc(sy.device.label)}</strong>
-        <span class="sha">${esc(sy.device.id)}</span>. Base groups its cases by that.</p>
+        <span class="sha">${esc(sy.device.id)}</span>. Base groups its cases by that${
+        sy.device.worker ? `, and shows them as carried by ${esc(sy.device.worker)}` : ""}.</p>
     </div>
 
     <div class="sy-go">
@@ -78,7 +82,8 @@ export function bindSync(root, on) {
   const form = root.querySelector("#sy-form");
   if (form) form.onsubmit = e => {
     e.preventDefault();
-    on.setBase(String(new FormData(form).get("base_url") || ""));
+    const fd = new FormData(form);
+    on.setBase(String(fd.get("base_url") || ""), String(fd.get("worker") || ""));
   };
   const btn = root.querySelector("#sy-send");
   if (btn) btn.onclick = () => on.send();

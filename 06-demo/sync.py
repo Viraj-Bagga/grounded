@@ -127,11 +127,14 @@ class SyncState:
         url = str(url or "").strip().rstrip("/")
         if not url.startswith(("http://", "https://")):
             return None, "Base needs an http:// or https:// address."
-        worker = " ".join(str(worker or "").split())[:40]
         with self.lock:
             d = self._read()
             d["base_url"] = url
-            d["worker"] = worker
+            # ONLY WHEN SUPPLIED. Saving the address from the page sent no
+            # worker, and this used to overwrite the name with "" every time,
+            # so a worker set once silently disappeared on the next save.
+            if worker is not None:
+                d["worker"] = " ".join(str(worker).split())[:40]
             _write_json(self.path, d)
             return url, None
 
@@ -190,16 +193,35 @@ def bundle_problems(b) -> list:
     return errs
 
 
+SHOWN_KINDS = ("result", "refused", "error")
+
+
 def pending(conversations, state):
     """Finished assessments this device has not had accepted at base yet.
 
-    An assessment with no turn that reached the model is not sent: it is an
-    empty shell the worker started and abandoned, and base does not want it.
+    An assessment that has SHOWN the worker nothing is not sent: it is an empty
+    shell they started and abandoned, and base does not want it.
+
+    "SHOWN SOMETHING" IS NOT "REACHED THE MODEL". This tested
+    `t.get("reached_model")`, which on real data is an exact synonym for
+    `kind == "result"`: measured 2026-09-20 over 78 saved assessments, every
+    turn is either ('result', reached_model=True) or ('refused', False), with
+    no other combination. So the rule quietly meant "only send answers", and
+    **16 refusals on this device had never been sendable at all**. Found by the
+    other instance walking the app; the mechanism is confirmed here.
+
+    That is the wrong way round. A refusal is a finished piece of work and the
+    most interesting kind: the system declined to answer, for a child, for
+    something out of scope, or because nothing was grounded. Base's register
+    already counts refused as needing review, so those cases were being counted
+    on a screen they could never reach. Errors go too, for the same reason and
+    so the caseload cannot say "seen" for something base never received.
     """
     out = []
     already = state.sent()
     for conv in conversations:
-        if not any(t.get("reached_model") for s in conv.get("sides", []) for t in s.get("turns", [])):
+        if not any(t.get("kind") in SHOWN_KINDS
+                   for s in conv.get("sides", []) for t in s.get("turns", [])):
             continue
         d = digest_of(conv)
         was = already.get(conv["id"])

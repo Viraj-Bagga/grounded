@@ -526,6 +526,20 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .people .fx { color: var(--ink-2); font-size: var(--t-15); grid-column: 1; }
 .people .rl { grid-column: 1; display: flex; gap: .375rem; flex-wrap: wrap; font-size: var(--t-14); color: var(--ink-2); align-items: center; }
 .people .ch { grid-row: 1 / span 3; grid-column: 2; color: var(--ink-3); }
+.people .rec { grid-column: 1; }
+.people .rec:empty { display: none; }
+/* The clinician's record, beside the facts the model reads and clearly not
+   part of them. Labels lead, values follow; the drug is mono because it is
+   data, the schedule is prose because a person wrote it. */
+.rec-block { display: grid; gap: .25rem; margin: .25rem 0 .125rem; }
+.rec-line { display: grid; grid-template-columns: 9.5rem 1fr; gap: .5rem;
+  font-size: var(--t-14); color: var(--ink-2); }
+.rec-line > b { font-weight: 700; color: var(--ink-3); }
+.sched { list-style: none; margin: 0; padding: 0; display: grid; gap: .125rem; }
+.sched li { display: flex; gap: .5rem; flex-wrap: wrap; }
+.sched .drug { font: 600 var(--t-14) var(--mono); color: var(--ink-2); }
+.sched .when { color: var(--ink-2); }
+@media (max-width: 30rem) { .rec-line { grid-template-columns: 1fr; gap: 0; } }
 .rtag { font: 700 var(--t-12) var(--mono); padding: .125rem .375rem; border: 1px solid var(--rule-2); color: var(--action); }
 .u16 { font: 700 var(--t-12)/1 var(--font); padding: .25rem .4375rem; background: var(--hold) var(--hatch); color: var(--on-hold); }
 .sample { font: 700 var(--t-12)/1 var(--font); padding: .1875rem .375rem; border: 1px dashed var(--ink-3); color: var(--ink-2); }
@@ -552,6 +566,10 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .q-acts .btn { min-height: 2.25rem; padding: 0 .75rem; }
 /* Seen rows stay legible but stop competing with the ones still waiting. */
 .q-item.done .nm { font-weight: 600; color: var(--ink-2); }
+/* Being assessed right now. A word, not a colour: the triage palette is for
+   verdicts and this is a state of the work, not of the patient. */
+.tag-busy { font: 700 var(--t-12)/1 var(--font); padding: .1875rem .375rem;
+  border: 1px solid var(--rule-2); border-radius: 3px; color: var(--ink-2); }
 .q-item.gone-person .nm { color: var(--ink-2); }
 .icon-btn.danger:hover { background: var(--red); color: var(--on-red); }
 /* A caseload with people on it says so in the sidebar, because the whole point

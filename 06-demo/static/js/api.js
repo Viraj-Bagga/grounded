@@ -31,11 +31,12 @@ export const api = {
   chunk: key => j(`/api/chunk/${q(key)}`),
   queue: () => j("/api/queue"),
   enqueue: (person_id, reason) => j("/api/queue", put("POST", { person_id, reason })),
+  startEntry: entry => j(`/api/queue/${q(entry)}/start`, put("POST", {})),
   markSeen: (entry, conversation_id) =>
     j(`/api/queue/${q(entry)}/done`, put("POST", { conversation_id })),
   unqueue: entry => j(`/api/queue/${q(entry)}`, { method: "DELETE" }),
   sync: () => j("/api/sync"),
-  setBase: base_url => j("/api/sync/base", put("POST", { base_url })),
+  setBase: (base_url, worker) => j("/api/sync/base", put("POST", { base_url, worker })),
 };
 
 // One turn for one side, streamed as server-sent events. onEvent gets every

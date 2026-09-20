@@ -86,7 +86,7 @@ class QueueStore:
                     return e, {}
             entry = dict(id=_new_id(), person_id=person_id, reason=reason,
                          added=now_iso(), done=False, done_at=None,
-                         conversation_id=None)
+                         started_at=None, conversation_id=None)
             entries.append(entry)
             self._save(entries)
             return entry, {}
@@ -103,6 +103,51 @@ class QueueStore:
                 if (e.get("person_id") == person_id and not e.get("done")
                         and not e.get("conversation_id")):
                     e["conversation_id"] = conversation_id
+                    self._save(entries)
+                    return e
+        return None
+
+    def start(self, entry_id):
+        """Mark that the worker has picked this person up.
+
+        TAPPING ASSESS CREATES NO ASSESSMENT. The conversation is only created
+        when the first message is sent, so between the tap and the typing there
+        is nothing to link and the row looked untouched on a list the worker had
+        just been navigated away from. This is the missing half: the entry
+        records that work has started, and the assessment attaches to it later.
+        """
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if e["id"] == entry_id and not e.get("done"):
+                    if not e.get("started_at"):
+                        e["started_at"] = now_iso()
+                        self._save(entries)
+                    return e
+        return None
+
+    def unstart(self, entry_id):
+        """Put a started entry back to plain waiting: it was abandoned."""
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if e["id"] == entry_id and (e.get("started_at") or e.get("conversation_id")):
+                    e["started_at"] = None
+                    e["conversation_id"] = None
+                    self._save(entries)
+                    return e
+        return None
+
+    def unlink(self, entry_id):
+        """Forget the assessment an entry was linked to, so the person goes
+        back to plain waiting. Used when the assessment was ABANDONED: the
+        worker tapped Assess and never sent anything. Leaving the link would
+        strand the row pointing at an empty conversation forever."""
+        with self.lock:
+            entries = self._load()
+            for e in entries:
+                if e["id"] == entry_id and e.get("conversation_id"):
+                    e["conversation_id"] = None
                     self._save(entries)
                     return e
         return None
@@ -134,6 +179,21 @@ class QueueStore:
             return True
 
 
+# WAITING -> IN PROGRESS -> SEEN, and back to waiting if it was abandoned.
+#
+# Tapping Assess used to leave the row looking exactly as it did before, on a
+# list the worker had just been navigated away from, so a person being seen
+# right now was indistinguishable from one nobody had touched. Viraj's report
+# 2026-09-20. The state is DERIVED from the linked assessment rather than
+# stored, so it cannot go stale: see queue_view in server.py, which reconciles
+# each entry against its conversation before the page is built.
+def status_of(entry):
+    if entry.get("done"):
+        return "seen"
+    started = entry.get("started_at") or entry.get("conversation_id")
+    return "in_progress" if started else "waiting"
+
+
 def describe(entry, people_by_id):
     """An entry with the person joined on, for the page. A person who has been
     deleted still lists: the caseload records that they were waiting."""
@@ -141,6 +201,7 @@ def describe(entry, people_by_id):
     return dict(entry,
                 label=(p or {}).get("label") or "Removed person",
                 age=(p or {}).get("age"), sex=(p or {}).get("sex"),
+                status=status_of(entry),
                 missing=p is None)
 
 
@@ -185,6 +246,27 @@ if __name__ == "__main__":
         check("a done person can be queued again",
               q.add("mum", "came back")[0]["id"] != e1["id"])
         check("missing entries do not mark done", q.done("nope") is None)
+        q.add("grandpa", "abandoned test")
+        g = q.waiting_for("grandpa")
+        check("a fresh entry is waiting", status_of(g) == "waiting")
+        check("start alone makes it in progress, with no assessment yet",
+              status_of(q.start(g["id"])) == "in_progress"
+              and q.waiting_for("grandpa")["conversation_id"] is None)
+        check("unstart puts it back to waiting",
+              q.unstart(g["id"]) is not None and status_of(q.waiting_for("grandpa")) == "waiting")
+        check("starting an entry that does not exist is None", q.start("nope") is None)
+        q.link("grandpa", "20260920-999999-cccccc")
+        check("a linked entry is in progress", status_of(q.waiting_for("grandpa")) == "in_progress")
+        check("unlink puts it back to waiting",
+              q.unlink(g["id"]) is not None and status_of(q.waiting_for("grandpa")) == "waiting")
+        check("unlinking an unlinked entry is None", q.unlink(g["id"]) is None)
+        q.link("grandpa", "20260920-999999-dddddd")
+        q.done(g["id"])
+        check("a done entry is seen",
+              status_of(next(x for x in q.list()[1] if x["id"] == g["id"])) == "seen")
+        # Cleaned up: a later check counts the done list and this entry is not
+        # part of what it is measuring.
+        q.remove(g["id"])
         q.add("aunt", "breathless")
         linked = q.link("aunt", "20260920-222222-aaaaaa")
         check("link records the assessment without marking done",

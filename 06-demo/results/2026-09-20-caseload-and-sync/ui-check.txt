@@ -1,0 +1,213 @@
+2026-09-20  five fixes: base refresh, LAN sync, the worker name, the caseload
+            state machine, refusals that could never sync, and base's counts
+
+  06-demo/caseload.py                29/29 self-tests passed.
+  06-demo/selftest_profile_text.py   25/25 self-tests passed.
+  02-pairs/guards.py                 87/87 self-tests passed (fixtures shared with guards.ts).
+
+=== shots  04:34:15
+PASS  desktop: new assessment shows presets
+PASS  desktop: people list shows the household
+PASS  desktop: Mum's form shows the rules her profile turns on
+PASS  desktop: Maya's empty screen says she is not assessed
+PASS  phone: new assessment shows presets
+PASS  phone: people list shows the household
+PASS  phone: Mum's form shows the rules her profile turns on
+PASS  phone: Maya's empty screen says she is not assessed
+all passed
+
+=== people  04:34:21
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+PASS  the deleted person is gone, and only them
+all passed
+
+=== guards  04:34:26
+PASS  a child's profile gets NOT ASSESSED
+PASS  a child word on an adult profile asks who it is for
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+all passed
+
+=== flow  04:34:30
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+PASS  the raw stream opens on a real press, not just a synthetic click
+PASS  the raw stream keeps updating while it is open
+PASS  the raw stream closes again on a real press
+PASS  a verdict bar is shown
+PASS  the verdict is announced to a screen reader
+PASS  the live region is hidden from the eye
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+PASS  the checked line opens its details
+PASS  a source chip opens the real chunk
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+PASS  the drawer lists this assessment
+all passed
+
+=== compare  04:35:00
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+all passed
+
+=== two-tabs  04:35:17
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+PASS  both follow-ups reused their own cache
+all passed
+
+=== drop  04:36:04
+PASS  a dropped stream says the answer is still being written
+PASS  the composer waits while it is written
+PASS  the saved answer appears without a reload
+all passed
+
+=== regions  04:36:19
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+PASS  a US chunk that says 9-1-1 carries the region's number
+PASS  the check leaves the base corpus selected, as it found it
+PASS  the sidebar is back to Base only
+all passed
+
+=== voice  04:36:34
+PASS  the composer offers a microphone
+PASS  tapping starts recording
+PASS  send is closed while recording
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+PASS  editing is recorded
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+all passed
+
+=== queue  04:36:54
+PASS  an empty caseload says so
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+PASS  tapping Assess keeps them on the list, in progress
+PASS  nothing is linked yet, because no assessment exists yet
+PASS  nobody is marked seen while it is still running
+PASS  the row says it is being assessed
+PASS  finishing the assessment moves them to Seen by itself
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+all passed
+
+=== sync  04:37:53
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+PASS  the flush reports each assessment landing
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+all passed
+
+=== base  04:38:21
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+PASS  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+PASS  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+all passed
+
+
+================================================================================
+SUMMARY: 117 pass, 0 fail, plus 29 caseload and 25 profile_text self-tests.
+================================================================================
+
+1. BASE DID NOT SHOW ARRIVALS. Not a polling bug: base saw an arrival in under
+   2 s every time. It was BASE-DESIGN.md 4.7 implemented too literally, holding
+   EVERY arrival behind a "N new since you opened this" bar, so the closing
+   beat showed a thin grey line and a tally still reading 44 while base held 45.
+   Arrivals now land immediately, row and counts together, and are held ONLY
+   while a control here has focus or the pointer is over a row. Measured: idle
+   45->46 in 2 s; focused, held for the full 12 s.
+   The hold also used to cancel itself, because rendering the bar destroyed the
+   focused button it was protecting. The bar is now inserted in place.
+
+2. LAN SYNC WORKS. base_server.py --lan binds *:8781, answers on
+   10.6.13.168:8781, and the field device POSTed two assessments across it.
+   FOUND WHILE CHECKING: saving the base address from the page WIPED the worker
+   name, because the form sent no worker and set_base overwrote it with "".
+   It now only writes the name when one is supplied, and the page has a field
+   for it, so it is settable rather than dead config.
+
+3. TAPPING ASSESS. Could not reproduce literal disappearance: the entry stayed
+   waiting with the assessment linked. What is real is that tapping Assess
+   creates NO assessment (the conversation is made on send), so for the whole
+   window between the tap and the typing there was nothing to link and the row
+   looked untouched, on a list the worker had just been navigated away from.
+   The entry now records that work started, independent of any assessment:
+     waiting -> in progress (the tap) -> seen (the assessment finishes)
+     in progress -> waiting (abandoned, after 30 minutes)
+   Derived, never stored, reconciled before every read, so it cannot go stale.
+
+4. MEDICATION SCHEDULE. The form wrote it and nothing displayed it. Now shown
+   on the person's record with the patient ID and when they were last seen,
+   beside the facts the model reads and clearly not part of them. The
+   medications list is untouched and selftest_profile_text is 25/25.
+
+5. REFUSALS COULD NEVER SYNC. Diagnosed by the other instance and confirmed
+   here. pending() tested `reached_model`, which on real data is an exact
+   synonym for `kind == "result"`: over 78 saved assessments every turn is
+   either ('result', True) or ('refused', False), no other combination. So the
+   rule quietly meant "only send answers" and 16 refusals had never been
+   sendable. Base's register counts refused as needing review, so those cases
+   were counted on a screen they could never reach. All 16 have now crossed.
+   The second half of that diagnosis, that base's case page would blank or
+   throw on a refusal, does NOT reproduce: it renders the hold mark, OUT OF
+   SCOPE and the refusal message. turnHTML already maps a refused turn.
+
+6. BASE COUNTED TWO THINGS WITH ONE WORD. counts.red counted SIDES and the
+   page's tally counted ROWS, so a compare assessment with two red sides made
+   the API say 39 and the page say 38. Rows is the unit a supervisor thinks in,
+   because a row is what they open. Now both say 38. Files, distinct ids, rows
+   and counts.assessments all agree at 75: resends overwrite by device and id.

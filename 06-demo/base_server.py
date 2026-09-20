@@ -232,7 +232,16 @@ def dashboard():
     today_rows = [r for r in rows if (r.get("updated") or "")[:10] == today]
 
     def count(rs, state):
-        return sum(1 for r in rs for s in r["sides"] if s["state"] == state)
+        """ROWS containing that state, not sides.
+
+        This counted sides, so a compare assessment with two red sides made
+        counts.red say 39 while the page's own tally said 38: the same word
+        meaning two things depending on where you read it. A supervisor counts
+        cases, because a case is what they open, so a row is the unit. A
+        compare row with a green beside a yellow is counted in both, which is
+        the honest answer to "how many have a yellow in them".
+        """
+        return sum(1 for r in rs if any(x["state"] == state for x in r["sides"]))
 
     waiting_out_there = sum((d.get("caseload") or {}).get("waiting", 0) for d in devices.values())
     last_sync = max([r.get("synced_at") or "" for r in rows] or [""])

@@ -21,15 +21,24 @@ function who(e) {
   return bits.join(" · ");
 }
 
+// A PERSON BEING ASSESSED RIGHT NOW STAYS ON THE LIST AND SAYS SO.
+// Tapping Assess used to leave the row looking exactly as it had before, on a
+// list the worker was navigated away from, so someone mid-assessment was
+// indistinguishable from someone nobody had touched. Viraj's report
+// 2026-09-20. The state is derived from the linked assessment, not stored:
+// see reconcile_caseload in server.py.
 function waitingRow(e) {
-  return `<li class="q-item${e.missing ? " gone-person" : ""}" data-entry="${esc(e.id)}">
+  const busy = e.status === "in_progress";
+  return `<li class="q-item${busy ? " in-progress" : ""}${e.missing ? " gone-person" : ""}" data-entry="${esc(e.id)}">
     <div class="q-main">
-      <span class="nm">${esc(e.label)}${e.missing ? '<span class="sample">No profile</span>' : ""}</span>
+      <span class="nm">${esc(e.label)}${busy ? '<span class="tag-busy">Being assessed</span>' : ""}${e.missing ? '<span class="sample">No profile</span>' : ""}</span>
       <span class="fx">${who(e) || "waiting"}</span>
       <span class="m">Added ${esc(clock(e.added))}</span>
     </div>
     <div class="q-acts">
-      ${e.missing ? "" : `<button class="btn primary" type="button" data-assess="${esc(e.person_id)}">Assess</button>`}
+      ${busy && e.conversation_id
+        ? `<a class="btn primary" href="/c/${esc(e.conversation_id)}" data-link>Open</a>`
+        : (e.missing ? "" : `<button class="btn primary" type="button" data-assess="${esc(e.person_id)}" data-entry-id="${esc(e.id)}">Assess</button>`)}
       <button class="btn plain" type="button" data-seen="${esc(e.id)}">Mark seen</button>
       <button class="icon-btn danger" type="button" data-drop="${esc(e.id)}"
         aria-label="Take ${esc(e.label)} off the list">${icon("close")}</button>
@@ -72,12 +81,15 @@ export function queueHTML(q, people, flash) {
   return `<div class="page">
     ${flash ? `<p class="saved" role="status">${esc(flash)}</p>` : ""}
     <div class="head-row"><h1>Caseload</h1><span class="grow"></span>
-      <span class="q-count">${n} waiting · ${q.counts.done_today} seen today</span></div>
+      <span class="q-count">${n} waiting${q.counts.in_progress
+        ? ` · ${q.counts.in_progress} being assessed` : ""} · ${q.counts.done_today} seen today</span></div>
     <p class="lede">Who is waiting to be assessed on this device. The list is kept here,
       offline, and nothing on it is sent to the model.</p>
     ${addHTML(people, q.waiting)}
     ${q.waiting.length
-      ? `<ul class="q-list">${q.waiting.map(waitingRow).join("")}</ul>`
+      ? `<ul class="q-list">${[...q.waiting]
+          .sort((a, b) => (b.status === "in_progress") - (a.status === "in_progress"))
+          .map(waitingRow).join("")}</ul>`
       : `<p class="hist-empty">Nobody is waiting. Add someone above to start a caseload.</p>`}
     ${q.done.length ? `<h2 class="q-h2">Seen</h2>
       <ul class="q-list">${q.done.slice(0, 20).map(doneRow).join("")}</ul>` : ""}
@@ -97,7 +109,7 @@ export function bindQueue(root, on) {
     };
   }
   root.querySelectorAll("[data-assess]").forEach(b => {
-    b.onclick = () => on.assess(b.dataset.assess);
+    b.onclick = () => on.assess(b.dataset.assess, b.dataset.entryId);
   });
   root.querySelectorAll("[data-seen]").forEach(b => {
     b.onclick = () => on.seen(b.dataset.seen);
