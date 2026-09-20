@@ -13,24 +13,14 @@
  */
 
 :root {
-  /* Same ground as the field app, and for the same reason: glass needs
-     something to refract. Greige, not cream. Copy of app.css's block. */
-  --ground: #e5e2da;
-  --paper: #fcfbf8;
-  --chrome: #f1efe9;
-  --well: #edeae2;
-  --ink: #14181d;
-  --ink-2: #454d59;
+  --paper: #ffffff;
+  --chrome: #f2f4f7;
+  --well: #eaedf2;
+  --ink: #0f1318;
+  --ink-2: #414a56;
   --ink-3: #5c6472;
-  --rule: #d9d4c9;
-  --rule-2: #bdb7a9;
-  --glass: rgb(252 251 248 / .70);
-  --glass-solid: rgb(252 251 248 / .88);
-  --glass-line: rgb(255 255 255 / .72);
-  --glass-edge: rgb(20 24 29 / .10);
-  --blur: blur(18px) saturate(140%);
-  --lift: 0 1px 2px rgb(20 24 29 / .05), 0 10px 28px rgb(20 24 29 / .09);
-  --r-float: 14px;
+  --rule: #dce0e6;
+  --rule-2: #b9c0ca;
   --action: #1f3fbf;
   --action-soft: #e5eafa;
   --red: #c8261d;     --on-red: #ffffff;
@@ -51,16 +41,9 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; color: var(--ink);
-  background: var(--ground);
-  background-image: linear-gradient(158deg, #efece4 0%, #e2ded4 52%, #d8dad5 100%);
-  background-attachment: fixed;
+body { margin: 0; background: var(--paper); color: var(--ink);
   font: 400 var(--t-17)/1.5 var(--font); -webkit-text-size-adjust: 100%; }
 .wrap { max-width: 72rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
-/* GLASS MEANS IT FLOATS, as in the field app. The register is the record, so
-   it lies on paper; the sticky column header floats over it, so it is glass. */
-.reg-slab { background: var(--paper); border-radius: var(--r-float);
-  box-shadow: var(--lift); padding: .25rem .875rem .5rem; margin-bottom: 1.25rem; }
 /* ONE NAME FOR THIS ACROSS THE WHOLE SYSTEM, and it is the field app's: .sr.
    base briefly called it .sr-only and app.css ended up defining both, which is
    two names for one thing in 72 rendered places. See DESIGN.md. */
@@ -119,9 +102,7 @@ a.link-btn { text-decoration: none; }
 
 /* ------------------------------------------------------------ the table */
 .reg { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.reg th { background: var(--glass); position: sticky; top: 0; z-index: 1;
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  box-shadow: inset 0 1px 0 var(--glass-line);
+.reg th { background: var(--chrome); position: sticky; top: 0; z-index: 1;
   text-align: left; font: 600 var(--t-14) var(--font); color: var(--ink-2);
   padding: .4375rem .625rem; border-bottom: 1px solid var(--rule); }
 .reg td { padding: .5rem .625rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -185,10 +166,7 @@ a.link-btn { text-decoration: none; }
 .rec .dev { display: inline; }
 
 /* ---------------------------------------------------------- empty states */
-.well-panel { background: var(--glass-solid); border-radius: var(--r-float);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-edge); box-shadow: var(--lift);
-  padding: 1.25rem; margin: .75rem 0 0; }
+.well-panel { background: var(--well); border-radius: var(--r); padding: 1.25rem; margin: .75rem 0 0; }
 .well-panel p { margin: .25rem 0 0; color: var(--ink-2); }
 .well-panel .eh { font: 700 var(--t-17) var(--font); color: var(--ink); margin: 0; text-transform: none; }
 /* Completion is told by a word and a check, never by a fourth colour. */
@@ -231,10 +209,3 @@ a.link-btn { text-decoration: none; }
   margin-top: 1.5rem; border-top: 1px solid var(--rule); padding-top: .625rem; }
 footer.note { margin-top: 2.5rem; color: var(--ink-2); font-size: var(--t-14);
   border-top: 1px solid var(--rule); padding-top: .75rem; }
-
-/* Where there is no backdrop-filter, glass becomes flat chrome. Legibility
-   never depends on the effect. Same rule as the field app. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .reg th { background: var(--chrome); }
-  .well-panel { background: var(--well); }
-}

@@ -1,21 +1,6 @@
 /* The health worker's handset: numbered, bold, full-width status bars, built
    for one hand and bad light. Triage colours live only in urgency bars; every
-   other state is carried by form and by a word. See PRODUCT.md.
-
-   GLASS MEANS IT FLOATS (2026-09-20). Translucency is not decoration here, it
-   is the one signal that a surface sits ABOVE the record: the sidebar, the top
-   bar, the composer, the source sheet and the picker are glass and lift; the
-   conversation, the answer and the register are solid paper, because they are
-   the record. It extends the Only Overlays Cast Shadows Rule rather than
-   breaking it.
-
-   THE GROUND IS GREIGE so the glass has something to refract. The record sits
-   on a warm near-white sheet and the ground frames it from 60rem, which is a
-   clinic register on a desk rather than panels floating in space.
-
-   THE ONE LOUD THING IS STILL THE VERDICT. The urgency bar stays full-bleed,
-   square, opaque and 800: on a quiet ground it hits harder than it did on
-   white. Nothing else competes with it. */
+   other state is carried by form and by a word. See PRODUCT.md. */
 
 @font-face {
   font-family: "Atkinson Next";
@@ -31,26 +16,14 @@
 }
 
 :root {
-  /* THE GROUND. Greige, not cream: cream plus a clay accent is the house
-     style of every generated page this year, and this one keeps its blue. */
-  --ground: #e5e2da;
-  --ground-far: #dedfd9;    /* the cool corner, so it is not relentlessly warm */
-  --paper: #fcfbf8;         /* the record: the conversation, the answer, forms */
-  --chrome: #f1efe9;        /* the flat fallback where glass is unsupported */
-  --well: #edeae2;          /* the person's own messages, quiet panels */
-  --ink: #14181d;
-  --ink-2: #454d59;
-  --ink-3: #5c6472;       /* 4.61 on the ground, 5.76 on paper, 4.96 in a well */
-  --rule: #d9d4c9;
-  --rule-2: #bdb7a9;
-
-  /* GLASS. Two densities: chrome you look past, and chrome you type into. */
-  --glass: rgb(252 251 248 / .70);
-  --glass-solid: rgb(252 251 248 / .88);   /* the composer: text sits on it */
-  --glass-line: rgb(255 255 255 / .72);    /* the lit top edge */
-  --glass-edge: rgb(20 24 29 / .10);
-  --blur: blur(18px) saturate(140%);
-  --lift: 0 1px 2px rgb(20 24 29 / .05), 0 10px 28px rgb(20 24 29 / .09);
+  --paper: #ffffff;         /* the conversation and the forms */
+  --chrome: #f2f4f7;        /* sidebar and top bar, a cooler layer */
+  --well: #eaedf2;          /* the person's own messages, quiet panels */
+  --ink: #0f1318;
+  --ink-2: #414a56;
+  --ink-3: #5c6472;       /* 5.96 on paper, 5.08 in a well, 5.41 on chrome */
+  --rule: #dce0e6;
+  --rule-2: #b9c0ca;
   --action: #1f3fbf;
   --action-2: #19339c;
   --action-soft: #e5eafa;
@@ -75,11 +48,7 @@
   --tap: 2.75rem;         /* 44px, the floor for anything a thumb lands on */
   --field: 1rem;          /* iOS Safari zooms a focused field under 16px */
 
-  --r: 8px;               /* pressables, a touch softer than the paper era */
-  --r-float: 14px;        /* only things that float: sheet, picker, drawer */
-  --sheet-pad: 1.75rem;   /* the sheet's inset from 60rem. The composer bar is
-                             sized from it, so the record, the answers and the
-                             composer keep one left edge. Change it once. */
+  --r: 6px;
   --top: 3rem;
   --col: 45rem;
   --col-pair: 64rem;
@@ -111,12 +80,7 @@
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
-  margin: 0; color: var(--ink);
-  /* Fixed, so the ground stays put while the record scrolls over it. */
-  background: var(--ground);
-  background-image:
-    linear-gradient(158deg, #efece4 0%, #e2ded4 52%, #d8dad5 100%);
-  background-attachment: fixed;
+  margin: 0; background: var(--paper); color: var(--ink);
   font: 400 var(--t-17)/1.5 var(--font);
   font-feature-settings: "kern";
   caret-color: var(--action);
@@ -140,8 +104,7 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
 
 .side {
   position: fixed; z-index: 40; inset: 0 auto 0 0; width: min(86vw, var(--side));
-  background: var(--glass); border-right: 1px solid var(--glass-edge);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  background: var(--chrome); border-right: 1px solid var(--rule);
   display: flex; flex-direction: column; transform: translateX(-102%);
   transition: transform 160ms cubic-bezier(.16, 1, .3, 1);
 }
@@ -204,8 +167,7 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
 /* Menu on the left, a new assessment on the right, and nothing in between.
    The person picker used to live here and now sits above the composer, where
    the thumb already is: it is touched once an assessment, not once a screen. */
-.top { position: sticky; top: 0; z-index: 20; height: var(--top); background: var(--glass);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+.top { position: sticky; top: 0; z-index: 20; height: var(--top); background: var(--chrome);
   border-bottom: 1px solid var(--rule); display: flex; align-items: center; gap: .25rem;
   padding: 0 .25rem; }
 .top .grow { flex: 1; }
@@ -215,21 +177,8 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
 .icon-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 /* ----------------------------------------------------------- conversation */
 
-/* THE SHEET. The record is one slab of paper lying on the ground, not a stack
-   of cards: every answer section still sits flat on it with nothing but space
-   and a hairline between them. Full bleed on a phone, because a handset has no
-   room to spend on a margin; floating from 60rem, where there is room. */
 .page { flex: 1; width: 100%; max-width: var(--col); margin: 0 auto;
-  padding: var(--page-y) var(--pad) calc(var(--page-y) + .25rem);
-  background: var(--paper); }
-@media (min-width: 60rem) {
-  .page { margin: 1rem auto 0; border-radius: var(--r-float) var(--r-float) 0 0;
-    padding: 1.5rem var(--sheet-pad) 1.25rem; box-shadow: var(--lift); }
-  /* Nothing has been assessed yet, so there is no record, so there is no
-     paper: the presets float on the ground as what they are, controls. Paper
-     arrives with the first answer. */
-  .page.blank { background: transparent; box-shadow: none; border-radius: 0; }
-}
+  padding: var(--page-y) var(--pad) calc(var(--page-y) + .25rem); }
 .page.wide { max-width: 72rem; }
 
 /* What the person said, as a record: who, when, the words, the timeline. */
@@ -362,13 +311,7 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 
 /* ---------------------------------------------------------------- composer */
 
-/* The composer is the one you type into, so it is the denser glass. Content
-   scrolling under it is what makes the translucency mean something: on a phone
-   it is a full-width bar docked to the bottom of the sheet, and from 60rem it
-   lifts off and floats in the same column the record uses. */
-.composer { position: sticky; bottom: 0; z-index: 10; background: var(--glass-solid);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  border-top: 1px solid var(--rule);
+.composer { position: sticky; bottom: 0; z-index: 10; background: var(--paper); border-top: 1px solid var(--rule);
   padding: .375rem var(--pad) calc(.5rem + env(safe-area-inset-bottom)); }
 .composer .in { max-width: calc(var(--col) - 2 * var(--pad)); margin: 0 auto; display: grid; gap: .3125rem; }
 /* a compare assessment keeps one left edge: the composer takes the pair page's width */
@@ -479,22 +422,27 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 /* CENTRED, NOT BOTTOM-PINNED. Viraj's call 2026-09-19 from the phone: at
    390x844 the old flex-end left the top two thirds empty and the content
    looked like it had fallen to the floor. */
-.page.blank { display: flex; flex-direction: column; justify-content: center; }
+/* Bottom-aligned, not centred: the work starts at the composer, so the presets
+   and the scope lines sit directly above it with an ordinary gap. Empty space
+   collects at the top, where it costs nothing. */
+.page.blank { display: flex; flex-direction: column; justify-content: flex-end; }
 
 /* Each preset is a button and has to look like one. Hairline-separated text
    read as a list of headings, which nobody taps. Bordered, 6px like every
    other control, with the drawn chevron for where it goes. */
-.picks { list-style: none; margin: 0 0 .875rem; padding: 0; display: grid; gap: .375rem; }
+/* Rows on the page, divided by hairlines. They were three bordered cards, which
+   made the empty screen read as a control panel rather than as a list of ways
+   to start. Nothing here is a card and nothing here floats. */
+.picks { list-style: none; margin: 0 0 .875rem; padding: 0;
+  border-top: 1px solid var(--rule); }
+.picks li { border-bottom: 1px solid var(--rule); }
 .picks button { width: 100%; min-height: var(--tap); display: flex; align-items: center; gap: .625rem;
-  text-align: left; padding: .5rem .5rem .5rem .75rem; cursor: pointer;
-  border: 1px solid var(--glass-edge); border-radius: var(--r); background: var(--glass-solid);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  box-shadow: inset 0 1px 0 var(--glass-line), var(--lift);
+  text-align: left; padding: .625rem .5rem .625rem .25rem; cursor: pointer;
+  border: 0; background: transparent;
   font: 600 var(--t-15)/1.3 var(--font); color: var(--ink); }
-.picks button:hover { border-color: var(--rule-2); background: var(--paper); }
+.picks button:hover { background: var(--well); }
 .picks button:active { background: var(--well); }
-.picks button:focus-visible { outline: none; border-color: var(--action);
-  box-shadow: 0 0 0 3px var(--action-soft); }
+.picks button:focus-visible { outline: 3px solid var(--action); outline-offset: -3px; }
 .picks .lbl { flex: 1; }
 .picks svg.i { color: var(--ink-3); }
 .picks button:hover svg.i { color: var(--ink-2); }
@@ -672,58 +620,22 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
 .confirm-del { display: grid; gap: .75rem; background: var(--well); padding: .875rem; border-radius: var(--r); margin-top: 1rem; }
 .saved { background: var(--action-soft); padding: .625rem .875rem; border-radius: var(--r); margin: 0 0 1rem; font-weight: 600; }
 
-@media (min-width: 60rem) {
-  /* THE ONE LEFT EDGE. The bar is exactly as wide as the sheet and carries the
-     same 1.75rem inset, so the record, the answers and the composer line up on
-     one edge. Measured, not eyeballed: ui_check compare asserts it, and it
-     caught this the first time the sheet's padding moved without the bar's. */
-  .composer { background: transparent; border-top: 0; padding: 0 0 1rem;
-    -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
-  .composer .in { max-width: calc(var(--col) - 2 * var(--sheet-pad));
-    padding: .875rem 1.125rem;
-    background: var(--glass-solid);
-    -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-edge); border-radius: var(--r-float);
-    box-shadow: var(--lift); }
-  .page.pair + .composer .in { max-width: calc(var(--col-pair) - 2 * var(--sheet-pad)); }
-}
-
 /* The top bar is a phone control. The media query that hides it sits ABOVE the
    base .top rule in this file, so display:none was losing and the bar survived
    as a 1px strip with its two icons overflowing it. Restated here, after. */
 @media (min-width: 60rem) { .top { display: none; } }
 
-/* THE LIT EDGE. A single inset hairline along the edge content passes under
-   is what makes a translucent panel read as glass rather than as a tint. It is
-   the only highlight in the system; nothing else is lit. */
-.top { box-shadow: inset 0 1px 0 var(--glass-line), 0 1px 0 var(--glass-edge); }
-.composer { box-shadow: inset 0 1px 0 var(--glass-line); }
-@media (min-width: 60rem) {
-  .side { box-shadow: inset -1px 0 0 var(--glass-edge); }
-}
-
-/* WHERE THERE IS NO backdrop-filter, the glass becomes flat chrome rather than
-   a pale wash over the ground. Legibility never depends on the effect. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .side, .top, .sh-head { background: var(--chrome); }
-  .composer, dialog.sheet { background: var(--paper); }
-}
-
 /* ------------------------------------------------------------ source sheet */
 
 dialog.sheet { border: 0; padding: 0; margin: auto 0 0; width: 100%; max-width: 100%; max-height: 85dvh;
-  border-radius: var(--r-float) var(--r-float) 0 0; background: var(--glass-solid); color: var(--ink);
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  border-top: 1px solid var(--glass-line);
-  box-shadow: 0 -8px 40px rgb(20 24 29 / .22); }
-dialog.sheet::backdrop { background: rgb(20 24 29 / .34);
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+  border-radius: 14px 14px 0 0; background: var(--paper); color: var(--ink);
+  box-shadow: 0 -8px 40px rgb(15 19 24 / .25); }
+dialog.sheet::backdrop { background: rgb(15 19 24 / .42); }
 @media (min-width: 60rem) {
   dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: 28rem; border-radius: 0;
     box-shadow: -8px 0 40px rgb(15 19 24 / .2); }
 }
-.sh-head { position: sticky; top: 0; background: var(--glass); display: flex;
-  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); align-items: center; gap: .625rem;
+.sh-head { position: sticky; top: 0; background: var(--paper); display: flex; align-items: center; gap: .625rem;
   padding: .5rem .5rem .5rem var(--pad); border-bottom: 1px solid var(--rule); }
 .sh-head .k { font: 700 var(--t-17) var(--mono); color: var(--action); }
 .sh-head .n { color: var(--ink-2); font-size: var(--t-14); }

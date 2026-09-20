@@ -122,8 +122,8 @@ function listHTML(rows) {
   </li>`).join("")}</ul>`;
 }
 
-const section = rows => `<div class="wide-only reg-slab">${tableHTML(rows)}</div>
-  <div class="narrow-only reg-slab">${listHTML(rows)}</div>`;
+const section = rows => `<div class="wide-only">${tableHTML(rows)}</div>
+  <div class="narrow-only">${listHTML(rows)}</div>`;
 
 // Needs review is read top to bottom by someone who will run out of time, so
 // the order is the priority order, not the clock.

@@ -1,0 +1,190 @@
+2026-09-20 ui-glass branch, glass direction REVERTED to one neutral ground
+what changed: the glass, the greige ground and everything floating are gone.
+  kept from the reverted work: the ink-3 contrast fix and the top-bar fix.
+  new: the empty screen is bottom-aligned, and the presets are hairline rows.
+
+=== shots  03:21:28
+PASS  desktop: new assessment shows presets
+PASS  desktop: people list shows the household
+PASS  desktop: Mum's form shows the rules her profile turns on
+PASS  desktop: Maya's empty screen says she is not assessed
+PASS  phone: new assessment shows presets
+PASS  phone: people list shows the household
+PASS  phone: Mum's form shows the rules her profile turns on
+PASS  phone: Maya's empty screen says she is not assessed
+all passed
+
+=== people  03:21:34
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+PASS  the deleted person is gone, and only them
+all passed
+
+=== guards  03:21:39
+PASS  a child's profile gets NOT ASSESSED
+PASS  a child word on an adult profile asks who it is for
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+all passed
+
+=== flow  03:21:44
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+PASS  a verdict bar is shown
+PASS  the verdict is announced to a screen reader
+PASS  the live region is hidden from the eye
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+PASS  the checked line opens its details
+PASS  a source chip opens the real chunk
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+PASS  the drawer lists this assessment
+all passed
+
+=== compare  03:22:15
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+PASS  compare: record, answers and composer share one left edge
+all passed
+
+=== two-tabs  03:22:36
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+PASS  both follow-ups reused their own cache
+all passed
+
+=== drop  03:23:47
+PASS  a dropped stream says the answer is still being written
+PASS  the composer waits while it is written
+PASS  the saved answer appears without a reload
+all passed
+
+=== regions  03:24:01
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+PASS  a US chunk that says 9-1-1 carries the region's number
+PASS  the check leaves the base corpus selected, as it found it
+PASS  the sidebar is back to Base only
+all passed
+
+=== voice  03:24:25
+PASS  the composer offers a microphone
+PASS  tapping starts recording
+PASS  send is closed while recording
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+PASS  editing is recorded
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+all passed
+
+=== queue  03:24:46
+PASS  an empty caseload says so
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+PASS  starting an assessment links it to the caseload row
+PASS  starting an assessment does NOT mark them seen
+PASS  Mark seen moves them out of waiting
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+all passed
+
+=== sync  03:25:01
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+PASS  the flush reports each assessment landing
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+all passed
+
+=== base  03:25:27
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+PASS  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+PASS  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+all passed
+
+
+================================================================================
+SUMMARY
+================================================================================
+  112 pass, 0 fail across 12 modes.
+
+WHAT WAS REVERTED, AND WHY. The glass direction landed on exactly the warm
+cream the frontend-design skill warns is this year's commonest generated-page
+tell, and floating every surface on a coloured ground read as unfinished
+rather than as light. Viraj's call, and he is right: the four files went back
+to main rather than being unpicked rule by rule, which is cleaner and leaves
+nothing of the direction behind. `grep backdrop-filter` over both stylesheets
+returns nothing.
+
+KEPT FROM THAT WORK, on his instruction, because neither belonged to the glass:
+  ink-3 #5c6572 -> #5c6472. On THIS palette it measures 5.96 on paper, 5.08 in
+    a well and 5.41 on chrome. The original already cleared AA here; the
+    darkening was for the greige ground and is kept as harmless headroom. The
+    comment in app.css carried the greige numbers for one commit and now
+    carries the measured ones for this palette.
+  The top bar fix. It rendered as a 1px strip with two icons overflowing it on
+    every desktop screen, because the base .top rule sits after the media query
+    that hides it and display:none was losing. Pre-existing, in every
+    screenshot taken today, and nothing to do with the revamp.
+
+NEW, from his direction:
+  The empty screen is bottom-aligned. The presets and the scope lines sat
+    centred in a void; they now sit directly above the composer with an
+    ordinary gap. Empty space collects at the top, where it costs nothing.
+  The presets are rows divided by hairlines, not three bordered cards. They
+    read as ways to start rather than as a control panel.
+
+UNTOUCHED, as instructed: the urgency bars, in every state.
+
+SCREENSHOTS, both surfaces at both sizes:
+  r-field-desktop.png  1440x900   r-field-phone.png  390x844
+  r-base-desktop.png   1440x900   r-base-phone.png   390x844
