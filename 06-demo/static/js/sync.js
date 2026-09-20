@@ -39,9 +39,17 @@ function logLine(e) {
   return "";
 }
 
-export function syncHTML(sy, run) {
+// THE ADDRESS IS SETTINGS, NOT THE JOB. Once base has an address the field is
+// folded away behind a link: a raw IP sitting at the top of the page is the
+// first thing a judge reads, and it is the least interesting thing here. What
+// stays is the work: who this device is, how many assessments are waiting, and
+// the control that sends them. With no address saved the field shows as it
+// always did, because then setting one IS the job.
+export function syncHTML(sy, run, editing) {
   const n = sy.pending.length;
   const busy = run && run.running;
+  const hasBase = !!String(sy.base_url || "").trim();
+  const showForm = editing || !hasBase;
   return `<div class="page">
     <div class="head-row"><h1>Send to base</h1><span class="grow"></span>
       <span class="q-count">${n} waiting to send · ${sy.sent} already at base</span></div>
@@ -49,7 +57,7 @@ export function syncHTML(sy, run) {
       part that needs one: when you are back in range, send the day's caseload to base.</p>
 
     <div class="sy-base">
-      <form class="q-add" id="sy-form">
+      ${showForm ? `<form class="q-add" id="sy-form">
         <label class="sr" for="sy-url">Base address</label>
         <input id="sy-url" name="base_url" type="url" inputmode="url" autocomplete="off"
           value="${esc(sy.base_url)}" placeholder="http://192.168.1.20:8781">
@@ -57,10 +65,11 @@ export function syncHTML(sy, run) {
         <input id="sy-worker" name="worker" type="text" maxlength="40" autocomplete="off"
           value="${esc(sy.device.worker || "")}" placeholder="Your name, optional">
         <button class="btn plain" type="submit">Save</button>
-      </form>
+      </form>` : ""}
       <p class="m">This device is <strong>${esc(sy.device.label)}</strong>
         <span class="sha">${esc(sy.device.id)}</span>. Base groups its cases by that${
-        sy.device.worker ? `, and shows them as carried by ${esc(sy.device.worker)}` : ""}.</p>
+        sy.device.worker ? `, and shows them as carried by ${esc(sy.device.worker)}` : ""}.${
+        showForm ? "" : ` <button class="link-btn" type="button" data-edit-base>Change base address</button>`}</p>
     </div>
 
     <div class="sy-go">
@@ -79,6 +88,8 @@ export function syncHTML(sy, run) {
 }
 
 export function bindSync(root, on) {
+  const edit = root.querySelector("[data-edit-base]");
+  if (edit) edit.onclick = () => on.edit();
   const form = root.querySelector("#sy-form");
   if (form) form.onsubmit = e => {
     e.preventDefault();

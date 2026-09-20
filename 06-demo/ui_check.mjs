@@ -581,10 +581,29 @@ async function syncFlow(out, baseUrl) {
   await p.size(DESKTOP);
 
   // OFFLINE. Point the device at a port nothing is listening on.
+  //
+  // The address field is folded away behind "Change base address" once an
+  // address is saved, so it has to be opened before it can be typed into.
+  // openBase() does that and asserts the fold is actually there.
+  const openBase = async () => {
+    if (await p.count("[data-edit-base]")) {
+      await p.click("[data-edit-base]");
+      await p.until("document.querySelector('#sy-url')", 5000);
+    }
+  };
   await p.go("/sync");
+  check("the base address is folded away once one is saved",
+    await p.count("[data-edit-base]") === 1 && await p.count("#sy-url") === 0);
+  check("what stays is the work: the device, the count and the send control",
+    /This device is/.test(await p.text(".sy-base"))
+    && await p.count("#sy-send") === 1
+    && /waiting to send/.test(await p.text(".head-row")));
+  await openBase();
+  check("the field opens on the link", await p.count("#sy-url") === 1);
   await p.type("#sy-url", "http://127.0.0.1:1");
   await p.click("#sy-form button[type=submit]");
   await sleep(600);
+  check("saving folds it away again", await p.count("#sy-url") === 0);
 
   // Assess somebody while "out of range". The triage itself must not care.
   await p.go("/?p=dad");
@@ -611,6 +630,7 @@ async function syncFlow(out, baseUrl) {
   await p.shot(join(out, "desktop-sync-offline.png"), true);
 
   // BACK IN RANGE.
+  await openBase();
   await p.type("#sy-url", BASE);
   await p.click("#sy-form button[type=submit]");
   await sleep(600);

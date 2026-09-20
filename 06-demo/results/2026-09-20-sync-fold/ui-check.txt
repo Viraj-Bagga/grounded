@@ -1,0 +1,22 @@
+PASS  the base address is folded away once one is saved
+PASS  what stays is the work: the device, the count and the send control
+PASS  the field opens on the link
+PASS  saving folds it away again
+      assessment with base unreachable: 21.8 s
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+      saved 06-demo/results/2026-09-20-sync-fold/desktop-sync-waiting.png
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+      saved 06-demo/results/2026-09-20-sync-fold/desktop-sync-offline.png
+PASS  the flush reports each assessment landing
+      saved 06-demo/results/2026-09-20-sync-fold/desktop-sync-sent.png
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+      saved 06-demo/results/2026-09-20-sync-fold/phone-sync.png
+all passed

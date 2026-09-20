@@ -63,6 +63,8 @@ const S = {
   // Where base is, what is waiting to go, and the live log of a flush.
   sync: { base_url: "", device: { id: "", label: "" }, pending: [], sent: 0 },
   flush: { running: false, lines: [] },
+  // The base-address field is folded away once an address exists; see sync.js.
+  syncEdit: false,
   picked: [NOBODY.id], compare: false,
   conv: null, live: {}, liveSaid: null,
   draft: { text: "", timeline: "", showTl: false, heard: null },
@@ -1178,11 +1180,18 @@ async function showSync() {
 }
 
 function paintSync() {
-  $("#main").innerHTML = syncHTML(S.sync, S.flush);
+  $("#main").innerHTML = syncHTML(S.sync, S.flush, S.syncEdit);
   bindSync($("#main"), {
+    edit: () => { S.syncEdit = true; paintSync(); },
     setBase: async (url, worker) => {
-      try { S.sync = await api.setBase(url, worker); S.flash = null; }
-      catch (e) { S.flush.lines = [esc(e.body?.error || "That address was not accepted.")]; }
+      try {
+        S.sync = await api.setBase(url, worker);
+        S.flash = null;
+        S.syncEdit = false;          // saved: fold it away again
+      } catch (e) {
+        // Refused, so the field stays open with what they typed still in it.
+        S.flush.lines = [esc(e.body?.error || "That address was not accepted.")];
+      }
       paintSync();
     },
     send: async () => {
