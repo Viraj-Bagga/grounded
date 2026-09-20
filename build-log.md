@@ -5454,15 +5454,31 @@ re-reading, and the answer says it re-read everything and why. **The restart is
 also the only cold load of the tuned GGUF done by hand**, and it came up on
 2 slots of 4096.
 
-**50 saved assessments went missing during the suite and I cannot say what
-removed them.** The demo has no deletion path: nothing in `06-demo/*.py` calls
-`unlink`, `remove` or `rmtree`, `ConversationStore` never deletes, and
-`DELETE /api/people/<id>` removes a person and leaves their assessments, which
-the `people` check exercises. No hooks are configured. Everything written before
-21:58:04 was gone and everything after it survived. Disk was not full, 19 GiB
-free. **Restored from a snapshot taken before the preset runs**, so the history
-is back to 52 plus tonight's. **The nine preset assessments are not recoverable
-as JSON**, being newer than the snapshot; their full content is in the committed
+**50 saved assessments went missing during the suite, and the cause is almost
+certainly the OTHER SESSION, not the demo.** Everything written before 21:58:04
+was gone and everything after it survived. The demo has no deletion path:
+nothing in `06-demo/*.py` calls `unlink`, `remove` or `rmtree`,
+`ConversationStore` never deletes, and `DELETE /api/people/<id>` removes a
+person and leaves their assessments, which the `people` check exercises. No
+hooks are configured and the disk was not full, 19 GiB free.
+
+**Two other `claude` sessions were running in this repo at the time**, working
+on the real-voice rescore: `01-data/eval/rescore_real_voice.py` written 21:57,
+`01-data/eval/audio/record.sh` 21:54, and
+`01-data/eval/runs/2026-09-19-whisper-5line-synthetic-dryrun.txt` 21:58. That is
+the same minute. Clearing the demo history is a reasonable thing for that work
+to have done and there is no evidence it was anything else. **This is not a
+product bug and nothing needs fixing in the demo**, but two sessions writing the
+same working tree is worth knowing about the night before judging.
+
+**Restored from a snapshot taken before the preset runs**, so the history is back
+to 52 plus tonight's. **The nine preset assessments are not recoverable as
+JSON**, being newer than the snapshot; their full content is in the committed
 `06-demo/results/2026-09-19-tuned-presets-live/report.txt` and nine screenshots,
-which is why that harness saves content and not summaries. **Worth watching: if
-it happens again before judging, the demo history is not safe.**
+which is why that harness saves content and not summaries.
+
+**Also from two sessions in one tree: `git add -A` on the swap commit swept up
+that session's in-progress `rescore_real_voice.py` and its dry-run.** They are
+committed under a message about the model swap, which is wrong but not lossy.
+Left alone rather than unpicked, because rewriting a commit under a live session
+is worse than a mislabelled one.
