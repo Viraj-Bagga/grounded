@@ -1,0 +1,153 @@
+# HE01: why the tuned model reads a heart attack down to yellow under retrieval
+#
+# date    2026-09-19, after the swap
+# what    diagnosis only, nothing changed
+# source  01-data/eval/runs/2026-09-19-heldout-{base,tuned}-{matched,retrieval}.jsonl
+#         01-data/eval/heldout-eval/HELDOUT-EVAL-v1.json, 01-data/chunks/
+# short   The chunk that reads it down is CP-ANG-003. The reason it can is that
+#         CP-ACS-006 is missing. Retrieval is the fault, not the tune.
+
+================================================================================
+THE CASE
+================================================================================
+HE01, expected RED, condition CP-ACS. 63-year-old woman, high blood pressure,
+amlodipine.
+
+  "For about forty minutes my upper back and left shoulder have been aching, I
+   get out of breath just sitting here, and I suddenly feel completely drained
+   and a bit queasy. THERE IS NO REAL CHEST PAIN."
+
+That last sentence is the whole case. It is the textbook atypical presentation
+that kills women, and the set keys it to CP-ACS-006 for exactly that reason.
+
+================================================================================
+THE SPLIT, and it is deterministic
+================================================================================
+  condition          chunks in the prompt                         verdict
+  tuned,  matched    CP-ACS-006, CP-ACS-003                       red 3/3
+  tuned,  retrieval  CP-ACS-003, CP-PERI-002, CP-ANG-003          YELLOW 3/3
+  base,   matched    CP-ACS-006, CP-ACS-003                       red 3/3
+  base,   retrieval  CP-ACS-003, CP-PERI-002, CP-ANG-003          red 3/3
+
+Retrieval DROPS CP-ACS-006 and ADDS CP-PERI-002 and CP-ANG-003.
+
+================================================================================
+1. WHICH CHUNK READS IT DOWN: CP-ANG-003
+================================================================================
+All three tuned retrieval runs cite CP-ACS-003 and CP-ANG-003 and reason about
+ANGINA. CP-PERI-002 is retrieved and NEVER cited in any run on either model, so
+pericarditis is not involved.
+
+CP-ANG-003 matches this case symptom for symptom:
+
+  "The pain or discomfort can also be felt in areas far from the source of the
+   pain, such as the shoulders, arms, neck, back, and jaw"   -> back, shoulder
+  "Shortness of breath"                                      -> breathless at rest
+  "Extreme tiredness"                                        -> completely drained
+  "Nausea, or feeling sick to the stomach"                   -> queasy
+  "Weakness"                                                 -> drained
+
+Every finding in the case appears in an angina symptom list. Nothing in the
+retrieved set says those same findings are a heart attack WITHOUT chest pain.
+
+================================================================================
+2. THE MECHANISM: one trigger in the whole prompt, and it needs chest pain
+================================================================================
+Grepped all three retrieved chunks for a call to action:
+
+  CP-ACS-003    no call to action at all
+  CP-PERI-002   no call to action at all
+  CP-ANG-003    "Call 9-1-1 if you feel CHEST DISCOMFORT that does not go away
+                 with rest or medicine."
+
+So the retrieved set contains EXACTLY ONE escalation trigger and it is
+conditioned on a symptom the case explicitly denies. The tuned model reads that
+correctly and says so, in its own words, run 1:
+
+  "The retrieved context says to call 9-1-1 if chest discomfort does not go
+   away with rest, AND DOES NOT SAY TO CALL FOR ANYTHING ELSE."
+  "The retrieved context lists chest discomfort that does not go away with rest
+   as a reason to call 9-1-1, and the patient has breathlessness at rest, NOT
+   CHEST DISCOMFORT."
+
+That is the model reasoning itself out of red because the only trigger it was
+given does not fire. It is not a comprehension failure. It is faithful reading
+of an inadequate context.
+
+================================================================================
+3. WHAT IS MISSING: CP-ACS-006, and it ranks 5th
+================================================================================
+CP-ACS-006 is the chunk written for this exact presentation:
+
+  "These symptoms can happen together with chest pain OR WITHOUT ANY CHEST PAIN."
+  "It is important to call 9-1-1 if you have these symptoms."
+
+An unconditional trigger keyed to shoulder/back pain, breathlessness, unusual
+tiredness and upset stomach. With it in the prompt the tuned model says red 3/3
+and quotes it: "lists those symptoms together with chest pain as the pattern of
+a heart attack, and says to call 9-1-1".
+
+Hybrid retrieval, HE01 query, top 12 of 35, alpha 0.5:
+
+   1. CP-ACS-003   0.9656   <-- retrieved
+   2. CP-PERI-002  0.8439   <-- retrieved, never cited, matches nothing in the case
+   3. CP-ANG-003   0.7738   <-- retrieved, reads it down
+   4. CP-PERI-001  0.6824
+   5. CP-ACS-006   0.6264   *** the keyed chunk, cut by top-3
+   6. CP-ANG-002   0.5978
+
+**CP-ACS-006 loses its slot to CP-PERI-002**, a bare three-line list of sharp
+pleuritic pain, fast heartbeat and fever. The case has none of those four
+things. A short bare symptom list outranks a relevant prose chunk whose symptom
+words are diluted by two paragraphs about hospital screening and women's
+outcomes.
+
+================================================================================
+4. WHY THE BASE GOT IT RIGHT, AND WHY THAT IS WORSE
+================================================================================
+The base saw the IDENTICAL three chunks and said red 3/3. It did it by
+asserting chest pain the case denies:
+
+  run 1  "CHEST DISCOMFORT that does not go away with rest or medicine is a red
+          flag for possible heart attack"
+  run 2  "Symptoms include CHEST DISCOMFORT, shortness of breath, SWEATING,
+          nausea, and sudden fatigue"
+  run 3  "CHEST DISCOMFORT not relieved by rest"
+
+The case says "There is no real chest pain" and mentions no sweating. So the
+base manufactured the finding that CP-ANG-003's trigger requires, and got the
+right verdict for a fabricated reason. That is a constraint 11 contradiction
+sitting in the rationale, where no guard screens it: screen_red_flags covers
+red_flags, not the Why. Extending grounding to the rationale is already on the
+roadmap (constraint 13) and this is a second argument for it.
+
+**So the tune did not introduce this error. It removed the blanket red that was
+hiding a retrieval gap that was always there.** Under retrieval chunks the base
+was right by accident on this case and the tuned model is wrong on the evidence
+it was handed.
+
+================================================================================
+5. TWO SECONDARY OBSERVATIONS, not the diagnosis
+================================================================================
+a. **The tuned model's own steps say RED under a YELLOW verdict.** Runs 1 and 3
+   return next_steps = ["Call emergency services now", "Call emergency services
+   now", "Call emergency services now"] with urgency "yellow". Only the label is
+   yellow; the content is red. Nothing in the app reconciles those, because
+   constraint 16 fires on a profile RAISE, not on a model that contradicts
+   itself.
+
+b. **Degenerate repetition in the rationale.** Runs 1 and 3 loop the same two
+   sentences five and six times. Run 1's Why is 1,700 characters of the same
+   three clauses. Only on this case, only under retrieval chunks. Worth watching
+   as a possible overfit artefact of a 120-pair run, on 1 of 22 cases.
+
+================================================================================
+WHAT THIS IS NOT
+================================================================================
+Not a tune regression in category assignment: matched chunks give red 3/3.
+Not pericarditis: CP-PERI-002 is never cited.
+Not the prompt: base and tuned ran the same prompt at sha 26e4f4ff.
+Not sampling: 3 of 3 in both directions, temperature 0.2.
+
+It is retrieval returning a chunk set in which no evidence for a red exists.
+Nothing changed. Viraj's call.

@@ -5482,3 +5482,63 @@ that session's in-progress `rescore_real_voice.py` and its dry-run.** They are
 committed under a message about the model swap, which is wrong but not lossy.
 Left alone rather than unpicked, because rewriting a commit under a live session
 is worse than a mislabelled one.
+
+### 2026-09-19 HE01 diagnosed: retrieval hands it no evidence for a red
+
+Diagnosis only, nothing changed. Full working in
+`01-data/eval/runs/2026-09-19-he01-undertriage-diagnosis.txt`.
+
+**The chunk that reads it down is CP-ANG-003. The reason it can is that
+CP-ACS-006 is missing.**
+
+HE01 is a 63-year-old woman, forty minutes of upper back and left shoulder
+ache, breathless at rest, drained and queasy, and the case says outright
+**"There is no real chest pain."** The set keys it to CP-ACS-006 for that
+reason. The split is deterministic: matched chunks give red 3/3 on both models,
+retrieval chunks give red 3/3 on the base and **yellow 3/3 on the tuned model**.
+Retrieval drops CP-ACS-006 and adds CP-PERI-002 and CP-ANG-003.
+
+**Every finding in the case appears in CP-ANG-003's angina symptom list**,
+shoulder and back, shortness of breath, extreme tiredness, nausea, weakness.
+And grepping all three retrieved chunks for a call to action, **there is exactly
+one in the whole prompt**: CP-ANG-003's "Call 9-1-1 if you feel chest discomfort
+that does not go away with rest or medicine." CP-ACS-003 and CP-PERI-002 have
+none at all.
+
+So the single escalation trigger in context is conditioned on the one symptom
+the patient explicitly does not have, and the model says so itself: "the
+retrieved context says to call 9-1-1 if chest discomfort does not go away with
+rest, and does not say to call for anything else", and "the patient has
+breathlessness at rest, not chest discomfort". **That is faithful reading of an
+inadequate context, not a comprehension failure.**
+
+**CP-ACS-006 ranks 5th and is cut by top-3.** It is the chunk written for this
+presentation: "These symptoms can happen together with chest pain or without
+any chest pain" plus an unconditional "It is important to call 9-1-1 if you have
+these symptoms". It loses its slot to **CP-PERI-002 at rank 2, which is never
+cited in any run on either model and matches nothing in the case**: sharp
+pleuritic pain, fast heartbeat, fever, none of which this patient has. A bare
+three-line symptom list outranks a prose chunk whose symptom words are diluted
+by two paragraphs on hospital screening.
+
+**The base was right by accident and that is the worse finding.** On the
+identical three chunks it said red every run by asserting chest discomfort the
+case denies, and in one run sweating that is not there either. It manufactured
+the finding CP-ANG-003's trigger needs. That is a constraint 11 contradiction
+living in the rationale, where no guard looks: `screen_red_flags` covers
+`red_flags`, not the Why. **A second argument for extending grounding to the
+rationale**, which constraint 13 already has as roadmap.
+
+**So the tune did not introduce this. It removed the blanket red that was hiding
+a retrieval gap that was always there.**
+
+Two secondary observations, not the diagnosis. **The tuned model's own steps say
+red under its yellow label**: runs 1 and 3 return `next_steps` of three
+consecutive "Call emergency services now" with `urgency: yellow`, and nothing
+reconciles that, because constraint 16 fires on a profile raise and not on a
+model contradicting itself. **And the rationale loops**, the same two sentences
+five and six times in runs 1 and 3, only on this case and only under retrieval
+chunks. Worth watching as a possible artefact of a 120-pair run.
+
+Not a tune regression in category assignment, not pericarditis, not the prompt
+(same sha 26e4f4ff), not sampling (3 of 3 both ways at temperature 0.2).
