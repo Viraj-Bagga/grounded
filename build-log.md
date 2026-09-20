@@ -5407,3 +5407,62 @@ before the swap.
 **Nothing was swapped.** The demo still loads
 `03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf`. The tuned GGUF was reached
 by pointing llama-server at it, which is the only thing these runs changed.
+
+### 2026-09-19 The tuned GGUF is what the demo loads, and the suite re-run against it
+
+Viraj's call after the preset runs. `06-demo/server.py`, `claude.md` and
+`03-model/RUNBOOK.md` now name
+`03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf`. The base stays beside it as
+the fallback. **The adapter is committed**, 39 MB,
+sha256 `eabf01c159dafaa1da8cfe6b3a9887ee93310c86450fbc5e0506091c10a57920`: the
+merged bf16 it came from was deleted to make room for the F16, so ignoring it
+left the day's training run on one disk.
+
+**Offline first, nothing needing a server:** `qlora_config.py` 50 of 50 matched
+modules, `guards.py` 87, `escalation.py` 34, `selftest_validator.py` 24,
+`guards.ts` 48 under jest. `verify_grounding` passed, which is not a separate
+run: the demo server refuses to start otherwise, and it started.
+
+**Then every ui_check mode, against the tuned model on a restarted server: 68
+pass, 0 fail.** `06-demo/results/2026-09-19-tuned-ui-check/`.
+
+**One check was passing while asserting nothing, and the tune is what exposed
+it.** `compare` looked for a side reading "Raised to red" and ran its three
+constraint 16 assertions on it. The tuned model raises Mum to **yellow**, so the
+match failed, both branches were skipped, and the check printed "all passed" on
+six checks where the base model ran nine. Nothing said so.
+
+**That is constraint 10's PEFT trap in a test suite:** a matcher that matches
+nothing reported as a pass. Same shape as `gate_proj` sitting in the seven-module
+list and training cleanly. Fixed: the detector finds a raise to either level,
+and it now **fails loudly when nothing was raised at all**, because R1 fires on
+Mum on every run measured on both models. The rationale assertion moved to where
+constraint 16 actually applies, which is any raise that is not a rescue, and the
+re-run exercises it: "a raise to yellow strikes out the model's rationale, whole
+and tagged".
+
+**The yellow-steps gap is printed by the check rather than asserted**, so that
+closing it does not turn the suite red. It shows what the model's steps actually
+say under the raised verdict, which is the thing to look at.
+
+**`reread` failed once, on my error and not the product's.** The kill did not
+take, the replacement llama-server could not bind 8080 and exited, so nothing
+restarted and the follow-up reused 1591 of 1592 tokens. That is correct
+behaviour and a wrong test. Re-run against a genuinely cold server, pid 78227
+started 22:05:26, it passes: the page says it lost the conversation and is
+re-reading, and the answer says it re-read everything and why. **The restart is
+also the only cold load of the tuned GGUF done by hand**, and it came up on
+2 slots of 4096.
+
+**50 saved assessments went missing during the suite and I cannot say what
+removed them.** The demo has no deletion path: nothing in `06-demo/*.py` calls
+`unlink`, `remove` or `rmtree`, `ConversationStore` never deletes, and
+`DELETE /api/people/<id>` removes a person and leaves their assessments, which
+the `people` check exercises. No hooks are configured. Everything written before
+21:58:04 was gone and everything after it survived. Disk was not full, 19 GiB
+free. **Restored from a snapshot taken before the preset runs**, so the history
+is back to 52 plus tonight's. **The nine preset assessments are not recoverable
+as JSON**, being newer than the snapshot; their full content is in the committed
+`06-demo/results/2026-09-19-tuned-presets-live/report.txt` and nine screenshots,
+which is why that harness saves content and not summaries. **Worth watching: if
+it happens again before judging, the demo history is not safe.**

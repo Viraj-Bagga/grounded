@@ -2,8 +2,12 @@
 """The laptop demo: the triage app against llama-server, with the guards wired in.
 
     # terminal 1
-    llama-server -m 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf \
+    llama-server -m ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf \
       --jinja -np 2 -ngl 0 -c 8192 --port 8080
+    # THE TUNED GGUF SINCE 2026-09-19. The 120-pair fine-tune, scored against
+    # the base on the held-out 22: 46.0 to 81.5 per completion, yellow 3/19 to
+    # 21/21, and non-red answers citing nothing 9/33 to 0/53. The base is kept
+    # at 03-model/base/NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf to fall back to.
     # -np 2: two slots. A compare assessment decodes both sides together (86 s
     # against 112 at -np 1, 06-demo/results/2026-09-19-compare-timing.txt), and
     # each assessment side is pinned to a slot so follow-ups hit the prefix

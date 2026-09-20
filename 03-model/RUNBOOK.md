@@ -442,7 +442,30 @@ prompt moved underneath it.
 
 ---
 
-## 8. The training half: steps 1 to 4 RUN 2026-09-19, step 5 NOT RUN
+## 8. The training half: ALL FIVE STEPS RUN 2026-09-19
+
+**Step 5 ran and the result ships.** 120 pairs, 124 examples, 2 epochs, 30
+optimizer steps, 189 s on one A6000, loss 1.5787 to 0.6851. Merged, then back
+through sections 3 to 7 of this runbook with every gate passing, giving
+`03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf`, **which is what the demo
+loads since 2026-09-19.** Held out against the base on the frozen 22: 46.0 to
+81.5 per completion on matched chunks, yellow 3/19 to 21/21, non-red answers
+citing nothing 9/33 to 0/53. Runs:
+`01-data/eval/runs/2026-09-19-brev-qlora-trained.txt`,
+`2026-09-19-tuned-conversion-chain.txt`,
+`2026-09-19-heldout-{base,tuned}-{matched,retrieval}.txt`.
+
+**It is LoRA, not QLoRA, and step 3 below is why that changed.** The fused
+`mamba_ssm` and `causal_conv1d` kernels are needed to fit on a 48 GB card at all
+(47.29 GiB without them against 21.29 with), and the fused kernel multiplies
+`in_proj` and `out_proj` itself, so bitsandbytes' packed 4-bit weights die on
+shape. Kernels or 4-bit, not both. The base trained in bf16 at 7.95 GB.
+`03-model/brev_train_qlora.py` is the script that ran.
+
+**The adapter is committed**, `03-model/adapter-120pairs/`, sha256
+`eabf01c159dafaa1da8cfe6b3a9887ee93310c86450fbc5e0506091c10a57920`. The merged
+bf16 was deleted to make room for the F16, so the adapter plus the merge stage
+of `brev_train_qlora.py` is the way back to it.
 
 **Steps 1 to 4 passed on Brev** (`massedcompute_A6000_base`, about $0.42). See
 `01-data/eval/runs/2026-09-19-brev-4bit-gate.txt`. Every projection is
@@ -470,3 +493,12 @@ The original list, kept for the numbers it asked for:
 **The merged model goes through sections 3 to 7 unchanged.** That is the whole
 point of proving them separately: if tomorrow breaks, the break is in training,
 not in conversion, and section 7 is the test that tells you which.
+
+**It held.** The merge re-entered at section 3 and every gate passed with no
+surprises, which is the only reason the conversion could be trusted on weights
+nothing had ever converted before. One thing needed care and is written up in
+`01-data/eval/runs/2026-09-19-tuned-conversion-chain.txt`: transformers 5.17
+writes metadata beside the merge that is not what section 3 was proven with, so
+the conversion ran from `03-model/convert-src-120pairs/`, which is the merged
+weights under NVIDIA's own config and tokenizer files. `tokenizer.json` is
+byte-identical in both, checked before substituting rather than assumed.

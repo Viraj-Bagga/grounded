@@ -289,34 +289,45 @@ async function compare(out) {
   await sleep(700);
   console.log(`      compare, both sides, one click: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   check("both sides answered", await p.count(".turn.pair .side-ans .bar") === 2);
-  // Constraint 16: a verdict a rule raised to red shows the app's steps, not
-  // the ones the model wrote for its own lower verdict. Skipped if no rule fired.
-  const raised = await p.eval(`(() => {
-    const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
-    return side ? side.innerText.replace(/\\s+/g, " ") : null;
+  // Constraint 16: what is SHOWN must match the urgency that is shown.
+  //
+  // UNTIL 2026-09-19 THIS LOOKED ONLY FOR "Raised to red". The tuned model
+  // raises Mum to YELLOW, so every assertion below stopped running and the
+  // check still printed "all passed": six checks where the base model ran
+  // nine, and nothing said so. That is constraint 10's PEFT trap in a test
+  // suite, a matcher that matches nothing reported as a pass. It now finds a
+  // raise to either level and FAILS when nothing was raised at all, because
+  // R1 fires on Mum on every run measured on both models.
+  const raise = await p.eval(`(() => {
+    const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to (red|yellow)/.test(s.innerText));
+    if (!side) return null;
+    return { level: side.innerText.match(/Raised to (red|yellow)/)[1],
+             text: side.innerText.replace(/\\s+/g, " "),
+             rescued: !!side.querySelector(".ungrounded") };
   })()`);
-  // A raise lands on one of TWO branches and this preset takes both, so the
-  // check has to know which it is looking at. A GROUNDED raise has the model's
-  // prose on screen, so constraint 16 strikes it out and replaces the steps. A
-  // RESCUED raise has none: the model cited nothing, so constraint 13 shows the
-  // urgency, says it is not grounded and withholds everything else, and there
-  // is nothing left to strike. Asserting constraint 16 on a rescued raise fails
-  // a page that is behaving correctly. Measured 2026-09-19 on the 35-chunk
-  // corpus: Mum is raised every run, and about two runs in three are rescued.
-  const rescued = raised !== null && await p.eval(`(() => {
-    const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
-    return !!side.querySelector(".ungrounded");
-  })()`) === true;
-  if (rescued) {
+  check("a profile rule raised one side", raise !== null,
+    "no side shows a raise, and R1 fires on Mum on every measured run");
+  // A raise lands on one of three branches and the preset has taken all three
+  // across the two models, so the check has to know which it is looking at.
+  // GROUNDED RAISE TO RED: the model's prose is on screen, so constraint 16
+  // strikes it out and replaces the steps with the app's own.
+  // RESCUED RAISE TO RED: the model cited nothing, so constraint 13 shows the
+  // urgency, says it is not grounded and withholds everything else. There is
+  // nothing left to strike, and asserting constraint 16 here fails a page that
+  // is behaving correctly.
+  // RAISE TO YELLOW: constraint 16 strikes the rationale, because it argues
+  // for the lower verdict, and deliberately does NOT replace the steps,
+  // because there is no yellow equivalent of the three red lines. That gap is
+  // recorded rather than asserted, so this check keeps passing when it is
+  // closed. See the note it prints.
+  if (raise && raise.rescued) {
     console.log("      the raise came through the refusal rescue: the not-grounded branch");
     check("a rescued red shows the urgency, its disposition and the not-grounded line",
-      /\bRED\b/.test(raised) && raised.includes("Call emergency services now")
-      && raised.includes("Not grounded in sources"), raised.slice(0, 300));
-    // The same thing constraint 16 is for, on the branch that has no prose to
-    // strike: nothing the model wrote for its yellow may sit under the red bar.
+      /\bRED\b/.test(raise.text) && raise.text.includes("Call emergency services now")
+      && raise.text.includes("Not grounded in sources"), raise.text.slice(0, 300));
     check("a rescued red shows none of the prose the model wrote for its own verdict", await p.eval(`(async () => {
       const conv = await (await fetch("/api/conversations/" + location.pathname.split("/")[2])).json();
-      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to (red|yellow)/.test(s.innerText));
       const held = conv.sides.flatMap(s => s.turns)
         .map(t => ((t.event || {}).ungrounded || {}).withheld || {})
         .flatMap(w => [w.rationale || "", ...(w.next_steps || []), ...(w.follow_up_questions || [])])
@@ -324,18 +335,37 @@ async function compare(out) {
       return held.length > 0 && held.every(x => !side.innerText.includes(x)) &&
         !/What to do/.test(side.innerText) && !/Sources/.test(side.innerText);
     })()`) === true);
-  } else if (raised) {
+  } else if (raise && raise.level === "red") {
     check("a raised red shows the app's steps",
-      ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raised.includes(t)), raised.slice(0, 300));
-    check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raised), raised.slice(0, 300));
-    check("the model's rationale is struck out, whole and tagged", await p.eval(`(() => {
-      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to red/.test(s.innerText));
+      ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raise.text.includes(t)), raise.text.slice(0, 300));
+    check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raise.text), raise.text.slice(0, 300));
+  }
+  // The half of constraint 16 that holds on EVERY raise, whichever level it
+  // lands on and whether or not it was rescued: the model wrote its Why for
+  // the verdict it gave, so a raise strikes it out whole and tags it. A
+  // rescued raise has no rationale on screen to strike, so it is exempt.
+  if (raise && !raise.rescued) {
+    check(`a raise to ${raise.level} strikes out the model's rationale, whole and tagged`, await p.eval(`(() => {
+      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to (red|yellow)/.test(s.innerText));
       const why = [...side.querySelectorAll(".sec")].find(sec => /^Why\\b/.test(sec.innerText));
       const struck = why && why.querySelector("p.gone s");
       return !!struck && !why.querySelector("h3 + p:not(.gone)") &&
         struck.innerText.length > 80 && !struck.innerText.endsWith("…") &&
         /removed: written for a/.test(why.innerText);
     })()`) === true);
+  }
+  if (raise && raise.level === "yellow") {
+    // KNOWN GAP, measured 2026-09-19 on the tuned model and not a failure of
+    // this check: a raise to yellow keeps the steps the model wrote for its
+    // green, so "Be seen today" can sit above "eat the rest of the meal".
+    // Printed, not asserted, so closing it does not turn this red.
+    const steps = await p.eval(`(() => {
+      const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to yellow/.test(s.innerText));
+      const sec = [...side.querySelectorAll(".sec")].find(x => /^What to do\\b/.test(x.innerText));
+      return sec ? [...sec.querySelectorAll("li")].map(li => li.innerText.replace(/\\s+/g, " ")) : [];
+    })()`);
+    console.log(`      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps`);
+    steps.forEach(x => console.log(`        ${x}`));
   }
   await oneLeftEdge(p, "compare");
   await p.shot(join(out, "desktop-compare.png"), true);

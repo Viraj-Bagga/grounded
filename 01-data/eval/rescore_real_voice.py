@@ -171,8 +171,11 @@ def main():
             E += e
             N += n
             hw = words(hyp)
-            for word in SAFETY.get(cid, []):
-                if hw.count(word) < SAFETY[cid].count(word):
+            # Normalise the safety words the same way, or "two" is reported
+            # missing every time the model correctly writes "2".
+            want = [NUMBERS.get(x, x) for x in SAFETY.get(cid, [])]
+            for word in want:
+                if hw.count(word) < want.count(word):
                     miss.append(f"{cid}:{word}")
         table.append((m, 100 * E / N, E, N, sorted(set(miss))))
     for m, pct, e, n, miss in sorted(table, key=lambda r: r[1]):

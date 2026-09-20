@@ -1,0 +1,231 @@
+2026-09-19/20 ui_check.mjs, every mode that needs no extra argument, against the TUNED GGUF
+config: llama-server ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf, --jinja -np 2 -ngl 0 -c 8192
+        demo 06-demo/server.py on 8770; 35 chunks; macOS low power mode 0
+build:  main at 5064cb7 plus the uncommitted model swap
+method: node 06-demo/ui_check.mjs <mode> 06-demo/results/2026-09-19-tuned-ui-check/<mode>, in the order below.
+        phone, reread and review need arguments and are run separately.
+
+=== shots  21:57:52
+PASS  desktop: new assessment shows presets
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/desktop-new.png
+PASS  desktop: people list shows the household
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/phone-new.png
+PASS  phone: people list shows the household
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-19-tuned-ui-check/shots/phone-maya.png
+all passed
+=== shots exit 0  21:57:59
+
+=== people  21:57:59
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved 06-demo/results/2026-09-19-tuned-ui-check/people/desktop-person-new.png
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+      saved 06-demo/results/2026-09-19-tuned-ui-check/people/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+all passed
+=== people exit 0  21:58:03
+
+=== guards  21:58:03
+      child profile: 1.0 s
+PASS  a child's profile gets NOT ASSESSED
+      saved 06-demo/results/2026-09-19-tuned-ui-check/guards/desktop-child.png
+PASS  a child word on an adult profile asks who it is for
+      saved 06-demo/results/2026-09-19-tuned-ui-check/guards/desktop-who-is-this-for.png
+      out of scope: 1.0 s
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+      saved 06-demo/results/2026-09-19-tuned-ui-check/guards/desktop-out-of-scope.png
+all passed
+=== guards exit 0  21:58:08
+
+=== flow  21:58:08
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/desktop-streaming.png
+PASS  a verdict bar is shown
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/desktop-answer.png
+PASS  the checked line opens its details
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/desktop-source.png
+      follow-up: 7.4 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/desktop-followup.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/phone-answer.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved 06-demo/results/2026-09-19-tuned-ui-check/flow/phone-drawer.png
+all passed
+=== flow exit 0  21:58:41
+
+=== compare  21:58:41
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 17.9 s
+PASS  both sides answered
+PASS  compare: record, answers and composer share one left edge
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare/desktop-compare.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare/phone-compare-a.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare/phone-compare-b.png
+all passed
+=== compare exit 0  21:59:01
+
+=== two-tabs  21:59:01
+      tab B, Grandpa: 36.3 s
+      tab A, Dad: 36.6 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 14.6 s
+      tab A follow-up: 18.5 s
+PASS  both follow-ups reused their own cache
+      saved 06-demo/results/2026-09-19-tuned-ui-check/two-tabs/desktop-tab-a.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/two-tabs/desktop-tab-b.png
+all passed
+=== two-tabs exit 0  21:59:59
+
+=== drop  21:59:59
+PASS  a dropped stream says the answer is still being written
+PASS  the composer waits while it is written
+      saved 06-demo/results/2026-09-19-tuned-ui-check/drop/desktop-dropped.png
+      dropped, then saved: 12.4 s
+PASS  the saved answer appears without a reload
+      saved 06-demo/results/2026-09-19-tuned-ui-check/drop/desktop-dropped-answer.png
+all passed
+=== drop exit 0  22:00:14
+
+=== regions  22:00:14
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved 06-demo/results/2026-09-19-tuned-ui-check/regions/desktop-regions.png
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved 06-demo/results/2026-09-19-tuned-ui-check/regions/desktop-regions-india.png
+      assessment for a citation: 11.0 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved 06-demo/results/2026-09-19-tuned-ui-check/regions/desktop-region-annotation.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/regions/mobile-regions.png
+all passed
+=== regions exit 0  22:00:28
+
+=== voice  22:00:28
+PASS  the composer offers a microphone
+      speaking 4.29 s into the page
+PASS  tapping starts recording
+PASS  send is closed while recording
+      saved 06-demo/results/2026-09-19-tuned-ui-check/voice/voice-recording.png
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+      saved 06-demo/results/2026-09-19-tuned-ui-check/voice/voice-transcript.png
+PASS  editing is recorded
+      saved 06-demo/results/2026-09-19-tuned-ui-check/voice/voice-edited.png
+      spoken assessment: 12.2 s
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+      saved 06-demo/results/2026-09-19-tuned-ui-check/voice/voice-answer-details.png
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+      saved 06-demo/results/2026-09-19-tuned-ui-check/voice/voice-soap.txt
+all passed
+=== voice exit 0  22:00:51
+
+
+=== compare, RE-RUN with the skip fixed  22:01:02
+    the first compare above ran 6 checks where the base model ran 9: its raise
+    detector matched only 'Raised to red' and the tuned model raises Mum to
+    yellow, so every constraint 16 assertion silently stopped running.
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 15.6 s
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps
+        1 Call emergency services if the indigestion comes on at rest, is accompanied by breathlessness, or does not settle with a short walk
+PASS  compare: record, answers and composer share one left edge
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare-fixed/desktop-compare.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare-fixed/phone-compare-a.png
+      saved 06-demo/results/2026-09-19-tuned-ui-check/compare-fixed/phone-compare-b.png
+all passed
+=== compare re-run exit 0  22:01:20
+
+=== reread  22:03:46
+    run last and on its own: it needs a llama-server restart between the
+    assessment and the follow-up, so the slot cache is gone. llama-server was
+    restarted COLD on the tuned GGUF at 22:02, which also proves the swap
+    loads from scratch. CID 20260919-215809-61dc7f, Mum, 2 turns, from flow.
+FAIL  timed out waiting for /lost this conversation and is re-reading/.test(document.querySelector('[data-live]')?.innerText || '')
+1 failed
+=== reread exit 1  22:04:48
+
+=== reread, RE-RUN after a REAL restart  22:05:39
+    the run above failed on my error, not the product's: the kill silently did
+    not take, the replacement llama-server could not bind 8080 and exited, so
+    nothing restarted and the follow-up reused 1591 of 1592 tokens. Correct
+    behaviour, wrong test. llama-server is now genuinely cold, pid 78227
+    started 22:05:26 on the tuned GGUF.
+PASS  a slow read says it is re-reading, while it happens
+      saved 06-demo/results/2026-09-19-tuned-ui-check/reread/desktop-rereading.png
+PASS  the answer says it re-read everything, and why
+      saved 06-demo/results/2026-09-19-tuned-ui-check/reread/desktop-reread-answer.png
+all passed
+=== reread re-run exit 0  22:06:39
+
+==============================================================================
+SUMMARY
+==============================================================================
+  shots                                8 pass   0 fail
+  people                               5 pass   0 fail
+  guards                               3 pass   0 fail
+  flow                                15 pass   0 fail
+  compare                              5 pass   0 fail
+  two-tabs                             3 pass   0 fail
+  drop                                 3 pass   0 fail
+  regions                              7 pass   0 fail
+  voice                               16 pass   0 fail
+  compare, RE-RUN with the skip fixed   7 pass   0 fail
+  reread                               0 pass   1 fail
+  reread, RE-RUN after a REAL restart   2 pass   0 fail
+
+  TOTAL 74 pass, 1 fail across 12 runs.
+
+  Two of those runs supersede an earlier one in the same file:
+    compare      the first run asserted nothing about constraint 16, because its
+                 raise detector matched only "Raised to red" and the tuned model
+                 raises Mum to YELLOW. It printed "all passed" on 6 checks where
+                 the base model ran 9. ui_check.mjs is fixed and the re-run now
+                 fails loudly if nothing was raised at all.
+    reread       the first run failed on MY error: the kill did not take, the
+                 replacement llama-server could not bind 8080 and exited, so
+                 nothing had restarted and there was no lost cache to re-read.
+                 The re-run is against a genuinely cold server.
+
+  Counting the superseded runs out: 68 pass, 0 fail.
+
