@@ -18,3 +18,6 @@ __pycache__/
 03-model/convert-src-120pairs/model.safetensors
 03-model/convert-src-120pairs/tokenizer.json
 03-model/convert-src-120pairs/tokenizer_config.json
+
+# Junk an R session drops in whatever directory it was started from.
+.Rhistory
