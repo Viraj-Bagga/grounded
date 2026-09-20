@@ -33,6 +33,9 @@ THE API
   PUT    /api/people/<id>                 edit a person
   DELETE /api/people/<id>                 remove a person; their assessments stay
   GET    /api/queue                       the caseload: waiting, done, counts
+  GET    /api/sync                        base's address, what is waiting to go
+  POST   /api/sync/base                   point this device at a base
+  POST   /api/sync/flush                  send everything pending, streamed
   POST   /api/queue                       queue a person, with an optional note
   POST   /api/queue/<entry>/done          mark one seen, optionally naming the assessment
   DELETE /api/queue/<entry>               take one off the list
@@ -83,6 +86,7 @@ import pipeline  # noqa: E402
 import caseload  # noqa: E402  (the queue; NOT named queue.py, which
                  # would shadow the stdlib module that concurrent.futures imports)
 import soap  # noqa: E402  (puts 02-pairs, 04-retrieval on the path)
+import sync  # noqa: E402
 import voice  # noqa: E402
 from guards import is_child_profile, load_registry  # noqa: E402
 from escalation import verify_grounding  # noqa: E402
@@ -95,7 +99,7 @@ STATIC = HERE / "static"
 # other request is small, so the cap is per route rather than one global limit.
 MAX_BODY = 200_000
 MAX_AUDIO_BODY = 4_000_000
-APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions|queue)?/?$")
+APP_ROUTES = re.compile(r"^/(?:c/[\w-]+|people(?:/[\w-]+)?|regions|queue|sync)?/?$")
 
 # The regional add-on packs, read only, for the region selector. They are NOT
 # wired into retrieval (Viraj's call 2026-09-19): selecting a region changes
@@ -159,6 +163,7 @@ SAMPLE_IDS = {p["id"] for p in SEED_PEOPLE}
 PEOPLE = PeopleStore()
 CONVERSATIONS = ConversationStore()
 QUEUE = caseload.QueueStore()
+SYNC = sync.SyncState()
 ENGINE = pipeline.Engine(CONVERSATIONS, retriever, registry)
 
 
@@ -205,6 +210,21 @@ def queue_view():
             "done": [caseload.describe(e, people) for e in done],
             "counts": {"waiting": len(waiting), "done": len(done),
                        "done_today": len(seen_today)}}
+
+
+def sync_view():
+    """What the field device knows about base: where it is, what is waiting to
+    go, and what has already been accepted. No network call: asking base
+    whether it is there belongs to the flush, not to painting a page."""
+    d = SYNC.get()
+    todo = sync.pending(CONVERSATIONS.all(), SYNC)
+    return {"base_url": d["base_url"],
+            "device": {"id": d["device_id"], "label": d["device_label"]},
+            "pending": [{"id": c["id"], "sha256": h,
+                         "updated": c.get("updated"),
+                         "people": [(s.get("profile") or {}).get("label") for s in c.get("sides", [])]}
+                        for c, h in todo],
+            "sent": len(SYNC.sent())}
 
 
 def conversation_view(conv):
@@ -320,6 +340,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(ENGINE.chunk_meta(key))
         if path == "/api/queue":
             return self._json(queue_view())
+        if path == "/api/sync":
+            return self._json(sync_view())
         if path.startswith("/api/"):
             return self._json({"error": "not found"}, 404)
         if APP_ROUTES.match(path):
@@ -383,6 +405,20 @@ class Handler(SimpleHTTPRequestHandler):
             entry = QUEUE.done(m.group(1), body.get("conversation_id"))
             return self._json(queue_view()) if entry else \
                 self._json({"error": "no such caseload entry"}, 404)
+
+        # SYNC. One direction: finished assessments go up, nothing comes down.
+        # The flush is streamed like a turn is, because the honest thing to
+        # show a worker is each assessment landing, not a spinner.
+        if path == "/api/sync/base":
+            url, err = SYNC.set_base(body.get("base_url"))
+            return self._json(sync_view()) if url else self._json({"error": err}, 422)
+        if path == "/api/sync/flush":
+            send = self._sse()
+            try:
+                sync.flush(CONVERSATIONS.all(), SYNC, queue_view()["counts"], emit=send)
+            except Exception as e:
+                send("error", {"message": f"the sync failed: {e}"})
+            return
 
         if path == "/api/people":
             person, errors = PEOPLE.create(body)

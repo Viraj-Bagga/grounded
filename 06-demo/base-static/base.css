@@ -1,0 +1,91 @@
+/* BASE: the supervisor's screen. Same design language as the field app and a
+   SEPARATE FILE ON PURPOSE. base_server.py serves only this directory, so it
+   cannot reach ../static, and base has to keep working if the field app's CSS
+   is mid-edit. The token block below is a deliberate copy of the one in
+   06-demo/static/app.css; if a colour changes there, change it here too. */
+
+:root {
+  --paper: #ffffff;
+  --chrome: #f2f4f7;
+  --well: #eaedf2;
+  --ink: #0f1318;
+  --ink-2: #414a56;
+  --ink-3: #5c6572;
+  --rule: #dce0e6;
+  --rule-2: #b9c0ca;
+  --action: #1f3fbf;
+  --action-soft: #e5eafa;
+  --red: #c8261d;     --on-red: #ffffff;
+  --yellow: #f2b705;  --on-yellow: #101418;
+  --green: #1c7a43;   --on-green: #ffffff;
+  --hold: #56606c;    --on-hold: #ffffff;
+  --hatch: repeating-linear-gradient(135deg, rgb(0 0 0 / .24) 0 6px, transparent 6px 12px);
+  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --t-12: .75rem; --t-14: .875rem; --t-15: .9375rem; --t-17: 1.0625rem;
+  --t-24: 1.5rem; --t-30: 1.875rem;
+  --tap: 2.75rem;
+  --r: 6px;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--chrome); color: var(--ink); font: 400 var(--t-17)/1.5 var(--font); }
+.wrap { max-width: 70rem; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+header.bar { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; margin-bottom: .25rem; }
+header.bar h1 { font-size: var(--t-30); margin: 0; letter-spacing: -.01em; }
+.role { font-weight: 700; font-size: var(--t-12); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-2); border: 1px solid var(--rule-2); padding: .125rem .375rem; border-radius: var(--r); }
+.lede { color: var(--ink-2); margin: .25rem 0 1.25rem; max-width: 46rem; }
+
+/* The numbers a supervisor reads first. */
+.tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); margin-bottom: 1.5rem; }
+.tile { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); padding: .875rem; }
+.tile .n { font-size: var(--t-30); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .k { color: var(--ink-2); font-size: var(--t-14); }
+.tile.alarm .n { color: var(--red); }
+
+h2 { font-size: var(--t-24); margin: 1.75rem 0 .5rem; }
+.muted { color: var(--ink-2); }
+.empty { background: var(--paper); border: 1px dashed var(--rule-2); border-radius: var(--r);
+  padding: 1.5rem; color: var(--ink-2); }
+
+.devices { list-style: none; margin: 0 0 .5rem; padding: 0; display: grid; gap: .5rem; }
+.devices li { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r);
+  padding: .625rem .875rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.devices .id { font: 700 var(--t-14) var(--mono); color: var(--ink-2); }
+.devices .grow { flex: 1; }
+
+.cases { list-style: none; margin: 0; padding: 0; display: grid; gap: .625rem; }
+.case { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.case > summary { cursor: pointer; padding: .75rem .875rem; display: flex; gap: .75rem;
+  align-items: center; flex-wrap: wrap; list-style: none; }
+.case > summary::-webkit-details-marker { display: none; }
+.case > summary:hover { background: var(--chrome); }
+.case .said { flex: 1; min-width: 14rem; }
+.case .when { color: var(--ink-3); font-size: var(--t-14); font-variant-numeric: tabular-nums; }
+.case .body { border-top: 1px solid var(--rule); padding: .875rem; display: grid; gap: .875rem; }
+
+/* The verdict word, carried by form as well as colour, exactly as in the field app. */
+.v { font: 800 var(--t-12)/1 var(--font); letter-spacing: .04em; padding: .3125rem .4375rem;
+  border-radius: 3px; text-transform: uppercase; }
+.v.red { background: var(--red); color: var(--on-red); }
+.v.yellow { background: var(--yellow); color: var(--on-yellow); }
+.v.green { background: var(--green); color: var(--on-green); }
+.v.refused, .v.child, .v.error, .v.none { background: var(--hold) var(--hatch); color: var(--on-hold); }
+
+.side { border-left: 3px solid var(--rule); padding-left: .75rem; }
+.side h3 { margin: 0 0 .25rem; font-size: var(--t-17); display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.side dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .1875rem .75rem; font-size: var(--t-15); }
+.side dt { color: var(--ink-2); }
+.side dd { margin: 0; }
+.keys { display: flex; gap: .3125rem; flex-wrap: wrap; }
+.key { font: 700 var(--t-12) var(--mono); border: 1px solid var(--rule-2); color: var(--action);
+  padding: .125rem .3125rem; border-radius: 3px; }
+.tag { font: 700 var(--t-12) var(--font); padding: .125rem .375rem; border-radius: 3px;
+  background: var(--well); color: var(--ink-2); }
+.tag.raised { background: var(--action-soft); color: var(--action); }
+.tag.ungrounded { background: var(--hold) var(--hatch); color: var(--on-hold); }
+.sha { font: 400 var(--t-12) var(--mono); color: var(--ink-3); word-break: break-all; }
+footer.note { margin-top: 2.5rem; color: var(--ink-2); font-size: var(--t-14); border-top: 1px solid var(--rule);
+  padding-top: .75rem; }

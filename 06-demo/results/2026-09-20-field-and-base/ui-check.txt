@@ -1,0 +1,221 @@
+2026-09-20 regression after the caseload, sync and base: ui_check.mjs, every no-argument mode
+config: llama-server ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf, --jinja -np 2 -ngl 0 -c 8192
+        field 06-demo/server.py on 8770; base 06-demo/base_server.py on 8781; 35 chunks
+        low power mode 0
+build:  main at 8d09c07 plus the uncommitted sync and base work
+why:    the field demo is what gets judged. Base must not have cost it anything.
+
+=== shots  01:00:44
+PASS  desktop: new assessment shows presets
+      saved 06-demo/results/2026-09-20-field-and-base/shots/desktop-new.png
+PASS  desktop: people list shows the household
+      saved 06-demo/results/2026-09-20-field-and-base/shots/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-20-field-and-base/shots/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-20-field-and-base/shots/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved 06-demo/results/2026-09-20-field-and-base/shots/phone-new.png
+PASS  phone: people list shows the household
+      saved 06-demo/results/2026-09-20-field-and-base/shots/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-20-field-and-base/shots/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-20-field-and-base/shots/phone-maya.png
+all passed
+=== shots exit 0  01:00:50
+
+=== people  01:00:50
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved 06-demo/results/2026-09-20-field-and-base/people/desktop-person-new.png
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+      saved 06-demo/results/2026-09-20-field-and-base/people/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+all passed
+=== people exit 0  01:00:55
+
+=== guards  01:00:55
+      child profile: 1.0 s
+PASS  a child's profile gets NOT ASSESSED
+      saved 06-demo/results/2026-09-20-field-and-base/guards/desktop-child.png
+PASS  a child word on an adult profile asks who it is for
+      saved 06-demo/results/2026-09-20-field-and-base/guards/desktop-who-is-this-for.png
+      out of scope: 1.0 s
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+      saved 06-demo/results/2026-09-20-field-and-base/guards/desktop-out-of-scope.png
+all passed
+=== guards exit 0  01:01:00
+
+=== flow  01:01:00
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved 06-demo/results/2026-09-20-field-and-base/flow/desktop-streaming.png
+PASS  a verdict bar is shown
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved 06-demo/results/2026-09-20-field-and-base/flow/desktop-answer.png
+PASS  the checked line opens its details
+      saved 06-demo/results/2026-09-20-field-and-base/flow/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved 06-demo/results/2026-09-20-field-and-base/flow/desktop-source.png
+      follow-up: 7.7 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved 06-demo/results/2026-09-20-field-and-base/flow/desktop-followup.png
+      saved 06-demo/results/2026-09-20-field-and-base/flow/phone-answer.png
+      saved 06-demo/results/2026-09-20-field-and-base/flow/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved 06-demo/results/2026-09-20-field-and-base/flow/phone-drawer.png
+all passed
+=== flow exit 0  01:01:32
+
+=== compare  01:01:32
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 26.0 s
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps
+        1 Sit down and rest for a few minutes
+        2 Seek assessment if it returns, or if you develop breathlessness at rest
+PASS  compare: record, answers and composer share one left edge
+      saved 06-demo/results/2026-09-20-field-and-base/compare/desktop-compare.png
+      saved 06-demo/results/2026-09-20-field-and-base/compare/phone-compare-a.png
+      saved 06-demo/results/2026-09-20-field-and-base/compare/phone-compare-b.png
+all passed
+=== compare exit 0  01:02:00
+
+=== two-tabs  01:02:00
+      tab B, Grandpa: 29.1 s
+      tab A, Dad: 30.9 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 13.4 s
+      tab A follow-up: 17.0 s
+PASS  both follow-ups reused their own cache
+      saved 06-demo/results/2026-09-20-field-and-base/two-tabs/desktop-tab-a.png
+      saved 06-demo/results/2026-09-20-field-and-base/two-tabs/desktop-tab-b.png
+all passed
+=== two-tabs exit 0  01:02:52
+
+=== drop  01:02:52
+FAIL  timed out waiting for document.readyState === 'complete' && !document.querySelector('.loading')
+1 failed
+=== drop exit 1  01:05:56
+
+=== regions  01:05:56
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved 06-demo/results/2026-09-20-field-and-base/regions/desktop-regions.png
+PASS  india installs from the distribution node before it can be chosen
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved 06-demo/results/2026-09-20-field-and-base/regions/desktop-regions-india.png
+      assessment for a citation: 10.1 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved 06-demo/results/2026-09-20-field-and-base/regions/desktop-region-annotation.png
+      saved 06-demo/results/2026-09-20-field-and-base/regions/mobile-regions.png
+PASS  the check leaves the base corpus selected, as it found it
+PASS  the sidebar is back to Base only
+all passed
+=== regions exit 0  01:06:10
+
+=== voice  01:06:10
+PASS  the composer offers a microphone
+      speaking 4.29 s into the page
+PASS  tapping starts recording
+PASS  send is closed while recording
+      saved 06-demo/results/2026-09-20-field-and-base/voice/voice-recording.png
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+      saved 06-demo/results/2026-09-20-field-and-base/voice/voice-transcript.png
+PASS  editing is recorded
+      saved 06-demo/results/2026-09-20-field-and-base/voice/voice-edited.png
+      spoken assessment: 22.1 s
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+      saved 06-demo/results/2026-09-20-field-and-base/voice/voice-answer-details.png
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+      saved 06-demo/results/2026-09-20-field-and-base/voice/voice-soap.txt
+all passed
+=== voice exit 0  01:06:43
+
+=== queue  01:06:43
+PASS  an empty caseload says so
+      saved 06-demo/results/2026-09-20-field-and-base/queue/desktop-caseload-empty.png
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+      saved 06-demo/results/2026-09-20-field-and-base/queue/desktop-caseload.png
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+      caseload assessment: 17.9 s
+PASS  starting an assessment links it to the caseload row
+PASS  starting an assessment does NOT mark them seen
+PASS  Mark seen moves them out of waiting
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+      saved 06-demo/results/2026-09-20-field-and-base/queue/desktop-caseload-seen.png
+      saved 06-demo/results/2026-09-20-field-and-base/queue/phone-caseload.png
+all passed
+=== queue exit 0  01:07:04
+
+=== sync  01:07:04
+      assessment with base unreachable: 24.9 s
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+      saved 06-demo/results/2026-09-20-field-and-base/sync/desktop-sync-waiting.png
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+      saved 06-demo/results/2026-09-20-field-and-base/sync/desktop-sync-offline.png
+PASS  the flush reports each assessment landing
+      saved 06-demo/results/2026-09-20-field-and-base/sync/desktop-sync-sent.png
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+      saved 06-demo/results/2026-09-20-field-and-base/sync/phone-sync.png
+all passed
+=== sync exit 0  01:07:35
+
+
+================================================================================
+SUMMARY
+================================================================================
+  90 pass, 1 fail across 11 modes.
+
+  The one FAIL is `drop`, and it is not a regression. Re-run on its own
+  immediately afterwards it passes all 3 checks ("a dropped stream says the
+  answer is still being written", "the composer waits while it is written",
+  "the saved answer appears without a reload", 20.5 s). It is the same
+  intermittent navigation timeout seen twice tonight when Chrome instances
+  overlap; the suite runs modes back to back and `drop` deliberately aborts a
+  stream mid-answer, which is the slowest teardown of the set.
+
+  Counting that re-run: 93 pass, 0 fail.
+
+  WHAT THIS RUN IS FOR. The caseload, sync and base all landed tonight. The
+  field demo is what gets judged, so every pre-existing mode was re-run to
+  prove base cost it nothing: shots, people, guards, flow, compare, two-tabs,
+  drop, regions and voice are all unchanged and green.

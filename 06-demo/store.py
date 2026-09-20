@@ -278,6 +278,18 @@ class ConversationStore:
             _write_json(p, conv)
             return conv
 
+    def all(self):
+        """Every saved assessment, whole. Sync needs the actual files, not the
+        history summaries: what crosses to base is the assessment verbatim, so
+        the citations and guard actions arrive as the field device saved them."""
+        out = []
+        for p in sorted(self.root.glob("*.json")):
+            try:
+                out.append(json.loads(p.read_text(encoding="utf-8")))
+            except (OSError, ValueError):
+                continue
+        return out
+
     def summaries(self):
         out = []
         for p in sorted(self.root.glob("*.json"), reverse=True):

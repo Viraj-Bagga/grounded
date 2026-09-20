@@ -2,11 +2,12 @@
 // composer. No framework and no build step; it has to run with the laptop
 // offline, from 06-demo/server.py.
 
-import { api, streamTurn, streamInstall } from "./api.js";
+import { api, streamTurn, streamInstall, streamFlush } from "./api.js";
 import { answerHTML, pendingHTML, esc, fmt, secs } from "./answer.js";
 import { peopleListHTML, personFormHTML, bindPersonForm, facts, ruleName } from "./people.js";
 import { icon } from "./icons.js";
 import { queueHTML, bindQueue } from "./queue.js";
+import { syncHTML, bindSync, logLine } from "./sync.js";
 import { Recorder, transcribe, micBlocked, micError, recordingLabel, wasEdited } from "./voice.js";
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -59,6 +60,9 @@ const S = {
   health: null, people: [], convs: [], regions: [], region: null,
   // The caseload, refreshed with the other lists so the sidebar count is live.
   queue: { waiting: [], done: [], counts: { waiting: 0, done: 0, done_today: 0 } },
+  // Where base is, what is waiting to go, and the live log of a flush.
+  sync: { base_url: "", device: { id: "", label: "" }, pending: [], sent: 0 },
+  flush: { running: false, lines: [] },
   picked: [NOBODY.id], compare: false,
   conv: null, live: {}, liveSaid: null,
   draft: { text: "", timeline: "", showTl: false, heard: null },
@@ -87,6 +91,7 @@ function route() {
   if ((m = path.match(/^\/c\/([\w-]+)\/?$/))) return showConversation(m[1]);
   if (/^\/regions\/?$/.test(path)) return showRegions();
   if (/^\/queue\/?$/.test(path)) return showQueue();
+  if (/^\/sync\/?$/.test(path)) return showSync();
   if (/^\/people\/?$/.test(path)) return showPeople();
   if (path === "/people/new") return showPersonForm(null);
   if ((m = path.match(/^\/people\/([\w-]+)\/?$/))) return showPersonForm(m[1]);
@@ -231,6 +236,11 @@ function renderHistory() {
   const nq = S.queue.counts.waiting;
   $("#queue-n").textContent = nq ? `${nq} waiting` : "Empty";
   $("#queue-link").classList.toggle("has-waiting", nq > 0);
+  const onSync = location.pathname.startsWith("/sync");
+  $("#sync-link").setAttribute("aria-current", onSync ? "page" : "false");
+  const ns = S.sync.pending.length;
+  $("#sync-n").textContent = ns ? `${ns} to send` : "All sent";
+  $("#sync-link").classList.toggle("has-waiting", ns > 0);
 }
 
 function renderStatus() {
@@ -243,10 +253,15 @@ function renderStatus() {
 }
 
 async function refreshLists() {
-  const [c, p, q] = await Promise.all([api.conversations(), api.people(), api.queue()]);
+  const [c, p, q, y] = await Promise.all([
+    api.conversations(), api.people(), api.queue(),
+    // Never blocks the rest: sync is the one list that can be stale without
+    // anything on screen being wrong.
+    api.sync().catch(() => S.sync)]);
   S.convs = c.conversations;
   S.people = p.people;
   S.queue = q;
+  S.sync = y;
   renderHistory();
 }
 
@@ -1059,6 +1074,40 @@ async function showQueue() {
       await showQueue();
     },
     assess: id => { S.picked = [id]; S.compare = false; go("/"); },
+  });
+}
+
+// ------------------------------------------------------------------ send to base
+
+// The only screen in the app that needs a network, and it says so. Nothing is
+// sent until the button is pressed: see sync.js.
+async function showSync() {
+  S.conv = null;
+  document.title = "Send to base · Triage";
+  await refreshLists();
+  paintSync();
+}
+
+function paintSync() {
+  $("#main").innerHTML = syncHTML(S.sync, S.flush);
+  bindSync($("#main"), {
+    setBase: async url => {
+      try { S.sync = await api.setBase(url); S.flash = null; }
+      catch (e) { S.flush.lines = [esc(e.body?.error || "That address was not accepted.")]; }
+      paintSync();
+    },
+    send: async () => {
+      S.flush = { running: true, lines: [] };
+      paintSync();
+      await streamFlush(e => {
+        const line = logLine(e);
+        if (line) S.flush.lines.push(line);
+        paintSync();
+      });
+      S.flush.running = false;
+      await refreshLists();
+      paintSync();
+    },
   });
 }
 

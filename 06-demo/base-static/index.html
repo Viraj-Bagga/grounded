@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Base · Triage</title>
+<link rel="stylesheet" href="/base.css">
+<!--
+  BASE. What arrived from the field, and nothing else.
+
+  This page has no model, no corpus and no retriever behind it. Everything it
+  shows was rendered on a field device and carried here inside a verified
+  bundle, which is why the citations and the guard removals are the field
+  device's own and not something base recomputed. See base_server.py.
+-->
+<div class="wrap">
+  <header class="bar"><h1>Base</h1><span class="role">Supervisor</span></header>
+  <p class="lede">Assessments that have arrived from field devices. Nothing here is edited and
+    nothing is sent back: base shows what the worker's device showed them, from the same bytes.</p>
+  <div id="main"><p class="muted">Loading…</p></div>
+  <footer class="note">Base holds no model and no corpus. Every verdict, citation and guard action
+    on this page was produced on the field device that sent it.</footer>
+</div>
+<script type="module" src="/base.js"></script>

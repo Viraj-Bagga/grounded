@@ -553,6 +553,24 @@ ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; w
    is that the worker does not have to remember. */
 .foot-link.has-waiting .n { color: var(--action); font-weight: 700; }
 
+/* -------------------------------------------------------- send to base */
+.sy-base { margin-bottom: 1rem; }
+.sy-base .m { color: var(--ink-2); font-size: var(--t-14); margin: .5rem 0 0; }
+.sy-go { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.sy-go .m { color: var(--ink-2); font-size: var(--t-14); }
+.sha { font: 400 var(--t-12) var(--mono); color: var(--ink-3); }
+/* The flush log. A worker watches each assessment land, so it is a record,
+   not a spinner: monospace, newest at the bottom, refusals called out. */
+.sy-log { list-style: none; margin: 0 0 1.25rem; padding: .625rem .75rem; background: var(--well);
+  border-radius: var(--r); font: 400 var(--t-14) var(--mono); display: grid; gap: .1875rem;
+  max-height: 16rem; overflow: auto; }
+.sy-log li.bad { color: var(--red); font-weight: 700; }
+.sy-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.sy-row { display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;
+  padding: .4375rem .25rem; border-bottom: 1px solid var(--rule); }
+.sy-row .nm { font-weight: 700; font-size: var(--t-15); flex: 1; min-width: 10rem; }
+.sy-row .m { color: var(--ink-2); font-size: var(--t-14); }
+
 .form-grid { display: grid; gap: 2rem; align-items: start; }
 @media (min-width: 60rem) { .form-grid { grid-template-columns: minmax(0, 1fr) 22rem; } .preview { position: sticky; top: 4.5rem; } }
 .form section { border-top: 1px solid var(--rule); padding-top: .875rem; margin-top: 1rem; }

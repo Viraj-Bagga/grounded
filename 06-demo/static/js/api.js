@@ -34,6 +34,8 @@ export const api = {
   markSeen: (entry, conversation_id) =>
     j(`/api/queue/${q(entry)}/done`, put("POST", { conversation_id })),
   unqueue: entry => j(`/api/queue/${q(entry)}`, { method: "DELETE" }),
+  sync: () => j("/api/sync"),
+  setBase: base_url => j("/api/sync/base", put("POST", { base_url })),
 };
 
 // One turn for one side, streamed as server-sent events. onEvent gets every
@@ -64,6 +66,28 @@ export async function streamInstall(id, onEvent) {
   let r;
   try {
     r = await fetch(`/api/regions/${q(id)}/install`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+    });
+  } catch {
+    onEvent({ event: "error", message: "The app server could not be reached." });
+    return;
+  }
+  if (!r.ok) {
+    let b = {};
+    try { b = await r.json(); } catch { /* not JSON */ }
+    onEvent({ event: "error", message: (b && b.error) || r.statusText });
+    return;
+  }
+  return pump(r, onEvent);
+}
+
+// Send everything waiting to base, streamed so each assessment is seen to
+// land rather than a spinner standing in for it. Events: start, sent, refused,
+// offline, done, error.
+export async function streamFlush(onEvent) {
+  let r;
+  try {
+    r = await fetch("/api/sync/flush", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
     });
   } catch {

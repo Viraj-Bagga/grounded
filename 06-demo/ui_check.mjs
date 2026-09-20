@@ -8,6 +8,7 @@
 //   node 06-demo/ui_check.mjs guards OUTDIR         child profile, child word, out of scope
 //   node 06-demo/ui_check.mjs people OUTDIR         add, edit and delete a person through the form
 //   node 06-demo/ui_check.mjs queue OUTDIR          the caseload: add, assess, mark seen
+//   node 06-demo/ui_check.mjs sync OUTDIR [BASE]     offline, queue, back in range, land at base
 //   node 06-demo/ui_check.mjs two-tabs OUTDIR       two assessments running at once in two tabs
 //   node 06-demo/ui_check.mjs drop OUTDIR           a stream that drops mid-answer, then the saved answer
 //   node 06-demo/ui_check.mjs regions OUTDIR        the region packs, and the emergency-number annotation
@@ -463,6 +464,101 @@ async function queue(out) {
   await p.size(PHONE);
   await p.go("/queue");
   await p.shot(join(out, "phone-caseload.png"), true);
+  await p.close();
+}
+
+// SEND TO BASE, the whole demo sentence: assess with base unreachable, watch it
+// queue, then reach base and watch it land with its hash.
+//
+// "Unreachable" is a dead PORT, not a stopped process. A check that has to
+// stop and start another server is a check nobody runs; pointing the device at
+// 127.0.0.1:1 exercises exactly the same code path in sync.post.
+async function syncFlow(out, baseUrl) {
+  const BASE = (baseUrl || "http://127.0.0.1:8781").replace(/\/+$/, "");
+  let up = true;
+  try { await fetch(`${BASE}/api/health`); } catch { up = false; }
+  if (!up) {
+    check(`base is running at ${BASE}`, false, "start it: python 06-demo/base_server.py");
+    return;
+  }
+  const p = await tab();
+  await p.size(DESKTOP);
+
+  // OFFLINE. Point the device at a port nothing is listening on.
+  await p.go("/sync");
+  await p.type("#sy-url", "http://127.0.0.1:1");
+  await p.click("#sy-form button[type=submit]");
+  await sleep(600);
+
+  // Assess somebody while "out of range". The triage itself must not care.
+  await p.go("/?p=dad");
+  await p.type("#ta", "Tight chest when I walk up the hill, it eased when I stopped.");
+  await sendAndWait(p, "assessment with base unreachable");
+  const cid = await p.eval("location.pathname.split('/')[2]");
+  check("an assessment works with base unreachable", /^\d{8}-/.test(cid), cid);
+
+  await p.go("/sync");
+  check("the new assessment is waiting to send",
+    (await p.text("#main")).includes("waiting to send")
+    && await p.count(".sy-list .sy-row") >= 1);
+  check("the sidebar says how many are waiting to send",
+    /to send/.test(await p.text("#sync-link")), await p.text("#sync-link"));
+  await p.shot(join(out, "desktop-sync-waiting.png"), true);
+
+  await p.click("#sy-send");
+  await p.until("/not reachable/.test(document.querySelector('.sy-log')?.innerText || '')", 30000);
+  check("an unreachable base is reported, and nothing is lost",
+    /Nothing was lost/.test(await p.text(".sy-log")), await p.text(".sy-log"));
+  const stillThere = await (await fetch(`${APP}/api/sync`)).json();
+  check("nothing was marked sent while base was unreachable",
+    stillThere.pending.some(x => x.id === cid));
+  await p.shot(join(out, "desktop-sync-offline.png"), true);
+
+  // BACK IN RANGE.
+  await p.type("#sy-url", BASE);
+  await p.click("#sy-form button[type=submit]");
+  await sleep(600);
+  await p.click("#sy-send");
+  await p.until("/sent/.test(document.querySelector('.sy-log')?.innerText || '')", 120000);
+  await p.until("!document.querySelector('#sy-send[disabled]') || /All sent|Nothing to send/.test(document.querySelector('#main').innerText)", 120000);
+  await sleep(500);
+  const log = await p.text(".sy-log");
+  check("the flush reports each assessment landing", /Landed at base|already had/.test(log), log.slice(0, 300));
+  await p.shot(join(out, "desktop-sync-sent.png"), true);
+
+  // AT BASE. The assessment is there, and it carried its citations and the
+  // guard actions with it, because base stores the field device's own bytes.
+  const got = await (await fetch(`${BASE}/api/assessments/${cid}`)).json();
+  check("base received that exact assessment", got && got.assessment && got.assessment.id === cid);
+  check("base verified it against the sha256 it arrived with",
+    typeof got.sha256 === "string" && got.sha256.length === 64);
+  const dash = await (await fetch(`${BASE}/api/dashboard`)).json();
+  const rowAt = dash.assessments.find(r => r.id === cid);
+  check("the dashboard lists it under the device that sent it",
+    !!rowAt && !!rowAt.device && rowAt.device === got.device.id);
+  check("the verdict at base is the one the field device showed",
+    !!rowAt && rowAt.sides.length === 1 && ["red", "yellow", "green", "refused"].includes(rowAt.sides[0].state),
+    JSON.stringify(rowAt && rowAt.sides));
+
+  // A SECOND FLUSH MUST BE A NO-OP. This is what makes a flaky link safe.
+  const after = await (await fetch(`${APP}/api/sync`)).json();
+  check("nothing is left waiting after a successful send",
+    !after.pending.some(x => x.id === cid), JSON.stringify(after.pending.map(x => x.id)));
+
+  // INTEGRITY. Base must refuse content that does not match its own digest.
+  const tampered = JSON.parse(JSON.stringify(got));
+  tampered.assessment.sides[0].turns[0].text = "TAMPERED: the pain has gone away";
+  const r = await fetch(`${BASE}/api/receive`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(tampered) });
+  const refused = await r.json();
+  check("base REFUSES a bundle whose content does not match its sha256",
+    r.status === 422 && (refused.problems || []).some(x => /sha256 does not match/.test(x)),
+    JSON.stringify(refused).slice(0, 200));
+
+  await p.size(PHONE);
+  await p.go("/sync");
+  await p.shot(join(out, "phone-sync.png"), true);
   await p.close();
 }
 
@@ -1000,7 +1096,7 @@ const chrome = await launch(mode === "voice"
   ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone, voice, packs: packsFlow, queue }[mode];
+                regions, phone, voice, packs: packsFlow, queue, sync: syncFlow }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {
