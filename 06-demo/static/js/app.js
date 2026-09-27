@@ -1295,8 +1295,8 @@ async function openChunk(key) {
     dlg.showModal();
     return;
   }
-  $("#sheet-k").textContent = c.key;
-  $("#sheet-n").textContent = `${fmt(c.token_count)} tokens`;
+  $("#sheet-k").textContent = String(c.attribution || c.key).replace(/^Source:\s*/, "").split(",")[0];
+  $("#sheet-n").textContent = `${c.key}, ${fmt(c.token_count)} tokens`;
   $("#sheet-body").textContent = c.text;
   const region = S.regions.find(r => r.id === S.region);
   const otherNumber = /\b9-?1-?1\b/.test(c.text || "");

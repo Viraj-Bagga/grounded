@@ -1,0 +1,24 @@
+{
+ "overflow": [],
+ "targets": [
+  "person: button \"Female\" 87x40",
+  "person: button \"Male\" 67x40",
+  "person-new: button \"Female\" 85x40",
+  "person-new: button \"Male\" 67x40",
+  "base: button \"Today\" 176x40",
+  "base: button \"All\" 176x40"
+ ],
+ "fields": [],
+ "fieldEdge": [],
+ "contrast": [],
+ "motion": [],
+ "dashes": [],
+ "colour": [],
+ "words": [],
+ "hold": [],
+ "cites": [],
+ "gone": 0,
+ "goneBad": [],
+ "offscreen": [],
+ "clamp": []
+}

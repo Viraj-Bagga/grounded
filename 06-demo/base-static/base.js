@@ -45,13 +45,14 @@ const whenCell = iso => iso
     : `<span class="d">${esc(dt(iso).toLocaleDateString([], { day: "numeric", month: "short" }))}</span><span class="t">${esc(hhmm(iso))}</span>`)
   : `<span class="t none-mark">None</span>`;
 
-// Every mark carries its word as visually hidden text: the letter alone is not
-// the verdict.
+// Every mark carries its word as visually hidden text and in its title: the
+// dot alone is not the verdict. Since the overhaul of 2026-09-27 it is a dot,
+// filled for a verdict and a ring for none, with no letter.
 function mk(state) {
   const l = LETTER[state];
   const word = WORD[state] || "no answer";
   return l
-    ? `<span class="mk ${esc(state)}" title="${esc(word)}">${l}<span class="sr"> ${esc(word)}</span></span>`
+    ? `<span class="mk ${esc(state)}" title="${esc(word)}"><span class="sr">${esc(word)}</span></span>`
     : `<span class="mk hold" title="${esc(word)}">${icon("none")}<span class="sr">${esc(word)}</span></span>`;
 }
 
