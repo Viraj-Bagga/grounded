@@ -101,12 +101,12 @@ function fold(title, preview, body, { clamp = false, cls = "" } = {}) {
 const reason = why => `<span class="tag">removed: ${esc(why)}</span>`;
 const gone = (text, why) => `<li class="gone"><s>${esc(cut(text))}</s>${reason(why)}</li>`;
 
-// NEW COPY, for Viraj: "N things removed by the app's checks", "Show".
+// Viraj's wording, final 2026-09-27: "N items removed by safety checks". "Show" is final too.
 function noticeHTML(items) {
   if (!items.length) return "";
   const id = uid(), n = items.length;
   return `<div class="guard-note"><button class="note-btn" type="button" data-fold aria-expanded="false" aria-controls="${id}">` +
-    `<span class="glyph" aria-hidden="true">!</span><span class="t">${n} ${n === 1 ? "thing" : "things"} removed by the app's checks</span>` +
+    `<span class="glyph" aria-hidden="true">!</span><span class="t">${n} ${n === 1 ? "item" : "items"} removed by safety checks</span>` +
     `<span class="more" aria-hidden="true">Show</span></button>` +
     `<ul class="removed" id="${id}" hidden>${items.join("")}</ul></div>`;
 }
@@ -178,7 +178,7 @@ function rulesHTML(ev) {
 }
 
 // Inside Why: each rule's quoted line, the sources it quotes, and its number.
-// NEW COPY, for Viraj: "From <whose> profile".
+// Final wording: "From <whose> profile".
 function ruleQuotes(ev) {
   const fired = ((ev.escalation || {}).fired) || [];
   return fired.map(f => `<div class="rq"><div class="sub">From ${whoseOf(ev)}</div>` +
@@ -206,7 +206,7 @@ function resultHTML(ev, ctx) {
 
   const qs = r.follow_up_questions || [];
   if (qs.length) {
-    // NEW COPY, for Viraj: "A question for you" when there is one.
+    // Final wording: "A question for you" when there is one.
     h += section(qs.length === 1 ? "A question for you" : "Questions for you", `<div class="qs">` + qs.map(q =>
       `<div class="q-row"><span>${esc(q)}</span>` +
       (ctx.canAnswer ? `<button class="btn-line" type="button" data-answer="${esc(q)}">Answer</button>` : "") +
@@ -232,17 +232,17 @@ function resultHTML(ev, ctx) {
   const goneWhy = drop.rationale_urgency || "";
   const fired = ((ev.escalation || {}).fired) || [];
   const flags = r.red_flags || [];
-  // NEW COPY, for Viraj: "The model's reason".
+  // Viraj's wording, final: "The model's original reason".
   const whyBody =
     (r.rationale ? `<p class="lead">${esc(r.rationale)}</p>` : "") +
     ruleQuotes(ev) +
-    (goneWhy ? `<div class="rq"><div class="sub">The model’s reason</div><p class="gone"><s>${esc(goneWhy)}</s>${reason(lower)}</p></div>` : "") +
+    (goneWhy ? `<div class="rq"><div class="sub">The model's original reason</div><p class="gone"><s>${esc(goneWhy)}</s>${reason(lower)}</p></div>` : "") +
     (!r.rationale && !goneWhy && !fired.length ? `<p class="muted">No reason given.</p>` : "") +
     `<div class="rq"><div class="sub">Red flags</div>${flags.length
       ? `<ul class="plain">${flags.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : `<p class="muted">None.</p>`}</div>`;
   const whyPv = r.rationale ? esc(r.rationale)
     : fired.length ? `“${esc(fired[0].quote)}”`
-    : goneWhy ? "The model’s reason was removed." : "No reason given.";
+    : goneWhy ? "The model's original reason was removed." : "No reason given.";
 
   const cites = ev.citations || [];
   const keys = cites.map(c => c.key);
@@ -280,9 +280,13 @@ function refusedHTML(ev, ctx) {
   // The nearest sources are registry keys, so they open like any other.
   if (ev.nearest) rows.push(["Nearest", `<div class="srcs">${ev.nearest.map(k => citeChip(k)).join("")}</div>`]);
   if (!child && ctx.sources) rows.push(["Scope", `Chest pain only, ${fmt(ctx.sources)} sources.`]);
-  // NEW COPY, for Viraj: the closed line "Why there is no verdict".
-  h += `<div class="folds">` + fold("Why there is no verdict", "",
-    `<dl class="kv">${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`, { cls: "details-fold" }) +
+  // The closed Why row. Viraj's wording, final: "No verdict: Grounded only
+  // covers chest pain." It is said only of a plain out-of-scope refusal: a
+  // child's profile or a categorical exclusion (pregnancy) is refused for a
+  // different reason, so those rows carry no preview and the reason is inside.
+  const pv = child || ev.categorical ? "" : "No verdict: Grounded only covers chest pain.";
+  h += `<div class="folds">` + fold("Why", pv,
+    `<dl class="kv">${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`, { cls: "why-not" }) +
     (ev.timings ? checkedHTML(ev, ctx) : "") + `</div>`;
   return h;
 }
