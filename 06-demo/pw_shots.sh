@@ -68,8 +68,10 @@ async page => {
   }
   if (ids.answer !== "-") {
     await at(FIELD + "/c/" + ids.answer); await shot("04-answer"); await shot("04-answer", true);
-    if (await page.\$(".cite")) {
-      await page.click(".cite"); await page.waitForSelector("#sheet[open]"); await page.waitForTimeout(300);
+    // Sources are closed since the overhaul (2026-09-27): open them, as a person would.
+    if (await page.\$(".sources .cite")) {
+      await page.click(".sources [data-fold]"); await page.waitForTimeout(200); await shot("04-answer-sources");
+      await page.click(".sources .cite"); await page.waitForSelector("#sheet[open]"); await page.waitForTimeout(300);
       await shot("05-source");
     }
   }

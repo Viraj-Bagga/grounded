@@ -401,6 +401,10 @@ async function compare(out) {
   // suite, a matcher that matches nothing reported as a pass. It now finds a
   // raise to either level and FAILS when nothing was raised at all, because
   // R1 fires on Mum on every run measured on both models.
+  // Since the overhaul (2026-09-27) Why, Sources, Checked and the removals are
+  // closed. Open them, as a person would, before reading the side's text.
+  await p.eval(`document.querySelectorAll('#thread [data-fold][aria-expanded="false"]').forEach(b => b.click())`);
+  await sleep(200);
   const raise = await p.eval(`(() => {
     const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to (red|yellow)/.test(s.innerText));
     if (!side) return null;
@@ -439,8 +443,10 @@ async function compare(out) {
         !/What to do/.test(side.innerText) && !/Sources/.test(side.innerText);
     })()`) === true);
   } else if (raise && raise.level === "red") {
+    // The banner carries "Call emergency services now", so since the overhaul
+    // (2026-09-27) the app's first step is not repeated under it.
     check("a raised red shows the app's steps",
-      ["Call emergency services now.", "Do not drive yourself.", "Stay where you are."].every(t => raise.text.includes(t)), raise.text.slice(0, 300));
+      ["Call emergency services now", "Do not drive yourself.", "Stay where you are."].every(t => raise.text.includes(t)), raise.text.slice(0, 300));
     check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raise.text), raise.text.slice(0, 300));
   }
   // The half of constraint 16 that holds on EVERY raise, whichever level it
@@ -1486,9 +1492,14 @@ function pageAudit(phone) {
 
   // TRIAGE COLOURS ARE SIGNALS. Only an urgency bar and a history or register
   // mark may carry red, yellow or green, as text, fill or border.
-  const TRIAGE = ["rgb(200, 38, 29)", "rgb(242, 183, 5)", "rgb(28, 122, 67)"];
+  // The overhaul (2026-09-27) gave each verdict an ink, a dot and a pale tint.
+  // All of them are triage colours, and all of them live on the verdict panel.
+  const TRIAGE = ["rgb(200, 38, 29)", "rgb(242, 183, 5)", "rgb(28, 122, 67)",
+    "rgb(179, 38, 30)", "rgb(122, 80, 0)", "rgb(47, 107, 58)",
+    "rgb(211, 58, 44)", "rgb(229, 168, 0)", "rgb(63, 143, 78)",
+    "rgb(253, 235, 236)", "rgb(251, 243, 219)", "rgb(237, 243, 236)"];
   for (const el of document.querySelectorAll("body *")) {
-    if (el.closest(".bar, .mk") || away(el)) continue;
+    if (el.closest(".bar, .mk, .verdict") || away(el)) continue;
     const cs = getComputedStyle(el);
     const hit = [];
     if (TRIAGE.includes(cs.color) && [...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim())) hit.push("text");
@@ -1503,8 +1514,10 @@ function pageAudit(phone) {
   for (const b of document.querySelectorAll(".bar[role=heading]")) {
     const w = (b.querySelector(".w")?.innerText || "").trim();
     if (!/^(RED|YELLOW|GREEN|OUT OF SCOPE|NOT ASSESSED|WHO IS THIS FOR\?)$/.test(w)) out.words.push(`a bar says ${JSON.stringify(w)}`);
-    if (b.classList.contains("hold") && getComputedStyle(b).backgroundColor !== "rgb(86, 96, 108)")
-      out.hold.push(`${where(b)} ${getComputedStyle(b).backgroundColor}`);
+    // The grey is the verdict panel's tint since the overhaul, 2026-09-27.
+    const panel = b.closest(".verdict") || b;
+    if (b.classList.contains("hold") && getComputedStyle(panel).backgroundColor !== "rgb(239, 238, 234)")
+      out.hold.push(`${where(b)} ${getComputedStyle(panel).backgroundColor}`);
   }
   for (const m of document.querySelectorAll(".mk")) {
     if (away(m)) continue;

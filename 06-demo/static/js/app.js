@@ -762,7 +762,9 @@ function bindThread() {
     const t = e.target;
     const cite = t.closest(".cite");
     if (cite) return openChunk(cite.dataset.k);
-    const chk = t.closest(".checked");
+    // Checked, Why, Sources and the guard line all open the same way: the
+    // button names the panel it controls.
+    const chk = t.closest(".checked, [data-fold]");
     if (chk) {
       const d = document.getElementById(chk.getAttribute("aria-controls"));
       const open = chk.getAttribute("aria-expanded") !== "true";
