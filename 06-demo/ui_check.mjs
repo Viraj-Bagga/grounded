@@ -18,8 +18,12 @@
 //   node 06-demo/ui_check.mjs voice OUTDIR [URL]    the microphone, with a known WAV played into it
 //   node 06-demo/ui_check.mjs reread OUTDIR CID     a follow-up after a llama-server restart
 //   node 06-demo/ui_check.mjs review OUTDIR IDS     the finish review's screenshots (six ids, comma-separated)
+//   node 06-demo/ui_check.mjs rules OUTDIR [BASE]    the rules in 06-demo/CLAUDE.md, read off every screen
 //
 // Needs the demo server on 8770 and, for the live flows, llama-server on 8080.
+// FIELD_URL points it at a demo server on another port: on 2026-09-27 macOS's
+// own sharingd (Continuity) held *:8770, so server.py could not bind it and ran
+// with --port 8772 instead.
 // Every check prints PASS or FAIL; the exit code is the number of failures.
 
 import { spawn, execFileSync } from "node:child_process";
@@ -28,7 +32,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-let APP = "http://127.0.0.1:8770";
+let APP = (process.env.FIELD_URL || "http://127.0.0.1:8770").replace(/\/+$/, "");
 const PORT = 9333;
 const DESKTOP = { width: 1440, height: 900, mobile: false, deviceScaleFactor: 1 };
 const PHONE = { width: 390, height: 844, mobile: true, deviceScaleFactor: 2 };
@@ -1311,6 +1315,291 @@ async function packsFlow(out) {
   await p.close();
 }
 
+// THE RULES IN 06-demo/CLAUDE.md, READ OFF THE RENDERED PAGE rather than off
+// the CSS. Runs in the page, so it is written as an ordinary function and
+// handed over as its own source. One call reads one screen and returns what
+// broke, by rule; nothing here decides pass or fail.
+function pageAudit(phone) {
+  const W = innerWidth;
+  const out = { overflow: [], targets: [], fields: [], fieldEdge: [], contrast: [], motion: [], dashes: [],
+                colour: [], words: [], hold: [], cites: [], gone: 0, goneBad: [] };
+  const where = el => {
+    const cls = typeof el.className === "string" && el.className.trim()
+      ? "." + el.className.trim().split(/\s+/).join(".") : "";
+    const txt = (el.innerText || el.getAttribute("aria-label") || el.value || "").trim()
+      .replace(/\s+/g, " ").slice(0, 28);
+    return el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + cls + (txt ? ` "${txt}"` : "");
+  };
+  // Not on screen: visually hidden text, display:none, zero size, or an
+  // off-canvas drawer translated out of the viewport.
+  const away = el => {
+    if (el.closest(".sr")) return true;
+    const cs = getComputedStyle(el);
+    if (cs.visibility === "hidden" || cs.display === "none") return true;
+    const r = el.getBoundingClientRect();
+    return !r.width || !r.height || r.right <= 0 || r.left >= W;
+  };
+
+  // 390 WIDE WITH NOTHING SIDEWAYS. The page itself must not scroll across;
+  // a table or a pre that scrolls inside its own box is allowed to.
+  if (phone && document.documentElement.scrollWidth > W + 1) {
+    const inScroller = e => { for (let a = e.parentElement; a; a = a.parentElement)
+      if (/(auto|scroll|hidden)/.test(getComputedStyle(a).overflowX)) return true; return false; };
+    const wide = [...document.querySelectorAll("body *")].filter(e => !away(e)
+      && e.getBoundingClientRect().right > W + 1 && !inScroller(e));
+    out.overflow.push(`page is ${document.documentElement.scrollWidth}px wide: `
+      + wide.slice(0, 3).map(where).join(", "));
+  }
+
+  // 44 BY 44 FOR ANYTHING A THUMB LANDS ON. A link in running text is exempt,
+  // as WCAG 2.5.8 exempts it: its size is the line's. A checkbox is measured by
+  // the label around it, which is what takes the tap.
+  for (const el of document.querySelectorAll(
+    "a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab]")) {
+    if (away(el)) continue;
+    if (el.tagName === "A" && getComputedStyle(el).display === "inline") continue;
+    const box = el.matches("input[type=checkbox], input[type=radio]") && el.closest("label")
+      ? el.closest("label") : el;
+    const r = box.getBoundingClientRect();
+    if (r.width < 43.5 || r.height < 43.5)
+      out.targets.push(`${where(el)} ${Math.round(r.width)}x${Math.round(r.height)}`);
+  }
+
+  // 16PX IN EVERY FIELD, or iOS Safari zooms the page when it takes focus.
+  for (const el of document.querySelectorAll(
+    "input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea")) {
+    if (away(el)) continue;
+    const fs = parseFloat(getComputedStyle(el).fontSize);
+    if (fs < 16) out.fields.push(`${where(el)} ${fs}px`);
+  }
+
+  // WCAG AA. The background is the stack of fills behind the text, blended;
+  // a hatch counts as its fill colour, which it only ever darkens. Disabled
+  // controls are exempt, as WCAG exempts them.
+  const rgb = s => {
+    const m = String(s).match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const v = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 };
+  };
+  const mix = (top, under) => ({ r: top.r * top.a + under.r * (1 - top.a),
+    g: top.g * top.a + under.g * (1 - top.a), b: top.b * top.a + under.b * (1 - top.a), a: 1 });
+  const lum = c => [c.r, c.g, c.b].map(v => (v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+    .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const bgOf = el => {
+    const layers = [];
+    for (let e = el; e; e = e.parentElement) {
+      const c = rgb(getComputedStyle(e).backgroundColor);
+      if (c && c.a > 0) { layers.push(c); if (c.a >= 1) break; }
+    }
+    return layers.reverse().reduce((under, top) => mix(top, under), { r: 255, g: 255, b: 255, a: 1 });
+  };
+  const seen = new Set();
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = walk.nextNode());) {
+    const el = n.parentElement;
+    if (!n.nodeValue.trim() || !el || seen.has(el)) continue;
+    seen.add(el);
+    if (away(el) || el.closest(":disabled, [aria-disabled=true], option, script, style")) continue;
+    const cs = getComputedStyle(el);
+    const bg = bgOf(el);
+    let op = 1;
+    for (let e = el; e; e = e.parentElement) op *= +getComputedStyle(e).opacity;
+    const fg = mix({ ...mix(rgb(cs.color), bg), a: op }, bg);
+    const size = parseFloat(cs.fontSize), weight = +cs.fontWeight || 400;
+    const need = size >= 24 || (size >= 18.66 && weight >= 700) ? 3 : 4.5;
+    const r = ratio(fg, bg);
+    if (r < need) out.contrast.push(`${where(el)} ${r.toFixed(2)}:1, needs ${need}`);
+  }
+
+  // A FIELD CAN BE FOUND. WCAG 1.4.11: what identifies a text field has to
+  // stand 3:1 against what is next to it. That is its fill against the ground
+  // around it, or an edge against both the ground and the fill. A token field
+  // is judged as the box around its input. Disabled fields are exempt.
+  for (const el of document.querySelectorAll(
+    "input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea")) {
+    if (away(el) || el.disabled) continue;
+    const box = el.closest(".tokens") || el;
+    const cs = getComputedStyle(box);
+    const ground = bgOf(box.parentElement);
+    const fill = mix(rgb(cs.backgroundColor) || { r: 0, g: 0, b: 0, a: 0 }, ground);
+    const edges = ["Top", "Right", "Bottom", "Left"].filter(s => parseFloat(cs[`border${s}Width`]) >= 1
+      && cs[`border${s}Style`] !== "none")
+      .map(s => { const c = mix(rgb(cs[`border${s}Color`]), fill); return Math.min(ratio(c, ground), ratio(c, fill)); });
+    const best = Math.max(ratio(fill, ground), ...edges, 0);
+    if (best < 3) out.fieldEdge.push(`${where(box)} ${best.toFixed(2)}:1`);
+  }
+
+  // NOTHING MOVES WHEN THE PERSON HAS ASKED FOR LESS MOTION. Read with the
+  // page emulating prefers-reduced-motion: reduce.
+  for (const el of document.querySelectorAll("*")) {
+    const cs = getComputedStyle(el);
+    const t = Math.max(...cs.transitionDuration.split(",").map(parseFloat));
+    const a = cs.animationName === "none" ? 0 : Math.max(...cs.animationDuration.split(",").map(parseFloat));
+    if (t > 0.01 || a > 0.01)
+      out.motion.push(`${where(el)} transition ${cs.transitionDuration}, animation ${cs.animationName} ${cs.animationDuration}`);
+  }
+
+  // NO EM DASH IN THE COPY, the page title included.
+  const text = `${document.title}\n${document.body.innerText}`;
+  for (let i = text.indexOf("\u2014"); i >= 0; i = text.indexOf("\u2014", i + 1))
+    out.dashes.push(JSON.stringify(text.slice(Math.max(0, i - 30), i + 30).replace(/\s+/g, " ")));
+
+  // TRIAGE COLOURS ARE SIGNALS. Only an urgency bar and a history or register
+  // mark may carry red, yellow or green, as text, fill or border.
+  const TRIAGE = ["rgb(200, 38, 29)", "rgb(242, 183, 5)", "rgb(28, 122, 67)"];
+  for (const el of document.querySelectorAll("body *")) {
+    if (el.closest(".bar, .mk") || away(el)) continue;
+    const cs = getComputedStyle(el);
+    const hit = [];
+    if (TRIAGE.includes(cs.color) && [...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim())) hit.push("text");
+    if (TRIAGE.includes(cs.backgroundColor)) hit.push("fill");
+    if (["Top", "Right", "Bottom", "Left"].some(s => parseFloat(cs[`border${s}Width`]) > 0
+      && TRIAGE.includes(cs[`border${s}Color`]))) hit.push("border");
+    if (hit.length) out.colour.push(`${where(el)} ${hit.join("+")}`);
+  }
+
+  // EVERY RESULT HAS ITS WORD, never colour alone, and a refusal is the
+  // neutral grey, never a fourth category.
+  for (const b of document.querySelectorAll(".bar[role=heading]")) {
+    const w = (b.querySelector(".w")?.innerText || "").trim();
+    if (!/^(RED|YELLOW|GREEN|OUT OF SCOPE|NOT ASSESSED|WHO IS THIS FOR\?)$/.test(w)) out.words.push(`a bar says ${JSON.stringify(w)}`);
+    if (b.classList.contains("hold") && getComputedStyle(b).backgroundColor !== "rgb(86, 96, 108)")
+      out.hold.push(`${where(b)} ${getComputedStyle(b).backgroundColor}`);
+  }
+  for (const m of document.querySelectorAll(".mk")) {
+    if (away(m)) continue;
+    const said = (m.innerText || "").trim() || m.getAttribute("title") || m.querySelector(".sr")?.textContent || "";
+    if (!said.trim()) out.words.push(`${where(m)} has no word`);
+  }
+
+  // EVERY CITATION IS A BUTTON THAT NAMES ITS KEY. Opening one is checked by
+  // the caller, with a real click.
+  for (const c of document.querySelectorAll(".cite")) {
+    if (away(c)) continue;
+    if (c.tagName !== "BUTTON" || !c.dataset.k || c.disabled) out.cites.push(where(c));
+  }
+
+  // A GUARD REMOVAL STAYS VISIBLE: struck through, with the reason beside it
+  // or on the head line of the list it belongs to.
+  for (const g of document.querySelectorAll(".gone")) {
+    if (away(g)) continue;
+    out.gone++;
+    const reason = g.querySelector(".tag") || g.closest("ul")?.previousElementSibling?.querySelector(".tag");
+    if (!g.querySelector("s") || !reason || !/removed/.test(reason.innerText)) out.goneBad.push(where(g));
+  }
+  return out;
+}
+
+async function rulesFlow(out, baseUrl) {
+  const BASE = (baseUrl || "http://127.0.0.1:8781").replace(/\/+$/, "");
+  const p = await tab();
+  await p.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  await p.size(DESKTOP);
+  await p.go("/");
+  // The saved assessments the other modes leave behind: an answer, a pair, a
+  // refusal and a child's profile. Newest first, so a suite reads its own.
+  const convs = JSON.parse(await p.eval(`fetch("/api/conversations").then(r => r.json())
+    .then(j => JSON.stringify(j.conversations))`));
+  const answered = s => ["red", "yellow", "green"].includes(s.state);
+  const find = f => (convs.find(f) || {}).id;
+  const ids = {
+    answer: find(c => c.sides.length === 1 && answered(c.sides[0])),
+    pair: find(c => c.sides.length === 2 && c.sides.every(answered)),
+    refusal: find(c => c.sides.some(s => s.state === "refused")),
+    child: find(c => c.sides.some(s => s.state === "child")),
+  };
+  for (const [k, v] of Object.entries(ids)) if (!v) console.log(`      NOTE no saved ${k} to read: run flow, compare and guards first`);
+  let baseUp = false;
+  try { baseUp = !!(await (await fetch(`${BASE}/api/health`)).json()).ok; } catch { /* down */ }
+  if (!baseUp) console.log(`      NOTE base is not running at ${BASE}, so its pages were not read`);
+
+  // [name, path or url, what to press first, what to wait for, which width only]
+  const screens = [
+    ["new", "/"],
+    ["picker", "/", "#forwho", "#picker[open]"],
+    ["drawer", "/", "#menu", ".side.open", "phone"],
+    ...(ids.answer ? [["answer", `/c/${ids.answer}`],
+      ["details", `/c/${ids.answer}`, ".checked", ".details:not([hidden])"],
+      ["source", `/c/${ids.answer}`, ".cite", "#sheet[open]"]] : []),
+    ...(ids.pair ? [["compare", `/c/${ids.pair}`]] : []),
+    ...(ids.refusal ? [["refusal", `/c/${ids.refusal}`]] : []),
+    ...(ids.child ? [["not-assessed", `/c/${ids.child}`]] : []),
+    ["people", "/people"],
+    ["person", "/people/mum", null, ".preview .w-rule"],
+    ["person-new", "/people/new"],
+    ["caseload", "/queue"],
+    ["sync", "/sync"],
+    ["regions", "/regions"],
+    ...(baseUp ? [["base", `${BASE}/`], ["base-assessment", `${BASE}/`, ".ttl", ".det"]] : []),
+  ];
+
+  // ONE NAVIGATION IN A FEW NEVER FINISHES, and nothing about the page explains
+  // it: on 2026-09-27 the phone "details" screen sat on "Loading…" for the full
+  // 180 s, with the server, both llama slots and the node idle, and passed on
+  // the next run. claude.md records the same hang for drop. So a page gets 20 s,
+  // then one more navigation, and the second attempt is printed, not hidden.
+  // Base marks loading with .fine; the field app with .loading.
+  const visit = async url => {
+    const ready = url.startsWith(APP)
+      ? "document.readyState === 'complete' && !document.querySelector('.loading')"
+      : "document.readyState === 'complete' && !document.querySelector('.fine')";
+    for (let attempt = 1; ; attempt++) {
+      await p.send("Page.navigate", { url });
+      try { await p.until(ready, 20000); break; }
+      catch (e) {
+        if (attempt === 2) throw e;
+        console.log(`      NOTE ${url} had not finished loading after 20 s; navigating to it again`);
+      }
+    }
+    await sleep(350);
+  };
+  for (const [dev, size] of [["phone", PHONE], ["desktop", DESKTOP]]) {
+    await p.size(size);
+    const found = {};
+    for (const [name, at, press, wait, only] of screens) {
+      if (only && only !== dev) continue;
+      await visit(at.startsWith("http") ? at : APP + at);
+      if (press) {
+        if (!(await p.count(press))) { console.log(`      NOTE ${dev} ${name}: nothing matches ${press}`); continue; }
+        await p.click(press);
+      }
+      if (wait) await p.until(`document.querySelector(${JSON.stringify(wait)})`, 15000);
+      await sleep(300);
+      const a = await p.eval(`(${pageAudit})(${dev === "phone"})`);
+      for (const [k, v] of Object.entries(a)) {
+        if (Array.isArray(v)) (found[k] ||= []).push(...v.map(x => `${name}: ${x}`));
+        else found[k] = (found[k] || 0) + v;
+      }
+      if (name === "source") {
+        check(`${dev}: a citation opens its source, with a link out`,
+          (await p.text("#sheet-body")).length > 40 && await p.count("#sheet-foot a[href^='http']") === 1);
+      }
+      await p.shot(join(out, `${dev}-${name}.png`));
+    }
+    writeFileSync(join(out, `rules-${dev}.json`), JSON.stringify(found, null, 1));
+    const rule = (k, label) => {
+      const v = found[k] || [];
+      check(`${dev}: ${label}`, !v.length, v.slice(0, 8).join("; ") + (v.length > 8 ? `; and ${v.length - 8} more` : ""));
+    };
+    if (dev === "phone") rule("overflow", "nothing scrolls sideways at 390px");
+    rule("targets", "every control is at least 44px");
+    rule("fields", "every field's text is at least 16px");
+    rule("fieldEdge", "every field has an edge or fill that stands 3:1 (WCAG 1.4.11)");
+    rule("contrast", "all text meets WCAG AA contrast");
+    rule("motion", "nothing moves under prefers-reduced-motion");
+    rule("dashes", "no em dash anywhere in the copy");
+    rule("colour", "triage colours appear only in urgency bars and marks");
+    rule("words", "every urgency bar and mark carries a word");
+    rule("hold", "refusals are the neutral grey");
+    rule("cites", "every citation is a button with its key");
+    if (found.gone) rule("goneBad", `every removal is struck through with its reason (${found.gone} on screen)`);
+    else console.log(`      NOTE ${dev}: no guard removals in the saved answers, so that rule was not exercised`);
+  }
+  await p.close();
+}
+
 const [mode, out = ".", arg, arg2] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 // Only the voice check needs an AudioContext that runs without a click.
@@ -1319,7 +1608,7 @@ const chrome = await launch(mode === "voice"
   ? ["--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] : []);
 try {
   const run = { shots, flow, compare, guards, people, "two-tabs": twoTabs, reread, review, drop,
-                regions, phone, voice, packs: packsFlow, queue, sync: syncFlow, base }[mode];
+                regions, phone, voice, packs: packsFlow, queue, sync: syncFlow, base, rules: rulesFlow }[mode];
   if (!run) throw new Error(`unknown mode ${mode}`);
   await run(out, arg, arg2);
 } catch (e) {

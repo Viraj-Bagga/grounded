@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "rgb(0 0 0 / .24)",
+        "createdAt": "2026-09-27T17:52:46.431Z",
+        "reason": "Documented in 06-demo/DESIGN.md Shapes: the refusal hatch is black at 24% over hold, part of Grounded's design since before 2026-09-27; the hook's palette parser reads hex colours only"
+      }
+    ]
+  }
+}

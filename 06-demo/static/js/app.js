@@ -324,7 +324,7 @@ function showNew() {
   S.picked = S.picked.filter(byId);
   if (!S.picked.length) S.picked = [NOBODY.id];
   S.conv = null; S.live = {}; S.liveSaid = null;
-  document.title = "New assessment · Triage";
+  document.title = "New assessment · Grounded";
   renderHistory();
   const compareHint = S.compare && S.picked.filter(byId).length < 2
     ? `<div class="notice">${icon("compare")}<span>Pick a second person to compare them.</span></div>` : "";
@@ -658,7 +658,7 @@ function renderConversation() {
   const conv = S.conv;
   const pair = conv.sides.length === 2;
   renderHistory();
-  document.title = `${conv.title || "Assessment"} · Triage`;
+  document.title = `${conv.title || "Assessment"} · Grounded`;
 
   const n = Math.max(...conv.sides.map(s => s.turns.length));
   const whoSaid = `For ${conv.sides.map(s => s.profile.label === "You" ? "you" : s.profile.label).join(" and ")}`;
@@ -671,12 +671,12 @@ function renderConversation() {
     h += turnHTML(conv.sides.map((s, k) => s.turns[i]
       ? answerHTML(s.turns[i].event ? { event: s.turns[i].kind, ...s.turns[i].event } : { event: "error", message: "missing" },
         sideCtx(s, s.turns[i]))
-      : ""), pair, conv);
+      : ""), pair, conv, `t${i}`);
   }
   const lastSaid = n ? conv.sides.map(s => s.turns[n - 1]).find(Boolean).text : null;
   if (S.liveSaid && S.liveSaid.text !== lastSaid) h += saidHTML(S.liveSaid.text, S.liveSaid.timeline, whoSaid, S.liveSaid.at);
   if (Object.keys(S.live).length) {
-    h += `<div id="live">${turnHTML(conv.sides.map((s, k) => `<div data-live="${k}">${liveHTML(k)}</div>`), pair, conv)}</div>`;
+    h += `<div id="live">${turnHTML(conv.sides.map((s, k) => `<div data-live="${k}">${liveHTML(k)}</div>`), pair, conv, "live")}</div>`;
   }
   if (n && !Object.keys(S.live).length) {
     h += `<div class="export"><a class="link-a" href="/api/conversations/${encodeURIComponent(conv.id)}/soap.txt"` +
@@ -710,14 +710,29 @@ const saidHTML = (text, tl, who, at) => `<div class="said">` +
   `<div class="words">${esc(text)}</div>` +
   (tl ? `<div class="tl"><b>Timeline</b><span>${esc(tl)}</span></div>` : "") + `</div>`;
 
-function turnHTML(parts, pair, conv) {
+// A comparison below 60rem: two tabs and two panels. `key` names the turn, so
+// each turn's tabs point at its own panels.
+function turnHTML(parts, pair, conv, key = "t") {
   if (!pair) return `<div class="turn">${parts[0]}</div>`;
-  const tabs = `<div class="tabs" role="tablist">${conv.sides.map((s, k) =>
-    `<button class="chip" type="button" role="tab" data-tab="${k}" aria-pressed="${k === 0}">` +
+  const id = k => `${key}-${k}`;
+  const tabs = `<div class="tabs" role="tablist" aria-label="Whose answer">${conv.sides.map((s, k) =>
+    `<button type="button" role="tab" id="tab-${id(k)}" aria-controls="side-${id(k)}" data-tab="${k}"` +
+    ` aria-selected="${k === 0}" tabindex="${k === 0 ? 0 : -1}">` +
     `<span class="ab">${"AB"[k]}</span>${esc(s.profile.label)}</button>`).join("")}</div>`;
   return `<div class="turn pair">${tabs}${parts.map((p, k) =>
-    `<div class="side-ans" data-side="${k}" ${k === 0 ? "" : "hidden"}><div class="who"><span class="ab">${"AB"[k]}</span>` +
+    `<div class="side-ans" role="tabpanel" id="side-${id(k)}" aria-labelledby="tab-${id(k)}" data-side="${k}"` +
+    ` ${k === 0 ? "" : "hidden"}><div class="who"><span class="ab">${"AB"[k]}</span>` +
     `${esc(conv.sides[k].profile.label)}</div>${p}</div>`).join("")}</div>`;
+}
+
+function selectTab(tab) {
+  const turn = tab.closest(".turn");
+  turn.querySelectorAll("[data-tab]").forEach(b => {
+    const on = b === tab;
+    b.setAttribute("aria-selected", on);
+    b.tabIndex = on ? 0 : -1;
+  });
+  turn.querySelectorAll(".side-ans").forEach(s => s.hidden = s.dataset.side !== tab.dataset.tab);
 }
 
 function liveHTML(k) {
@@ -729,6 +744,18 @@ function liveHTML(k) {
 
 function bindThread() {
   const thread = $("#thread");
+  // Arrow keys move between the two tabs, as a tab list should.
+  thread.onkeydown = e => {
+    const tab = e.target.closest("[role=tab]");
+    if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    const all = [...tab.closest("[role=tablist]").querySelectorAll("[role=tab]")];
+    const i = all.indexOf(tab);
+    const next = e.key === "Home" ? all[0] : e.key === "End" ? all[all.length - 1]
+      : all[(i + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length];
+    e.preventDefault();
+    selectTab(next);
+    next.focus();
+  };
   thread.onclick = e => {
     const t = e.target;
     const cite = t.closest(".cite");
@@ -752,12 +779,7 @@ function bindThread() {
       return;
     }
     const tab = t.closest("[data-tab]");
-    if (tab) {
-      const turn = tab.closest(".turn");
-      turn.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-pressed", b === tab));
-      turn.querySelectorAll(".side-ans").forEach(s => s.hidden = s.dataset.side !== tab.dataset.tab);
-      return;
-    }
+    if (tab) return selectTab(tab);
     const liveEl = t.closest("[data-live]");
     if (t.closest("[data-raw-toggle]") && liveEl) {
       const k = +liveEl.dataset.live, p = S.live[k];
@@ -973,7 +995,7 @@ function packProgress(r) {
   if (job && job.running) {
     const pct = job.total ? Math.round((100 * job.done) / job.total) : 0;
     return `<div class="dl">
-      <div class="bar" role="progressbar" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>
+      <div class="meter" role="progressbar" aria-label="Download" aria-valuenow="${pct}"><span style="transform:scaleX(${pct / 100})"></span></div>
       <p class="sm">${bytes(job.done)} of ${bytes(job.total)} \u00b7
         ${fmt(job.files.length)} of ${fmt(job.nfiles)} files hashed from disk</p>
       ${job.files.length ? `<ul class="dl-f">${job.files.slice(-6).map(f =>
@@ -1033,7 +1055,7 @@ async function loadRegions() {
 
 async function showRegions() {
   S.conv = null;
-  document.title = "Regions \u00b7 Triage";
+  document.title = "Regions \u00b7 Grounded";
   await loadRegions();
   renderHistory();
   const active = S.regions.find(r => r.id === S.region);
@@ -1139,7 +1161,7 @@ function renderRegionRow() {
 // the assessment to their caseload entry, so Mark seen is the only thing left.
 async function showQueue() {
   S.conv = null;
-  document.title = "Caseload · Triage";
+  document.title = "Caseload · Grounded";
   await refreshLists();
   $("#main").innerHTML = queueHTML(S.queue, S.people, S.flash);
   S.flash = null;
@@ -1174,7 +1196,7 @@ async function showQueue() {
 // sent until the button is pressed: see sync.js.
 async function showSync() {
   S.conv = null;
-  document.title = "Send to base · Triage";
+  document.title = "Send to base · Grounded";
   await refreshLists();
   paintSync();
 }
@@ -1213,7 +1235,7 @@ function paintSync() {
 
 async function showPeople() {
   S.conv = null;
-  document.title = "People · Triage";
+  document.title = "People · Grounded";
   const p = await api.people();
   S.people = p.people;
   renderHistory();
@@ -1230,7 +1252,7 @@ async function showPersonForm(id) {
     catch { return go("/people", true); }
   }
   const count = id ? S.convs.filter(c => c.sides.some(s => s.person_id === id)).length : 0;
-  document.title = `${id ? `Edit ${person.label}` : "Add person"} · Triage`;
+  document.title = `${id ? `Edit ${person.label}` : "Add person"} · Grounded`;
   $("#main").innerHTML = personFormHTML(person, !id, count);
   bindPersonForm($("#main"), person, !id, {
     go, openChunk,

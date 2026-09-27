@@ -1,0 +1,105 @@
+2026-09-27 UI polish of 06-demo under the rules now in 06-demo/CLAUDE.md
+config:  llama-server TUNED-120pairs-imatrix-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192;
+         field app on 8772 (see PORT below); base on 8781; distribution node on 8790
+build:   main at 9001af8, every change below uncommitted
+choices: Viraj, 2026-09-27: take Carbon's STRUCTURE only (square corners, 1px
+         hairlines, 4px grid, bottom-rule fields, line tabs); rename the visible
+         brand to Grounded; save the rules as 06-demo/CLAUDE.md.
+
+PORT. macOS's own sharingd (Continuity, with live connections from a nearby
+device) held *:8770 today, so server.py could not bind it. The demo ran with
+--port 8772 and ui_check.mjs now takes FIELD_URL. `python 06-demo/server.py`
+on its default port will fail the same way while sharingd holds 8770.
+
+=== 0 baseline (results/2026-09-27-polish-0-baseline)
+Before any UI change. 6 self-tests and 11 of 12 modes passed. regions failed
+because it needs the India pack installed or the node on 8790 to install it
+from, and neither was the case; with the node up it passed 10/10. Setup, not
+the product.
+The new rules mode, run on the untouched UI, failed 7 checks: 59 undersized
+targets across the phone screens and 110 across desktop (a control counts once
+per screen it is on), motion that ignored reduced motion (drawer,
+chevron), one separator at 1.83:1 on base, and em dashes in base's register.
+
+=== 1 rules (results/2026-09-27-polish-1-rules)
+- 44px: citation chips, the Answer button, the for-who line, question actions,
+  text actions, the SOAP link, the source URL, sidebar rows, the Checked line,
+  token remove buttons, checkbox labels; at base the switcher, links, titles.
+- One reduced-motion rule for everything, replacing two per-component ones.
+- Base: "None" in place of the em dash in empty cells; separator to ink-3.
+- Triage red out of two places it did not belong: the refused line in the
+  send-to-base log and the caseload remove button's hover. Both ink now.
+- The compare A/B tabs were bare browser buttons: their .chip rule had gone
+  with the chip row. Styled.
+- Brand: Triage to Grounded in both page titles, both brand marks and all
+  seven route titles. PRODUCT.md records the name.
+Suite: 6 self-tests, 13 modes, 143 PASS, 0 FAIL.
+
+A rule added after batch 1 then found every field below WCAG 1.4.11: field
+edges were rule-2, 1.83:1 on paper. Batch 2 fixes it.
+
+=== 2 carbon (results/2026-09-27-polish-2-carbon)
+- Every corner 0 (controls were 6px, tags 3px, the sheet 14px).
+- Control edges 1px (were 1.5px). State patterns unchanged.
+- Fields: chrome fill, paper on a well, one bottom rule in a new --edge
+  #7b8490 (3.79 on paper, 3.44 on chrome, 3.23 in a well), 2px action focus
+  drawn inside, ink for errors.
+- Line tabs for compare, selected in ink, with real tab semantics
+  (aria-selected, roving tabindex, arrow keys, tabpanels).
+- Content switcher (1px ink frame), checkboxes ticked in ink, the microphone
+  as a ghost icon button, tokens as square paper chips at 44px.
+Suite: 145 PASS, 0 FAIL (the two new field-edge checks included).
+
+=== 3 grid (results/2026-09-27-polish-3-grid)
+Every padding, margin and gap on the 4px grid: 99 lines moved, each listed in
+changes.txt. Ties went up (6 to 8, 10 to 12, 14 to 16, 18 to 20). A field's
+line and a numbered step's first line are centred by calc() instead.
+Suite: 145 PASS, 0 FAIL.
+
+=== 4 spec (results/2026-09-27-polish-4-spec)
+- DESIGN.md is Grounded's spec again: the named rules from HEAD, plus what
+  Carbon changed, plus four new named rules (Findable Field, 44px, Less Motion,
+  and the triage-red fixes under One Saturated Field). IBM's analysis, which
+  was in DESIGN.md uncommitted, is kept whole as CARBON-REFERENCE.md.
+- Three 1px offsets onto Carbon's 2px step; one inline 14px margin to 16px.
+- The person form said the profile the model reads "is the panel on the
+  right". On a phone it is underneath, so it now names the panel's heading.
+Suite: 145 PASS, 0 FAIL.
+
+=== 5 hook (results/2026-09-27-polish-5-hook)
+From the design hook's last review:
+- The pack download bar animated width, and it carried the class .bar, which is
+  the urgency bar's, so it inherited a 52px least height and bleed margins.
+  Now .meter, filled by transform: scaleX, with the aria-label a progressbar
+  needs. Checked by rendering it into the page: 8px tall, 40% filled at 0.4.
+- The selection colour #c7d2f4 is a token (--selection) and in DESIGN.md.
+- The hatch's rgb(0 0 0 / .24) is recorded as a hook exception in
+  06-demo/.impeccable/config.json, because DESIGN.md already documents it.
+Suite: 145 PASS, 0 FAIL.
+
+=== data the runs left behind
+Five suite runs made real assessments. 06-demo/data now holds 60 saved
+assessments (0 before), a caseload entry, 55 "sent" records, and the India pack
+installed on this device; base-data holds what was sent. The Regions demo
+starts from an empty 06-demo/data/packs. Not reset, because it deletes data.
+
+=== tools added, all in 06-demo
+- ui_check.mjs rules: the CLAUDE.md rules read off 17 screens at 390 and
+  1440, with reduced motion on. Runs last in the suite.
+- suite.sh: the offline self-tests and all 13 modes, one at a time, waiting
+  for both llama slots to be idle, re-running drop alone if it fails.
+- pw_shots.sh: the playwright-cli screenshots at 1440x900 and as an iPhone 15.
+  Long pages are cut at 16000 device pixels, where Chromium starts repeating
+  the page, and the output says where.
+
+=== open, not done
+- One navigation in the rules mode sat on "Loading..." for 180 s on its first
+  run and passed on the next. Same symptom as the drop flake in claude.md.
+  The rules mode now retries once after 20 s and prints a NOTE when it does.
+  No NOTE appeared in any of the four suite runs.
+- Copy for Viraj to put in his own voice: "None" in empty base cells, the
+  rewritten person-form line, the tabs' screen-reader label "Whose answer",
+  and the prose in DESIGN.md.
+- .impeccable/design.json predates the new DESIGN.md.
+- README.md, outside 06-demo, still says Triage. build-log.md was not
+  touched, because the rules keep this work inside 06-demo.

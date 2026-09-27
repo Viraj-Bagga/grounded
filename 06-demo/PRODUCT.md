@@ -34,7 +34,7 @@ A small model on the device, wrapped in deterministic app-logic guards it cannot
 - Urgency uses the three WHO categories only. A refusal, the not-grounded note, rule lines and guard removals are never shown in a triage colour.
 - A red verdict carries no follow-up questions (claude.md hard constraint 4).
 - Follow-up turns reuse the first turn's retrieved chunks, and the system prompt and chunks stay byte-identical so the llama.cpp prefix cache hits.
-- Undecided: the product name. A neutral placeholder stands in and is on the replacement list.
+- The product name is Grounded, Viraj's call 2026-09-27. It replaced the placeholder "Triage" in the field app and at base; the README outside 06-demo still says Triage.
 
 ## Brand Commitments
 

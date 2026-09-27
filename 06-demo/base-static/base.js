@@ -43,7 +43,7 @@ const isToday = iso => {
 const whenCell = iso => iso
   ? (isToday(iso) ? `<span class="t">${esc(hhmm(iso))}</span>`
     : `<span class="d">${esc(dt(iso).toLocaleDateString([], { day: "numeric", month: "short" }))}</span><span class="t">${esc(hhmm(iso))}</span>`)
-  : `<span class="t">—</span>`;
+  : `<span class="t none-mark">None</span>`;
 
 // Every mark carries its word as visually hidden text: the letter alone is not
 // the verdict.
@@ -64,7 +64,7 @@ function attention(r) {
     if (s.raised) t.push(`<span class="tg box">raised to ${esc(s.state || "")}</span>`);
     if (s.removed) t.push(`<span class="tg removed">${s.removed} removed</span>`);
   }
-  return t.length ? t.join("") : `<span class="none-dash">—</span>`;
+  return t.length ? t.join("") : `<span class="none-mark">None</span>`;
 }
 
 const people = r => r.sides.map(s => esc(s.label)).join(" and ");

@@ -1,0 +1,16 @@
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved 06-demo/results/2026-09-27-polish-0-baseline/regions-with-node/desktop-regions.png
+PASS  india installs from the distribution node before it can be chosen
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved 06-demo/results/2026-09-27-polish-0-baseline/regions-with-node/desktop-regions-india.png
+      assessment for a citation: 11.6 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved 06-demo/results/2026-09-27-polish-0-baseline/regions-with-node/desktop-region-annotation.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/regions-with-node/mobile-regions.png
+PASS  the check leaves the base corpus selected, as it found it
+PASS  the sidebar is back to Base only
+all passed

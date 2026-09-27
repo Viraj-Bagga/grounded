@@ -1,0 +1,57 @@
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-new.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-picker.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-drawer.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-answer.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-details.png
+PASS  phone: a citation opens its source, with a link out
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-source.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-compare.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-refusal.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-not-assessed.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-people.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-person.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-person-new.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-caseload.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-sync.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-regions.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-base.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/phone-base-assessment.png
+PASS  phone: nothing scrolls sideways at 390px
+FAIL  phone: every control is at least 44px  (new: button#forwho.forwho "For No profile" 115x36; new: button#tl-toggle.link-btn "Add when it started" 116x25; picker: button#forwho.forwho "For No profile" 115x36; picker: button#tl-toggle.link-btn "Add when it started" 116x25; drawer: a#queue-link.foot-link "Caseload Empty" 279x39; drawer: a#sync-link.foot-link.has-waiting "Send to base 1 to send" 279x39; drawer: a#people-link.foot-link "People 6" 279x39; drawer: a#region-link.foot-link "Region Base only" 279x39; and 51 more)
+PASS  phone: every field's text is at least 16px
+FAIL  phone: all text meets WCAG AA contrast  (base: span.sep "·" 1.83:1, needs 4.5; base: span.sep "·" 1.83:1, needs 4.5; base: span.sep "·" 1.83:1, needs 4.5)
+FAIL  phone: nothing moves under prefers-reduced-motion  (new: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; picker: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; drawer: nav#side.side.open "Triage New assessment Today " transition 0.16s, animation none 0s; answer: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; answer: span.chev transition 0.16s, animation none 0s; details: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; details: span.chev transition 0.16s, animation none 0s; source: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; and 12 more)
+PASS  phone: no em dash anywhere in the copy
+PASS  phone: triage colours appear only in urgency bars and marks
+PASS  phone: every urgency bar and mark carries a word
+PASS  phone: refusals are the neutral grey
+PASS  phone: every citation is a button with its key
+      NOTE phone: no guard removals in the saved answers, so that rule was not exercised
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-new.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-picker.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-answer.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-details.png
+PASS  desktop: a citation opens its source, with a link out
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-source.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-compare.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-refusal.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-not-assessed.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-people.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-person.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-person-new.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-caseload.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-sync.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-regions.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-base.png
+      saved 06-demo/results/2026-09-27-polish-0-baseline/rules/desktop-base-assessment.png
+FAIL  desktop: every control is at least 44px  (new: a#queue-link.foot-link "Caseload Empty" 279x42; new: a#sync-link.foot-link.has-waiting "Send to base 1 to send" 279x42; new: a#people-link.foot-link "People 6" 279x42; new: a#region-link.foot-link "Region Base only" 279x42; new: button#forwho.forwho "For No profile" 124x36; new: button#tl-toggle.link-btn "Add when it started" 130x27; picker: a#queue-link.foot-link "Caseload Empty" 279x42; picker: a#sync-link.foot-link.has-waiting "Send to base 1 to send" 279x42; and 102 more)
+PASS  desktop: every field's text is at least 16px
+FAIL  desktop: all text meets WCAG AA contrast  (base: span.sep "·" 1.83:1, needs 4.5; base: span.sep "·" 1.83:1, needs 4.5; base: span.sep "·" 1.83:1, needs 4.5)
+FAIL  desktop: nothing moves under prefers-reduced-motion  (new: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; picker: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; answer: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; answer: span.chev transition 0.16s, animation none 0s; details: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; details: span.chev transition 0.16s, animation none 0s; source: nav#side.side "Triage New assessment Today " transition 0.16s, animation none 0s; source: span.chev transition 0.16s, animation none 0s; and 11 more)
+FAIL  desktop: no em dash anywhere in the copy  (base: " sick and I am sweating. You — MacBook-Air-77 13:10 Mar"; base: " sick and I am sweating. Mum — MacBook-Air-77 13:08 Mar"; base: " when I breathe in. Aunt Sue — MacBook-Air-77 13:11 Mar"; base: "it eased when I stopped. Dad — MacBook-Air-77 13:12 Mar"; base: "it eased when I stopped. Dad — MacBook-Air-77 13:09 Mar"; base: "spread to my jaw. No profile — MacBook-Air-77 13:10 Re")
+PASS  desktop: triage colours appear only in urgency bars and marks
+PASS  desktop: every urgency bar and mark carries a word
+PASS  desktop: refusals are the neutral grey
+PASS  desktop: every citation is a button with its key
+PASS  desktop: every removal is struck through with its reason (1 on screen)
+7 failed

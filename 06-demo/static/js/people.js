@@ -107,9 +107,9 @@ export function personFormHTML(p, isNew, conversationsFor) {
         </section>
         <section>
           <h2>Record</h2>
-          <p class="hint" style="margin:-.25rem 0 .875rem">Record-keeping for a clinician.
-            <b>None of this is shown to the model</b>: the profile it reads is the panel on the right,
-            and nothing below changes it.</p>
+          <p class="hint" style="margin:-.25rem 0 1rem">Record-keeping for a clinician.
+            <b>None of this is shown to the model</b>: the profile it reads is the one under
+            “What the model reads”, and nothing below changes it.</p>
           <div class="pair-f">
             <div class="f" data-f="patient_id"><label for="f-pid">Patient ID</label>
               <input class="inp" id="f-pid" maxlength="40" value="${esc(p.patient_id || "")}">

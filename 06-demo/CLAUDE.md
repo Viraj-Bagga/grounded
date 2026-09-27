@@ -1,0 +1,13 @@
+## UI polish rules (06-demo)
+- Only edit files in 06-demo/. Do not touch guards, escalation rules, the server API, eval or model files.
+- Stack stays plain HTML/CSS/JS. No React, Tailwind, GSAP or new dependencies without asking.
+- Offline app: no CDN links. Self-host fonts with @font-face inside the repo.
+- Design spec: 06-demo/DESIGN.md. Adapt it. Keep Grounded's own name and look.
+- Red/yellow/green are triage signals, not decoration. Every result shows a text label, never color alone.
+- Refusals stay neutral grey and must never look like a fourth category.
+- Guard removals stay visible: struck-through text plus the reason.
+- Every citation stays clickable and opens its source.
+- Phone first: works at 390px wide, tap targets at least 44px, input text at least 16px, WCAG AA contrast.
+- Motion only for feedback and state changes. Respect prefers-reduced-motion.
+- No em dashes in UI copy.
+- After every batch: run the full check suite and take playwright-cli screenshots at 1440px and iPhone 15. Stop if anything fails.
