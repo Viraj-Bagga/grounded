@@ -17,6 +17,8 @@ export const DISPOSITION = {
 };
 
 const cut = (s, n = 90) => (s = String(s), s.length > n ? s.slice(0, n - 1) + "…" : s);
+// Paired straight quotes curled for display. The words are the rule's own.
+const curl = s => String(s ?? "").replace(/"([^"]*)"/g, "\u201c$1\u201d");
 
 // "Source: NHLBI, National Institutes of Health" -> "NHLBI". The registry's own
 // short name, not a publisher string cut at a comma.
@@ -108,7 +110,7 @@ function rulesHTML(ev) {
       : f.status === "noted" ? "Noted" : "Flagged";
     const ic = f.status === "raised" ? "raised" : f.status === "flag" ? "flag" : "supports";
     return `<div class="rule${f.status === "raised" ? " raised" : ""}"><span class="ic">${icon(ic)}</span>` +
-      `<div><div><span class="h">${head}</span>: ${esc(f.fact)} on ${whose}, with ${esc(f.symptom)}</div>` +
+      `<div><div><span class="h">${head}</span>: ${esc(curl(f.fact))} on ${whose}, with ${esc(curl(f.symptom))}</div>` +
       `<div class="q">“${esc(f.quote)}”</div>` +
       `<div class="src">${f.keys.map(k => citeChip(k)).join("")}<span class="rid">rule ${esc(f.rule)}</span></div>` +
       `</div></div>`;
@@ -125,13 +127,18 @@ function resultHTML(ev, ctx) {
   // app's own when a profile rule raised the answer to red.
   const goneLower = drop.next_steps_urgency || [];
   const wrote = String(((ev.escalation || {}).original) || "").toLowerCase();
+  // A removed step stays where the model put it: in the numbered column, struck
+  // out, unnumbered, its reason under it. It used to fall into a bulleted list
+  // below the steps and outside their column. Approved 2026-09-27.
+  const goneStep = (x, why) => `<li class="gone"><span class="key" aria-hidden="true"></span>` +
+    `<span><s>${esc(cut(x))}</s><span class="tag">removed: ${esc(why)}</span></span></li>`;
+  const goneSteps2 = goneSteps.map(x => goneStep(x, "medication instruction")).join("") +
+    goneLower.map(x => goneStep(x, wrote ? `written for a ${wrote}` : "does not match a red")).join("");
   h += section("What to do",
-    (steps.length ? `<ol class="keys">${steps.map((s, i) => `<li><span class="key">${i + 1}</span>` +
-      `<span>${esc(s)}${flagged.has(s) ? '<span class="tag">flagged, kept</span>' : ""}</span></li>`).join("")}</ol>`
-      : `<p class="muted">No steps given.</p>`) +
-    (goneSteps.length ? `<ul class="plain">${goneSteps.map(x => gone(x, "medication instruction")).join("")}</ul>` : "") +
-    (goneLower.length ? `<ul class="plain">${goneLower.map(x =>
-      gone(x, wrote ? `written for a ${wrote}` : "does not match a red")).join("")}</ul>` : ""));
+    (steps.length ? "" : `<p class="muted">No steps given.</p>`) +
+    (steps.length || goneSteps2 ? `<ol class="keys">${steps.map((s, i) => `<li><span class="key">${i + 1}</span>` +
+      `<span>${esc(s)}${flagged.has(s) ? '<span class="tag">flagged, kept</span>' : ""}</span></li>`).join("")}` +
+      `${goneSteps2}</ol>` : ""));
 
   // Constraint 16: a raise strikes the rationale out rather than leave a "Why"
   // that argues against the verdict above it. Not clipped, so nothing is hidden.
@@ -187,7 +194,8 @@ function refusedHTML(ev, ctx) {
   h += `<div class="sec"><p>${esc(ev.message)}</p></div>`;
   const rows = [["Why", esc(ev.reason)]];
   if (ev.urgency_withheld) rows.push(["Withheld", `A ${esc(ev.urgency_withheld)} verdict was produced and withheld.`]);
-  if (ev.nearest) rows.push(["Nearest", ev.nearest.map(k => `<span class="mono">${esc(k)}</span>`).join(", ")]);
+  // The nearest sources are registry keys, so they open like any other.
+  if (ev.nearest) rows.push(["Nearest", `<span class="cites">${ev.nearest.map(k => citeChip(k)).join("")}</span>`]);
   if (!child && ctx.sources) rows.push(["Scope", `Chest pain only, ${fmt(ctx.sources)} sources.`]);
   h += `<div class="sec details"><dl>${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl></div>`;
   return h + (ev.timings ? checkedHTML(ev, ctx) : "");

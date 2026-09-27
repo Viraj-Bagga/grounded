@@ -291,9 +291,14 @@ ol.keys li { display: grid; grid-template-columns: var(--numeral) 1fr; gap: .75r
   background: var(--paper); }
 ol.keys li > span:last-child { padding-top: max(0px, calc((var(--numeral) - 1lh) / 2)); }
 
-ul.plain { margin: 0; padding-left: 1.25rem; }
+ul.plain { margin: 0; padding-left: 1.25rem; list-style: square; }
+ul.plain li::marker { color: var(--ink-2); }
 ul.plain li { margin: .25rem 0; }
 .gone s { color: var(--ink-3); text-decoration-thickness: 1.5px; }
+/* A removal's reason sits under what it removed, not trailing after it, and a
+   removed step keeps its place in the column with an empty numeral. */
+.gone .tag { display: table; margin: .25rem 0 0; }
+ol.keys li.gone .key { border: 0; }
 p.gone { margin: 0; }
 ul.clip li.gone s { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gone-head { margin: 0 0 .25rem; color: var(--ink-2); font-size: var(--fs-label); }

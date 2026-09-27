@@ -364,7 +364,7 @@ Blunt and filled with ink; there is no blue button.
 A square full-width field, and the one loud thing on the screen: the verdict word at 800, 36px on a phone and 48 on a laptop, with the disposition at 700 under it. They share one line once the answer's own column is 34rem wide; that is a container query on the turn, so each side of a comparison follows its own width. 16px of padding, 24 at the sides when it runs on one line. 36px on a phone was kept after a fold measurement on iPhone 15 (results/2026-09-27-direction-2-band/fold.txt): the first step stays on the first screen in every state without a rule line, and where a rule line pushes it under the composer it does so at 30px too. Red, yellow and green for the three WHO categories; hatched hold for OUT OF SCOPE, NOT ASSESSED and WHO IS THIS FOR?. It is exposed as a level-2 heading. On arrival it develops left to right in two hard steps over 180ms, and not at all under reduced motion. The disposition strings are Viraj's copy and are recorded here as he wrote them, not as system copy to vary: "Call emergency services now", "Be seen today", "Self-care, and the signs that change the answer". The refusal and not-assessed messages beneath the bar are also his.
 
 ### Rule Lines (signature)
-Pinned directly under the bar in a hairline frame with no top border, so they read as part of the verdict. Each line has a drawn icon (blue raise arrow when the rule raised the verdict, ink-3 check-circle when it supports it, flag when it only flags), a bold head ("Raised to red" or "Raised to yellow", "Backs up this red", "At least yellow", "Flagged"), the profile fact and symptom, the quoted source line in ink-2 with curly quotes, and a citation chip with the rule id in mono. The wording of rule lines is Viraj's.
+Pinned directly under the bar in a hairline frame with no top border, so they read as part of the verdict. Each line has a drawn icon (blue raise arrow when the rule raised the verdict, ink-3 check-circle when it supports it, flag when it only flags), a bold head ("Raised to red" or "Raised to yellow", "Backs up this red", "At least yellow", "Flagged"), the profile fact and symptom, the quoted source line in ink-2 with curly quotes, and a citation chip with the rule id in mono. Quotes inside the fact and symptom, which the rule writes straight, are curled for display. The wording of rule lines is Viraj's.
 
 ### Said Row
 What the person said, as a record: a square well row across the column with who on the left and when on the right in meta ("For Dad", "3:34 PM"), two facts rather than one string joined by a dot, the words in body, and an optional timeline in mono with a bold "Timeline" label. Never a bubble, never right-aligned.
@@ -376,12 +376,15 @@ Four equal columns, Retrieve, Read, Write, Check, each topped by a 3px stripe: r
 Numbered steps sit beside a square with a 1px ink border and a bold numeral, 32px on a phone and 36px from 60rem. "What to do" is always numbered this way.
 
 ### Removed, Flagged, Not Grounded
-- **Removed:** the entry struck through in ink-3, followed by a small square tag "removed: " plus the reason. Several removed citations share one "removed" head line and are clipped to a line each.
+- **Removed:** the entry struck through in ink-3, with a small square tag under it, "removed: " plus the reason. A removed step keeps its place in the numbered column, with an empty numeral: it is not a step any more, and it is not moved out of sight into a list below. Several removed citations share one "removed" head line and are clipped to a line each. Lists of red flags use square markers.
 - **Flagged, kept:** the same tag shape appended to a kept step.
 - **Not grounded:** a 1.5px dashed hold box headed "Not grounded in sources" in bold, placed under the bar and any rule lines; no sections follow except removals and the reason.
 
 ### Checked Line
 A full-width text button, 44px at least, above a hairline: check icon, "Checked", total time, read and cached tokens, tokens written, and "n removed" in bold, separated by small square ink-3 dots, with a chevron that turns 90deg over 160ms when opened. It expands a definition list of Retrieve, Read, Write, Check, Total and Slot, what the guards removed, the raw output, and a fine line on the run conditions.
+
+### Refusal Details
+Under a refusal's message: Why, Withheld when a verdict was held back, Nearest and Scope. The nearest sources are citation chips that open the source sheet, like any other key. Going behind a disclosure next, once its label is written.
 
 ### Profile Tags
 - **Under 16:** a small hatched hold tag, bold 0.75rem.
