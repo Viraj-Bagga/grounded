@@ -50,7 +50,7 @@ const whenCell = iso => iso
 function ruleHead(f, e) {
   const fin = String(e.final || "").toLowerCase();
   return f.status === "raised" ? `Raised to ${fin}` : f.status === "supports" ? `Backs up this ${fin}`
-    : f.status === "at_least" ? `At least ${String(f.cap || "").toLowerCase()}`
+    : f.status === "at_least" ? `At least ${String(f.to || f.cap || "").toLowerCase()}`
     : f.status === "noted" ? "Noted" : "Flagged";
 }
 
@@ -355,7 +355,9 @@ function turnHTML(t, n, total) {
     ${n > 1 && t.text ? `<blockquote class="saidq small">${esc(t.text)}</blockquote>` : ""}
     ${ev.ungrounded ? `<p class="tg dashed inline">not grounded in sources</p>` : ""}
     ${ev.message && t.kind !== "result" ? `<p>${esc(ev.message)}</p>` : ""}
-    ${(e.fired || []).map(f => `<p class="rulep"><b>${esc(ruleHead(f, e))}</b>:
+    ${(e.fired || []).map(f => f.kind === "steps"
+      ? `<p class="rulep"><b>${esc(ruleHead(f, e))}</b>: ${esc(f.name)}.<br><span class="q">“${esc(f.step)}”</span></p>`
+      : `<p class="rulep"><b>${esc(ruleHead(f, e))}</b>:
       ${esc(f.fact)} with ${esc(f.symptom)}<br><span class="q">“${esc(f.quote)}”</span>
       <span class="keys">${(f.keys || []).map(k => `<span class="key">${esc(k)}</span>`).join("")}</span></p>`).join("")}
     ${res.rationale ? `<h4>Why</h4><p>${esc(res.rationale)}</p>` : ""}

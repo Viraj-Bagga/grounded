@@ -51,6 +51,7 @@ from guards import (PAEDIATRIC_REFUSAL, REFUSAL,  # noqa: E402
                     excluded_subject, is_child_profile, post_flight,
                     scope_check, screen_follow_ups)
 from escalation import RULES, escalate, rescue_refusal  # noqa: E402
+from steps_raise import raise_on_steps  # noqa: E402
 from pair_format import (ASSISTANT_SCHEMA, SYSTEM_PROMPT,  # noqa: E402
                          build_human_turn)
 
@@ -574,6 +575,10 @@ class Engine:
         # chunks. See 02-pairs/escalation.py.
         if escalation is None:      # a rescued refusal arrives escalated
             escalation = escalate(result.get("urgency"), prof, case_present)
+        # A yellow or green whose own steps say, flatly, to call emergency
+        # services is raised to red, like a profile raise. Viraj's rule,
+        # 2026-09-27. See steps_raise.py.
+        escalation = raise_on_steps(escalation, result.get("next_steps"))
         if result.get("urgency") != escalation["final"]:
             result = dict(result, urgency=escalation["final"])
             # Constraint 4 again: a verdict raised to red asks no questions.

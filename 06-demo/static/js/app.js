@@ -300,7 +300,9 @@ function announce(final, who) {
     const u = (final.result || {}).urgency;
     msg = `${name}${u}. ${DISPOSITION_SPOKEN[u] || ""}.`
       + (final.ungrounded ? " Not grounded in sources." : "")
-      + ((final.escalation || {}).changed ? " Raised by a profile rule." : "");
+      + ((final.escalation || {}).changed
+        ? (((final.escalation || {}).fired || []).some(f => f.kind === "steps" && f.status === "raised")
+          ? " Raised to red: the steps call for emergency care." : " Raised by a profile rule.") : "");
   } else if (final.event === "refused") {
     msg = `${name}no verdict. ${final.message || "This is outside what the app covers."}`;
   } else if (final.event === "error") {

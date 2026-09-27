@@ -167,9 +167,12 @@ function rulesHTML(ev) {
   if (!e || !e.fired || !e.fired.length) return "";
   const lc = s => esc(String(s).toLowerCase());
   return `<div class="rules">` + e.fired.map(f => {
+    // Viraj's words: "Raised to red: the steps call for emergency care."
+    if (f.kind === "steps") return `<p class="rule raised"><span class="ic">${icon("raised")}</span>` +
+      `<span><span class="h">Raised to ${lc(e.final)}</span>: ${esc(f.name)}.</span></p>`;
     const head = f.status === "raised" ? `Raised to ${lc(e.final)}`
       : f.status === "supports" ? `Backs up this ${lc(e.final)}`
-      : f.status === "at_least" ? `At least ${lc(f.cap)}`
+      : f.status === "at_least" ? `At least ${lc(f.to || f.cap)}`
       : f.status === "noted" ? "Noted" : "Flagged";
     const ic = f.status === "raised" ? "raised" : f.status === "flag" ? "flag" : "supports";
     return `<p class="rule${f.status === "raised" ? " raised" : ""}"><span class="ic">${icon(ic)}</span>` +
@@ -180,7 +183,7 @@ function rulesHTML(ev) {
 // Inside Why: each rule's quoted line, the sources it quotes, and its number.
 // Final wording: "From <whose> profile".
 function ruleQuotes(ev) {
-  const fired = ((ev.escalation || {}).fired) || [];
+  const fired = (((ev.escalation || {}).fired) || []).filter(f => f.kind !== "steps");
   return fired.map(f => `<div class="rq"><div class="sub">From ${whoseOf(ev)}</div>` +
     `<p class="q">“${esc(f.quote)}”</p>` +
     `<div class="srcs">${f.keys.map(k => citeChip(k)).join("")}</div>` +
@@ -230,7 +233,7 @@ function resultHTML(ev, ctx) {
   // written for the lower verdict, so it is struck out whole and the rule's
   // quoted line is the reason shown.
   const goneWhy = drop.rationale_urgency || "";
-  const fired = ((ev.escalation || {}).fired) || [];
+  const fired = (((ev.escalation || {}).fired) || []).filter(f => f.kind !== "steps");
   const flags = r.red_flags || [];
   // Viraj's wording, final: "The model's original reason".
   const whyBody =

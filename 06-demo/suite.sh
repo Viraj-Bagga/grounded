@@ -49,7 +49,7 @@ say "field ${FIELD_URL:-http://127.0.0.1:8770}   base 8781   llama $LLAMA   node
 say "build $(git rev-parse --short HEAD)$(git diff --quiet -- 06-demo || echo ', 06-demo has uncommitted changes')"
 say ""
 say "=== offline self-tests"
-for t in 06-demo/caseload.py 06-demo/selftest_profile_text.py 02-pairs/guards.py \
+for t in 06-demo/caseload.py 06-demo/selftest_profile_text.py 06-demo/selftest_steps_raise.py 02-pairs/guards.py \
          02-pairs/escalation.py 02-pairs/selftest_validator.py 03-model/qlora_config.py; do
   if res=$("$PY" "$t" 2>&1); then
     say "  ok    $t   $(echo "$res" | tail -1)"
@@ -79,7 +79,7 @@ done
 say ""
 say "check lines: $(grep -c '^PASS' "$LOG") PASS, $(grep -c '^FAIL' "$LOG") FAIL (a drop re-run adds its own)"
 if [ ${#failed[@]} -eq 0 ]; then
-  say "SUITE PASSED: 6 self-tests, 13 modes."
+  say "SUITE PASSED: 7 self-tests, 13 modes."
 else
   say "SUITE FAILED: ${failed[*]}"
 fi

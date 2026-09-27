@@ -1,0 +1,301 @@
+{
+ "id": "20260927-143822-4d6d49",
+ "created": "2026-09-27T18:38:22Z",
+ "updated": "2026-09-27T18:39:10Z",
+ "mode": "single",
+ "title": "Tight chest when I walk up the hill, it eased when I stopped.",
+ "sides": [
+  {
+   "person_id": "dad",
+   "profile": {
+    "id": "dad",
+    "label": "Dad",
+    "age": 71,
+    "sex": "male",
+    "conditions": [
+     "atrial fibrillation",
+     "high blood pressure"
+    ],
+    "medications": [
+     "apixaban 5mg twice daily",
+     "bisoprolol"
+    ]
+   },
+   "profile_text": "age: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol",
+   "slot": 1,
+   "anchor": {
+    "keys": [
+     "CP-PERI-002",
+     "CP-DIFF-001",
+     "CP-ANG-002"
+    ],
+    "tokens": 403,
+    "ms": 276,
+    "chunks": [
+     {
+      "key": "CP-PERI-002",
+      "tokens": 25,
+      "category": "yellow"
+     },
+     {
+      "key": "CP-DIFF-001",
+      "tokens": 147,
+      "category": "uncategorised"
+     },
+     {
+      "key": "CP-ANG-002",
+      "tokens": 231,
+      "category": "yellow"
+     }
+    ]
+   },
+   "llm": [
+    {
+     "role": "user",
+     "content": "[PATIENT PROFILE]\nage: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol\n[/PATIENT PROFILE]\n\n[SYMPTOMS]\nTight chest when I walk up the hill, it eased when I stopped.\n[/SYMPTOMS]\n\n[RETRIEVED CONTEXT]\n[CP-PERI-002]\nChest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward\nFast heartbeat\nFever\n\n[CP-DIFF-001]\nHaving a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:\n\nOther heart problems, such as angina\nPanic attacks\nDigestive problems, such as heartburn or esophagus disorders\nSore muscles\nLung diseases, such as pneumonia , pleurisy , or pulmonary embolism\nCostochondritis - an inflammation of joints in your chest\n\nSome of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.\n\n[CP-ANG-002]\nAngina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.\n\nAngina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.\n\nAngina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.\n\nAngina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.\n[/RETRIEVED CONTEXT]"
+    },
+    {
+     "role": "assistant",
+     "content": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion that eases with stopping, with a known history of atrial fibrillation and on anticoagulant therapy. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe pain at rest, nor does it describe breathlessness, sweating or nausea, which would raise the urgency to red.\", \"red_flags\": [\"Chest tightness on exertion easing with stopping\"], \"next_steps\": [\"Call emergency services now if the tightness comes on at rest, or if you become breathless at rest\", \"Arrange assessment today, and keep the apixaban and bisoprolol on board\"], \"citations\": [\"CP-PERI-002\", \"CP-ANG-002\"], \"follow_up_questions\": [\"Does it come on at rest, or does it come on with exertion?\"]}"
+    },
+    {
+     "role": "user",
+     "content": "[FOLLOW-UP]\nIt came back when I climbed the stairs.\n[/FOLLOW-UP]"
+    },
+    {
+     "role": "assistant",
+     "content": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion that eases with stopping, now confirmed to come on with climbing stairs. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe breathlessness at rest, nor does it describe pain at rest, so the urgency remains assessment today.\", \"red_flags\": [\"Chest tightness on exertion easing with stopping\"], \"next_steps\": [\"Call emergency services now if it comes on at rest\", \"Arrange assessment today, and keep the apixaban and bisoprolol on board\"], \"citations\": [\"CP-PERI-002\", \"CP-ANG-002\"], \"follow_up_questions\": [\"Does it come on at rest, or does it come on with exertion?\"]}"
+    }
+   ],
+   "turns": [
+    {
+     "n": 1,
+     "at": "2026-09-27T18:38:51Z",
+     "text": "Tight chest when I walk up the hill, it eased when I stopped.",
+     "timeline": "",
+     "kind": "result",
+     "event": {
+      "profile": "Dad",
+      "profile_id": "dad",
+      "side": 0,
+      "result": {
+       "urgency": "yellow",
+       "rationale": "Chest tightness on exertion that eases with stopping, with a known history of atrial fibrillation and on anticoagulant therapy. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe pain at rest, nor does it describe breathlessness, sweating or nausea, which would raise the urgency to red.",
+       "red_flags": [
+        "Chest tightness on exertion easing with stopping"
+       ],
+       "next_steps": [
+        "Call emergency services now if the tightness comes on at rest, or if you become breathless at rest"
+       ],
+       "citations": [
+        "CP-PERI-002",
+        "CP-ANG-002"
+       ],
+       "follow_up_questions": [
+        "Does it come on at rest, or does it come on with exertion?"
+       ]
+      },
+      "ungrounded": null,
+      "escalation": {
+       "original": "yellow",
+       "final": "yellow",
+       "changed": false,
+       "fired": []
+      },
+      "while_waiting": [],
+      "dropped": {
+       "citations": [],
+       "next_steps": [
+        "Arrange assessment today, and keep the apixaban and bisoprolol on board"
+       ],
+       "follow_up_questions": [],
+       "red_flags": [],
+       "red_flags_skipped": false
+      },
+      "flagged": {
+       "next_steps": []
+      },
+      "citations": [
+       {
+        "key": "CP-PERI-002",
+        "text": "Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward\nFast heartbeat\nFever",
+        "publisher": "National Heart, Lung, and Blood Institute, NIH",
+        "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms",
+        "retrieval_date": "2026-09-15",
+        "attribution": "Source: NHLBI, National Institutes of Health",
+        "token_count": 25,
+        "category": "yellow"
+       },
+       {
+        "key": "CP-ANG-002",
+        "text": "Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.\n\nAngina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.\n\nAngina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.\n\nAngina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.",
+        "publisher": "National Heart, Lung, and Blood Institute, NIH",
+        "url": "https://www.nhlbi.nih.gov/health/angina",
+        "retrieval_date": "2026-09-15",
+        "attribution": "Source: NHLBI, National Institutes of Health",
+        "token_count": 231,
+        "category": "yellow"
+       }
+      ],
+      "gen_ms": 29173,
+      "check_ms": 0,
+      "retrieval_ms": 276,
+      "ttft_ms": 10908,
+      "total_ms": 29450,
+      "retrieved_tokens": 403,
+      "timings": {
+       "cache_n": 1214,
+       "prompt_n": 4,
+       "prompt_ms": 7657.855,
+       "prompt_per_token_ms": 1914.46375,
+       "prompt_per_second": 0.5223394801808079,
+       "predicted_n": 206,
+       "predicted_ms": 18266.72,
+       "predicted_per_token_ms": 89.1059512195122,
+       "predicted_per_second": 11.222594970525632
+      },
+      "profile_text": "age: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol",
+      "n": 1,
+      "first": true,
+      "cache": {
+       "expected": 0,
+       "reused": 1214,
+       "read": 4,
+       "slot_taken": false,
+       "slot": 1,
+       "re_read": false
+      },
+      "followups_left": 4
+     },
+     "reached_model": true,
+     "raw": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion that eases with stopping, with a known history of atrial fibrillation and on anticoagulant therapy. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe pain at rest, nor does it describe breathlessness, sweating or nausea, which would raise the urgency to red.\", \"red_flags\": [\"Chest tightness on exertion easing with stopping\"], \"next_steps\": [\"Call emergency services now if the tightness comes on at rest, or if you become breathless at rest\", \"Arrange assessment today, and keep the apixaban and bisoprolol on board\"], \"citations\": [\"CP-PERI-002\", \"CP-ANG-002\"], \"follow_up_questions\": [\"Does it come on at rest, or does it come on with exertion?\"]}",
+     "timings": {
+      "cache_n": 1214,
+      "prompt_n": 4,
+      "prompt_ms": 7657.855,
+      "prompt_per_token_ms": 1914.46375,
+      "prompt_per_second": 0.5223394801808079,
+      "predicted_n": 206,
+      "predicted_ms": 18266.72,
+      "predicted_per_token_ms": 89.1059512195122,
+      "predicted_per_second": 11.222594970525632
+     }
+    },
+    {
+     "n": 2,
+     "at": "2026-09-27T18:39:10Z",
+     "text": "It came back when I climbed the stairs.",
+     "timeline": "",
+     "kind": "result",
+     "event": {
+      "profile": "Dad",
+      "profile_id": "dad",
+      "side": 0,
+      "result": {
+       "urgency": "yellow",
+       "rationale": "Chest tightness on exertion that eases with stopping, now confirmed to come on with climbing stairs. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe breathlessness at rest, nor does it describe pain at rest, so the urgency remains assessment today.",
+       "red_flags": [
+        "Chest tightness on exertion easing with stopping"
+       ],
+       "next_steps": [
+        "Call emergency services now if it comes on at rest"
+       ],
+       "citations": [
+        "CP-PERI-002",
+        "CP-ANG-002"
+       ],
+       "follow_up_questions": [
+        "Does it come on at rest, or does it come on with exertion?"
+       ]
+      },
+      "ungrounded": null,
+      "escalation": {
+       "original": "yellow",
+       "final": "yellow",
+       "changed": false,
+       "fired": []
+      },
+      "while_waiting": [],
+      "dropped": {
+       "citations": [],
+       "next_steps": [
+        "Arrange assessment today, and keep the apixaban and bisoprolol on board"
+       ],
+       "follow_up_questions": [],
+       "red_flags": [],
+       "red_flags_skipped": false
+      },
+      "flagged": {
+       "next_steps": []
+      },
+      "citations": [
+       {
+        "key": "CP-PERI-002",
+        "text": "Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward\nFast heartbeat\nFever",
+        "publisher": "National Heart, Lung, and Blood Institute, NIH",
+        "url": "https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms",
+        "retrieval_date": "2026-09-15",
+        "attribution": "Source: NHLBI, National Institutes of Health",
+        "token_count": 25,
+        "category": "yellow"
+       },
+       {
+        "key": "CP-ANG-002",
+        "text": "Angina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.\n\nAngina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.\n\nAngina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.\n\nAngina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.",
+        "publisher": "National Heart, Lung, and Blood Institute, NIH",
+        "url": "https://www.nhlbi.nih.gov/health/angina",
+        "retrieval_date": "2026-09-15",
+        "attribution": "Source: NHLBI, National Institutes of Health",
+        "token_count": 231,
+        "category": "yellow"
+       }
+      ],
+      "gen_ms": 17857,
+      "check_ms": 0,
+      "retrieval_ms": 0,
+      "ttft_ms": 1795,
+      "total_ms": 17858,
+      "retrieved_tokens": 403,
+      "timings": {
+       "cache_n": 1423,
+       "prompt_n": 37,
+       "prompt_ms": 1679.728,
+       "prompt_per_token_ms": 45.39805405405406,
+       "prompt_per_second": 22.02737586085366,
+       "predicted_n": 187,
+       "predicted_ms": 16060.68,
+       "predicted_per_token_ms": 86.34774193548387,
+       "predicted_per_second": 11.581078758807223
+      },
+      "profile_text": "age: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol",
+      "n": 2,
+      "first": false,
+      "cache": {
+       "expected": 1424,
+       "reused": 1423,
+       "read": 37,
+       "slot_taken": false,
+       "slot": 1,
+       "re_read": false
+      },
+      "followups_left": 3
+     },
+     "reached_model": true,
+     "raw": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion that eases with stopping, now confirmed to come on with climbing stairs. The retrieved context lists angina as chest pain that occurs when the heart is working hard, and says it can feel like an upset stomach. It does not describe breathlessness at rest, nor does it describe pain at rest, so the urgency remains assessment today.\", \"red_flags\": [\"Chest tightness on exertion easing with stopping\"], \"next_steps\": [\"Call emergency services now if it comes on at rest\", \"Arrange assessment today, and keep the apixaban and bisoprolol on board\"], \"citations\": [\"CP-PERI-002\", \"CP-ANG-002\"], \"follow_up_questions\": [\"Does it come on at rest, or does it come on with exertion?\"]}",
+     "timings": {
+      "cache_n": 1423,
+      "prompt_n": 37,
+      "prompt_ms": 1679.728,
+      "prompt_per_token_ms": 45.39805405405406,
+      "prompt_per_second": 22.02737586085366,
+      "predicted_n": 187,
+      "predicted_ms": 16060.68,
+      "predicted_per_token_ms": 86.34774193548387,
+      "predicted_per_second": 11.581078758807223
+     }
+    }
+   ],
+   "context_tokens": 1647
+  }
+ ]
+}

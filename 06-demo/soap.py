@@ -240,9 +240,15 @@ def _objective(side, chunk_meta):
             continue
         out += ["", f"{head}:"]
         for f in fired:
+            if f.get("kind") == "steps":
+                out.append(_wrap(f"RAISED {esc.get('original')} to {esc.get('final')}: the model's own "
+                                 f"step called for emergency care, unconditionally, under a "
+                                 f"{esc.get('original')}.", indent="         ", first=f"      Rule {f['rule']}: "))
+                out.append(_wrap(f'"{f.get("step")}"', indent="            ", first="         step: "))
+                continue
             verb = {"raised": f"RAISED {esc.get('original')} to {esc.get('final')}",
                     "supports": f"supports this {esc.get('final')}",
-                    "at_least": f"supports at least {f.get('cap')}",
+                    "at_least": f"supports at least {f.get('to') or f.get('cap')}",
                     "flag": "flag only, no change"}.get(f.get("status"), f.get("status"))
             out.append(_wrap(f"{verb}. Profile fact: {f.get('fact')}. "
                              f"In the case text: {f.get('symptom')}.",
@@ -283,9 +289,15 @@ def _assessment(side, chunk_meta):
     out.append(f"   Urgency shown: {u.upper()} (WHO Interagency Integrated Triage Tool).")
     out.append(f"   Disposition: {DISPOSITION.get(u, '?')}. The app's words, not the model's.")
     if esc.get("changed"):
-        rules = ", ".join(f["rule"] for f in esc.get("fired") or [] if f.get("status") == "raised")
-        out.append(_wrap(f"The model gave {esc.get('original')}. Profile rule {rules} raised it to "
-                         f"{esc.get('final')}; the rule and its source line are in O.", first="   "))
+        raised = [f for f in esc.get("fired") or [] if f.get("status") == "raised"]
+        if any(f.get("kind") == "steps" for f in raised):
+            out.append(_wrap(f"The model gave {esc.get('original')}, but its own steps called for "
+                             f"emergency care, so the app raised it to {esc.get('final')}; the step "
+                             f"is in O.", first="   "))
+        else:
+            rules = ", ".join(f["rule"] for f in raised)
+            out.append(_wrap(f"The model gave {esc.get('original')}. Profile rule {rules} raised it to "
+                             f"{esc.get('final')}; the rule and its source line are in O.", first="   "))
     if ev.get("ungrounded"):
         out.append("")
         out.append(_wrap(f"NOT GROUNDED: {(ev['ungrounded'] or {}).get('note') or ''}", first="   "))
