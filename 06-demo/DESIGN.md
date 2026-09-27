@@ -23,7 +23,7 @@ colors:
 typography:
   verdict:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "1.875rem"
+    fontSize: "3rem"
     fontWeight: 800
     lineHeight: 1
     letterSpacing: "0.01em"
@@ -41,7 +41,7 @@ typography:
     letterSpacing: "-0.005em"
   disposition:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "1.0625rem"
+    fontSize: "1.3125rem"
     fontWeight: 700
     lineHeight: 1.25
   body:
@@ -152,26 +152,22 @@ components:
     backgroundColor: "{colors.red}"
     textColor: "{colors.paper}"
     rounded: "{rounded.none}"
-    padding: "0.75rem 1rem"
-    height: "3.75rem"
+    padding: "1rem 1.5rem"
   urgency-bar-yellow:
     backgroundColor: "{colors.yellow}"
     textColor: "{colors.on-yellow}"
     rounded: "{rounded.none}"
-    padding: "0.75rem 1rem"
-    height: "3.75rem"
+    padding: "1rem 1.5rem"
   urgency-bar-green:
     backgroundColor: "{colors.green}"
     textColor: "{colors.paper}"
     rounded: "{rounded.none}"
-    padding: "0.75rem 1rem"
-    height: "3.75rem"
+    padding: "1rem 1.5rem"
   urgency-bar-hold:
     backgroundColor: "{colors.hold}"
     textColor: "{colors.paper}"
     rounded: "{rounded.none}"
-    padding: "0.75rem 1rem"
-    height: "3.75rem"
+    padding: "1rem 1.5rem"
   said-row:
     backgroundColor: "{colors.well}"
     textColor: "{colors.ink}"
@@ -259,18 +255,18 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 **Character:** One legibility-first family built for low vision, used heavy where it must be read first and plain everywhere else. Its mono twin marks anything that is a key or a measurement, so a citation key, a timeline and a token count all look like data rather than prose.
 
 ### Hierarchy
-- **Verdict** (800, 1.875rem, line-height 1, tracking 0.01em): the category word inside the urgency bar, uppercase as written (RED, YELLOW, GREEN, OUT OF SCOPE). The heaviest thing on screen.
+- **Verdict** (800, 3rem, line-height 1, tracking 0.01em; 2.25rem on a phone): the category word inside the urgency bar, uppercase as written (RED, YELLOW, GREEN, OUT OF SCOPE). The heaviest thing on screen.
 - **Headline** (700, 1.5rem, 1.2, tracking -0.01em): page titles ("Edit Mum", "People", "Caseload").
 - **Title** (700, 1.3125rem, 1.25): answer section headings (What to do, Why, Red flags, Questions for you, Sources) and the brand mark (at 800).
-- **Disposition** (700, 1.0625rem, 1.25): the disposition beside the verdict word.
+- **Disposition** (700, 1.3125rem, 1.25; 1.125rem on a phone): the disposition under the verdict word, or beside it on a wide column.
 - **Body** (400, 1.125rem, 1.5): answers, what the person said. Answer prose and the said row are capped at 70ch.
 - **Field** (400, 1.125rem, 1.35): text inside fields. Never below 16px at any width, because iOS Safari zooms the page when a smaller field takes focus.
 - **Label** (600 to 700, 1rem): tabs, field labels, preset titles, history titles, rule headings.
-- **Meta** (400, 0.875rem): the "For Dad · 3:34 PM" record header, history meta, the Checked line, allowance, scope line.
+- **Meta** (400, 0.875rem): the "For Dad" and "3:34 PM" record header, history meta, the Checked line, allowance, scope line.
 - **Key** (mono 700, 0.875rem): citation keys, rule ids, A/B side tags (at 0.75rem).
 - **Measure** (mono 400, 0.75rem to 0.875rem, 1.5): timelines, raw model output, the "What the model reads" block.
 
-The sizes above are the laptop sizes. Every size is a step of the classical typographic scale, 12, 14, 16, 18, 21, 24, 36 and 48px, approved on 2026-09-27 (ui-audit/direction.html). The tokens are named by role, `--fs-fine`, `--fs-meta`, `--fs-label`, `--fs-body`, `--fs-title` and `--fs-headline`, mobile first and growing at 60rem: on a phone body and fields are 16px, section titles 18 and page titles 21; on a laptop 18, 21 and 24. Meta is 14 and labels 16 at every width. Nothing a person has to read is under 14px, except the 12px mono of counts and hashes. Until 2026-09-27 the tokens were named after the desktop pixel size each was born as (`--t-17` for the body), and phone body text was 15px. Numerals in measurements and details use tabular figures.
+The sizes above are the laptop sizes. Every size is a step of the classical typographic scale, 12, 14, 16, 18, 21, 24, 36 and 48px, approved on 2026-09-27 (ui-audit/direction.html). The tokens are named by role, `--fs-fine`, `--fs-meta`, `--fs-label`, `--fs-body`, `--fs-title`, `--fs-headline`, `--fs-disp` and `--fs-verdict`, mobile first and growing at 60rem: on a phone body and fields are 16px, section titles 18 and page titles 21; on a laptop 18, 21 and 24. Meta is 14 and labels 16 at every width. Nothing a person has to read is under 14px, except the 12px mono of counts and hashes. Until 2026-09-27 the tokens were named after the desktop pixel size each was born as (`--t-17` for the body), and phone body text was 15px. Numerals in measurements and details use tabular figures.
 
 ### Named Rules
 **The Mono Means Data Rule.** Mono is only for citation keys, rule ids, timelines, token and cache counts and raw model output. Never for prose, headings or labels.
@@ -295,7 +291,6 @@ Every padding, margin and gap is a multiple of 4px, from Carbon. The steps in us
 | `--sec` | 24px | 32px | between an answer's sections |
 | `--turn` | 32px | 40px | between one turn and the next, always more than a section |
 | `--tap` | 44px | 44px | the floor for anything a thumb lands on |
-| `--bar-h` | 52px | 60px | the urgency bar's least height |
 | `--numeral` | 32px | 36px | the keypad square on a numbered step |
 
 Two things are centred by arithmetic rather than spaced: a field's one line sits in the middle of its 44px box (`calc((var(--tap) - 1lh) / 2)`), and a numbered step's first line sits level with the middle of its numeral.
@@ -366,13 +361,13 @@ Blunt and filled with ink; there is no blue button.
 - **Drawer:** below 60rem the sidebar slides in over a scrim. Closed, it is hidden as well as moved aside, so none of its links can take focus or be read out; its visibility flips only after the 160ms slide. Until 2026-09-27 its 71 links took focus off screen.
 
 ### Urgency Bar (signature)
-A square full-width field, at least 3.75rem, holding the verdict word at 800 and the disposition at 700. Red, yellow and green for the three WHO categories; hatched hold for OUT OF SCOPE, NOT ASSESSED and WHO IS THIS FOR?. It is exposed as a level-2 heading. On arrival it develops left to right in two hard steps over 180ms, and not at all under reduced motion. The disposition strings are Viraj's copy and are recorded here as he wrote them, not as system copy to vary: "Call emergency services now", "Be seen today", "Self-care, and the signs that change the answer". The refusal and not-assessed messages beneath the bar are also his.
+A square full-width field, and the one loud thing on the screen: the verdict word at 800, 36px on a phone and 48 on a laptop, with the disposition at 700 under it. They share one line once the answer's own column is 34rem wide; that is a container query on the turn, so each side of a comparison follows its own width. 16px of padding, 24 at the sides when it runs on one line. 36px on a phone was kept after a fold measurement on iPhone 15 (results/2026-09-27-direction-2-band/fold.txt): the first step stays on the first screen in every state without a rule line, and where a rule line pushes it under the composer it does so at 30px too. Red, yellow and green for the three WHO categories; hatched hold for OUT OF SCOPE, NOT ASSESSED and WHO IS THIS FOR?. It is exposed as a level-2 heading. On arrival it develops left to right in two hard steps over 180ms, and not at all under reduced motion. The disposition strings are Viraj's copy and are recorded here as he wrote them, not as system copy to vary: "Call emergency services now", "Be seen today", "Self-care, and the signs that change the answer". The refusal and not-assessed messages beneath the bar are also his.
 
 ### Rule Lines (signature)
 Pinned directly under the bar in a hairline frame with no top border, so they read as part of the verdict. Each line has a drawn icon (blue raise arrow when the rule raised the verdict, ink-3 check-circle when it supports it, flag when it only flags), a bold head ("Raised to red" or "Raised to yellow", "Backs up this red", "At least yellow", "Flagged"), the profile fact and symptom, the quoted source line in ink-2 with curly quotes, and a citation chip with the rule id in mono. The wording of rule lines is Viraj's.
 
 ### Said Row
-What the person said, as a record: a square well row across the column with "For Dad · 3:34 PM" in meta, the words in body, and an optional timeline in mono with a bold "Timeline" label. Never a bubble, never right-aligned.
+What the person said, as a record: a square well row across the column with who on the left and when on the right in meta ("For Dad", "3:34 PM"), two facts rather than one string joined by a dot, the words in body, and an optional timeline in mono with a bold "Timeline" label. Never a bubble, never right-aligned.
 
 ### Working Steps
 Four equal columns, Retrieve, Read, Write, Check, each topped by a 3px stripe: rule when waiting, a blue and wash dashed stripe while running, solid blue when done, dashed and greyed when skipped. A sub-line under each gives the count or time. The raw model stream stays hidden behind a "Show what the model is writing" text action. A slow re-read shows a well notice with the info icon; its wording, "The model lost this conversation and is re-reading it.", is Viraj's (2026-09-19), and the answer's summary line says "The model lost this conversation and re-read it." afterwards.

@@ -46,7 +46,7 @@
      (ui-audit/direction.html). The names were --t-12 and the like, the desktop
      pixel size each was born as, until the sizes stopped matching the names. */
   --fs-fine: .75rem; --fs-meta: .875rem; --fs-label: 1rem; --fs-body: 1rem;
-  --fs-title: 1.125rem; --fs-headline: 1.3125rem; --fs-verdict: 1.5rem;
+  --fs-title: 1.125rem; --fs-headline: 1.3125rem; --fs-verdict: 2.25rem; --fs-disp: 1.125rem;
   --tap: 2.75rem;         /* 44px, the floor for anything a thumb lands on */
   --field: 1rem;          /* iOS Safari zooms a focused field under 16px */
 
@@ -59,20 +59,18 @@
   --page-y: .75rem;       /* the page's own top and bottom padding */
   --sec: 1.5rem;          /* between an answer's sections */
   --turn: 2rem;           /* between one turn and the next: always more than --sec */
-  --bar-h: 3.25rem;       /* the urgency bar */
   --numeral: 2rem;        /* the keypad square on a numbered step */
 }
 
 @media (min-width: 60rem) {
   :root {
-    --fs-body: 1.125rem; --fs-title: 1.3125rem; --fs-headline: 1.5rem; --fs-verdict: 1.875rem;
+    --fs-body: 1.125rem; --fs-title: 1.3125rem; --fs-headline: 1.5rem; --fs-verdict: 3rem; --fs-disp: 1.3125rem;
     --field: 1.125rem;
     --top: 0px;           /* the top bar is a phone control; the sidebar is the desktop one */
     --pad: 1rem;
     --page-y: 1.25rem;
     --sec: 2rem;
     --turn: 2.5rem;
-    --bar-h: 3.75rem;
     --numeral: 2.25rem;
   }
 }
@@ -199,8 +197,10 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
 
 /* What the person said, as a record: who, when, the words, the timeline. */
 .said { margin: .5rem 0 .75rem; background: var(--well); padding: .5rem .75rem .5rem; }
-.said .who-at { font-size: var(--fs-meta); font-weight: 700; color: var(--ink-2); margin-bottom: .125rem; }
-.said .who-at .nw { font-weight: 400; }
+/* who on the left, when on the right: two facts, not one string joined by a dot */
+.said .who-at { display: flex; justify-content: space-between; gap: .75rem; font-size: var(--fs-meta);
+  font-weight: 700; color: var(--ink-2); margin-bottom: .125rem; }
+.said .who-at time { font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .said .words { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
 .said .tl { display: grid; grid-template-columns: max-content 1fr; gap: .75rem; margin-top: .5rem;
   font: var(--fs-meta)/1.5 var(--mono); color: var(--ink-2); }
@@ -245,13 +245,20 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
   font-size: var(--fs-label); margin: 0 0 .75rem; border-radius: var(--r); }
 .notice b { font-weight: 700; }
 
-/* the verdict: one full-width field, the only saturated thing on screen */
-.bar { position: relative; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
-  min-height: var(--bar-h); padding: .5rem var(--pad); margin: 0 calc(var(--pad) * -1); }
-@media (min-width: 60rem) { .bar { gap: 1rem; padding: .75rem 1rem; } }
+/* THE ONE LOUD THING. The category word is the biggest, heaviest type on the
+   screen, and the band the only saturated field. The word and what to do stack
+   on a phone and share a line once the answer's own column is 34rem wide. That
+   is a container query, so each side of a comparison follows its own width.
+   Approved 2026-09-27, ui-audit/direction.html. */
+.turn, .side-ans, [data-live] { container-type: inline-size; }
+.bar { position: relative; display: flex; flex-direction: column; gap: .25rem;
+  padding: 1rem var(--pad); margin: 0 calc(var(--pad) * -1); }
+@container (min-width: 34rem) {
+  .bar { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 1rem; padding: 1rem 1.5rem; }
+}
 @media (min-width: 45rem) { .bar { margin: 0; } }
 .bar .w { font: 800 var(--fs-verdict)/1 var(--font); letter-spacing: .01em; }
-.bar .d { font: 700 var(--fs-body)/1.25 var(--font); }
+.bar .d { font: 700 var(--fs-disp)/1.25 var(--font); }
 .bar .for { margin-left: auto; font-size: var(--fs-meta); font-weight: 600; opacity: .92; }
 .bar.red { background: var(--red); color: var(--on-red); }
 .bar.yellow { background: var(--yellow); color: var(--on-yellow); }

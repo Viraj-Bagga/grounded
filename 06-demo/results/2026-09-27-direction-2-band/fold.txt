@@ -1,0 +1,28 @@
+2026-09-27 fold measurement for the verdict size on a phone
+config:  iPhone 15 (playwright-cli, viewport 393 x 659), field app on 8772, the band batch applied
+rule:    keep 36px on a phone unless it pushes the first "What to do" step below the fold; if it does, use 30
+method:  open the saved assessment, scroll its latest message to the top as the page does on load, and
+         compare the bottom of the latest answer's first step with the top of the sticky composer.
+         30px is the same page with --fs-verdict overridden.
+
+state                                              verdict  step bottom  composer top  first step
+red, no rule line (20260927-135613-6cbed8)            36px          364           499  above the fold
+                                                      30px          358           499  above the fold
+red, a rule line (20260927-134759-caf874)             36px          513           499  below, by 14px
+                                                      30px          507           499  below, by 8px
+yellow, a removed step (20260927-134552-357ba2)       36px          360           499  above the fold
+                                                      30px          354           499  above the fold
+green, compare, tab A (20260927-135354-4f86fa)        36px          439           499  above the fold
+                                                      30px          433           499  above the fold
+raised to yellow, compare, tab B, rule line           36px          661           499  below, by 162px
+  (20260927-133832-1bc40c)                            30px          655           499  below, by 156px
+Grandpa, two turns, the latest (20260927-135432-6678ee) 36px        513           499  below, by 14px
+                                                      30px          507           499  below, by 8px
+
+reading: no state has its first step above the fold at 30px and below it at 36px. Where the step
+misses, it misses at both sizes, by the rule line (and in a comparison the tabs), not by the verdict,
+which costs 6px. So the verdict stays 36px on a phone.
+
+what would bring those states onto the first screen: the composer, which is 160px here. The audit's
+P2 item 8 (the "For ..." line is a 44px row though it is not a control) would win back about 20px,
+and folding the allowance onto that line about 20 more. Not done; it was not part of the direction.

@@ -707,7 +707,8 @@ function renderConversation() {
 // timeline in the same mono as every other measurement.
 const clock = iso => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 const saidHTML = (text, tl, who, at) => `<div class="said">` +
-  `<div class="who-at">${esc(who)} <span class="nw">· ${esc(clock(at || new Date().toISOString()))}</span></div>` +
+  `<div class="who-at"><span>${esc(who)}</span><time datetime="${esc(at || "")}">` +
+  `${esc(clock(at || new Date().toISOString()))}</time></div>` +
   `<div class="words">${esc(text)}</div>` +
   (tl ? `<div class="tl"><b>Timeline</b><span>${esc(tl)}</span></div>` : "") + `</div>`;
 
