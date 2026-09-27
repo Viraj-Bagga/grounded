@@ -587,9 +587,41 @@ async function queue(out) {
     await p.count(".q-item.done a[href^='/c/']") === 1 && /^\d{8}-/.test(cid), cid);
   check("the sidebar count goes back to empty", /Empty/.test(await p.text("#queue-link")));
   await p.shot(join(out, "desktop-caseload-seen.png"), true);
+  // AN ASSESSMENT THAT ENDS IN AN ERROR DOES NOT SEE ANYONE. Viraj's report
+  // 2026-09-27: Dad's caseload assessment was cut off at the token limit and
+  // he was marked seen. The model cannot be made to cut off on demand, so the
+  // assessment is made through the API exactly as the page makes it (which
+  // links it to his row) and given the turn that really happened, from
+  // 06-demo/fixtures/caseload/cut-off-dad.json.
+  await fetch(`${APP}/api/queue`, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ person_id: "dad", reason: "chest tightness on the walk up" }) });
+  const made = await (await fetch(`${APP}/api/conversations`, { method: "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify({ person_ids: ["dad"] }) })).json();
+  const convPath = join("06-demo", "data", "conversations", `${made.id}.json`);
+  const conv = JSON.parse(readFileSync(convPath, "utf8"));
+  const cut = JSON.parse(readFileSync(join("06-demo", "fixtures", "caseload", "cut-off-dad.json"), "utf8"));
+  conv.sides[0].turns = cut.sides[0].turns;
+  conv.title = cut.title;
+  writeFileSync(convPath, JSON.stringify(conv, null, 1));
+  const errq = await (await fetch(`${APP}/api/queue`)).json();
+  const dadRow = errq.waiting.find(e => e.person_id === "dad");
+  check("an assessment that ended in an error keeps the person waiting",
+    !!dadRow && dadRow.status === "error" && !errq.done.some(e => e.person_id === "dad" && e.conversation_id === made.id),
+    JSON.stringify(dadRow));
+  check("the error is carried to their row", /cut off at the token limit/.test((dadRow || {}).error || ""));
+  await p.size(DESKTOP);
+  await p.go("/queue");
+  const rowText = await p.text(`[data-entry="${dadRow && dadRow.id}"]`);
+  check("the row says the answer did not finish, and why",
+    /The answer did not finish/.test(rowText) && /cut off at the token limit/.test(rowText), rowText.slice(0, 200));
+  check("the row opens the assessment to try again",
+    await p.count(`[data-entry="${dadRow && dadRow.id}"] a[href="/c/${made.id}"]`) === 1);
+  check("the sidebar still counts them as waiting", /1 waiting/.test(await p.text("#queue-link")));
+  await p.shot(join(out, "desktop-caseload-error.png"), true);
   await p.size(PHONE);
   await p.go("/queue");
   await p.shot(join(out, "phone-caseload.png"), true);
+  if (dadRow) await fetch(`${APP}/api/queue/${dadRow.id}`, { method: "DELETE" });
   await p.close();
 }
 

@@ -32,6 +32,8 @@ from pathlib import Path
 
 from store import DATA, _write_json, now_iso
 
+HERE = Path(__file__).resolve().parent
+
 REASON_MAX = 80
 
 
@@ -187,21 +189,43 @@ class QueueStore:
 # 2026-09-20. The state is DERIVED from the linked assessment rather than
 # stored, so it cannot go stale: see queue_view in server.py, which reconciles
 # each entry against its conversation before the page is built.
-def status_of(entry):
+def status_of(entry, failed=None):
     if entry.get("done"):
         return "seen"
+    if failed:
+        return "error"
     started = entry.get("started_at") or entry.get("conversation_id")
     return "in_progress" if started else "waiting"
 
 
-def describe(entry, people_by_id):
+# WHAT THE LINKED ASSESSMENT SAYS ABOUT THE PERSON. Viraj's report 2026-09-27:
+# an assessment that ended in an error (the model's answer cut off at the
+# token limit) marked the person SEEN, so they left the list without anyone
+# having been told anything. An error is not a finished piece of work. Only a
+# shown answer or a refusal is. An assessment whose turns are all errors keeps
+# the person WAITING, and the row carries the error, so the worker can open it
+# and try again; a later turn that finishes marks them seen as usual.
+def linked_state(conv):
+    """("seen", None), ("error", message) or ("open", None) for a linked
+    assessment's turns."""
+    turns = [t for s in (conv or {}).get("sides", []) for t in s.get("turns", [])]
+    if any(t.get("kind") in ("result", "refused") for t in turns):
+        return "seen", None
+    errors = [t for t in turns if t.get("kind") == "error"]
+    if errors:
+        return "error", (errors[-1].get("event") or {}).get("message") or "The answer did not finish."
+    return "open", None
+
+
+def describe(entry, people_by_id, failed=None):
     """An entry with the person joined on, for the page. A person who has been
-    deleted still lists: the caseload records that they were waiting."""
+    deleted still lists: the caseload records that they were waiting. `failed`
+    is the error the linked assessment ended in, if it ended in one."""
     p = people_by_id.get(entry["person_id"])
-    return dict(entry,
+    return dict(entry, error=failed,
                 label=(p or {}).get("label") or "Removed person",
                 age=(p or {}).get("age"), sex=(p or {}).get("sex"),
-                status=status_of(entry),
+                status=status_of(entry, failed),
                 missing=p is None)
 
 
@@ -284,6 +308,25 @@ if __name__ == "__main__":
         check("describe joins the person on", d1["label"] == "Mum" and d1["missing"] is False)
         d2 = describe(mum_entry, {})
         check("a deleted person still lists", d2["missing"] is True and d2["label"] == "Removed person")
+
+        # An assessment that ended in an error does not see anyone. The
+        # fixture is the real one: Dad's caseload assessment on 2026-09-27,
+        # cut off at the token limit, which marked him seen.
+        import json
+        cut = json.loads((HERE / "fixtures" / "caseload" / "cut-off-dad.json").read_text())
+        state, msg = linked_state(cut)
+        check("an assessment that only errored is not seen", state == "error")
+        check("its error is carried to the row", "cut off at the token limit" in (msg or ""))
+        e_dad = q.waiting_for("dad")
+        row = describe(e_dad, {"dad": {"label": "Dad", "age": 71, "sex": "male"}}, failed=msg)
+        check("the row says error and stays waiting",
+              row["status"] == "error" and not row["done"] and row["error"] == msg)
+        retried = json.loads(json.dumps(cut))
+        retried["sides"][0]["turns"].append({"kind": "result", "event": {}})
+        check("a turn that finishes after the error marks them seen", linked_state(retried) == ("seen", None))
+        refused = {"sides": [{"turns": [{"kind": "refused", "event": {}}]}]}
+        check("a refusal is still a finished piece of work", linked_state(refused)[0] == "seen")
+        check("nothing sent yet is still open", linked_state({"sides": [{"turns": []}]}) == ("open", None))
 
     print(f"\n{ok}/{ok + fails} self-tests passed.")
     raise SystemExit(1 if fails else 0)

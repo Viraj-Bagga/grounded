@@ -1,0 +1,116 @@
+{
+ "id": "20260927-175358-3624db",
+ "created": "2026-09-27T21:53:58Z",
+ "updated": "2026-09-27T21:55:04Z",
+ "mode": "single",
+ "title": "Tight chest walking up the hill, it eased when I stopped.",
+ "sides": [
+  {
+   "person_id": "dad",
+   "profile": {
+    "id": "dad",
+    "label": "Dad",
+    "age": 71,
+    "sex": "male",
+    "conditions": [
+     "atrial fibrillation",
+     "high blood pressure"
+    ],
+    "medications": [
+     "apixaban 5mg twice daily",
+     "bisoprolol"
+    ]
+   },
+   "profile_text": "age: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol",
+   "slot": 1,
+   "anchor": {
+    "keys": [
+     "CP-PERI-002",
+     "CP-DIFF-001",
+     "CP-ANG-002"
+    ],
+    "tokens": 403,
+    "ms": 568,
+    "chunks": [
+     {
+      "key": "CP-PERI-002",
+      "tokens": 25,
+      "category": "yellow"
+     },
+     {
+      "key": "CP-DIFF-001",
+      "tokens": 147,
+      "category": "uncategorised"
+     },
+     {
+      "key": "CP-ANG-002",
+      "tokens": 231,
+      "category": "yellow"
+     }
+    ]
+   },
+   "llm": [
+    {
+     "role": "user",
+     "content": "[PATIENT PROFILE]\nage: 71, sex: male\nconditions: atrial fibrillation, high blood pressure\nmedications: apixaban 5mg twice daily, bisoprolol\n[/PATIENT PROFILE]\n\n[SYMPTOMS]\nTight chest walking up the hill, it eased when I stopped.\n[/SYMPTOMS]\n\n[RETRIEVED CONTEXT]\n[CP-PERI-002]\nChest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward\nFast heartbeat\nFever\n\n[CP-DIFF-001]\nHaving a pain in your chest can be scary. It does not always mean that you are having a heart attack . There can be many other causes, including:\n\nOther heart problems, such as angina\nPanic attacks\nDigestive problems, such as heartburn or esophagus disorders\nSore muscles\nLung diseases, such as pneumonia , pleurisy , or pulmonary embolism\nCostochondritis - an inflammation of joints in your chest\n\nSome of these problems can be serious. Get immediate medical care if you have chest pain that does not go away, crushing pain or pressure in the chest, or chest pain along with nausea, sweating, dizziness or shortness of breath. Treatment depends on the cause of the pain.\n\n[CP-ANG-002]\nAngina can be a warning sign that you are at a higher risk of having a heart attack. If you have chest pain that does not go away, call 9-1-1 immediately.\n\nAngina, also known as angina pectoris, is chest pain or discomfort that occurs when part of your heart muscle does not get enough oxygen-rich blood. It is a common symptom of coronary heart disease , which develops when the arteries of the heart become partially or totally blocked.\n\nAngina pain can feel like pressure, squeezing, tightness, or burning in your chest. The discomfort can also spread to your shoulders, arms, neck, jaw, or back, just like a heart attack. Angina pain can even feel like an upset stomach. Symptoms can be different for women and men.\n\nAngina is very common, affecting approximately 11 million people in the United States. There are several types of angina, and the symptoms may vary depending on which type you have. Angina pain, also called an angina event, can happen when your heart is working hard, or it can happen when you are at rest.\n[/RETRIEVED CONTEXT]"
+    },
+    {
+     "role": "assistant",
+     "content": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion eased by stopping, with the retrieved context describing chest pain that feels better with sitting up and leaning forward, and listing angina as chest pain that occurs when the heart is working hard. The patient has atrial fibrillation and is on apixaban and bisoprolol, which are relevant risk modifiers.\", \"red_flags\": [\"Chest tightness on exertion eased by stopping\"], \"next_steps\": [\"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \""
+    }
+   ],
+   "turns": [
+    {
+     "n": 1,
+     "at": "2026-09-27T21:55:04Z",
+     "text": "Tight chest walking up the hill, it eased when I stopped.",
+     "timeline": "",
+     "kind": "error",
+     "event": {
+      "profile": "Dad",
+      "profile_id": "dad",
+      "side": 0,
+      "message": "Could not read a verdict: the answer was cut off at the token limit",
+      "raw": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion eased by stopping, with the retrieved context describing chest pain that feels better with sitting up and leaning forward, and listing angina as chest pain that occurs when the heart is working hard. The patient has atrial fibrillation and is on apixaban and bisoprolol, which are relevant risk modifiers.\", \"red_flags\": [\"Chest tightne",
+      "n": 1,
+      "first": true,
+      "cache": {
+       "expected": 0,
+       "reused": 702,
+       "read": 514,
+       "slot_taken": false,
+       "slot": 1,
+       "re_read": false
+      },
+      "timings": {
+       "cache_n": 702,
+       "prompt_n": 514,
+       "prompt_ms": 9616.276,
+       "prompt_per_token_ms": 18.708708171206226,
+       "prompt_per_second": 53.45104487433597,
+       "predicted_n": 1024,
+       "predicted_ms": 53676.698,
+       "predicted_per_token_ms": 52.469890518084064,
+       "predicted_per_second": 19.05854939139513
+      },
+      "followups_left": 3
+     },
+     "reached_model": true,
+     "raw": "{\"urgency\": \"yellow\", \"rationale\": \"Chest tightness on exertion eased by stopping, with the retrieved context describing chest pain that feels better with sitting up and leaning forward, and listing angina as chest pain that occurs when the heart is working hard. The patient has atrial fibrillation and is on apixaban and bisoprolol, which are relevant risk modifiers.\", \"red_flags\": [\"Chest tightness on exertion eased by stopping\"], \"next_steps\": [\"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"Call emergency services now\", \"",
+     "timings": {
+      "cache_n": 702,
+      "prompt_n": 514,
+      "prompt_ms": 9616.276,
+      "prompt_per_token_ms": 18.708708171206226,
+      "prompt_per_second": 53.45104487433597,
+      "predicted_n": 1024,
+      "predicted_ms": 53676.698,
+      "predicted_per_token_ms": 52.469890518084064,
+      "predicted_per_second": 19.05854939139513
+     }
+    }
+   ],
+   "context_tokens": 2240
+  }
+ ]
+}

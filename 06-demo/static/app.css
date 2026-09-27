@@ -672,6 +672,10 @@ dl.kv dt { color: var(--ink-3); } dl.kv dd { margin: 0; color: var(--ink); min-w
 .q-acts .btn { padding: 0 .75rem; }
 /* Seen rows stay legible but stop competing with the ones still waiting. */
 .q-item.done .nm { font-weight: 600; color: var(--ink-2); }
+/* An assessment that ended in an error: said in words, with the alert icon, in
+   ink. Not a triage colour: it is a state of the work, not of the patient. */
+.q-err { display: flex; gap: .5rem; align-items: flex-start; font-size: var(--fs-meta); color: var(--ink); margin-top: .25rem; }
+.q-err svg.i { width: 1rem; height: 1rem; flex: none; margin-top: .125rem; }
 /* Being assessed right now. A word, not a colour: the triage palette is for
    verdicts and this is a state of the work, not of the patient. */
 .tag-busy { font: 700 var(--fs-fine)/1 var(--font); padding: .25rem .5rem; border-radius: 999px;

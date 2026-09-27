@@ -27,16 +27,20 @@ function who(e) {
 // indistinguishable from someone nobody had touched. Viraj's report
 // 2026-09-20. The state is derived from the linked assessment, not stored:
 // see reconcile_caseload in server.py.
+// AN ASSESSMENT THAT ENDED IN AN ERROR LEAVES THE PERSON WAITING, with the
+// error on the row and a way back into the assessment, whose last turn offers
+// Try again. It used to mark them seen. Viraj's report 2026-09-27.
 function waitingRow(e) {
-  const busy = e.status === "in_progress";
-  return `<li class="q-item${busy ? " in-progress" : ""}${e.missing ? " gone-person" : ""}" data-entry="${esc(e.id)}">
+  const busy = e.status === "in_progress", failed = e.status === "error";
+  return `<li class="q-item${busy ? " in-progress" : ""}${failed ? " failed" : ""}${e.missing ? " gone-person" : ""}" data-entry="${esc(e.id)}">
     <div class="q-main">
       <span class="nm">${esc(e.label)}${busy ? '<span class="tag-busy">Being assessed</span>' : ""}${e.missing ? '<span class="sample">No profile</span>' : ""}</span>
       <span class="fx">${who(e) || "waiting"}</span>
+      ${failed ? `<span class="q-err" role="status">${icon("alert")}<span>The answer did not finish. ${esc(e.error)}</span></span>` : ""}
       <span class="m">Added ${esc(clock(e.added))}</span>
     </div>
     <div class="q-acts">
-      ${busy && e.conversation_id
+      ${(busy || failed) && e.conversation_id
         ? `<a class="btn primary" href="/c/${esc(e.conversation_id)}" data-link>Open</a>`
         : (e.missing ? "" : `<button class="btn primary" type="button" data-assess="${esc(e.person_id)}" data-entry-id="${esc(e.id)}">Assess</button>`)}
       <button class="btn plain" type="button" data-seen="${esc(e.id)}">Mark seen</button>

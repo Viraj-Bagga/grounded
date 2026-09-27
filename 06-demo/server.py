@@ -232,7 +232,9 @@ def reconcile_caseload():
 
     "Shown something" includes a refusal, because a child profile or an
     out-of-scope complaint is a finished piece of work: the worker asked and
-    the system answered, even though the answer was no verdict.
+    the system answered, even though the answer was no verdict. It does NOT
+    include an error: an assessment whose turns all errored leaves the person
+    waiting, with the error on their row. See caseload.linked_state.
 
     Run before the caseload is read, so tapping Assess and coming back shows
     the person mid-assessment rather than looking untouched. Viraj's report
@@ -252,8 +254,11 @@ def reconcile_caseload():
             QUEUE.unlink(e["id"])           # the assessment is gone
             continue
         turns = [t for s in conv.get("sides", []) for t in s.get("turns", [])]
-        if any(t.get("kind") in ("result", "refused", "error") for t in turns):
+        state, _ = caseload.linked_state(conv)
+        if state == "seen":
             QUEUE.done(e["id"], cid)        # finished -> seen
+        elif state == "error":
+            continue                        # errored -> still waiting, error on the row
         elif not turns and _older_than(conv.get("created"), ABANDON_AFTER):
             QUEUE.unstart(e["id"])          # abandoned -> waiting
 
@@ -270,7 +275,11 @@ def queue_view():
     reconcile_caseload()
     waiting, done = QUEUE.list()
     seen_today = [e for e in done if (e.get("done_at") or "")[:10] == now_iso()[:10]]
-    rows = [caseload.describe(e, people) for e in waiting]
+    def failed(e):
+        conv = CONVERSATIONS.get(e["conversation_id"]) if e.get("conversation_id") else None
+        state, msg = caseload.linked_state(conv) if conv else ("open", None)
+        return msg if state == "error" else None
+    rows = [caseload.describe(e, people, failed(e)) for e in waiting]
     active = [r for r in rows if r["status"] == "in_progress"]
     return {"waiting": rows,
             "done": [caseload.describe(e, people) for e in done],
