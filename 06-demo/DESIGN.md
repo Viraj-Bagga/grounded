@@ -35,7 +35,7 @@ typography:
     letterSpacing: "-0.01em"
   title:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "1.25rem"
+    fontSize: "1.3125rem"
     fontWeight: 700
     lineHeight: 1.25
     letterSpacing: "-0.005em"
@@ -46,18 +46,18 @@ typography:
     lineHeight: 1.25
   body:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "1.0625rem"
+    fontSize: "1.125rem"
     fontWeight: 400
     lineHeight: 1.5
     fontFeature: "\"kern\""
   field:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "1.0625rem"
+    fontSize: "1.125rem"
     fontWeight: 400
     lineHeight: 1.35
   label:
     fontFamily: "Atkinson Next, system-ui, -apple-system, Segoe UI, sans-serif"
-    fontSize: "0.9375rem"
+    fontSize: "1rem"
     fontWeight: 700
     lineHeight: 1.3
   meta:
@@ -82,8 +82,8 @@ spacing:
   xs: "0.5rem"
   sm: "0.75rem"
   pad: "1rem"
-  sec: "1.75rem"
-  turn: "2rem"
+  sec: "2rem"
+  turn: "2.5rem"
   tap: "2.75rem"
 components:
   button-primary:
@@ -147,7 +147,7 @@ components:
     backgroundColor: "{colors.paper}"
     textColor: "{colors.ink}"
     rounded: "{rounded.none}"
-    size: "2rem"
+    size: "2.25rem"
   urgency-bar-red:
     backgroundColor: "{colors.red}"
     textColor: "{colors.paper}"
@@ -261,16 +261,16 @@ A cool neutral paper-and-ink system with a single deep blue accent and three res
 ### Hierarchy
 - **Verdict** (800, 1.875rem, line-height 1, tracking 0.01em): the category word inside the urgency bar, uppercase as written (RED, YELLOW, GREEN, OUT OF SCOPE). The heaviest thing on screen.
 - **Headline** (700, 1.5rem, 1.2, tracking -0.01em): page titles ("Edit Mum", "People", "Caseload").
-- **Title** (700, 1.25rem, 1.25): answer section headings (What to do, Why, Red flags, Questions for you, Sources) and the brand mark (at 800).
+- **Title** (700, 1.3125rem, 1.25): answer section headings (What to do, Why, Red flags, Questions for you, Sources) and the brand mark (at 800).
 - **Disposition** (700, 1.0625rem, 1.25): the disposition beside the verdict word.
-- **Body** (400, 1.0625rem, 1.5): answers, what the person said. Answer prose and the said row are capped at 70ch.
-- **Field** (400, 1.0625rem, 1.35): text inside fields. Never below 16px at any width, because iOS Safari zooms the page when a smaller field takes focus.
-- **Label** (600 to 700, 0.9375rem): tabs, field labels, preset titles, history titles, rule headings.
+- **Body** (400, 1.125rem, 1.5): answers, what the person said. Answer prose and the said row are capped at 70ch.
+- **Field** (400, 1.125rem, 1.35): text inside fields. Never below 16px at any width, because iOS Safari zooms the page when a smaller field takes focus.
+- **Label** (600 to 700, 1rem): tabs, field labels, preset titles, history titles, rule headings.
 - **Meta** (400, 0.875rem): the "For Dad · 3:34 PM" record header, history meta, the Checked line, allowance, scope line.
 - **Key** (mono 700, 0.875rem): citation keys, rule ids, A/B side tags (at 0.75rem).
 - **Measure** (mono 400, 0.75rem to 0.875rem, 1.5): timelines, raw model output, the "What the model reads" block.
 
-The sizes above are the desktop steps: 0.75, 0.875, 0.9375, 1.0625, 1.25, 1.5 and 1.875rem. The scale is mobile first and grows at 60rem: on a phone the same steps are 0.6875, 0.78125, 0.84375, 0.9375, 1.0625, 1.1875 and 1.5rem, and a field is exactly 1rem. Each CSS name (`--t-17` and so on) is the desktop pixel size it was born as. Numerals in measurements and details use tabular figures.
+The sizes above are the laptop sizes. Every size is a step of the classical typographic scale, 12, 14, 16, 18, 21, 24, 36 and 48px, approved on 2026-09-27 (ui-audit/direction.html). The tokens are named by role, `--fs-fine`, `--fs-meta`, `--fs-label`, `--fs-body`, `--fs-title` and `--fs-headline`, mobile first and growing at 60rem: on a phone body and fields are 16px, section titles 18 and page titles 21; on a laptop 18, 21 and 24. Meta is 14 and labels 16 at every width. Nothing a person has to read is under 14px, except the 12px mono of counts and hashes. Until 2026-09-27 the tokens were named after the desktop pixel size each was born as (`--t-17` for the body), and phone body text was 15px. Numerals in measurements and details use tabular figures.
 
 ### Named Rules
 **The Mono Means Data Rule.** Mono is only for citation keys, rule ids, timelines, token and cache counts and raw model output. Never for prose, headings or labels.
@@ -292,11 +292,11 @@ Every padding, margin and gap is a multiple of 4px, from Carbon. The steps in us
 |---|---|---|---|
 | `--pad` | 16px | 16px | the page gutter |
 | `--page-y` | 12px | 20px | the page's own top and bottom padding |
-| `--sec` | 20px | 28px | between an answer's sections |
-| `--turn` | 24px | 32px | between one turn and the next |
+| `--sec` | 24px | 32px | between an answer's sections |
+| `--turn` | 32px | 40px | between one turn and the next, always more than a section |
 | `--tap` | 44px | 44px | the floor for anything a thumb lands on |
 | `--bar-h` | 52px | 60px | the urgency bar's least height |
-| `--numeral` | 28px | 32px | the keypad square on a numbered step |
+| `--numeral` | 32px | 36px | the keypad square on a numbered step |
 
 Two things are centred by arithmetic rather than spaced: a field's one line sits in the middle of its 44px box (`calc((var(--tap) - 1lh) / 2)`), and a numbered step's first line sits level with the middle of its numeral.
 
@@ -378,7 +378,7 @@ What the person said, as a record: a square well row across the column with "For
 Four equal columns, Retrieve, Read, Write, Check, each topped by a 3px stripe: rule when waiting, a blue and wash dashed stripe while running, solid blue when done, dashed and greyed when skipped. A sub-line under each gives the count or time. The raw model stream stays hidden behind a "Show what the model is writing" text action. A slow re-read shows a well notice with the info icon; its wording, "The model lost this conversation and is re-reading it.", is Viraj's (2026-09-19), and the answer's summary line says "The model lost this conversation and re-read it." afterwards.
 
 ### Keypad Numerals
-Numbered steps sit beside a square with a 1px ink border and a bold numeral, 28px on a phone and 32px from 60rem. "What to do" is always numbered this way.
+Numbered steps sit beside a square with a 1px ink border and a bold numeral, 32px on a phone and 36px from 60rem. "What to do" is always numbered this way.
 
 ### Removed, Flagged, Not Grounded
 - **Removed:** the entry struck through in ink-3, followed by a small square tag "removed: " plus the reason. Several removed citations share one "removed" head line and are clipped to a line each.

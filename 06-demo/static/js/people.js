@@ -174,7 +174,7 @@ function previewHTML(pv, label) {
   } else {
     h += pv.watching.map(w => `<div class="w-rule">
       <div class="h"><span class="rtag">${esc(w.rule)}</span> ${esc(ruleName(w.name))}</div>
-      <div class="muted" style="font-size:var(--t-14)">Because of ${esc(w.fact)}. ${w.action === "flag"
+      <div class="muted" style="font-size:var(--fs-meta)">Because of ${esc(w.fact)}. ${w.action === "flag"
         ? "It flags the answer and does not change the urgency."
         : `It raises the urgency one level${w.cap === "yellow" ? ", up to yellow" : ", up to red"}.`}</div>
       <div class="q">“${esc(w.quote)}”</div>

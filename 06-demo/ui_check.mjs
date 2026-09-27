@@ -163,7 +163,22 @@ async function tab() {
           + "(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
         platform: "iPhone" });
     },
-    async go(path) { await send("Page.navigate", { url: APP + path }); await page.until("document.readyState === 'complete' && !document.querySelector('.loading')"); await sleep(350); },
+    // ONE NAVIGATION IN A FEW NEVER FINISHES. Page.navigate returns and the page
+    // sits on "Loading..." for the full wait, then a second navigation clears it.
+    // Unexplained: claude.md records it for drop, and on 2026-09-27 it hit the
+    // rules mode and voice, each passing when run again. So a page gets 20 s, then
+    // one more navigation, and the second attempt is printed, never hidden.
+    async go(path) {
+      const ready = "document.readyState === 'complete' && !document.querySelector('.loading')";
+      await send("Page.navigate", { url: APP + path });
+      try { await page.until(ready, 20000); }
+      catch {
+        console.log(`      NOTE ${path} had not finished loading after 20 s; navigating to it again`);
+        await send("Page.navigate", { url: APP + path });
+        await page.until(ready);
+      }
+      await sleep(350);
+    },
     async eval(expr) {
       const r = await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true });
       if (r.exceptionDetails) throw new Error(`${expr.slice(0, 80)}: ${r.exceptionDetails.exception?.description || r.exceptionDetails.text}`);
