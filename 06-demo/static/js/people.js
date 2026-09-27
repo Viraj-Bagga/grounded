@@ -58,7 +58,7 @@ export function peopleListHTML(people, flash) {
       <span class="fx">${esc(facts(p))}</span>
       <span class="rec">${scheduleHTML(p)}</span>
       <span class="rl">${p.child ? "Not assessed by this app"
-        : p.watching.length ? `Watching for ${p.watching.map(w => `<span class="rtag">${esc(w.rule)}</span>`).join("")}`
+        : p.watching.length ? `Watching for ${p.watching.map(w => `<span class="rtag">${esc(ruleName(w.name))}</span>`).join("")}`
         : "No profile rules apply"}</span>
       <span class="ch">${icon("chevron")}</span></a></li>`).join("")}</ul>
   </div>`;
@@ -173,7 +173,7 @@ function previewHTML(pv, label) {
     h += `<p class="muted" style="margin:0">No profile rules apply. The model still assesses every answer, and the guards still run.</p>`;
   } else {
     h += pv.watching.map(w => `<div class="w-rule">
-      <div class="h"><span class="rtag">${esc(w.rule)}</span> ${esc(ruleName(w.name))}</div>
+      <div class="h">${esc(ruleName(w.name))}</div>
       <div class="muted" style="font-size:var(--fs-meta)">Because of ${esc(w.fact)}. ${w.action === "flag"
         ? "It flags the answer and does not change the urgency."
         : `It raises the urgency one level${w.cap === "yellow" ? ", up to yellow" : ", up to red"}.`}</div>

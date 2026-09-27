@@ -245,7 +245,12 @@ async function shots(out) {
     await p.go("/people/mum");
     await p.until("document.querySelector('.preview .w-rule')");
     check(`${name}: Mum's form shows the rules her profile turns on`,
-      /R1/.test(await p.text(".preview")) && /R3/.test(await p.text(".preview")));
+      /Diabetes with mild or vague symptoms/.test(await p.text(".preview"))
+      && /Known coronary disease/.test(await p.text(".preview")));
+    // No rule number shows by default anywhere, since 2026-09-27: the rules
+    // go by their plain descriptions.
+    check(`${name}: the people pages show no rule number`,
+      !/\bR[1-6]\b/.test(await p.text(".preview")) && !/\bR[1-6]\b/.test(await p.text("#main")));
     await p.shot(join(out, `${name}-person-mum.png`), true);
     await p.go("/?p=maya");
     check(`${name}: Maya's empty screen says she is not assessed`, /under 16/i.test(await p.text(".kid-note")));
@@ -829,7 +834,7 @@ async function people(out) {
   await p.click('[data-sex="male"]');
   await p.type("#f-conditions", "type 2 diabetes");
   await p.eval("document.querySelector('#f-conditions').dispatchEvent(new Event('change'))");
-  await p.until("/R1/.test(document.querySelector('.preview')?.innerText || '')", 10000);
+  await p.until("/Diabetes with mild or vague symptoms/.test(document.querySelector('.preview')?.innerText || '')", 10000);
   check("the preview shows the rule the new condition turns on", true);
   await p.shot(join(out, "desktop-person-new.png"), true);
   await p.click("button[type=submit]");
@@ -1345,7 +1350,7 @@ async function packsFlow(out) {
 // broke, by rule; nothing here decides pass or fail.
 function pageAudit(phone) {
   const W = innerWidth;
-  const out = { overflow: [], targets: [], fields: [], fieldEdge: [], contrast: [], motion: [], dashes: [],
+  const out = { overflow: [], targets: [], fields: [], fieldEdge: [], contrast: [], motion: [], dashes: [], ruleIds: [],
                 colour: [], words: [], hold: [], cites: [], gone: 0, goneBad: [], offscreen: [], clamp: [] };
   const where = el => {
     const cls = typeof el.className === "string" && el.className.trim()
@@ -1489,6 +1494,12 @@ function pageAudit(phone) {
   const text = `${document.title}\n${document.body.innerText}`;
   for (let i = text.indexOf("\u2014"); i >= 0; i = text.indexOf("\u2014", i + 1))
     out.dashes.push(JSON.stringify(text.slice(Math.max(0, i - 30), i + 30).replace(/\s+/g, " ")));
+
+  // NO RULE NUMBER BY DEFAULT, since 2026-09-27. Rules go by their plain
+  // descriptions; a number may appear only once a person opens the details.
+  // innerText skips closed panels, so this reads what is on screen.
+  for (const m of document.body.innerText.matchAll(/\b(?:rule )?R[1-6]\b/g))
+    out.ruleIds.push(JSON.stringify(document.body.innerText.slice(Math.max(0, m.index - 30), m.index + 30).replace(/\s+/g, " ")));
 
   // TRIAGE COLOURS ARE SIGNALS. Only an urgency bar and a history or register
   // mark may carry red, yellow or green, as text, fill or border.
@@ -1658,6 +1669,7 @@ async function rulesFlow(out, baseUrl) {
     rule("contrast", "all text meets WCAG AA contrast");
     rule("motion", "nothing moves under prefers-reduced-motion");
     rule("dashes", "no em dash anywhere in the copy");
+    rule("ruleIds", "no rule number shows by default");
     rule("colour", "triage colours appear only in urgency bars and marks");
     rule("words", "every urgency bar and mark carries a word");
     rule("hold", "refusals are the neutral grey");

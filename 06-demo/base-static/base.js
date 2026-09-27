@@ -45,6 +45,15 @@ const whenCell = iso => iso
     : `<span class="d">${esc(dt(iso).toLocaleDateString([], { day: "numeric", month: "short" }))}</span><span class="t">${esc(hhmm(iso))}</span>`)
   : `<span class="t none-mark">None</span>`;
 
+// What a profile rule did, in words. No rule number shows: the same heads as
+// the field device's rule line.
+function ruleHead(f, e) {
+  const fin = String(e.final || "").toLowerCase();
+  return f.status === "raised" ? `Raised to ${fin}` : f.status === "supports" ? `Backs up this ${fin}`
+    : f.status === "at_least" ? `At least ${String(f.cap || "").toLowerCase()}`
+    : f.status === "noted" ? "Noted" : "Flagged";
+}
+
 // Every mark carries its word as visually hidden text and in its title: the
 // dot alone is not the verdict. Since the overhaul of 2026-09-27 it is a dot,
 // filled for a verdict and a ring for none, with no letter.
@@ -346,7 +355,7 @@ function turnHTML(t, n, total) {
     ${n > 1 && t.text ? `<blockquote class="saidq small">${esc(t.text)}</blockquote>` : ""}
     ${ev.ungrounded ? `<p class="tg dashed inline">not grounded in sources</p>` : ""}
     ${ev.message && t.kind !== "result" ? `<p>${esc(ev.message)}</p>` : ""}
-    ${(e.fired || []).map(f => `<p class="rulep"><b>${esc(f.status === "raised" ? `Raised to ${e.final}` : "Rule " + f.rule)}</b>:
+    ${(e.fired || []).map(f => `<p class="rulep"><b>${esc(ruleHead(f, e))}</b>:
       ${esc(f.fact)} with ${esc(f.symptom)}<br><span class="q">“${esc(f.quote)}”</span>
       <span class="keys">${(f.keys || []).map(k => `<span class="key">${esc(k)}</span>`).join("")}</span></p>`).join("")}
     ${res.rationale ? `<h4>Why</h4><p>${esc(res.rationale)}</p>` : ""}
