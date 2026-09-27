@@ -224,10 +224,8 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
 .who .ab, .tabs .ab { font: 700 var(--fs-fine)/1 var(--font); width: 1.375rem; height: 1.375rem; display: inline-grid;
   place-items: center; border-radius: 50%; background: var(--well); color: var(--ink-2); }
 .tabs { display: flex; margin-bottom: .75rem; box-shadow: inset 0 -1px 0 var(--rule); }
-/* THE A/B TABS OF A COMPARISON, below 60rem: Carbon's line tabs. A hairline
-   runs under the row and the selected tab stands on it with a 3px rule in
-   ink, not blue, because selection is ink here. They were bare browser buttons
-   until 2026-09-27: the .chip rule they used went with the chip row. */
+/* THE A/B TABS OF A COMPARISON, below 60rem: line tabs. A hairline runs under
+   the row and the selected tab stands on it with a 2px rule in ink. */
 .tabs [role=tab] { display: inline-flex; align-items: center; gap: .5rem; min-height: var(--tap);
   padding: 0 1rem; border: 0; border-bottom: 2px solid transparent; background: transparent;
   font-weight: 600; color: var(--ink-2); cursor: pointer; }
