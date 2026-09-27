@@ -92,7 +92,7 @@ export function answerHTML(ev, ctx = {}) {
     case "confirm_subject": return confirmHTML(ev, ctx);
     case "full": return fullHTML(ev);
     case "busy": return `<div class="notice">${icon("info")}<span>${esc(ev.message)}</span></div>`;
-    default: return errorHTML(ev);
+    default: return errorHTML(ev, ctx);
   }
 }
 
@@ -208,9 +208,15 @@ function fullHTML(ev) {
     `<button class="btn plain" type="button" data-new>Start a new assessment</button></div>`;
 }
 
-function errorHTML(ev) {
-  return `<div class="err-panel"><div class="err">${icon("alert")}<span>Something went wrong</span></div>` +
-    `<div>${esc(ev.message)}</div></div>`;
+// A turn that failed says so first, in the words the announcement already
+// uses, then why, then offers the one thing to do: send the same words again.
+// It used to stop at "Something went wrong". Only the last turn of a side
+// offers it, and not while anything is being written.
+function errorHTML(ev, ctx = {}) {
+  return `<div class="err-panel"><div class="err">${icon("alert")}<span>The answer did not finish.</span></div>` +
+    `<div>${esc(ev.message)}</div>` +
+    (ctx.retry ? `<div class="err-acts"><button class="btn plain" type="button" data-retry>Try again</button></div>` : "") +
+    `</div>`;
 }
 
 // ------------------------------------------------ the one line, and its details

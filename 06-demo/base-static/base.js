@@ -98,7 +98,7 @@ function tableHTML(rows) {
     </tr></thead>
     <tbody>${rows.map(r => `<tr${r.reviewed ? ' class="seen"' : ""}>
       <td class="c-mk">${r.sides.map(s => mk(s.state)).join("")}</td>
-      <td class="c-as"><a href="/a/${esc(r.id)}" data-link class="ttl">${said(r)}</a>
+      <td class="c-as"><a href="/a/${esc(r.id)}" data-link class="ttl"><span class="clamp">${said(r)}</span></a>
         <span class="meta">${people(r)}</span></td>
       <td class="c-at">${attention(r)}</td>
       <td class="c-fr">${fromCell(r)}</td>
@@ -113,7 +113,7 @@ function listHTML(rows) {
   return `<ul class="recs">${rows.map(r => `<li class="rec${r.reviewed ? " seen" : ""}">
     <div class="rm">${r.sides.map(s => mk(s.state)).join("")}</div>
     <div class="rc">
-      <a href="/a/${esc(r.id)}" data-link class="ttl">${said(r)}</a>
+      <a href="/a/${esc(r.id)}" data-link class="ttl"><span class="clamp">${said(r)}</span></a>
       <span class="meta">${people(r)} · ${esc(r.updated ? hhmm(r.updated) : "")}</span>
       <span class="meta dev-line">${icon("device")}<span class="dev">${esc(r.device_label || r.device)}</span>${r.worker ? ` · ${esc(r.worker)}` : ""}</span>
       <span class="tags">${attention(r)}</span>

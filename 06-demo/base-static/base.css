@@ -115,11 +115,16 @@ a.link-btn { text-decoration: none; }
 .c-fr { width: 9rem; }
 .c-wh { width: 5.5rem; }
 .c-ac { width: 8.5rem; }
-/* 44px tall at the least, like everything else a thumb lands on. Most titles
-   are the symptom text and run to two lines, so it rarely shows. */
-.ttl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: var(--tap);
-  overflow: hidden; font: 600 var(--t-15)/1.35 var(--font); color: var(--ink); text-decoration: none; }
-.ttl:hover { text-decoration: underline; }
+/* 44PX TO A THUMB WITHOUT LOOKING IT. The two-line clamp lives on the inner
+   span, so the cut stays clean. The link reaches 12px above and below the words,
+   cancelled by an equal negative margin, so the row looks as it did while the
+   target is 44px or more. A min-height on the clamped box itself showed the top
+   of a third line under every title, fixed 2026-09-27. */
+.ttl { display: block; min-height: var(--tap); padding: 12px 0; margin: -12px 0;
+  color: var(--ink); text-decoration: none; }
+.ttl .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font: 600 var(--t-15)/1.35 var(--font); }
+.ttl:hover .clamp { text-decoration: underline; }
 .meta { display: block; font-size: var(--t-14); color: var(--ink-2); }
 /* A reviewed row quietens its title and NOTHING else: a supervisor re-reading
    it needs the same facts at the same strength. */

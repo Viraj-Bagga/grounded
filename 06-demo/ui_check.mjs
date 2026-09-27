@@ -948,7 +948,10 @@ async function regions(out) {
   await sleep(300);
   check("the check leaves the base corpus selected, as it found it",
     await p.eval(`(localStorage.getItem("region") || "") === ""`));
-  check("the sidebar is back to Base only", /Base only/.test(await p.text("#region-link")));
+  // Read the row's text, not its rendered text: at this width it is in the closed
+  // drawer, which is hidden since 2026-09-27, and innerText of hidden text is "".
+  check("the sidebar is back to Base only",
+    /Base only/.test(await p.eval(`document.querySelector("#region-link").textContent`)));
   await p.close();
 }
 
@@ -1322,7 +1325,7 @@ async function packsFlow(out) {
 function pageAudit(phone) {
   const W = innerWidth;
   const out = { overflow: [], targets: [], fields: [], fieldEdge: [], contrast: [], motion: [], dashes: [],
-                colour: [], words: [], hold: [], cites: [], gone: 0, goneBad: [] };
+                colour: [], words: [], hold: [], cites: [], gone: 0, goneBad: [], offscreen: [], clamp: [] };
   const where = el => {
     const cls = typeof el.className === "string" && el.className.trim()
       ? "." + el.className.trim().split(/\s+/).join(".") : "";
@@ -1349,6 +1352,26 @@ function pageAudit(phone) {
       && e.getBoundingClientRect().right > W + 1 && !inScroller(e));
     out.overflow.push(`page is ${document.documentElement.scrollWidth}px wide: `
       + wide.slice(0, 3).map(where).join(", "));
+  }
+
+  // NOTHING OFF SCREEN TAKES FOCUS. A closed drawer that is only moved aside
+  // keeps its links in the tab order and in front of a screen reader; it has to
+  // be hidden too. 71 did, on a phone, until 2026-09-27.
+  for (const el of document.querySelectorAll("a[href], button, input:not([type=hidden]), select, textarea, summary")) {
+    const cs = getComputedStyle(el);
+    if (cs.display === "none" || cs.visibility === "hidden" || el.disabled || el.closest("[inert], .sr")) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width && r.height && (r.right <= 0 || r.left >= W)) out.offscreen.push(where(el));
+  }
+
+  // A LINE CLAMP SHOWS ITS LINES AND NO MORE. A clamped box made taller than
+  // its lines shows the top of the next one, as base's register titles did.
+  for (const el of document.querySelectorAll("body *")) {
+    const cs = getComputedStyle(el);
+    const n = parseInt(cs.webkitLineClamp, 10), lh = parseFloat(cs.lineHeight);
+    if (!n || !lh || away(el)) continue;
+    const inner = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    if (inner > n * lh + 1) out.clamp.push(`${where(el)} ${Math.round(inner)}px for ${n} lines of ${Math.round(lh)}px`);
   }
 
   // 44 BY 44 FOR ANYTHING A THUMB LANDS ON. A link in running text is exempt,
@@ -1509,6 +1532,7 @@ async function rulesFlow(out, baseUrl) {
     pair: find(c => c.sides.length === 2 && c.sides.every(answered)),
     refusal: find(c => c.sides.some(s => s.state === "refused")),
     child: find(c => c.sides.some(s => s.state === "child")),
+    error: find(c => c.sides.some(s => s.state === "error")),
   };
   for (const [k, v] of Object.entries(ids)) if (!v) console.log(`      NOTE no saved ${k} to read: run flow, compare and guards first`);
   let baseUp = false;
@@ -1526,6 +1550,7 @@ async function rulesFlow(out, baseUrl) {
     ...(ids.pair ? [["compare", `/c/${ids.pair}`]] : []),
     ...(ids.refusal ? [["refusal", `/c/${ids.refusal}`]] : []),
     ...(ids.child ? [["not-assessed", `/c/${ids.child}`]] : []),
+    ...(ids.error ? [["error", `/c/${ids.error}`]] : []),
     ["people", "/people"],
     ["person", "/people/mum", null, ".preview .w-rule"],
     ["person-new", "/people/new"],
@@ -1572,6 +1597,21 @@ async function rulesFlow(out, baseUrl) {
         if (Array.isArray(v)) (found[k] ||= []).push(...v.map(x => `${name}: ${x}`));
         else found[k] = (found[k] || 0) + v;
       }
+      // The timeline field is as wide as the composer: it was the browser's
+      // default textarea width, about 200px, until 2026-09-27.
+      if (name === "new" && await p.count("#tl-toggle")) {
+        await p.click("#tl-toggle");
+        await sleep(150);
+        const w = JSON.parse(await p.eval(`JSON.stringify({ tl: document.querySelector("#tl").getBoundingClientRect().width,
+          row: document.querySelector(".field-row").getBoundingClientRect().width })`));
+        check(`${dev}: the timeline field is as wide as the composer`, w.tl >= w.row * 0.95,
+          `${Math.round(w.tl)} of ${Math.round(w.row)}px`);
+        await p.click("#tl-toggle");
+      }
+      // A failed turn is not a dead end: it offers to send the same words again.
+      if (name === "error") {
+        check(`${dev}: a failed turn offers Try again`, await p.count("#thread [data-retry]") >= 1);
+      }
       if (name === "source") {
         check(`${dev}: a citation opens its source, with a link out`,
           (await p.text("#sheet-body")).length > 40 && await p.count("#sheet-foot a[href^='http']") === 1);
@@ -1594,6 +1634,8 @@ async function rulesFlow(out, baseUrl) {
     rule("words", "every urgency bar and mark carries a word");
     rule("hold", "refusals are the neutral grey");
     rule("cites", "every citation is a button with its key");
+    rule("offscreen", "nothing off screen can take focus");
+    rule("clamp", "every clamped text shows its lines and no more");
     if (found.gone) rule("goneBad", `every removal is struck through with its reason (${found.gone} on screen)`);
     else console.log(`      NOTE ${dev}: no guard removals in the saved answers, so that rule was not exercised`);
   }
@@ -1621,7 +1663,13 @@ try {
   // next mode in a suite attach to a dying browser. Chrome also writes its
   // profile out as it exits, so this is the same wait for both purposes.
   await waitForPortFree();
-  if (chrome.profile) rmSync(chrome.profile, { recursive: true, force: true });
+  // Chrome can still be writing to its profile as it exits: retry, and never let
+  // a cleanup race fail a mode whose checks have already run. On 2026-09-27 the
+  // queue mode passed all 14 checks and then exited 1 on ENOTEMPTY here.
+  if (chrome.profile) {
+    try { rmSync(chrome.profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); }
+    catch (e) { console.log(`      NOTE could not remove ${chrome.profile}: ${e.code}; remove it by hand`); }
+  }
 }
 console.log(`${failures ? `${failures} failed` : "all passed"}`);
 process.exit(failures);

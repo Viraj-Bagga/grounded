@@ -1,0 +1,343 @@
+2026-09-27 14:36:44 06-demo full suite
+field http://127.0.0.1:8772   base 8781   llama http://127.0.0.1:8080   node 8790 up
+build 6edf4f8, 06-demo has uncommitted changes
+
+=== offline self-tests
+  ok    06-demo/caseload.py   29/29 self-tests passed.
+  ok    06-demo/selftest_profile_text.py   25/25 self-tests passed.
+  ok    02-pairs/guards.py   87/87 self-tests passed (fixtures shared with guards.ts).
+  ok    02-pairs/escalation.py   34/34 self-tests passed.
+  ok    02-pairs/selftest_validator.py   24/24 self-tests passed.
+  ok    03-model/qlora_config.py   gate_proj correctly rejected: target_modules match nothing: ['gate_proj']
+
+=== shots  14:36:45
+PASS  desktop: new assessment shows presets
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/desktop-new.png
+PASS  desktop: people list shows the household
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/desktop-people.png
+PASS  desktop: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/desktop-person-mum.png
+PASS  desktop: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/desktop-maya.png
+PASS  phone: new assessment shows presets
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/phone-new.png
+PASS  phone: people list shows the household
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/phone-people.png
+PASS  phone: Mum's form shows the rules her profile turns on
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/phone-person-mum.png
+PASS  phone: Maya's empty screen says she is not assessed
+      saved 06-demo/results/2026-09-27-polish-6-p1/shots/phone-maya.png
+all passed
+=== shots exit 0  14:36:51
+
+=== people  14:36:51
+PASS  an empty form names what is missing
+PASS  the preview shows the rule the new condition turns on
+      saved 06-demo/results/2026-09-27-polish-6-p1/people/desktop-person-new.png
+PASS  the new person is saved and listed
+PASS  the new person is offered in the picker
+      saved 06-demo/results/2026-09-27-polish-6-p1/people/desktop-person-delete.png
+PASS  the deleted person is gone, and only them
+all passed
+=== people exit 0  14:36:56
+
+=== guards  14:36:56
+      child profile: 1.0 s
+PASS  a child's profile gets NOT ASSESSED
+      saved 06-demo/results/2026-09-27-polish-6-p1/guards/desktop-child.png
+PASS  a child word on an adult profile asks who it is for
+      saved 06-demo/results/2026-09-27-polish-6-p1/guards/desktop-who-is-this-for.png
+      out of scope: 2.2 s
+PASS  an out-of-scope complaint gets a hatched refusal, not a verdict
+      saved 06-demo/results/2026-09-27-polish-6-p1/guards/desktop-out-of-scope.png
+all passed
+=== guards exit 0  14:37:02
+
+=== flow  14:37:02
+PASS  a preset keeps the person picked
+PASS  the preset fills the composer
+PASS  the URL becomes the assessment's own
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/desktop-streaming.png
+PASS  the raw stream opens on a real press, not just a synthetic click
+PASS  the raw stream keeps updating while it is open
+PASS  the raw stream closes again on a real press
+PASS  a verdict bar is shown
+PASS  the verdict is announced to a screen reader
+PASS  the live region is hidden from the eye
+PASS  the checked line is shown
+PASS  the follow-up allowance is shown before it runs out
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/desktop-answer.png
+PASS  the checked line opens its details
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/desktop-answer-details.png
+PASS  a source chip opens the real chunk
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/desktop-source.png
+      follow-up: 8.3 s
+PASS  the follow-up reports its cache reuse
+PASS  the allowance counts down
+PASS  a finished assessment offers a SOAP note
+PASS  the note has its four sections and its header
+PASS  the note quotes the follow-up and carries citation keys
+PASS  the note wraps for a printed page
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/desktop-followup.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/phone-answer.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/phone-answer-full.png
+PASS  the drawer lists this assessment
+      saved 06-demo/results/2026-09-27-polish-6-p1/flow/phone-drawer.png
+all passed
+=== flow exit 0  14:37:46
+
+=== compare  14:37:46
+PASS  preset 3 turns Compare on by itself
+PASS  preset 3 sets You against Mum
+PASS  preset 3 sends by itself
+      compare, both sides, one click: 30.6 s
+PASS  both sides answered
+PASS  a profile rule raised one side
+PASS  a raise to yellow strikes out the model's rationale, whole and tagged
+      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps
+        1 Sit down and rest for a few minutes
+        2 Seek assessment if it becomes frequent, is accompanied by breathlessness at rest, or is new after a period of time
+PASS  compare: record, answers and composer share one left edge
+      saved 06-demo/results/2026-09-27-polish-6-p1/compare/desktop-compare.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/compare/phone-compare-a.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/compare/phone-compare-b.png
+all passed
+=== compare exit 0  14:38:20
+
+=== two-tabs  14:38:20
+      tab B, Grandpa: 28.5 s
+      tab A, Dad: 30.3 s
+PASS  the two tabs hold two different assessments
+PASS  each assessment kept its own person and words
+      tab B follow-up: 14.3 s
+      tab A follow-up: 18.8 s
+PASS  both follow-ups reused their own cache
+      saved 06-demo/results/2026-09-27-polish-6-p1/two-tabs/desktop-tab-a.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/two-tabs/desktop-tab-b.png
+all passed
+=== two-tabs exit 0  14:39:12
+
+=== drop  14:39:12
+PASS  a dropped stream says the answer is still being written
+PASS  the composer waits while it is written
+      saved 06-demo/results/2026-09-27-polish-6-p1/drop/desktop-dropped.png
+      dropped, then saved: 14.4 s
+PASS  the saved answer appears without a reload
+      saved 06-demo/results/2026-09-27-polish-6-p1/drop/desktop-dropped-answer.png
+all passed
+=== drop exit 0  14:39:29
+
+=== regions  14:39:29
+PASS  the region page lists the packs
+PASS  it says retrieval does not change
+PASS  it states the licence and that it is not for commercial use
+PASS  it gives the region's emergency number
+      saved 06-demo/results/2026-09-27-polish-6-p1/regions/desktop-regions.png
+PASS  choosing a region marks it active
+PASS  the sidebar says which region is on
+      saved 06-demo/results/2026-09-27-polish-6-p1/regions/desktop-regions-india.png
+      assessment for a citation: 22.1 s
+PASS  a US chunk that says 9-1-1 carries the region's number
+      saved 06-demo/results/2026-09-27-polish-6-p1/regions/desktop-region-annotation.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/regions/mobile-regions.png
+PASS  the check leaves the base corpus selected, as it found it
+FAIL  the sidebar is back to Base only
+1 failed
+=== regions exit 1  14:39:55
+
+=== voice  14:39:55
+PASS  the composer offers a microphone
+      speaking 4.29 s into the page
+PASS  tapping starts recording
+PASS  send is closed while recording
+      saved 06-demo/results/2026-09-27-polish-6-p1/voice/voice-recording.png
+PASS  the words land in the composer
+PASS  nothing was sent
+PASS  no answer started
+PASS  the transcription time is shown
+PASS  it says to check the words
+      saved 06-demo/results/2026-09-27-polish-6-p1/voice/voice-transcript.png
+PASS  editing is recorded
+      saved 06-demo/results/2026-09-27-polish-6-p1/voice/voice-edited.png
+      spoken assessment: 11.6 s
+PASS  the checked line says it was heard
+PASS  the details panel has a Heard row
+PASS  the details panel records the correction
+      saved 06-demo/results/2026-09-27-polish-6-p1/voice/voice-answer-details.png
+PASS  the SOAP note says the symptoms were spoken
+PASS  the SOAP note records the correction
+PASS  the SOAP note keeps what was heard
+PASS  the SOAP note names the model and the time
+      saved 06-demo/results/2026-09-27-polish-6-p1/voice/voice-soap.txt
+all passed
+=== voice exit 0  14:40:17
+
+=== queue  14:40:17
+PASS  an empty caseload says so
+      saved 06-demo/results/2026-09-27-polish-6-p1/queue/desktop-caseload-empty.png
+PASS  a person can be added to the caseload
+PASS  the note they were added with is shown
+PASS  the sidebar says how many are waiting
+      saved 06-demo/results/2026-09-27-polish-6-p1/queue/desktop-caseload.png
+PASS  somebody already waiting is not offered again
+PASS  Assess opens a new assessment for that person
+PASS  tapping Assess keeps them on the list, in progress
+PASS  nothing is linked yet, because no assessment exists yet
+PASS  nobody is marked seen while it is still running
+PASS  the row says it is being assessed
+      saved 06-demo/results/2026-09-27-polish-6-p1/queue/desktop-caseload-in-progress.png
+      caseload assessment: 59.9 s
+PASS  finishing the assessment moves them to Seen by itself
+PASS  a seen row links the assessment it was seen in
+PASS  the sidebar count goes back to empty
+      saved 06-demo/results/2026-09-27-polish-6-p1/queue/desktop-caseload-seen.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/queue/phone-caseload.png
+node:fs:1193
+  binding.rmdir(path);
+          ^
+
+Error: ENOTEMPTY: directory not empty, rmdir '/var/folders/cm/5n71s0ss7tz6m7vmqhlr3nc40000gn/T/ui-check-9a7NUW/Default'
+    at Object.rmdirSync (node:fs:1193:11)
+    at _rmdirSync (node:internal/fs/rimraf:261:21)
+    at rimrafSync (node:internal/fs/rimraf:194:7)
+    at node:internal/fs/rimraf:254:9
+    at Array.forEach (<anonymous>)
+    at _rmdirSync (node:internal/fs/rimraf:251:7)
+    at rimrafSync (node:internal/fs/rimraf:194:7)
+    at rmSync (node:fs:1239:10)
+    at file:///Users/virajbagga/Coding/steel26/06-demo/ui_check.mjs:1663:23
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  errno: -66,
+  code: 'ENOTEMPTY',
+  syscall: 'rmdir',
+  path: '/var/folders/cm/5n71s0ss7tz6m7vmqhlr3nc40000gn/T/ui-check-9a7NUW/Default'
+}
+
+Node.js v22.23.2
+=== queue exit 1  14:41:22
+
+=== sync  14:41:22
+PASS  the base address is folded away once one is saved
+PASS  what stays is the work: the device, the count and the send control
+PASS  the field opens on the link
+PASS  saving folds it away again
+      assessment with base unreachable: 24.9 s
+PASS  an assessment works with base unreachable
+PASS  the new assessment is waiting to send
+PASS  the sidebar says how many are waiting to send
+      saved 06-demo/results/2026-09-27-polish-6-p1/sync/desktop-sync-waiting.png
+PASS  an unreachable base is reported, and nothing is lost
+PASS  nothing was marked sent while base was unreachable
+      saved 06-demo/results/2026-09-27-polish-6-p1/sync/desktop-sync-offline.png
+PASS  the flush reports each assessment landing
+      saved 06-demo/results/2026-09-27-polish-6-p1/sync/desktop-sync-sent.png
+PASS  base received that exact assessment
+PASS  base verified it against the sha256 it arrived with
+PASS  the dashboard lists it under the device that sent it
+PASS  the verdict at base is the one the field device showed
+PASS  nothing is left waiting after a successful send
+PASS  base REFUSES a bundle whose content does not match its sha256
+      saved 06-demo/results/2026-09-27-polish-6-p1/sync/phone-sync.png
+all passed
+=== sync exit 0  14:41:54
+
+=== base  14:41:54
+PASS  base leads with a tally line, not a card grid
+PASS  the register is a real table with column headers
+PASS  it splits into Needs review and Reviewed
+PASS  every urgency mark carries its word, not just a letter
+PASS  no tag carries a triage colour
+      saved 06-demo/results/2026-09-27-polish-6-p1/base/desktop-base-register.png
+PASS  Needs review is in priority order, red before yellow
+PASS  Mark reviewed moves a row out of Needs review
+PASS  a reviewed row says when it was reviewed
+PASS  reviewing is recorded at base
+PASS  reviewing does not change the assessment's verified digest
+      saved 06-demo/results/2026-09-27-polish-6-p1/base/desktop-base-reviewed.png
+PASS  the Today/All control switches window
+PASS  an assessment opens read-only at base
+PASS  it carries the citation keys
+PASS  it says plainly that base holds no corpus
+PASS  it shows the verified digest it arrived with
+      saved 06-demo/results/2026-09-27-polish-6-p1/base/desktop-base-assessment.png
+PASS  the table is not rendered on a phone
+PASS  records are rendered instead
+PASS  nothing overflows sideways at 390px
+      saved 06-demo/results/2026-09-27-polish-6-p1/base/phone-base-register.png
+all passed
+=== base exit 0  14:41:58
+
+=== rules  14:41:58
+PASS  phone: the timeline field is as wide as the composer
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-new.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-picker.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-drawer.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-answer.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-details.png
+PASS  phone: a citation opens its source, with a link out
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-source.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-compare.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-refusal.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-not-assessed.png
+PASS  phone: a failed turn offers Try again
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-error.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-people.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-person.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-person-new.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-caseload.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-sync.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-regions.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-base.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/phone-base-assessment.png
+PASS  phone: nothing scrolls sideways at 390px
+PASS  phone: every control is at least 44px
+PASS  phone: every field's text is at least 16px
+PASS  phone: every field has an edge or fill that stands 3:1 (WCAG 1.4.11)
+PASS  phone: all text meets WCAG AA contrast
+PASS  phone: nothing moves under prefers-reduced-motion
+PASS  phone: no em dash anywhere in the copy
+PASS  phone: triage colours appear only in urgency bars and marks
+PASS  phone: every urgency bar and mark carries a word
+PASS  phone: refusals are the neutral grey
+PASS  phone: every citation is a button with its key
+PASS  phone: nothing off screen can take focus
+PASS  phone: every clamped text shows its lines and no more
+      NOTE phone: no guard removals in the saved answers, so that rule was not exercised
+PASS  desktop: the timeline field is as wide as the composer
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-new.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-picker.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-answer.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-details.png
+PASS  desktop: a citation opens its source, with a link out
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-source.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-compare.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-refusal.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-not-assessed.png
+PASS  desktop: a failed turn offers Try again
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-error.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-people.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-person.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-person-new.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-caseload.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-sync.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-regions.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-base.png
+      saved 06-demo/results/2026-09-27-polish-6-p1/rules/desktop-base-assessment.png
+PASS  desktop: every control is at least 44px
+PASS  desktop: every field's text is at least 16px
+PASS  desktop: every field has an edge or fill that stands 3:1 (WCAG 1.4.11)
+PASS  desktop: all text meets WCAG AA contrast
+PASS  desktop: nothing moves under prefers-reduced-motion
+PASS  desktop: no em dash anywhere in the copy
+PASS  desktop: triage colours appear only in urgency bars and marks
+PASS  desktop: every urgency bar and mark carries a word
+PASS  desktop: refusals are the neutral grey
+PASS  desktop: every citation is a button with its key
+PASS  desktop: nothing off screen can take focus
+PASS  desktop: every clamped text shows its lines and no more
+PASS  desktop: every removal is struck through with its reason (1 on screen)
+all passed
+=== rules exit 0  14:42:36
+
+check lines: 152 PASS, 1 FAIL (a drop re-run adds its own)
+SUITE FAILED: regions queue

@@ -363,6 +363,7 @@ Blunt and filled with ink; there is no blue button.
 ### Navigation
 - **Sidebar:** chrome. The brand square and "Grounded" at the top, a plain "New assessment" button, the history list grouped by day, then Caseload, Send to base, People and Region as 44px rows, and the model status lamp at the foot. A history row is a column of 1.5rem triage marks (R, Y, G letters, or the hatched hold mark with the drawn no-entry icon), a two-line clamped title and a meta line of person, verdict word and time.
 - **Top bar:** chrome, sticky, below 60rem only: the menu and new-assessment icon buttons, 44px each.
+- **Drawer:** below 60rem the sidebar slides in over a scrim. Closed, it is hidden as well as moved aside, so none of its links can take focus or be read out; its visibility flips only after the 160ms slide. Until 2026-09-27 its 71 links took focus off screen.
 
 ### Urgency Bar (signature)
 A square full-width field, at least 3.75rem, holding the verdict word at 800 and the disposition at 700. Red, yellow and green for the three WHO categories; hatched hold for OUT OF SCOPE, NOT ASSESSED and WHO IS THIS FOR?. It is exposed as a level-2 heading. On arrival it develops left to right in two hard steps over 180ms, and not at all under reduced motion. The disposition strings are Viraj's copy and are recorded here as he wrote them, not as system copy to vary: "Call emergency services now", "Be seen today", "Self-care, and the signs that change the answer". The refusal and not-assessed messages beneath the bar are also his.
@@ -395,11 +396,14 @@ A full-width text button, 44px at least, above a hairline: check icon, "Checked"
 ### Source Sheet
 A native dialog: a square bottom sheet up to 85dvh on narrow screens, a full-height 28rem right panel from 60rem. Sticky header with the key in blue mono at 1.0625rem, token count and a close button; the chunk text at line-height 1.55; a footer with publisher, the URL as a 44px link, retrieval date and source line in meta.
 
+### A Failed Turn
+An ink-bordered panel, never red: the alert icon and "The answer did not finish.", the words the screen-reader announcement already used, then the reason, then a plain **Try again** button that sends the same words and timeline again. Only the last turn of a side offers it, and not while anything is being written. It used to stop at "Something went wrong". "Try again" is surface copy for Viraj.
+
 ### Clinical Export
 Under the last answer, above the composer: a hairline rule, then one action link, 44px tall, and a muted line of explanation beside it, wrapping under it on a phone. It is the only link in the conversation that leaves the page, and it downloads rather than navigates. Added 2026-09-19. Its copy, "Download the SOAP note" and "Plain text, for a clinician. It shows what the guards removed and why.", is surface copy for Viraj to put in his own voice.
 
 ### Base
-The supervisor's register on its own port, with its own copy of these tokens in `base-static/base.css`. The same square shapes, 1px hairlines and 4px grid. A register cell with nothing in it says "None" in ink-3; it was an em dash until 2026-09-27. "None" is surface copy for Viraj to confirm.
+The supervisor's register on its own port, with its own copy of these tokens in `base-static/base.css`. The same square shapes, 1px hairlines and 4px grid. A register cell with nothing in it says "None" in ink-3; it was an em dash until 2026-09-27. "None" is surface copy for Viraj to confirm. A register title clamps at two lines on an inner span, and its link reaches 12px above and below the words, so it is a 44px target without a gap under it; a min-height on the clamped box itself showed the top of a third line.
 
 ## Do's and Don'ts
 
@@ -433,4 +437,4 @@ The supervisor's register on its own port, with its own copy of these tokens in 
 
 ## Checked, not remembered
 
-`node 06-demo/ui_check.mjs rules OUTDIR` reads these rules off every rendered screen, at 390px and 1440px, with reduced motion on: nothing sideways at 390px, every control 44px, every field's text 16px, every field findable at 3:1, all text AA, nothing moving under reduced motion, no em dash, triage colours only in bars and marks, a word on every bar and mark, refusals in hold, every citation a button that opens its source, every removal struck with its reason. `bash 06-demo/suite.sh OUTDIR` runs it last, after the other twelve modes and the offline self-tests, and `bash 06-demo/pw_shots.sh OUTDIR` takes the screenshots that close a batch.
+`node 06-demo/ui_check.mjs rules OUTDIR` reads these rules off every rendered screen, at 390px and 1440px, with reduced motion on: nothing sideways at 390px, every control 44px, every field's text 16px, every field findable at 3:1, all text AA, nothing moving under reduced motion, no em dash, triage colours only in bars and marks, a word on every bar and mark, refusals in hold, every citation a button that opens its source, every removal struck with its reason, nothing off screen able to take focus, every clamped text showing its lines and no more, the timeline field as wide as the composer, and a failed turn offering Try again. `bash 06-demo/suite.sh OUTDIR` runs it last, after the other twelve modes and the offline self-tests, and `bash 06-demo/pw_shots.sh OUTDIR` takes the screenshots that close a batch.

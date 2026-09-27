@@ -644,9 +644,10 @@ async function showConversation(id) {
   if (S.conv.busy && S.conv.busy.length && !Object.keys(S.live).length) pollBusy(id);
 }
 
-function sideCtx(side, final) {
+function sideCtx(side, final, last = false) {
   return {
     canAnswer: true,
+    retry: last && !Object.keys(S.live).length && !((S.conv && S.conv.busy) || []).length,
     children: S.people.filter(p => p.child),
     sources: S.health && S.health.sources,
     anchor: side.anchor,
@@ -670,7 +671,7 @@ function renderConversation() {
     h += saidHTML(t0.text, t0.timeline, whoSaid, t0.at);
     h += turnHTML(conv.sides.map((s, k) => s.turns[i]
       ? answerHTML(s.turns[i].event ? { event: s.turns[i].kind, ...s.turns[i].event } : { event: "error", message: "missing" },
-        sideCtx(s, s.turns[i]))
+        sideCtx(s, s.turns[i], i === s.turns.length - 1))
       : ""), pair, conv, `t${i}`);
   }
   const lastSaid = n ? conv.sides.map(s => s.turns[n - 1]).find(Boolean).text : null;
@@ -780,6 +781,13 @@ function bindThread() {
     }
     const tab = t.closest("[data-tab]");
     if (tab) return selectTab(tab);
+    // Try again: the same words, and timeline, as that side's failed turn.
+    if (t.closest("[data-retry]")) {
+      const k = +(t.closest("[data-side]")?.dataset.side || 0);
+      const turns = S.conv.sides[k].turns, last = turns[turns.length - 1];
+      if (last) return runTurn(S.conv.id, k, last.text, last.timeline || "", false);
+      return;
+    }
     const liveEl = t.closest("[data-live]");
     if (t.closest("[data-raw-toggle]") && liveEl) {
       const k = +liveEl.dataset.live, p = S.live[k];
