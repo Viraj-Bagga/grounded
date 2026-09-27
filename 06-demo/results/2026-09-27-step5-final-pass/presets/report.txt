@@ -1,0 +1,113 @@
+# The three demo presets through the real demo path
+#
+# date    2026-09-27T21:50:50.266Z
+# model   TUNED-120pairs-imatrix-Q4_K_M   (on llama-server at 127.0.0.1:8080)
+# path    headless Chrome -> 06-demo/server.py on 8770 -> llama-server on 8080
+# corpus  35 chunks, registry 35, topics chest_pain
+# server  2 slots of 4096 tokens
+# runs    1 per preset, each a fresh assessment, one click to send
+# NOTE    SCREEN is what the page rendered. Everything under it is the
+#         saved assessment, which is why the page rendered it.
+
+==============================================================================
+PRESET 1: Crushing chest pressure   on You   (beat 2, the red result)
+==============================================================================
+
+  RUN 1  Crushing chest pressure  (16.4 s wall, one click to answer)
+    You
+      SCREEN: RED  "RED / Call emergency services now"
+      model said red, shown red
+      grounded: yes, 2 source chip(s): CP-ACS-003, CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why
+Chest pressure in the centre of the chest for nearly half an hour, with sweating and nausea, and unchanged after resting. The retrieved context lists chest pain in the centre of the chest as the most common heart attack symptom, and sweating and nausea as other symptoms, saying to call 9-1-1 if chest discomfort does not go away with rest., Sources
+NHLBI
+      timing: retrieval 495 ms, first token 4684 ms, generate 14805 ms, guards 1 ms, total 15302 ms
+      rates: prompt 1.5 tok/s, generate 17.2 tok/s, 175 tokens out, 399 tokens of chunk in
+      checked line: "Checked / 15 sread 4, 1,279 cachedwrote 175"
+      saved 06-demo/results/2026-09-27-step5-final-pass/presets/preset1-run1.png   assessment 20260927-175051-059777
+
+==============================================================================
+PRESET 2: Sharp pain when breathing in   on Aunt Sue   (beat 3, the guards firing)
+==============================================================================
+
+  RUN 1  Sharp pain when breathing in  (19.5 s wall, one click to answer)
+    Aunt Sue
+      SCREEN: RED  "RED / Call emergency services now"
+      model said yellow, shown red  (RAISED by the profile layer)
+      grounded: yes, 3 source chip(s): CP-PERI-002, CP-ANG-001, CP-PERI-001
+      rule R4 RAISED: cancer or chemotherapy with pain on breathing
+        fact "breast cancer" + symptom ""worse" on "deep breath""  -> CP-PE-004, CP-PE-001
+      rule line on screen: "Raised to red: breast cancer on Aunt Sue's profile, with “worse” on “deep breath”"
+      guards removed: 
+      - rationale_urgency: "Sharp chest pain at rest, worse on breathing in, eased by sitting forward, unchanged by walking. The retrieved context describes this pattern for heart inflamm
+        why: rationale written for the model's lower verdict (c16)
+      - next_steps_urgency: "Call emergency services now"
+      - next_steps_urgency: "Seek assessment today"
+      - next_steps_urgency: "Call emergency services if the pain comes on while you are lying flat or you become breathless at rest"
+        why: steps written for the model's lower verdict (c16)
+      struck through on screen: 5 block(s)
+      sections shown: What to do, Why
+“cancer and cancer treatments including chemotherapy and surgery”, Sources
+NHLBI
+      timing: retrieval 312 ms, first token 9731 ms, generate 18186 ms, guards 2 ms, total 18500 ms
+      rates: prompt 63.7 tok/s, generate 21.8 tok/s, 185 tokens out, 348 tokens of chunk in
+      checked line: "Checked / 19 sread 526, 675 cachedwrote 1854 removed"
+      saved 06-demo/results/2026-09-27-step5-final-pass/presets/preset2-run1.png   assessment 20260927-175108-c4e64b
+
+==============================================================================
+PRESET 3: Indigestion (You and Mum)   on You vs Mum   (beat 3, same symptom two people)
+==============================================================================
+
+  RUN 1  Indigestion (You and Mum)  (16.5 s wall, one click to answer)
+    You
+      SCREEN: GREEN  "GREEN / Self-care, and the signs that change the answer"
+      model said green, shown green
+      grounded: yes, 1 source chip(s): CP-ANG-003
+      rules: none fired
+      guards removed: nothing
+      sections shown: What to do, Why
+Indigestion after lunch, with no chest pain, no breathlessness at rest, and no other symptoms. The retrieved context lists heartburn and indigestion among the symptoms of angina, but it also says angina pain usually starts behind the breastbone and grows over minutes, and calls for emergency care only if chest discomfort does not settle with rest. This is not that., Sources
+NHLBI
+      timing: retrieval 306 ms, first token 2918 ms, generate 15117 ms, guards 0 ms, total 15425 ms
+      rates: prompt 2.5 tok/s, generate 12.3 tok/s, 151 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 15 sread 4, 1,321 cachedwrote 151"
+    Mum
+      SCREEN: YELLOW  "YELLOW / Be seen today"
+      model said green, shown yellow  (RAISED by the profile layer)
+      grounded: yes, 2 source chip(s): CP-ANG-003, CP-ACS-003
+      rule R1 RAISED: diabetes with mild or vague symptoms
+        fact "type 2 diabetes" + symptom ""indigestion", described as "A bit""  -> CP-ACS-002
+      rule line on screen: "Raised to yellow: type 2 diabetes on Mum's profile, with “indigestion”, described as “A bit”"
+      guards removed: 
+      - rationale_urgency: "Indigestion after lunch with no other symptoms. The retrieved context lists indigestion among the symptoms of angina, but it is the only symptom described and 
+        why: rationale written for the model's lower verdict (c16)
+      struck through on screen: 2 block(s)
+      sections shown: What to do, A question for you, Why
+“Silent heart attacks are more common in older adults and in people who have high blood sugar or diabetes.”, Sources
+NHLBI
+      timing: retrieval 296 ms, first token 2919 ms, generate 13712 ms, guards 0 ms, total 14009 ms
+      rates: prompt 1.7 tok/s, generate 11.1 tok/s, 121 tokens out, 523 tokens of chunk in
+      checked line: "Checked / 14 sread 4, 1,332 cachedwrote 1211 removed"
+      saved 06-demo/results/2026-09-27-step5-final-pass/presets/preset3-run1.png   assessment 20260927-175128-43fe7c
+
+==============================================================================
+SUMMARY, what a judge sees
+==============================================================================
+
+PRESET 1: Crushing chest pressure
+  run 1  You      RED      model=red             grounded     cites=2 removed=0 rules=-  15.3s
+  tally: You: RED 1/1
+  wall clock, click to both answers: 16.4 s
+
+PRESET 2: Sharp pain when breathing in
+  run 1  Aunt Sue RED      model=yellow  RAISED  grounded     cites=3 removed=4 rules=R4:raised  18.5s
+  tally: Aunt Sue: RED 1/1
+  wall clock, click to both answers: 19.5 s
+
+PRESET 3: Indigestion (You and Mum)
+  run 1  You      GREEN    model=green           grounded     cites=1 removed=0 rules=-  15.4s
+  run 1  Mum      YELLOW   model=green   RAISED  grounded     cites=2 removed=1 rules=R1:raised  14.0s
+  tally: You: GREEN 1/1   Mum: YELLOW 1/1
+  wall clock, click to both answers: 16.5 s

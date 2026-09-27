@@ -187,7 +187,7 @@ function ruleQuotes(ev) {
   return fired.map(f => `<div class="rq"><div class="sub">From ${whoseOf(ev)}</div>` +
     `<p class="q">“${esc(f.quote)}”</p>` +
     `<div class="srcs">${f.keys.map(k => citeChip(k)).join("")}</div>` +
-    `<p class="rid">rule ${esc(f.rule)}</p></div>`).join("");
+    `<p class="rid" translate="no">rule ${esc(f.rule)}</p></div>`).join("");
 }
 
 function resultHTML(ev, ctx) {
@@ -374,7 +374,7 @@ function detailsHTML(ev, ctx) {
   ];
   let h = `<dl class="kv">${rows.map(([a, b]) => `<dt>${a}</dt><dd class="num">${b}</dd>`).join("")}</dl>`;
   if (ctx.anchor) {
-    h += `<div><h4>Sources read on the first turn</h4><div class="mono">${ctx.anchor.chunks.map(k =>
+    h += `<div><h4>Sources read on the first turn</h4><div class="mono" translate="no">${ctx.anchor.chunks.map(k =>
       `${esc(k.key)} (${fmt(k.tokens)} tokens, ${esc(k.category)})`).join("<br>")}</div></div>`;
   }
   const removed = [

@@ -26,7 +26,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const FIELD = "http://127.0.0.1:8770";
+const FIELD = (process.env.FIELD_URL || "http://127.0.0.1:8770").replace(/\/+$/, "");
 const BASE = "http://127.0.0.1:8781";
 const NODE = "http://127.0.0.1:8790";
 const PORT = 9350;
@@ -162,7 +162,9 @@ const READ_SIDES = `(() => {
       barText: txt(bar).replace(/\\n+/g, " / "),
       rule: txt(s.querySelector(".rules")).replace(/\\n+/g, " / ").slice(0, 140),
       ungrounded: !!s.querySelector(".ungrounded"),
-      cites: [...s.querySelectorAll(".cite .k")].map(txt),
+      // Since the overhaul (2026-09-27) a source shows its publisher; the key
+      // rides on the button, and the answer's own sources are under Sources.
+      cites: [...s.querySelectorAll(".sources .cite")].map(e => e.dataset.k),
       checked: txt(s.querySelector(".checked")).replace(/\\n+/g, " / "),
     };
   });
@@ -268,9 +270,10 @@ try {
 
   // 4 ------------------------------------------------------------------------
   await step(4, "Open a citation and confirm the chunk resolves", async () => {
-    if (!(await p.count(".cite"))) return "BROKE: no citation chip on screen to click";
-    const key = await p.eval(`document.querySelector(".cite .k").innerText`);
-    await p.click(".cite");
+    if (!(await p.count(".sources .cite"))) return "BROKE: no source on screen to click";
+    await p.click(".sources [data-fold]");
+    const key = await p.eval(`document.querySelector(".sources .cite").dataset.k`);
+    await p.click(".sources .cite");
     await p.until("document.querySelector('#sheet[open]')", 15000);
     await sleep(400);
     const body = await p.text("#sheet-body");

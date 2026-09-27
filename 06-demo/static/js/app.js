@@ -419,7 +419,7 @@ function composerHTML({ first, left, max = 4, names, busy, who }) {
     return `<div class="composer"><form class="in" id="compose" autocomplete="off">${forWho}
       <div class="waiting" role="status">Writing the answer. You can add more once it's done.</div>
       <div class="field-row"><label class="sr" for="ta">Waiting</label>
-        <textarea class="ta" id="ta" rows="1" disabled placeholder="Waiting for the answer to finish">${esc(S.draft.text)}</textarea>
+        <textarea class="ta" id="ta" name="text" autocomplete="off" rows="1" disabled placeholder="Waiting for the answer to finish">${esc(S.draft.text)}</textarea>
         <button class="send" id="send" type="submit" disabled aria-label="Send">${icon("send")}</button></div>
     </form></div>`;
   }
@@ -442,13 +442,13 @@ function composerHTML({ first, left, max = 4, names, busy, who }) {
     ${forWho}${line}
     <div class="field-row">
       <label class="sr" for="ta">${first ? "What is happening" : "Follow-up"}</label>
-      <textarea class="ta" id="ta" rows="1" placeholder="${ph}">${esc(S.draft.text)}</textarea>
+      <textarea class="ta" id="ta" name="text" autocomplete="off" rows="1" placeholder="${ph}">${esc(S.draft.text)}</textarea>
       <span id="mic-slot">${micHTML()}</span>
       <button class="send" id="send" type="submit" aria-label="Send">${icon("send")}</button>
     </div>
     <div id="heard-slot">${heardHTML(first)}</div>
     ${first ? `<div id="tl-wrap" ${S.draft.showTl ? "" : "hidden"}><label class="sr" for="tl">Timeline</label>
-      <textarea class="ta tl-in" id="tl" rows="1" placeholder="Timeline, optional: T+0:00 began while sitting…">${esc(S.draft.timeline)}</textarea></div>
+      <textarea class="ta tl-in" id="tl" name="timeline" autocomplete="off" rows="1" placeholder="Timeline, optional: T+0:00 began while sitting…">${esc(S.draft.timeline)}</textarea></div>
       <button class="link-btn" type="button" id="tl-toggle">${S.draft.showTl ? "Remove when it started" : "Add when it started"}</button>` : ""}
   </form></div>`;
 }
@@ -693,7 +693,7 @@ function renderConversation() {
   const busyOther = (conv.busy || []).filter(k => !S.live[k]);
   if (busyOther.length) {
     h += `<div class="notice" id="busy-note">${icon("info")}<span>` +
-      `Still writing${conv.sides.length > 1 ? " this side" : ""}...</span></div>`;
+      `Still writing${conv.sides.length > 1 ? " this side" : ""}…</span></div>`;
   }
   const first = conv.sides.every(s => !s.anchor);
   const left = allowance(conv);

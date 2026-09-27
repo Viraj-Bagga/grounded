@@ -31,7 +31,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const APP = "http://127.0.0.1:8770";
+const APP = (process.env.FIELD_URL || "http://127.0.0.1:8770").replace(/\/+$/, "");
 const PORT = 9334;                       // not ui_check's 9333, so both can run
 const DESKTOP = { width: 1440, height: 900, mobile: false, deviceScaleFactor: 1 };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -133,7 +133,7 @@ const SCRAPE = `(() => {
       ungrounded: !!s.querySelector(".ungrounded"),
       ungroundedText: txt(s.querySelector(".ungrounded")).replace(/\\n+/g, " / "),
       checked: txt(s.querySelector(".checked")).replace(/\\n+/g, " / "),
-      cites: [...s.querySelectorAll(".cite .k")].map(txt),
+      cites: [...s.querySelectorAll(".sources .cite")].map(e => e.dataset.k),
       sections: [...s.querySelectorAll(".sec h3")].map(txt),
       struck: [...s.querySelectorAll(".gone")].map(e => txt(e).replace(/\\n+/g, " ").slice(0, 150)),
       error: txt(s.querySelector(".err-panel")).replace(/\\n+/g, " / ") || null,

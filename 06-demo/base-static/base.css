@@ -42,6 +42,7 @@
 }
 
 * { box-sizing: border-box; }
+a, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; background: var(--paper); color: var(--ink);
   font: 400 var(--fs-body)/1.5 var(--font); -webkit-text-size-adjust: 100%; }
 .wrap { max-width: 72rem; margin: 0 auto; padding: 1rem 1rem 4rem; }

@@ -1,0 +1,156 @@
+========================================================================
+REHEARSAL: one end-to-end run in the state a judge meets
+========================================================================
+date    2026-09-27T21:42:06.500Z
+out     06-demo/results/2026-09-27-step5-final-pass/rehearsal
+start   field: 0 pending, 257 already sent
+        base:  257 assessments, 1 devices
+        slots: 0:idle 1:idle
+
+────────────────────────────────────────────────────────────────────────
+STEP 1. The empty screen, desktop and phone
+    BROKE: timed out after 60s waiting for document.readyState === 'complete' && !document.querySelector('.loading')
+    ⏱  60.1 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.1. Preset: Crushing chest pressure (You)
+    answer   RED     "RED / Call emergency services now"
+             sources: CP-ACS-003, CP-ANG-003
+             Checked / 22 sread 608, 675 cachedwrote 164
+      click to answer: 22.5 s
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/01-preset-1.png
+    ⏱  23.3 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.2. Preset: Sharp pain breathing in (Aunt Sue)
+    answer   RED     "RED / Call emergency services now"
+             sources: CP-PERI-002, CP-ANG-001, CP-PERI-001
+             rule: Raised to red: breast cancer on Aunt Sue's profile, with “worse” on “deep breath”
+             Checked / 18 sread 526, 675 cachedwrote 1804 removed
+      click to answer: 19.4 s
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/02-preset-2.png
+    ⏱  20.4 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 2.3. Preset: Indigestion (You and Mum)
+    A
+    You    GREEN   "GREEN / Self-care, and the signs that change the answer"
+             sources: CP-ANG-003, CP-ACS-003
+             Checked / 27 sread 650, 675 cachedwrote 186
+    B
+    Mum    YELLOW  "YELLOW / Be seen today"
+             sources: CP-ANG-003
+             rule: Raised to yellow: type 2 diabetes on Mum's profile, with “indigestion”, described as “A bit”
+             Checked / 24 sread 4, 1,332 cachedwrote 1181 removed
+      click to answer: 28.4 s
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/03-preset-3.png
+    ⏱  29.2 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 3. A follow-up on the Aunt Sue assessment
+    answer: RED "RED / Call emergency services now"
+    cache: Checked / 12 s1,380 cached, read 43wrote 190
+      follow-up: 12.6 s
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/04-follow-up.png
+    ⏱  13.4 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 4. Open a citation and confirm the chunk resolves
+    clicked CP-PERI-002
+    chunk text: 129 chars, "Chest pain that feels sharp, gets worse with breathing, and feels better with sitting up and leaning forward F…"
+    source line: NHLBI · https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms · Retrieved 2026-09-15 · Source: NHLBI, National Institutes of Health
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/05-citation.png
+    ⏱  0.8 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 5. Download a regional pack and confirm the integrity check
+    downloaded africa-ssa (11022 bytes) in 1.2 s
+    installed sha256, recomputed from this device's files: 2ae230ac1803cd88c7ca1491fa0750a3…
+    node published:                                        2ae230ac1803cd88c7ca1491fa0750a3…
+    INTEGRITY: MATCH
+    per-file sha256 lines on screen: 2
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/06-packs-before.png
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/07-packs-after.png
+    ⏱  2.2 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 6. The caseload: add someone, assess them, mark them seen
+    BROKE: (() => { const e = document.querySelector("[data-assess]");
+          if (: Error: nothing matches [data-assess]
+        at <anonymous>:2:21
+        at <anonymous>:2:91
+    ⏱  0.7 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 7. Sync to base and confirm what arrives
+    3 waiting to send before
+      Sending 3 to http://127.0.0.1:8781…
+      Landed at base: 20260927-174307-9412e7 · 00c581ed7b5f…
+      Landed at base: 20260927-174331-8d441e · a32c7a678a05…
+      Landed at base: 20260927-174351-6de8c4 · 0a9c3c5521db…
+      3 sent.
+    still waiting after: 0
+    base now holds: 260 assessments from 1 device(s)
+    0.9 s to send 3
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/09-sync-before.png
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/10-sync-after.png
+    ⏱  1.8 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 8. The base register, and do the counts match what was sent
+    tally: 260 assessed · 141 red · 238 need review · synced 17:44 from 1 device
+    field sent 3, base holds 260: MISMATCH
+    every assessment made in this rehearsal is at base: yes
+    red 141, yellow 67, green 24, refused 46
+    needs review 238, still waiting in the field 1
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/11-base-register.png
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/12-base-phone.png
+    ⏱  1.7 s
+
+────────────────────────────────────────────────────────────────────────
+STEP 9. Download a SOAP note
+    6124 chars in 0.0 s, saved 06-demo/results/2026-09-27-step5-final-pass/rehearsal/soap-note.txt
+    sections: 4 of 4
+    header names the model and the corpus: yes
+    says it is not a clinical record: yes
+    carries citation keys: yes
+    carries what the guards removed: yes
+    06-demo/results/2026-09-27-step5-final-pass/rehearsal/13-soap-link.png
+    ⏱  0.7 s
+
+========================================================================
+WHAT A DESK VISIT COSTS
+========================================================================
+  1     The empty screen, desktop and phone                  60.1 s   BROKE
+  2.1   Preset: Crushing chest pressure (You)                23.3 s
+  2.2   Preset: Sharp pain breathing in (Aunt Sue)           20.4 s
+  2.3   Preset: Indigestion (You and Mum)                    29.2 s
+  3     A follow-up on the Aunt Sue assessment               13.4 s
+  4     Open a citation and confirm the chunk resolves        0.8 s
+  5     Download a regional pack and confirm the integri      2.2 s
+  6     The caseload: add someone, assess them, mark the      0.7 s   BROKE
+  7     Sync to base and confirm what arrives                 1.8 s
+  8     The base register, and do the counts match what       1.7 s
+  9     Download a SOAP note                                  0.7 s
+        TOTAL                                               155.5 s  (2.6 min)
+
+  of which the model: 87.0 s across 5 generations (3 presets, 1 follow-up, 1 caseload)
+  everything else:    68.5 s
+
+VERDICTS SHOWN
+  Crushing chest pressure (You)         RED  22.5 s
+  Sharp pain breathing in (Aunt Sue)    RED  19.4 s
+  Indigestion (You and Mum)            A
+You GREEN | B
+Mum YELLOW  28.4 s
+
+WHAT BROKE
+  step 1 (The empty screen, desktop and phone): timed out after 60s waiting for document.readyState === 'complete' && !document.querySelector('.loading')
+  step 6 (The caseload: add someone, assess them, mark them seen): (() => { const e = document.querySelector("[data-assess]");
+      if (: Error: nothing matches [data-assess]
+    at <anonymous>:2:21
+    at <anonymous>:2:91
+
+13 screenshots in 06-demo/results/2026-09-27-step5-final-pass/rehearsal
+
+saved 06-demo/results/2026-09-27-step5-final-pass/rehearsal/rehearsal.txt

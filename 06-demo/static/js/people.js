@@ -76,10 +76,10 @@ export function personFormHTML(p, isNew, conversationsFor) {
         <section>
           <h2>Who</h2>
           <div class="f" data-f="label"><label for="f-label">Name</label>
-            <input class="inp" id="f-label" name="label" value="${esc(p.label || "")}" maxlength="40" required>
+            <input class="inp" id="f-label" name="label" autocomplete="off" value="${esc(p.label || "")}" maxlength="40" required>
             <div class="err" hidden>${icon("alert")}<span></span></div></div>
           <div class="f" data-f="age"><label for="f-age">Age</label>
-            <input class="inp short" id="f-age" name="age" inputmode="numeric" value="${p.age ?? ""}" required>
+            <input class="inp short" id="f-age" name="age" autocomplete="off" inputmode="numeric" value="${p.age ?? ""}" required>
             <div class="hint">In whole years. Under 16, the app will not assess them.</div>
             <div class="err" hidden>${icon("alert")}<span></span></div></div>
           <div class="f" data-f="sex"><span class="lab" id="f-sex">Sex</span>
@@ -98,10 +98,10 @@ export function personFormHTML(p, isNew, conversationsFor) {
           <label class="check"><input type="checkbox" id="f-surg" ${s ? "checked" : ""}> Had surgery in the last year</label>
           <div class="pair-f" id="f-surg-fields" ${s ? "" : "hidden"} style="margin-top:1rem">
             <div class="f" data-f="surgery"><label for="f-what">What was it</label>
-              <input class="inp" id="f-what" value="${esc(s ? s.what : "")}" maxlength="60">
+              <input class="inp" id="f-what" name="surgery_what" autocomplete="off" value="${esc(s ? s.what : "")}" maxlength="60">
               <div class="err" hidden>${icon("alert")}<span></span></div></div>
             <div class="f" data-f="surgery_weeks"><label for="f-weeks">Weeks ago</label>
-              <input class="inp" id="f-weeks" inputmode="numeric" value="${s ? s.weeks_ago : ""}">
+              <input class="inp" id="f-weeks" name="surgery_weeks" autocomplete="off" inputmode="numeric" value="${s ? s.weeks_ago : ""}">
               <div class="err" hidden>${icon("alert")}<span></span></div></div>
           </div>
         </section>
@@ -112,23 +112,23 @@ export function personFormHTML(p, isNew, conversationsFor) {
             “What the model reads”, and nothing below changes it.</p>
           <div class="pair-f">
             <div class="f" data-f="patient_id"><label for="f-pid">Patient ID</label>
-              <input class="inp" id="f-pid" maxlength="40" value="${esc(p.patient_id || "")}">
+              <input class="inp" id="f-pid" name="patient_id" autocomplete="off" spellcheck="false" maxlength="40" value="${esc(p.patient_id || "")}">
               <div class="err" hidden>${icon("alert")}<span></span></div></div>
             <div class="f" data-f="last_seen_on"><label for="f-seen-on">Last seen by a clinician</label>
-              <input class="inp" id="f-seen-on" type="date" value="${esc(p.last_seen_on || "")}">
+              <input class="inp" id="f-seen-on" name="last_seen_on" autocomplete="off" type="date" value="${esc(p.last_seen_on || "")}">
               <div class="err" hidden>${icon("alert")}<span></span></div></div>
           </div>
           <div class="f" data-f="last_seen_by"><label for="f-seen-by">Who saw them</label>
-            <input class="inp" id="f-seen-by" maxlength="80" value="${esc(p.last_seen_by || "")}">
+            <input class="inp" id="f-seen-by" name="last_seen_by" autocomplete="off" maxlength="80" value="${esc(p.last_seen_by || "")}">
             <div class="err" hidden>${icon("alert")}<span></span></div></div>
           <div class="f" data-f="medication_schedule"><label for="f-sched">Medication schedule</label>
             <div class="hint">One a line, as <code>metformin: 500mg twice daily</code>.
               The medicines themselves stay in the list above, which is what the model reads.</div>
-            <textarea class="inp" id="f-sched" rows="3">${esc(Object.entries(p.medication_schedule || {})
+            <textarea class="inp" id="f-sched" name="medication_schedule" autocomplete="off" rows="3">${esc(Object.entries(p.medication_schedule || {})
               .map(([k, v]) => `${k}: ${v}`).join("\n"))}</textarea>
             <div class="err" hidden>${icon("alert")}<span></span></div></div>
           <div class="f" data-f="history_notes"><label for="f-notes">History notes</label>
-            <textarea class="inp" id="f-notes" rows="4" maxlength="600">${esc(p.history_notes || "")}</textarea>
+            <textarea class="inp" id="f-notes" name="history_notes" autocomplete="off" rows="4" maxlength="600">${esc(p.history_notes || "")}</textarea>
             <div class="err" hidden>${icon("alert")}<span></span></div></div>
         </section>
         <div class="actions">
@@ -155,7 +155,7 @@ function tokenField(name, label, values, suggestions, placeholder) {
   return `<div class="f" data-f="${name}"><label for="f-${name}">${label}</label>
     <div class="tokens" data-tokens="${name}">
       ${values.map(v => tokHTML(v)).join("")}
-      <input id="f-${name}" list="dl-${name}" placeholder="${placeholder}" maxlength="60">
+      <input id="f-${name}" name="${name}" autocomplete="off" list="dl-${name}" placeholder="${placeholder}" maxlength="60">
     </div>
     <datalist id="dl-${name}">${suggestions.map(s => `<option value="${esc(s)}">`).join("")}</datalist>
     <div class="err" hidden>${icon("alert")}<span></span></div></div>`;

@@ -222,3 +222,7 @@ Why   (the refusal's closed row is now titled "Why", with the preview above besi
       mockup; it replaces "Why there is no verdict")
 The model's original reason was removed.   (the Why preview, in the rare case a raise struck the model's
       reason and no rule quote is available; follows "The model's original reason")
+
+## New, awaiting Viraj (added in the final pass, 2026-09-27)
+Skip to main content   (the skip link; it only appears when it has keyboard focus)
+Still writing…   (was "Still writing..."; the ellipsis character only)
