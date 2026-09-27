@@ -1,0 +1,101 @@
+SOAP NOTE, GENERATED OFFLINE BY AN EXPERIMENTAL SYSTEM
+==============================================================================
+NOT A CLINICAL RECORD. No clinician has reviewed this. The urgency was
+produced by a small language model running on the machine that wrote this
+note, with no internet, constrained by app-side guards, from a corpus of
+public government pages about chest pain and nothing else. Anything outside
+that subject is refused rather than answered.
+
+Assessment   20260927-175249-87418c, single, for Aunt Sue
+Generated    2026-09-27 21:55 UTC
+Started      2026-09-27 21:52 UTC
+Model        TUNED-120pairs-imatrix-Q4_K_M.gguf, llama.cpp b10809-5266f24da
+             CPU, reasoning off, schema-constrained output, no network
+Corpus       35 chunks, 01-data/citations.csv sha256 68363c032c9f
+Prompt       02-pairs/system_prompt.txt sha256 26e4f4ff3e30, 3066 chars
+
+==============================================================================
+PATIENT  Aunt Sue
+         age 52; female; conditions breast cancer; medications chemotherapy
+==============================================================================
+
+S  SUBJECTIVE
+   The patient's own words, in the order they were given.
+
+   21:53 UTC  first: "Sharp pain in my left chest, worse when I breathe in. It
+      eases if I sit up and lean forward. Walking around does not change it."
+      Timeline: T+0:00 began at rest. T+0:10 worse on deep breath. T+1:30
+         unchanged, no relation to exertion.
+
+   21:53 UTC  follow-up 1: "It is worse when I lie down, and I feel breathless
+      now."
+
+   Profile, as the model read it:
+      age: 52, sex: female
+      conditions: breast cancer
+      medications: chemotherapy
+
+O  OBJECTIVE
+   What the system did, and what it removed.
+
+   Retrieved on the first turn, 3 chunks, 348 tokens, reused unchanged on
+   every follow-up, with no re-retrieval:
+      CP-PERI-002  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+      CP-ANG-001  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/coronary-heart-disease/symptoms
+      CP-PERI-001  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+
+   Turn 1 (21:53 UTC):
+      Rule R4: supports this red. Profile fact: breast cancer. In the case
+         text: "worse" on "deep breath".
+         CP-PE-004: "cancer and cancer treatments including chemotherapy and
+            surgery"
+         CP-PE-001: "Shortness of breath and pain when breathing, if you have
+            a blood clot that travels to the lungs"
+
+   Turn 2 (21:53 UTC):
+      Rule R4: supports this red. Profile fact: breast cancer. In the case
+         text: "worse" on "deep breath".
+         CP-PE-004: "cancer and cancer treatments including chemotherapy and
+            surgery"
+         CP-PE-001: "Shortness of breath and pain when breathing, if you have
+            a blood clot that travels to the lungs"
+
+A  ASSESSMENT
+   Urgency shown: RED (WHO Interagency Integrated Triage Tool).
+   Disposition: Call emergency services now. The app's words, not the model's.
+
+   Rationale, the model's own words:
+      Sharp chest pain at rest, worse when lying down, and now breathless. The
+      retrieved context says chest pain at rest should be called to emergency
+      services, and breathlessness at rest is a sign of a complication. The
+      patient has breast cancer and is on chemotherapy, which raises the
+      threshold for cardiac symptoms.
+
+   Red flags, as stated by the model and kept by the grounding guard:
+      - Sharp chest pain at rest, worse when lying down, now breathless
+
+   Citations behind this answer. Every key resolves in the registry:
+      CP-PERI-002  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+      CP-ANG-001  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/coronary-heart-disease/symptoms
+      CP-PERI-001  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/heart-inflammation/symptoms
+
+   Earlier turns in this assessment: turn 1 red.
+
+P  PLAN
+   Next steps, as shown to the patient:
+      1. Call emergency services now
+      2. Stay seated and breathing slowly
+      3. Do not drive yourself
+
+   Follow-up questions: none.
+
+==============================================================================
+Everything above is read from the saved assessment. Citation keys resolve in
+01-data/citations.csv, whose sha256 is in the header. The system has no
+knowledge outside that corpus, and this note is not a diagnosis.
