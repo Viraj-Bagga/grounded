@@ -1,0 +1,75 @@
+# cut-offs and answer length, BEFORE: the schema as it was, no array caps
+# date   2026-09-27 18:47:15
+# path   this script -> http://127.0.0.1:8772 (06-demo/server.py) -> llama-server, 2 slots
+# runs   30 per scenario, two at a time, each a fresh assessment
+
+Dad, the hill: 5/30 cut off at the token limit
+  answers that finished: 25, tokens median 204, max 297
+  shown: CUT OFF 5, red 2, yellow 23
+  steps the model wrote per answer: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    20260927-184715-385cec  result   model yellow shown yellow   195 tok   27.4 s
+    20260927-184715-b73b9c  result   model yellow shown yellow   206 tok   28.3 s
+    20260927-184743-19278a  result   model yellow shown yellow   176 tok   17.2 s
+    20260927-184743-dd5a41  result   model yellow shown yellow   173 tok   16.5 s
+    20260927-184800-e9db3f  result   model yellow shown yellow   227 tok   25.0 s
+    20260927-184800-834fe5  result   model yellow shown yellow   215 tok   22.0 s
+    20260927-184822-423196  result   model yellow shown yellow   153 tok   17.0 s
+    20260927-184825-fe3219  result   model yellow shown yellow   209 tok   20.7 s
+    20260927-184839-4c0a2e  result   model yellow shown yellow   180 tok   18.4 s
+    20260927-184846-840807  result   model yellow shown yellow   211 tok   22.7 s
+    20260927-184857-6659ca  result   model yellow shown yellow   209 tok   23.8 s
+    20260927-184908-a24eab  result   model yellow shown red      203 tok   22.4 s
+    20260927-184921-154e5f  error    model None   shown None    1024 tok  106.5 s  CUT OFF
+    20260927-184931-755671  error    model None   shown None    1024 tok  108.3 s  CUT OFF
+    20260927-185108-e83901  result   model yellow shown yellow   273 tok   31.8 s
+    20260927-185119-c73a9f  result   model yellow shown yellow   181 tok   20.3 s
+    20260927-185139-317692  result   model yellow shown red      181 tok   20.2 s
+    20260927-185139-14ca16  result   model yellow shown yellow   204 tok   22.9 s
+    20260927-185159-a520f2  error    model None   shown None    1024 tok  112.4 s  CUT OFF
+    20260927-185202-fa75de  result   model yellow shown yellow   297 tok   31.4 s
+    20260927-185234-17147e  result   model yellow shown yellow   190 tok   21.6 s
+    20260927-185255-0880fd  result   model yellow shown yellow   204 tok   24.6 s
+    20260927-185320-3ef97f  error    model None   shown None    1024 tok  114.5 s  CUT OFF
+    20260927-185352-b16232  result   model yellow shown yellow   174 tok   18.6 s
+    20260927-185410-e61c57  result   model yellow shown yellow   205 tok   26.1 s
+    20260927-185437-ee9e9e  error    model None   shown None    1024 tok  115.9 s  CUT OFF
+    20260927-185514-b6c68f  result   model yellow shown yellow   210 tok   25.1 s
+    20260927-185539-877ac6  result   model yellow shown yellow   209 tok   23.1 s
+    20260927-185603-b5e0b0  result   model yellow shown yellow   173 tok   19.4 s
+    20260927-185622-ee40d8  result   model yellow shown yellow   201 tok   16.5 s
+
+Aunt Sue, the preset: 0/30 cut off at the token limit
+  answers that finished: 30, tokens median 167, max 291
+  shown: red 30
+  steps the model wrote per answer: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4]
+    20260927-185638-33f6c4  result   model yellow shown red      184 tok   26.0 s
+    20260927-185638-42ca5e  result   model yellow shown red      156 tok   22.9 s
+    20260927-185701-9b850d  result   model yellow shown red      166 tok   17.3 s
+    20260927-185704-89d591  result   model yellow shown red      171 tok   18.4 s
+    20260927-185719-4a3045  result   model yellow shown red      153 tok   17.2 s
+    20260927-185723-15c7c7  result   model yellow shown red      186 tok   20.3 s
+    20260927-185736-1379d3  result   model yellow shown red      145 tok   16.3 s
+    20260927-185743-77299e  result   model yellow shown red      169 tok   18.7 s
+    20260927-185752-e76cad  result   model yellow shown red      291 tok   40.8 s
+    20260927-185802-8d4cb9  result   model yellow shown red      155 tok   22.3 s
+    20260927-185824-3755c8  result   model yellow shown red      163 tok   29.6 s
+    20260927-185833-51cfe7  result   model yellow shown red      170 tok   30.9 s
+    20260927-185854-ed9f80  result   model yellow shown red      187 tok   33.4 s
+    20260927-185904-782085  result   model yellow shown red      157 tok   27.7 s
+    20260927-185927-343e4c  result   model yellow shown red      179 tok   31.6 s
+    20260927-185932-6495d8  result   model yellow shown red      189 tok   33.5 s
+    20260927-185959-492d9c  result   model yellow shown red      152 tok   26.9 s
+    20260927-190005-2cbad1  result   model red    shown red      143 tok   25.5 s
+    20260927-190026-f41f0c  result   model yellow shown red      174 tok   30.3 s
+    20260927-190031-d07313  result   model yellow shown red      215 tok   36.9 s
+    20260927-190056-d87869  result   model yellow shown red      147 tok   26.5 s
+    20260927-190108-c94245  result   model yellow shown red      162 tok   29.3 s
+    20260927-190122-e1c1c5  result   model yellow shown red      158 tok   28.1 s
+    20260927-190137-8dd6fa  result   model yellow shown red      154 tok   27.2 s
+    20260927-190150-9b11df  result   model yellow shown red      174 tok   30.9 s
+    20260927-190204-f07efb  result   model yellow shown red      214 tok   38.6 s
+    20260927-190221-eaae5b  result   model yellow shown red      180 tok   32.2 s
+    20260927-190243-8cc89b  result   model yellow shown red      155 tok   26.6 s
+    20260927-190253-ea8bc0  result   model yellow shown red      171 tok   30.1 s
+    20260927-190309-2b4b49  result   model yellow shown red      149 tok   20.9 s
+

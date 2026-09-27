@@ -1,0 +1,3 @@
+desktop 1440x900: "01-new, 02-picker, 04-answer, 04-answer (full), 04-answer-sources, 05-source, 06-compare, 06-compare (full), 07-refusal, 08-not-assessed, 09-people (full), 10-person (full), 11-caseload (full), 12-sync (full), 13-regions (full), 14-base (full), 15-base-assessment (full)"
+iPhone 15: "01-new, 02-picker, 03-drawer, 04-answer, 04-answer (full), 04-answer-sources, 05-source, 06-compare, 06-compare (full), 06-compare-b, 07-refusal, 08-not-assessed, 09-people (full), 10-person (full), 11-caseload (full), 12-sync (full), 13-regions (full), 14-base (full, first 5333 of 28334px), 15-base-assessment (full)"
+saved to /Users/virajbagga/Coding/steel26/06-demo/results/2026-09-27-fix2-cutoffs/shots

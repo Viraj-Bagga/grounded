@@ -1,0 +1,75 @@
+# cut-offs and answer length, AFTER: array caps red_flags 6, next_steps 6, citations 6, follow_up_questions 4
+# date   2026-09-27 19:14:26
+# path   this script -> http://127.0.0.1:8772 (06-demo/server.py) -> llama-server, 2 slots
+# runs   30 per scenario, two at a time, each a fresh assessment
+
+Dad, the hill: 0/30 cut off at the token limit
+  answers that finished: 30, tokens median 206, max 316
+  shown: red 2, yellow 28
+  steps the model wrote per answer: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    20260927-191426-b306b8  result   model yellow shown yellow   213 tok   79.1 s
+    20260927-191426-1903c7  result   model yellow shown yellow   175 tok   72.5 s
+    20260927-191539-ee87be  result   model yellow shown yellow   221 tok   37.7 s
+    20260927-191545-dd452f  result   model yellow shown yellow   192 tok   32.5 s
+    20260927-191616-637d8a  result   model yellow shown yellow   187 tok   32.8 s
+    20260927-191618-8d35ba  result   model yellow shown yellow   168 tok   28.4 s
+    20260927-191646-0b7cf5  result   model yellow shown yellow   226 tok   38.8 s
+    20260927-191649-4cef26  result   model yellow shown yellow   292 tok   51.0 s
+    20260927-191725-e63469  result   model yellow shown yellow   244 tok   42.8 s
+    20260927-191740-a3a4c2  result   model yellow shown yellow   206 tok   35.2 s
+    20260927-191808-ec5d3d  result   model yellow shown yellow   205 tok   37.1 s
+    20260927-191815-c720b0  result   model yellow shown red      230 tok   69.7 s
+    20260927-191845-ede2d9  result   model yellow shown yellow   177 tok   66.4 s
+    20260927-191925-bc791e  result   model yellow shown red      169 tok   43.5 s
+    20260927-191951-bb3555  result   model yellow shown yellow   242 tok   49.3 s
+    20260927-192009-5439cc  result   model yellow shown yellow   217 tok   40.1 s
+    20260927-192041-89e161  result   model yellow shown yellow   230 tok   41.9 s
+    20260927-192049-9a4576  result   model yellow shown yellow   207 tok   37.8 s
+    20260927-192122-67a9b9  result   model yellow shown yellow   316 tok   56.4 s
+    20260927-192127-5dca57  result   model yellow shown yellow   203 tok   35.0 s
+    20260927-192202-7e119c  result   model yellow shown yellow   182 tok   33.4 s
+    20260927-192219-6078d3  result   model yellow shown yellow   272 tok   50.3 s
+    20260927-192235-94b9be  result   model yellow shown yellow   181 tok   34.1 s
+    20260927-192309-498bac  result   model yellow shown yellow   192 tok   35.3 s
+    20260927-192309-fb71e0  result   model yellow shown yellow   163 tok   29.8 s
+    20260927-192339-20a179  result   model yellow shown yellow   224 tok   39.5 s
+    20260927-192344-e534e6  result   model yellow shown yellow   265 tok   43.9 s
+    20260927-192418-c08220  result   model yellow shown yellow   226 tok   25.2 s
+    20260927-192428-181613  result   model yellow shown yellow   198 tok   20.2 s
+    20260927-192444-f04710  result   model yellow shown yellow   193 tok   12.6 s
+
+Aunt Sue, the preset: 0/30 cut off at the token limit
+  answers that finished: 30, tokens median 159, max 195
+  shown: red 30
+  steps the model wrote per answer: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4]
+    20260927-192456-31b4c8  result   model yellow shown red      162 tok   22.6 s
+    20260927-192456-e01889  result   model yellow shown red      142 tok   19.4 s
+    20260927-192516-611bfe  result   model yellow shown red      169 tok   18.1 s
+    20260927-192519-468329  result   model yellow shown red      167 tok   17.2 s
+    20260927-192534-a1c19f  result   model yellow shown red      159 tok   16.8 s
+    20260927-192536-80ebff  result   model yellow shown red      161 tok   17.3 s
+    20260927-192550-a3e689  result   model yellow shown red      147 tok   15.9 s
+    20260927-192553-d7a233  result   model yellow shown red      143 tok   15.1 s
+    20260927-192606-f1d530  result   model yellow shown red      195 tok   21.4 s
+    20260927-192608-fe4b9b  result   model yellow shown red      144 tok   14.8 s
+    20260927-192623-92de95  result   model yellow shown red      152 tok   17.3 s
+    20260927-192628-1c9b76  result   model yellow shown red      158 tok   17.7 s
+    20260927-192640-819444  result   model yellow shown red      161 tok   18.7 s
+    20260927-192645-aea457  result   model yellow shown red      182 tok   20.8 s
+    20260927-192659-05a7c9  result   model yellow shown red      149 tok   17.0 s
+    20260927-192706-587510  result   model yellow shown red      152 tok   16.8 s
+    20260927-192716-ac393c  result   model yellow shown red      148 tok   16.9 s
+    20260927-192723-b7a899  result   model yellow shown red      169 tok   19.6 s
+    20260927-192733-eb12ac  result   model yellow shown red      164 tok   19.4 s
+    20260927-192743-c02d56  result   model yellow shown red      165 tok   19.0 s
+    20260927-192752-53cf92  result   model yellow shown red      175 tok   18.9 s
+    20260927-192802-b383b3  result   model yellow shown red      155 tok   16.7 s
+    20260927-192811-d5d848  result   model yellow shown red      155 tok   16.5 s
+    20260927-192818-1cd134  result   model yellow shown red      159 tok   17.1 s
+    20260927-192828-ec495f  result   model yellow shown red      189 tok   20.2 s
+    20260927-192835-bec4c8  result   model yellow shown red      148 tok   15.9 s
+    20260927-192848-ce9675  result   model yellow shown red      160 tok   17.5 s
+    20260927-192851-503e87  result   model yellow shown red      174 tok   18.7 s
+    20260927-192906-6b2069  result   model yellow shown red      178 tok   20.3 s
+    20260927-192910-580c1d  result   model yellow shown red      144 tok   16.2 s
+

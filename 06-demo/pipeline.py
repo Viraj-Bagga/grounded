@@ -33,6 +33,7 @@ if the answers run long. The page shows the allowance from the first answer,
 not when it runs out.
 """
 
+import copy
 import json
 import sys
 import threading
@@ -147,6 +148,22 @@ def verify_while_waiting(registry=None, chunks_dir=None):
     return problems
 TURN_BUDGET = 520       # tokens set aside per follow-up: its message and an answer
 MAX_TOKENS = 1024
+
+# THE ARRAYS HAVE A CEILING, 2026-09-27. Every answer cut off at MAX_TOKENS in
+# the demo data was a loop, not a long answer: 7 of 8 wrote the same next step
+# ("Call emergency services now") over and over, the eighth one rationale
+# sentence. Normal answers are far inside the limit (Dad median 200 tokens,
+# Aunt Sue 191) and never had more than 3 red flags, 6 steps, 3 citations or 2
+# questions. So the schema llama-server enforces caps each array, generously:
+# the grammar closes the array at the cap, and a looping list ends there and
+# the answer still parses. These are counts of items, never maxLength on a
+# string, which hard constraint 3 forbids because it cuts text mid-token.
+# ASSISTANT_SCHEMA itself, shared with the training pairs and the evals, is
+# not changed. Measured before and after: results/2026-09-27-fix2-cutoffs/.
+ARRAY_CAPS = {"red_flags": 6, "next_steps": 6, "citations": 6, "follow_up_questions": 4}
+DEMO_SCHEMA = copy.deepcopy(ASSISTANT_SCHEMA)
+for _field, _cap in ARRAY_CAPS.items():
+    DEMO_SCHEMA["properties"][_field]["maxItems"] = _cap
 MIN_ANSWER = 300        # below this the answer could be cut off mid-JSON
 # Starting guess for prompt eval, measured 2026-09-15 and 09-17 with macOS Low
 # Power Mode on. With it off, 2026-09-19, a first turn read at 72 tok/s. So the
@@ -467,7 +484,7 @@ class Engine:
             "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + side["llm"] +
                         [{"role": "user", "content": human}],
             "response_format": {"type": "json_schema",
-                                "json_schema": {"name": "triage", "schema": ASSISTANT_SCHEMA}},
+                                "json_schema": {"name": "triage", "schema": DEMO_SCHEMA}},
             "temperature": 0.2,
             "max_tokens": max_tokens,
             "stream": True,
