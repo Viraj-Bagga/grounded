@@ -1,0 +1,84 @@
+SOAP NOTE, GENERATED OFFLINE BY AN EXPERIMENTAL SYSTEM
+==============================================================================
+NOT A CLINICAL RECORD. No clinician has reviewed this. The urgency was
+produced by a small language model running on the machine that wrote this
+note, with no internet, constrained by app-side guards, from a corpus of
+public government pages about chest pain and nothing else. Anything outside
+that subject is refused rather than answered.
+
+Assessment   20260927-163820-392732, single, for No profile
+Generated    2026-09-27 20:38 UTC
+Started      2026-09-27 20:38 UTC
+Model        TUNED-120pairs-imatrix-Q4_K_M.gguf, llama.cpp b10809-5266f24da
+             CPU, reasoning off, schema-constrained output, no network
+Corpus       35 chunks, 01-data/citations.csv sha256 68363c032c9f
+Prompt       02-pairs/system_prompt.txt sha256 26e4f4ff3e30, 3066 chars
+
+==============================================================================
+PATIENT  No profile
+         no profile facts recorded
+==============================================================================
+
+S  SUBJECTIVE
+   The patient's own words, in the order they were given.
+
+   20:38 UTC  first: "heavy pressure in the middle of my chest that has not
+      let up for almost half an hour. It spread to my jaw."
+      Source: spoken, not typed. Transcribed on this machine by whisper.cpp
+         base.en-q5_1 in 0.5 s from 4.26 s of speech, then CORRECTED by the
+         patient before sending.
+      Heard as: "heavy pressure in the middle of my chest that has not let up
+         for almost half an hour."
+
+   Profile, as the model read it:
+      age: not given, sex: not given
+      conditions: not given
+      medications: not given
+
+O  OBJECTIVE
+   What the system did, and what it removed.
+
+   Retrieved on the first turn, 3 chunks, 590 tokens, reused unchanged on
+   every follow-up, with no re-retrieval:
+      CP-ANG-002  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/angina
+      CP-DIFF-001  MedlinePlus, National Library of Medicine  retrieved 2026-09-15
+         https://medlineplus.gov/chestpain.html
+      CP-ANG-003  NHLBI, National Institutes of Health  retrieved 2026-09-19
+         https://www.nhlbi.nih.gov/health/angina/symptoms
+
+   Turn 1 (20:38 UTC): no rule fired, nothing removed.
+
+A  ASSESSMENT
+   Urgency shown: RED (WHO Interagency Integrated Triage Tool).
+   Disposition: Call emergency services now. The app's words, not the model's.
+
+   Rationale, the model's own words:
+      Chest pressure that has not eased in half an hour and has spread to the
+      jaw. The retrieved context says to call 9-1-1 immediately for chest pain
+      that does not go away, crushing pressure in the chest, or chest pain
+      along with nausea, sweating, dizziness or shortness of breath.
+
+   Red flags, as stated by the model and kept by the grounding guard:
+      - Chest pressure for half an hour, spreading to the jaw
+      - Chest pressure that has not eased
+      - Chest pressure spreading to the jaw
+
+   Citations behind this answer. Every key resolves in the registry:
+      CP-ANG-002  NHLBI, National Institutes of Health  retrieved 2026-09-15
+         https://www.nhlbi.nih.gov/health/angina
+      CP-ANG-003  NHLBI, National Institutes of Health  retrieved 2026-09-19
+         https://www.nhlbi.nih.gov/health/angina/symptoms
+
+P  PLAN
+   Next steps, as shown to the patient:
+      1. Call emergency services now
+      2. Stay with the person until help arrives
+      3. Do not drive them yourself
+
+   Follow-up questions: none.
+
+==============================================================================
+Everything above is read from the saved assessment. Citation keys resolve in
+01-data/citations.csv, whose sha256 is in the header. The system has no
+knowledge outside that corpus, and this note is not a diagnosis.

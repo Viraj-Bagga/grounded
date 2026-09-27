@@ -131,9 +131,9 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
   visibility: hidden;
   transition: transform 160ms cubic-bezier(.16, 1, .3, 1), visibility 0s linear 160ms;
 }
-.side.open { transform: none; visibility: visible; box-shadow: 0 12px 40px rgb(15 19 24 / .22);
+.side.open { transform: none; visibility: visible; box-shadow: 0 12px 40px rgb(31 33 35 / .14);
   transition: transform 160ms cubic-bezier(.16, 1, .3, 1), visibility 0s; }
-.scrim { position: fixed; inset: 0; z-index: 35; background: rgb(15 19 24 / .38); }
+.scrim { position: fixed; inset: 0; z-index: 35; background: rgb(31 33 35 / .32); }
 .scrim[hidden] { display: none; }
 
 @media (min-width: 60rem) {
@@ -145,47 +145,49 @@ svg.i { width: 1.25rem; height: 1.25rem; flex: none; stroke: currentColor; fill:
   .scrim, .only-narrow { display: none !important; }
 }
 
-.side-head { padding: .75rem var(--pad) .75rem; display: grid; gap: .75rem; }
-.mark { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: var(--fs-title);
-  letter-spacing: -.01em; }
-.mark .dot { width: .75rem; height: .75rem; background: var(--ink); }
-.new-btn { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: var(--tap);
-  border: 1px solid var(--ink); border-radius: var(--r); background: var(--paper); font-weight: 700;
-  cursor: pointer; text-decoration: none; color: var(--ink); }
-.new-btn:hover { background: var(--well); }
+/* THE SIDEBAR: quiet type on a warm grey, one line per assessment, a dot
+   for each person's verdict. Ink, not boxes, says where you are. */
+.side-head { padding: 1.25rem .75rem .5rem; display: grid; gap: .5rem; }
+.mark { padding: 0 .5rem; font: 500 1.25rem/1.2 var(--display); letter-spacing: -.01em; }
+.new-btn { display: flex; align-items: center; gap: .625rem; min-height: var(--tap); padding: 0 .5rem;
+  border: 0; border-radius: var(--r); background: transparent; font-weight: 500; font-size: var(--fs-meta);
+  cursor: pointer; text-decoration: none; color: var(--ink-2); }
+.new-btn:hover { background: var(--action-soft); color: var(--ink); }
+.new-btn svg.i { width: 1.125rem; height: 1.125rem; }
 
-.history { flex: 1; overflow-y: auto; padding: 0 .5rem .75rem; }
-.history h2 { font-size: var(--fs-meta); font-weight: 700; color: var(--ink-2); margin: 1rem .5rem .5rem; }
-.hist-row { display: grid; grid-template-columns: 1.375rem 1fr; gap: .5rem; align-items: start;
-  padding: .5rem .5rem; border-radius: var(--r); color: var(--ink); text-decoration: none; }
-.hist-row:hover { background: var(--well); }
-.hist-row[aria-current="page"] { background: var(--action-soft); }
-.hist-row .t { font-size: var(--fs-label); font-weight: 600; line-height: 1.3; display: -webkit-box;
-  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.hist-row .m { font-size: var(--fs-meta); color: var(--ink-2); margin-top: .125rem; }
-.hist-empty { color: var(--ink-2); font-size: var(--fs-label); padding: .5rem; }
-
-.marks { display: grid; gap: 2px; padding-top: .125rem; }
-.mk { width: 1.5rem; height: 1.125rem; display: grid; place-items: center; font: 700 .75rem/1 var(--font);
+.history { flex: 1; overflow-y: auto; padding: 0 .75rem .75rem; }
+.history h2 { font-size: var(--fs-fine); font-weight: 500; color: var(--ink-3); margin: 1rem .5rem .25rem;
   letter-spacing: .02em; }
-.mk.red { background: var(--red); color: var(--on-red); }
-.mk.yellow { background: var(--yellow); color: var(--on-yellow); }
-.mk.green { background: var(--green); color: var(--on-green); }
-.mk.hold { background: var(--hold) var(--hatch); color: var(--on-hold); }
-.mk svg.i { width: .8125rem; height: .8125rem; stroke-width: 2.25; }
-.nw { white-space: nowrap; }
-.mk.none { background: var(--paper); border: 1px solid var(--rule-2); color: var(--ink-3); }
+.hist-row { display: flex; align-items: center; gap: .625rem; min-height: var(--tap); padding: 0 .5rem;
+  border-radius: var(--r); color: var(--ink-2); text-decoration: none; font-size: var(--fs-meta); }
+.hist-row:hover { background: var(--action-soft); color: var(--ink); }
+.hist-row[aria-current="page"] { background: var(--action-soft); color: var(--ink); font-weight: 500; }
+.hist-row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-row .m { flex: none; font-size: var(--fs-fine); color: var(--ink-3); font-variant-numeric: tabular-nums;
+  white-space: nowrap; }
+.hist-empty { color: var(--ink-2); font-size: var(--fs-meta); padding: .5rem; }
 
-.side-foot { border-top: 1px solid var(--rule); padding: .5rem; display: grid; gap: .25rem; }
+/* status dots: filled for a verdict, a ring for none */
+.marks { display: flex; gap: 3px; width: 1.0625rem; flex: none; }
+.mk { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.mk.red { background: var(--red-dot); }
+.mk.yellow { background: var(--yellow-dot); }
+.mk.green { background: var(--green-dot); }
+.mk.hold { box-shadow: inset 0 0 0 1.5px var(--hold-ink); }
+.mk.none { box-shadow: inset 0 0 0 1.5px var(--rule-2); }
+.nw { white-space: nowrap; }
+
+.side-foot { border-top: 1px solid var(--rule); padding: .5rem .75rem .75rem; display: grid; }
 .foot-link { display: flex; align-items: center; gap: .75rem; min-height: var(--tap); padding: 0 .5rem;
-  border-radius: var(--r); color: var(--ink); text-decoration: none; font-weight: 600; }
-.foot-link:hover { background: var(--well); }
-.foot-link[aria-current="page"] { background: var(--action-soft); }
-.foot-link .n { margin-left: auto; color: var(--ink-2); font-weight: 400; }
-.status { display: flex; align-items: center; gap: .5rem; padding: .5rem .5rem; font-size: var(--fs-meta);
-  color: var(--ink-2); }
-.status .lamp { width: .5rem; height: .5rem; background: var(--ink); }
-.status.down .lamp { background: transparent; border: 1px solid var(--ink); }
+  border-radius: var(--r); color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: var(--fs-meta); }
+.foot-link svg.i { width: 1.125rem; height: 1.125rem; color: var(--ink-3); }
+.foot-link:hover { background: var(--action-soft); color: var(--ink); }
+.foot-link[aria-current="page"] { background: var(--action-soft); color: var(--ink); }
+.foot-link .n { margin-left: auto; color: var(--ink-3); font-weight: 400; font-size: var(--fs-fine); }
+.status { display: flex; align-items: center; gap: .5rem; padding: .5rem .5rem 0; font-size: var(--fs-fine);
+  color: var(--ink-3); }
+.status .lamp { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-2); }
+.status.down .lamp { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-2); }
 
 /* ---------------------------------------------------------------- top bar */
 
@@ -674,7 +676,7 @@ dl.kv dt { color: var(--ink-3); } dl.kv dd { margin: 0; color: var(--ink); min-w
 .icon-btn.danger:hover { background: var(--ink); color: var(--paper); }
 /* A caseload with people on it says so in the sidebar, because the whole point
    is that the worker does not have to remember. */
-.foot-link.has-waiting .n { color: var(--action); font-weight: 700; }
+.foot-link.has-waiting .n { color: var(--ink); font-weight: 700; }
 
 /* -------------------------------------------------------- send to base */
 .sy-base { margin-bottom: 1rem; }

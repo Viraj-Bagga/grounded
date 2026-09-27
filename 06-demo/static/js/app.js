@@ -216,19 +216,23 @@ function renderHistory() {
     const g = d >= today ? "Today" : d >= new Date(today - 864e5) ? "Yesterday" : "Earlier";
     groups[g].push(c);
   }
+  // A dot per person: filled for a verdict, a ring for none. The row's
+  // hidden line says who and what in words, so colour is never alone.
   const mark = s => {
     const w = s.state === "red" || s.state === "yellow" || s.state === "green" ? s.state : null;
-    return w ? `<span class="mk ${w}" title="${w}">${w[0].toUpperCase()}</span>`
-      : s.state ? `<span class="mk hold" title="no verdict">${icon("none")}</span>` : `<span class="mk none" title="no answer yet"></span>`;
+    return w ? `<span class="mk ${w}" title="${w}"></span>`
+      : s.state ? `<span class="mk hold" title="no verdict"></span>` : `<span class="mk none" title="no answer yet"></span>`;
   };
-  const time = iso => `<span class="nw">${new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>`;
+  const clockOf = iso => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const word = s => s.state === "child" ? "not assessed" : s.state === "refused" ? "out of scope"
     : s.state === "error" ? "error" : s.state || "no answer";
   const rows = Object.entries(groups).filter(([, v]) => v.length).map(([g, list]) =>
-    `<h2>${g}</h2>` + list.map(c => `<a class="hist-row" href="/c/${esc(c.id)}" data-link${c.id === here ? ' aria-current="page"' : ""}>` +
-      `<span class="marks">${c.sides.map(mark).join("")}</span>` +
-      `<span><span class="t">${esc(c.title || "Untitled")}</span>` +
-      `<span class="m">${c.sides.map(s => `${esc(s.label)}, ${esc(word(s))}`).join(" · ")} · ${time(c.updated)}</span></span></a>`).join("")).join("");
+    `<h2>${g}</h2>` + list.map(c => `<a class="hist-row" href="/c/${esc(c.id)}" data-link${c.id === here ? ' aria-current="page"' : ""}` +
+      ` title="${esc(c.title || "Untitled")}">` +
+      `<span class="marks" aria-hidden="true">${c.sides.map(mark).join("")}</span>` +
+      `<span class="t">${esc(c.title || "Untitled")}</span>` +
+      `<span class="sr">. ${c.sides.map(s => `${esc(s.label)}, ${esc(word(s))}`).join("; ")}</span>` +
+      `<span class="m">${esc(clockOf(c.updated))}</span></a>`).join("")).join("");
   $("#history").innerHTML = rows || `<p class="hist-empty">Assessments you make appear here, saved on this device.</p>`;
   // aria-current is "page" on the one you are on and ABSENT everywhere else.
   // It used to be set to "false" on the others, which is legal but noisy, and
