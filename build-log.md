@@ -6041,3 +6041,20 @@ escalation.py, 37/37.
 **A favicon**, the same SVG on the field app and base, linked from both pages,
 so Chrome stops asking for `/favicon.ico` and logging a 404. Full suite passed,
 163 checks, and 07-distribute 56/56.
+
+### 2026-09-29 The stomach pain and late period case, re-run on the base model: it reproduces
+
+The founding case of guard 6 was prose only; nothing raw was saved on 09-17.
+Re-run with that day's setup reconstructed from the record: the base GGUF, the
+22-chunk index at blend alpha 0.5 top 3, You as 29F with nothing on the
+profile, temperature 0.2, reasoning off, and the demo's prompt at sha
+`102e7511`, rebuilt from change set B plus the one recorded edit and verified by
+hash. No guards: the finding was about the raw output.
+
+**Retrieval returned GERD, panic and angina, exactly as logged. Five runs: 2
+green, 3 yellow, 0 red, 4 of 5 citing nothing, no red flags in any.** Two are
+the original finding exactly, green with zero citations and a rationale calling
+it non-urgent. Run 1 is yellow and cites all three chunks, so the
+empty-citation check alone would not have caught it; the pregnancy exclusion,
+since 2026-09-18, refuses this text before generation.
+`01-data/eval/runs/2026-09-29-stomach-late-period-base-rerun.txt`, raw.
