@@ -6150,3 +6150,13 @@ fever", "rash on my arm", "sore throat and a cough", "I think I broke my arm",
 "sprained my wrist and feel dizzy"; not refused "jaw pain, sweating and I feel
 sick", which names nothing outside. guards.py 159/159. `ui-audit/copy.md` leaves
 git and stays on disk.
+
+### 2026-09-29 Vomiting joins the companions
+
+Viraj's omission from the two-tier split. `vomit*` and throw up, threw up,
+throws up, throwing up are one companion, so "vomiting and throwing up" counts
+once. Counts unchanged: in scope 165 of 168 pass, out of scope 15 of 15
+refused, the seven test texts as before. **One new hole, recorded as a known
+miss:** "headache, vomiting and feeling sick" now passes, because nausea and
+vomiting are two different companions. "Headache and vomiting" is still
+refused. guards.py 163/163.

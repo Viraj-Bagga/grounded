@@ -564,7 +564,7 @@ def excluded_subject(text):
 # COMPANIONS are the places heart pain spreads to (jaw, neck, arms, shoulders,
 # back, front), the legs for a clot (CP-PE-001), and what a heart attack or panic
 # attack comes with, from CP-ACS-003 and CP-PANIC-001 (sweating, dizziness,
-# fainting, nausea, tiredness, weakness, anxiety), plus cough. ONE companion no
+# fainting, nausea, vomiting, tiredness, weakness, anxiety), plus cough. ONE companion no
 # longer keeps a text in: with only one tier, "headache and feeling sick",
 # "headache, stiff neck and fever", "rash on my arm" and "sprained my wrist and
 # feel dizzy" all passed, because sick, neck, arm and dizzy were inside. TWO
@@ -608,7 +608,10 @@ COMPANIONS = tuple(re.compile(rf"\b(?:{w})\b", re.IGNORECASE) for w in (
     r"jaw\w*", r"neck", r"arms?", r"shoulders?", r"back", r"front", r"legs?",
     r"calf|calves", r"cough\w*", r"sweat\w*", r"clammy", r"dizz\w*",
     r"light[\s-]?headed\w*", r"faint\w*", r"nause\w*", r"queas\w*", r"sick",
-    r"tired\w*", r"exhaust\w*", r"drained", r"fatigue\w*", r"weak\w*", r"anxi\w*"))
+    r"tired\w*", r"exhaust\w*", r"drained", r"fatigue\w*", r"weak\w*", r"anxi\w*",
+    # Vomiting, added 2026-09-29 (Viraj's omission from the first split): one
+    # companion however it is said, so "vomiting" and "threw up" count once.
+    r"vomit\w*|thr(?:ow(?:s|ing)?|ew)\s+up"))
 
 OFF_TERRITORY = re.compile(
     r"\b(head|headaches?|migraines?|eyes?|eyesight|vision|ears?|earache|"

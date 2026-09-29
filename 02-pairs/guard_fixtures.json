@@ -1196,6 +1196,26 @@
       "name": "tiers 2026-09-29: 'I broke out in a sweat and my chest is tight', is not refused: `broke out` is not a break, and chest is core",
       "text": "I broke out in a sweat and my chest is tight",
       "refused": false
+    },
+    {
+      "name": "vomiting 2026-09-29: 'headache and vomiting', is refused: vomiting is one companion",
+      "text": "headache and vomiting",
+      "refused": true
+    },
+    {
+      "name": "vomiting 2026-09-29: 'headache, vomiting and feeling sick', is not refused: KNOWN MISS: nausea and vomiting are two different companions",
+      "text": "headache, vomiting and feeling sick",
+      "refused": false
+    },
+    {
+      "name": "vomiting 2026-09-29: 'I have been vomiting and throwing up with a sore throat', is refused: vomiting and throwing up are ONE companion",
+      "text": "I have been vomiting and throwing up with a sore throat",
+      "refused": true
+    },
+    {
+      "name": "vomiting 2026-09-29: 'I threw up and my tooth hurts and I am sweating', is not refused: two companions, threw up and sweating",
+      "text": "I threw up and my tooth hurts and I am sweating",
+      "refused": false
     }
   ]
 }
