@@ -530,6 +530,94 @@ def excluded_subject(text):
     return False, "", ""
 
 
+# SUBJECT SCOPE. Refuses before generation when the text names a body part or
+# complaint OUTSIDE the chest-pain territory and names NOTHING inside it.
+# Added 2026-09-29 after an audit of the tuned model.
+#
+# WHY IT HAD TO EXIST. The post-flight check refuses a yellow or green that
+# cites nothing, and on the BASE model that caught most out-of-scope queries,
+# because the base cited nothing when it had nothing. The fine-tune took
+# non-red answers citing nothing from 9/33 to 0/53, so the tuned model ALWAYS
+# cites something, and the post-flight check stopped firing on anything.
+# Measured live on the tuned model 2026-09-29, all three triaged, none refused:
+#     "My knee has been swollen and stiff since I twisted it playing football
+#      yesterday"                                  YELLOW, citing a DVT chunk
+#     "I have had a bad headache for three days and light hurts my eyes"
+#                                                  YELLOW, citing heart attack
+#                                                  symptoms, its own Why saying
+#                                                  the context "does not describe
+#                                                  headache"
+#     "My tooth is killing me and the side of my face aches"
+#                                                  GREEN self-care, citing heart
+#                                                  inflammation
+# The floor could not catch them either: the classes overlap on cosine (see
+# the calibration above), and all three clear 0.25.
+#
+# THE RULE, and why it is lopsided. BOTH lists must be consulted: a term from
+# OFF_TERRITORY refuses only when no term from IN_TERRITORY is present. A text
+# that names no body part at all ("I suddenly feel drained and a bit queasy",
+# "feels like an elephant is sitting on me") is NOT refused: that is how an
+# atypical heart attack reads, and HE01, the case this project most needs to
+# get right, says outright "There is no real chest pain". Refusing a real
+# presentation is the catastrophic direction, so every doubt goes into
+# IN_TERRITORY, where it can only make the check refuse less.
+#
+# IN_TERRITORY is the corpus's ground: the chest, heart and lungs; the places
+# heart pain spreads to (jaw, neck, arms, shoulders, back); the legs, because
+# DVT is how a clot presents (CP-PE-001); reflux words; and the companions a
+# heart attack or panic attack can come with, from CP-ACS-003 and CP-PANIC-001
+# (sweating, dizziness, fainting, nausea, tiredness, anxiety). So "my tooth
+# hurts and I feel sweaty and sick" is NOT refused: a heart attack can present
+# as dental pain, and the sweat and nausea keep it in.
+#
+# OFF_TERRITORY is body parts and complaints the corpus does not cover as a
+# presenting complaint. It is not "words the corpus never uses": CP-PNA-001
+# lists headache and diarrhoea among the symptoms that can come WITH pneumonia.
+# A pneumonia text will carry a cough or breathlessness, which keeps it in.
+#
+# MEASURED 2026-09-29, before wiring it in: no in-scope text refused out of 169
+# (the 22 held-out cases, all 120 training pairs, the 3 demo presets, the 12
+# colloquial in-scope calibration queries, and 12 stress phrasings of atypical
+# heart attack, DVT and reflux). Out of scope, 13 of 15 refused. The two it
+# lets through, both knowingly, because the fix would refuse real presentations:
+#     "I have got a rash on my arm that itches"   `arm` is where heart pain
+#                                                 spreads
+#     "I have a sore throat and a cough"          `cough` is pneumonia
+# It is a lexicon, and a lexicon has holes. The post-flight check and the floor
+# still run after it; it adds a layer, it replaces none.
+IN_TERRITORY = re.compile(
+    r"\b(chest\w*|breast\s*bone|sternum|ribs?|heart\w*|cardiac|palpitat\w*|pulse|"
+    r"breath\w*|winded|out\s+of\s+puff|cough\w*|lungs?|pleur\w*|"
+    r"jaw\w*|neck|arms?|shoulders?|back|front|legs?|calf|calves|thighs?|"
+    r"indigestion|heartburn|reflux|acid\w*|swallow\w*|epigastr\w*|"
+    r"upper\s+(?:stomach|belly|tummy|abdomen)|"
+    r"sweat\w*|clammy|dizz\w*|light[\s-]?headed\w*|faint\w*|nause\w*|queas\w*|"
+    r"sick|vomit\w*|throw(?:ing)?\s+up|tired\w*|exhaust\w*|drained|fatigue\w*|"
+    r"weak\w*|panic\w*|anxi\w*)\b", re.IGNORECASE)
+
+OFF_TERRITORY = re.compile(
+    r"\b(head|headaches?|migraines?|eyes?|eyesight|vision|ears?|earache|"
+    r"tooth|teeth|toothache|dental|gums?|face|facial|nose|sinus\w*|sore\s+throat|"
+    r"skin|rash\w*|itch\w*|"
+    r"knees?|ankles?|wrists?|hands?|fingers?|thumbs?|toes?|foot|feet|hips?|elbows?|"
+    r"pee|peeing|urin\w*|bladder|diarrh\w*|constipat\w*|"
+    r"sprain\w*|twist\w*|rolled|fractur\w*|"
+    r"feeling\s+(?:really\s+|very\s+|so\s+)?(?:down|low)|low\s+mood|depress\w*|"
+    r"can(?:no|['’])?t\s+sleep|insomnia)\b", re.IGNORECASE)
+
+
+def off_territory(text):
+    """(refuse, reason). Refuses when `text` names something outside the
+    chest-pain territory and nothing inside it. See the block above."""
+    t = str(text or "")
+    off = OFF_TERRITORY.search(t)
+    if not off or IN_TERRITORY.search(t):
+        return False, ""
+    return True, (f'the question is about "{off.group(0)}", and nothing in it '
+                  f"is about the chest, heart or breathing, which is all the "
+                  f"corpus covers")
+
+
 def scope_check(max_cosine=None, citations=None, floor=SCOPE_FLOOR):
     """(in_scope, reason). Either condition failing refuses the whole verdict,
     except that a red is never withheld: post-flight goes through post_flight.
@@ -684,6 +772,26 @@ if __name__ == "__main__":
     for c in fx.get("scope", []):
         ok, why = scope_check(c["max_cosine"], c["citations"])
         check(f"scope: {c['name']}", ok == c["in_scope"], f"got in_scope={ok} {why}")
+
+    # Subject scope: the 22 held-out cases, the demo presets and the audit's
+    # out-of-scope cases, each with the answer it must get.
+    for c in fx.get("subject_scope", []):
+        refused, why = off_territory(c["text"])
+        check(f"subject_scope: {c['name']}", refused == c["refused"],
+              f"got refused={refused} {why}")
+
+    # And no training pair may be refused: they are all chest pain, written by
+    # hand, in every register the pairs cover.
+    pairs = Path(__file__).resolve().parent / "review" / "candidates-120.jsonl"
+    hit = []
+    for line in pairs.read_text(encoding="utf-8").splitlines():
+        p = json.loads(line)
+        h = next(x["value"] for x in p["conversations"] if x["from"] == "human")
+        said = "\n".join(m.group(1) for m in re.finditer(
+            r"\[(?:SYMPTOMS|SYMPTOM TIMELINE)\]\n(.*?)\n\[/", h, re.S))
+        if off_territory(said)[0]:
+            hit.append(p["id"])
+    check("subject_scope: no training pair is refused", not hit, f"refused {hit}")
 
     # A flagged red must carry the urgency and nothing else the model wrote.
     for c in fx.get("post_flight", []):

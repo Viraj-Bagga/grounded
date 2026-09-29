@@ -49,8 +49,8 @@ sys.path.insert(0, str(ROOT / "01-data" / "eval"))
 
 from guards import (PAEDIATRIC_REFUSAL, REFUSAL,  # noqa: E402
                     UNGROUNDED_NOTE, apply_guards, child_term,
-                    excluded_subject, is_child_profile, post_flight,
-                    scope_check, screen_follow_ups)
+                    excluded_subject, is_child_profile, off_territory,
+                    post_flight, scope_check, screen_follow_ups)
 from escalation import RULES, escalate, rescue_refusal  # noqa: E402
 from steps_raise import raise_on_steps  # noqa: E402
 from pair_format import (ASSISTANT_SCHEMA, SYSTEM_PROMPT,  # noqa: E402
@@ -417,6 +417,20 @@ class Engine:
             excluded, exwhy, exmsg = excluded_subject(ptext + "\n" + case_present)
             if excluded:
                 ev = {"message": exmsg, "reason": exwhy, "categorical": True}
+                ev["followups_left"] = self._record(cid, si, turn_record("refused", {**who, **ev}))
+                emit("refused", ev)
+                return
+
+            # SUBJECT SCOPE, citation-independent, first turn only. The tuned
+            # model cites something for everything, so the post-flight check no
+            # longer catches an out-of-scope question: a twisted knee, a
+            # three-day headache and a toothache were all triaged on
+            # 2026-09-29. Refuses only a text that names something outside the
+            # chest-pain territory and nothing inside it. See off_territory.
+            off, offwhy = off_territory(query)
+            if off:
+                ev = {"message": REFUSAL, "reason": offwhy,
+                      "nearest": [h[0] for h in hits]}
                 ev["followups_left"] = self._record(cid, si, turn_record("refused", {**who, **ev}))
                 emit("refused", ev)
                 return

@@ -5933,3 +5933,53 @@ behaviour, wrong test.
 
 **Run one ui_check at a time**, and take the final number from a run with a
 freshly restarted llama-server.
+
+### 2026-09-29 Out-of-scope refusal stopped working on the tuned model; a subject check that needs no citations
+
+**Found by an audit, live on the tuned model, nothing mocked.** Three
+out-of-scope questions were triaged, none refused:
+
+| query | shown |
+|---|---|
+| "My knee has been swollen and stiff since I twisted it playing football yesterday" | YELLOW, citing a DVT chunk |
+| "I have had a bad headache for three days and light hurts my eyes" | YELLOW, citing heart attack symptoms; its own Why says the context "does not describe headache" |
+| "My tooth is killing me and the side of my face aches" | GREEN self-care, citing heart inflammation |
+
+**The cause is the fine-tune working.** The post-flight check refuses a yellow
+or green that cites nothing. On the base model that caught most out-of-scope
+questions, because the base cited nothing when it had nothing. The tune took
+non-red answers citing nothing from 9/33 to 0/53, so it cites something for
+everything and the post-flight check never fires. The floor cannot catch these
+either: the classes overlap on cosine, and all three clear 0.25.
+
+**`off_territory` in `02-pairs/guards.py`, first turn only, before the floor.**
+It refuses when the symptoms and timeline name a body part or complaint OUTSIDE
+the chest-pain territory (knee, tooth, headache, eyes, rash, urine, a sprain,
+low mood) and name NOTHING inside it (chest, heart, breathing, cough, the places
+heart pain spreads to, the legs for DVT, reflux words, and the companions of a
+heart attack or panic attack: sweat, dizziness, fainting, nausea, tiredness,
+anxiety). **A text that names no body part at all is never refused**, because
+that is how an atypical heart attack reads; HE01 says "There is no real chest
+pain". Every doubt goes into the in-territory list, where it can only make the
+check refuse less.
+
+**Measured before wiring it in.** In scope, 0 of 169 refused: the 22 held-out
+cases, all 120 training pairs, the 3 demo presets, the 12 colloquial
+calibration queries and 12 stress phrasings (tooth pain with sweat and nausea,
+knee and calf after a flight, faint with blurred vision). Out of scope, 13 of 15
+refused. **The two it lets through, knowingly:** "I have got a rash on my arm
+that itches" (`arm` is where heart pain spreads) and "I have a sore throat and a
+cough" (`cough` is pneumonia). Refusing either would refuse real presentations.
+
+**Live, one run each** (`06-demo/results/2026-09-29-subject-scope-live.txt`):
+the three audit cases refused in 0.1 s before retrieval; presets 1 and 2 RED,
+preset 3 GREEN beside YELLOW, heartburn GREEN, HE01 RED. Full suite passed,
+162 checks.
+
+63 fixtures under `subject_scope` in `guard_fixtures.json` (held-out, presets,
+audit cases, calibration, stress phrasings), plus a self-test that no training
+pair is refused. guards.py 151/151.
+
+**It is a lexicon and it has holes.** It adds a layer; the floor and the
+post-flight check still run after it. The lists are a clinical call and want
+Viraj's review.

@@ -840,5 +840,322 @@
       "profile": {},
       "child": false
     }
+  ],
+  "subject_scope": [
+    {
+      "name": "held-out HE01 (red, CP-ACS) is not refused",
+      "text": "For about forty minutes my upper back and left shoulder have been aching, I get out of breath just sitting here, and I suddenly feel completely drained and a bit queasy. There is no real chest pain.\nT+0:00 back and shoulder ache began while folding laundry. T+0:15 short of breath sitting down. T+0:40 still aching, very tired.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE02 (red, CP-PE) is not refused",
+      "text": "Sudden sharp pain on the right side of my chest when I breathe in, and I'm short of breath even lying on the sofa. My right calf has been swollen and sore for a couple of days.\nT+0:00 sharp pain on breathing in came on suddenly at rest. T+0:05 breathless at rest. T+0:30 no better.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE03 (yellow, CP-ANG) is not refused",
+      "text": "Walking up the hill to the shops my chest went tight, same as it does a couple of times a week. I stopped for a couple of minutes and it went away completely.\nT+0:00 tightness began walking uphill. T+0:02 stopped. T+0:04 gone. Same pattern for the past year.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE04 (yellow, CP-ANG) is not refused",
+      "text": "For about four months my jaw and left arm ache and I get breathless when I carry shopping up the stairs. It settles within a few minutes once I stop. I've never had it checked.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE05 (yellow, CP-PERI) is not refused",
+      "text": "Sharp pain in the middle of my chest for two days. It's worse when I lie back or take a deep breath and easier when I sit up and lean forward. I had a sore throat and a runny nose last week and I feel feverish.\nT+0:00 sharp central pain began at rest two days ago. T+48:00 still there, worse lying flat.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE06 (yellow, CP-PLEU) is not refused",
+      "text": "A sharp pain low on the left side of my chest whenever I breathe in deeply, since yesterday. I've had a chesty cold for a week. I'm not short of breath, my legs are fine and I haven't travelled.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE07 (yellow, CP-PNA) is not refused",
+      "text": "What started as a head cold last week has turned into a cough with thick yellow mucus, a high temperature with shivering, and a stabbing pain under my right ribs whenever I cough. I've gone off my food and feel wiped out, but my breathing is okay.\nT+0:00 head cold began a week ago. T+96:00 cough with yellow mucus, fever and shivering. T+144:00 stabbing pain under the right ribs when coughing.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE08 (yellow, CP-PE) is not refused",
+      "text": "My left calf is swollen, warm and sore to touch, and it hurts to walk on. I got back from a fourteen-hour flight three days ago. No chest pain and my breathing is normal.\nT+0:00 calf ache noticed the morning after the flight. T+72:00 swollen, warm, sore to touch.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE09 (yellow, CP-GERD) is not refused",
+      "text": "I've had heartburn most days for a couple of months, and for the last two days my stools have been black and tarry. I feel otherwise okay, no dizziness.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE10 (green, CP-GERD) is not refused",
+      "text": "Burning behind my breastbone that rises toward my throat, about an hour after a big curry and a couple of beers. I can taste acid at the back of my mouth. I've had this before after heavy meals.\nT+0:00 burning began an hour after dinner. T+0:30 sour taste. T+1:00 easing while sitting up.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE11 (green, CP-GERD) is not refused",
+      "text": "For two weeks I've had a burning feeling in my chest at night when I lie down after a late meal, and sometimes food comes back up into my mouth. Swallowing is fine and I'm eating normally.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE12 (green, CP-GERD) is not refused",
+      "text": "I've had a hoarse voice most mornings and a nagging cough for about a month, along with heartburn after meals. I feel fine otherwise.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE13 (green, CP-GERD) is not refused",
+      "text": "When I bend over at work after lunch I get a burning in my chest and a sour taste. It goes when I stand up straight. No vomiting and I've no trouble swallowing.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE14 (green, CP-GERD) is not refused",
+      "text": "Burning in my chest and a lot of burping after coffee on an empty stomach, same as my usual reflux. It's mild and I'm otherwise well.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE15 (green, CP-PANIC) is not refused",
+      "text": "In a crowded shop my heart suddenly started pounding, my hands went tingly and I was shaking and sure something awful was about to happen. It peaked within ten minutes and I've calmed down now, twenty minutes later. It felt like my usual panic attacks.\nT+0:00 sudden pounding heart in a crowded shop. T+0:10 peak. T+0:20 settled.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE16 (green, CP-PANIC) is not refused",
+      "text": "Woke up at 3am with my heart racing, chills and a feeling that I was losing control. It lasted about fifteen minutes and I'm settled now. I've had attacks like this before, sometimes at night.\nT+0:00 woke with a racing heart. T+0:15 settling. T+0:30 calm.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE17 (green, CP-PANIC) is not refused",
+      "text": "Before a presentation at work I started trembling, my hands went numb and my chest felt tight, and I felt totally out of control. Once I sat somewhere quiet it passed within about fifteen minutes, like my other attacks.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE18 (green, CP-PANIC) is not refused",
+      "text": "A sudden wave of fear in a lecture, with my heart racing, stomach cramps and shaky legs. It passed in about ten minutes. It's happened a few times this term.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE19 (green, CP-DIFF) is not refused",
+      "text": "My chest has been sore across the front since a heavy bench-press session yesterday. It hurts when I stretch or twist and when I press on the muscles. My breathing is fine and I feel well otherwise.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE20 (green, CP-DIFF) is not refused",
+      "text": "A sharp pain in one spot just beside my breastbone for about a week. It's sore when I press right on it and when I lift my arm. I feel fine otherwise, no breathlessness.\n",
+      "refused": false
+    },
+    {
+      "name": "held-out HE21 (red, CP-PERI) is not refused",
+      "text": "The sharp chest pain I've had since the flu last week is much worse today. I'm badly out of breath even sitting still, I can't lie flat at all and my heart is racing.\nT+0:00 sharp pain, easier leaning forward, began five days ago after flu. T+96:00 much worse. T+100:00 badly breathless at rest, cannot lie flat.",
+      "refused": false
+    },
+    {
+      "name": "held-out HE22 (red, CP-PNA) is not refused",
+      "text": "My mother has had a chesty cough for three days and since this morning she's muddled and not making sense. She's breathing fast and says she can't get enough air, and she feels cold rather than hot.\nT+0:00 chesty cough began three days ago. T+60:00 muddled and not making sense. T+62:00 breathing fast, cannot get enough air.",
+      "refused": false
+    },
+    {
+      "name": "demo preset 'Crushing chest pressure' is not refused",
+      "text": "Heavy pressure in the middle of my chest that has not let up for almost half an hour. I feel sick and I am sweating.\nT+0:00 began while sitting watching television. T+0:04 spread to the jaw. T+0:11 sweating and nausea. T+0:26 unchanged after resting.",
+      "refused": false
+    },
+    {
+      "name": "demo preset 'Sharp pain when breathing in' is not refused",
+      "text": "Sharp pain in my left chest, worse when I breathe in. It eases if I sit up and lean forward. Walking around does not change it.\nT+0:00 began at rest. T+0:10 worse on deep breath. T+1:30 unchanged, no relation to exertion.",
+      "refused": false
+    },
+    {
+      "name": "demo preset 'Indigestion (You and Mum)' is not refused",
+      "text": "A bit of indigestion after lunch, nothing much.",
+      "refused": false
+    },
+    {
+      "name": "heartburn is not refused",
+      "text": "Heartburn after dinner that will not settle",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, original worst, kept for continuity, is not refused",
+      "text": "Burning behind my breastbone at night",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, the live refusal that started this, is not refused",
+      "text": "Chest got tight walking up the hill to my car, same as it does most weeks. Sat on the wall. It has not shifted, it has been half an hour now.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, the classic idiom, is not refused",
+      "text": "Feels like an elephant sitting on my chest.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, exertional, colloquial, is not refused",
+      "text": "My chest goes tight when I walk up hills and settles when I stop.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, squeezing plus autonomic, is not refused",
+      "text": "Got a squeezing feeling in my chest and I have gone all clammy.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, radiation, no 'chest' framing, is not refused",
+      "text": "There is a heaviness across my front and my left arm has gone dead.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, reflux idiom, the GERD side, is not refused",
+      "text": "Bad indigestion that will not shift and I feel a bit sick with it.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, vague, which is how people actually open, is not refused",
+      "text": "Something is not right in my chest and it has been a while now.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, pleuritic, colloquial, is not refused",
+      "text": "Sharp stabbing in my side when I take a deep breath.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, musculoskeletal, the green side, is not refused",
+      "text": "My chest hurts when I press on it.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, woke with it, is not refused",
+      "text": "Woke up with a dull ache in the middle of my chest.",
+      "refused": false
+    },
+    {
+      "name": "calibration in-scope, panic side, is not refused",
+      "text": "My heart is pounding and my chest feels tight and I cannot calm down.",
+      "refused": false
+    },
+    {
+      "name": "atypical: tooth pain with sweat and nausea, is not refused",
+      "text": "My tooth hurts and I feel sweaty and sick",
+      "refused": false
+    },
+    {
+      "name": "atypical: teeth and jaw, is not refused",
+      "text": "My teeth and jaw ache and I am sweating",
+      "refused": false
+    },
+    {
+      "name": "atypical: head spinning with a heavy chest, is not refused",
+      "text": "My head is spinning and I am sweaty and my chest is heavy",
+      "refused": false
+    },
+    {
+      "name": "atypical: faint with blurred vision, is not refused",
+      "text": "I feel faint and my vision went blurry",
+      "refused": false
+    },
+    {
+      "name": "atypical: no body part at all, is not refused",
+      "text": "I suddenly feel completely drained and a bit queasy",
+      "refused": false
+    },
+    {
+      "name": "atypical: an idiom with no body part, is not refused",
+      "text": "Feels like an elephant is sitting on me",
+      "refused": false
+    },
+    {
+      "name": "heart failure: breathless with swollen ankles, is not refused",
+      "text": "Short of breath and my ankles are swollen",
+      "refused": false
+    },
+    {
+      "name": "DVT: knee and calf after a flight, is not refused",
+      "text": "My knee and calf are swollen after a long flight",
+      "refused": false
+    },
+    {
+      "name": "radiation: arm and hand, is not refused",
+      "text": "Pain in my left arm and my hand is tingling",
+      "refused": false
+    },
+    {
+      "name": "pleuritic with a headache, is not refused",
+      "text": "Headache and pain across my chest when I cough",
+      "refused": false
+    },
+    {
+      "name": "audit 2026-09-29: knee, was triaged yellow, is refused",
+      "text": "My knee has been swollen and stiff since I twisted it playing football yesterday",
+      "refused": true
+    },
+    {
+      "name": "audit 2026-09-29: headache, was triaged yellow, is refused",
+      "text": "I have had a bad headache for three days and light hurts my eyes",
+      "refused": true
+    },
+    {
+      "name": "audit 2026-09-29: toothache, was triaged green, is refused",
+      "text": "My tooth is killing me and the side of my face aches",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, original best out-of-scope, is refused",
+      "text": "My toddler has a fever and is pulling at her ear",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, ankle, is refused",
+      "text": "I rolled my ankle playing football and it is swollen.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, headache, is refused",
+      "text": "I have had a bad headache for three days.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, knee, is refused",
+      "text": "My knee has been sore since I started running.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, rash, passes. KNOWN MISS: `arm` is where heart pain spreads",
+      "text": "I have got a rash on my arm that itches.",
+      "refused": false
+    },
+    {
+      "name": "calibration out-of-scope, mental health, is refused",
+      "text": "I have been feeling really down and cannot sleep.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, dental, is refused",
+      "text": "My tooth is killing me and the side of my face aches.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, urinary, is refused",
+      "text": "I keep needing to pee and it stings when I go.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, gastro, is refused",
+      "text": "I have had diarrhoea since yesterday and my stomach is cramping.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, eye, is refused",
+      "text": "My eye is red and watery and it feels gritty.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, wrist, is refused",
+      "text": "I sprained my wrist falling off my bike.",
+      "refused": true
+    },
+    {
+      "name": "calibration out-of-scope, ENT, the near miss, passes. KNOWN MISS: `cough` is pneumonia",
+      "text": "I have a sore throat and a cough.",
+      "refused": false
+    }
   ]
 }
