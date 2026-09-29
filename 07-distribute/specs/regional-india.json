@@ -1,6 +1,6 @@
 {
   "id": "regional-india",
-  "version": "2026.09.19",
+  "version": "2026.09.29",
   "kind": "overlay",
   "title": "India add-on: rheumatic heart disease and tuberculosis",
   "description": "Two presentations that matter in India and are absent from the base corpus. Layered on corpus-base, which supplies everything else. EXPERIMENTAL. An add-on layered on the base corpus, never a swap. Not wired into retrieval: the demo shows what this pack holds and keeps retrieving from the base corpus alone.",
@@ -10,7 +10,7 @@
   "license": {
     "name": "CC BY-NC-SA 3.0 IGO",
     "status": "amber",
-    "note": "This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product, and that is a real constraint on the Seed Round pitch, not a formality. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain.",
+    "note": "This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain.",
     "verbatim": [
       "LICENCE: CC BY-NC-SA 3.0 IGO"
     ]

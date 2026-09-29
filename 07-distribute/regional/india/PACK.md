@@ -8,7 +8,7 @@ holds; retrieval still uses the base corpus alone. Viraj's call, 2026-09-19.
 
 ## Licence: CC BY-NC-SA 3.0 IGO
 
-This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product, and that is a real constraint on the Seed Round pitch, not a formality. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain.
+This pack contains World Health Organization text, so the whole pack is CC BY-NC-SA 3.0 IGO. NonCommercial: it may not ship in a commercial product. ShareAlike: anything derived from it carries the same licence. The base corpus pack is unaffected and stays public domain.
 
 Commercial use: NOT ALLOWED.
 

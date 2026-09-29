@@ -6016,3 +6016,28 @@ empty-queue panel said "All N assessments ... have been looked at", which was
 false for the same reason; it now counts the reviewed and the not flagged
 separately. The Attention column shows 0 instead of a bare "None". The outstanding
 rule in base_server.py is unchanged. Full suite passed, 163 checks.
+
+### 2026-09-29 Three wording fixes from the audit, and a favicon
+
+**The India pack card said "that is a real constraint on the Seed Round pitch,
+not a formality".** Pitch language on a licence notice. Removed at the source,
+`07-distribute/regional/sources.yaml`, and re-frozen with `build_regional.py
+freeze --pack india`: the four chunks and the registry are byte-identical, only
+the licence sentence in `pack.json`, `PACK.md` and `LICENCE.txt` changed.
+**Because a pack version is immutable, the pack is now `regional-india
+2026.09.29`**; the builder refuses different content under 2026.09.19. The old
+version stays on any device that installed it; the client takes the newest.
+`07-distribute/packs/` is not in git, so a machine that built the old pack keeps
+it until it is deleted.
+
+**A rule line said the chest was described as "Bit of".** The mild marker in
+"Bit of a niggle in my chest" matched "Bit of" and was quoted as it stood. The
+quote now runs on past a dangling word ("of", "a", "bit", "little") to the first
+one that carries meaning, at most three words: `"chest", described as "Bit of a
+niggle"`. When that phrase already names the complaint it is one quote, not two:
+Mum's line now reads `"A bit of indigestion"`. Three wording self-tests in
+escalation.py, 37/37.
+
+**A favicon**, the same SVG on the field app and base, linked from both pages,
+so Chrome stops asking for `/favicon.ico` and logging a 404. Full suite passed,
+163 checks, and 07-distribute 56/56.

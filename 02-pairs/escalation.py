@@ -143,9 +143,37 @@ UNEXPLAINED = _words(r"unusual(?:ly)?", r"no reason", r"for days", r"all week",
                      r"can(?:[’']?t|not) explain", r"since")
 
 
+# A mild marker can end on a word that needs the next one to read: "Bit of a
+# niggle in my chest" matched "Bit of", and the rule line said the chest was
+# described as "Bit of". The quote now runs on to the first word that carries
+# meaning, at most three words on, so it reads "Bit of a niggle".
+_TRAILING = {"a", "an", "the", "of", "bit", "little", "my", "in"}
+_WORD = re.compile(r"[\w’'-]+")
+
+
+def _mild_phrase(text, m):
+    end = m.end()
+    words = m.group(0).lower().split()
+    for _ in range(3):
+        if not words or words[-1] not in _TRAILING:
+            break
+        nxt = _WORD.search(text, end)
+        if not nxt or text[end:nxt.start()].strip():
+            break
+        end = nxt.end()
+        words.append(nxt.group(0).lower())
+    return text[m.start():end]
+
+
 def _mild_cardiac(text):
     c, m = _anywhere(text, CARDIAC), MILD.search(text)
-    return f'"{c}", described as "{m.group(0)}"' if c and m else None
+    if not (c and m):
+        return None
+    phrase = _mild_phrase(text, m)
+    # "A bit of indigestion" already names the complaint: one quote, not two.
+    if re.search(rf"\b{re.escape(c)}\b", phrase, re.I):
+        return f'"{phrase}"'
+    return f'"{c}", described as "{phrase}"'
 
 
 def _exertional_chest(text):
@@ -379,6 +407,16 @@ if __name__ == "__main__":
                if RANK[escalate(u, P[c["profile"]], c["text"])["final"]] < RANK[u]]
     check("never lowers: every fixture at green, yellow and red", not lowered,
           f"lowered: {lowered}")
+
+    # The quote on the rule line reads as English, found in an audit
+    # 2026-09-29: it said the chest was described as "Bit of".
+    for text, want in (
+            ("Bit of a niggle in my chest this morning, came on while sitting, not too bad.",
+             '"chest", described as "Bit of a niggle"'),
+            ("A bit of indigestion after lunch, nothing much.", '"A bit of indigestion"'),
+            ("My chest feels a bit tight", '"chest", described as "a bit tight"')):
+        got = _mild_cardiac(text)
+        check(f"wording: {want}", got == want, f"got {got}")
 
     print(f"\n{passed}/{passed + failed} self-tests passed.")
     raise SystemExit(0 if failed == 0 else 1)
