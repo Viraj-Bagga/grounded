@@ -553,47 +553,62 @@ def excluded_subject(text):
 # The floor could not catch them either: the classes overlap on cosine (see
 # the calibration above), and all three clear 0.25.
 #
-# THE RULE, and why it is lopsided. BOTH lists must be consulted: a term from
-# OFF_TERRITORY refuses only when no term from IN_TERRITORY is present. A text
-# that names no body part at all ("I suddenly feel drained and a bit queasy",
-# "feels like an elephant is sitting on me") is NOT refused: that is how an
-# atypical heart attack reads, and HE01, the case this project most needs to
-# get right, says outright "There is no real chest pain". Refusing a real
-# presentation is the catastrophic direction, so every doubt goes into
-# IN_TERRITORY, where it can only make the check refuse less.
+# THE RULE, revised 2026-09-29 on Viraj's call: two tiers inside, and two
+# companions rescue. Refuse when a term from OFF_TERRITORY matches, NO term from
+# CORE matches, and FEWER THAN TWO different COMPANIONS match.
 #
-# IN_TERRITORY is the corpus's ground: the chest, heart and lungs; the places
-# heart pain spreads to (jaw, neck, arms, shoulders, back); the legs, because
-# DVT is how a clot presents (CP-PE-001); reflux words; and the companions a
-# heart attack or panic attack can come with, from CP-ACS-003 and CP-PANIC-001
-# (sweating, dizziness, fainting, nausea, tiredness, anxiety). So "my tooth
-# hurts and I feel sweaty and sick" is NOT refused: a heart attack can present
-# as dental pain, and the sweat and nausea keep it in.
+# CORE is the corpus's own ground, the presenting complaints it covers: the
+# chest, heart and lungs, breathing, palpitations, reflux and swallowing, the
+# upper stomach, panic. One core word keeps a text in, whatever else it says.
+#
+# COMPANIONS are the places heart pain spreads to (jaw, neck, arms, shoulders,
+# back, front), the legs for a clot (CP-PE-001), and what a heart attack or panic
+# attack comes with, from CP-ACS-003 and CP-PANIC-001 (sweating, dizziness,
+# fainting, nausea, tiredness, weakness, anxiety), plus cough. ONE companion no
+# longer keeps a text in: with only one tier, "headache and feeling sick",
+# "headache, stiff neck and fever", "rash on my arm" and "sprained my wrist and
+# feel dizzy" all passed, because sick, neck, arm and dizzy were inside. TWO
+# DIFFERENT companions do keep it in, because that is how an atypical heart
+# attack reads when it names a body part the corpus does not: "My tooth hurts
+# and I feel sweaty and sick" is not refused.
+#
+# A text that names nothing from OFF_TERRITORY is still NEVER refused, whatever
+# else it says ("I suddenly feel drained and a bit queasy", "feels like an
+# elephant is sitting on me"). HE01 says outright "There is no real chest pain",
+# and refusing a real presentation is the catastrophic direction.
 #
 # OFF_TERRITORY is body parts and complaints the corpus does not cover as a
 # presenting complaint. It is not "words the corpus never uses": CP-PNA-001
 # lists headache and diarrhoea among the symptoms that can come WITH pneumonia.
-# A pneumonia text will carry a cough or breathlessness, which keeps it in.
+# A pneumonia text carries breathlessness, which is core. "broke" is in, for "I
+# think I broke my arm"; "broke out", as in a sweat, is not.
 #
-# MEASURED 2026-09-29, before wiring it in: no in-scope text refused out of 169
-# (the 22 held-out cases, all 120 training pairs, the 3 demo presets, the 12
-# colloquial in-scope calibration queries, and 12 stress phrasings of atypical
-# heart attack, DVT and reflux). Out of scope, 13 of 15 refused. The two it
-# lets through, both knowingly, because the fix would refuse real presentations:
-#     "I have got a rash on my arm that itches"   `arm` is where heart pain
-#                                                 spreads
-#     "I have a sore throat and a cough"          `cough` is pneumonia
+# MEASURED 2026-09-29, over 168 in-scope texts: the 22 held-out cases, all 120
+# training pairs, the 3 demo presets, 1 heartburn phrasing, the 12 colloquial
+# in-scope calibration queries and 10 stress phrasings of atypical heart attack,
+# DVT and reflux. 165 pass. THREE STRESS PHRASINGS ARE REFUSED, the accepted
+# cost of the tiers, each with one companion and one outside word:
+#     "I feel faint and my vision went blurry"            faint / vision
+#     "My knee and calf are swollen after a long flight"  calf / knee
+#     "Pain in my left arm and my hand is tingling"       arm / hand
+# None of the 22 held-out cases, 120 pairs, presets or calibration queries is
+# refused. Out of scope, all 15 refused, including the two the single tier let
+# through ("a rash on my arm", "a sore throat and a cough").
 # It is a lexicon, and a lexicon has holes. The post-flight check and the floor
 # still run after it; it adds a layer, it replaces none.
-IN_TERRITORY = re.compile(
+CORE_TERRITORY = re.compile(
     r"\b(chest\w*|breast\s*bone|sternum|ribs?|heart\w*|cardiac|palpitat\w*|pulse|"
-    r"breath\w*|winded|out\s+of\s+puff|cough\w*|lungs?|pleur\w*|"
-    r"jaw\w*|neck|arms?|shoulders?|back|front|legs?|calf|calves|thighs?|"
+    r"breath\w*|winded|out\s+of\s+puff|lungs?|pleur\w*|"
     r"indigestion|heartburn|reflux|acid\w*|swallow\w*|epigastr\w*|"
-    r"upper\s+(?:stomach|belly|tummy|abdomen)|"
-    r"sweat\w*|clammy|dizz\w*|light[\s-]?headed\w*|faint\w*|nause\w*|queas\w*|"
-    r"sick|vomit\w*|throw(?:ing)?\s+up|tired\w*|exhaust\w*|drained|fatigue\w*|"
-    r"weak\w*|panic\w*|anxi\w*)\b", re.IGNORECASE)
+    r"upper\s+(?:stomach|belly|tummy|abdomen)|panic\w*)\b", re.IGNORECASE)
+
+# One pattern per companion, so two words for the same thing ("sweaty",
+# "sweating") count once.
+COMPANIONS = tuple(re.compile(rf"\b(?:{w})\b", re.IGNORECASE) for w in (
+    r"jaw\w*", r"neck", r"arms?", r"shoulders?", r"back", r"front", r"legs?",
+    r"calf|calves", r"cough\w*", r"sweat\w*", r"clammy", r"dizz\w*",
+    r"light[\s-]?headed\w*", r"faint\w*", r"nause\w*", r"queas\w*", r"sick",
+    r"tired\w*", r"exhaust\w*", r"drained", r"fatigue\w*", r"weak\w*", r"anxi\w*"))
 
 OFF_TERRITORY = re.compile(
     r"\b(head|headaches?|migraines?|eyes?|eyesight|vision|ears?|earache|"
@@ -601,17 +616,23 @@ OFF_TERRITORY = re.compile(
     r"skin|rash\w*|itch\w*|"
     r"knees?|ankles?|wrists?|hands?|fingers?|thumbs?|toes?|foot|feet|hips?|elbows?|"
     r"pee|peeing|urin\w*|bladder|diarrh\w*|constipat\w*|"
-    r"sprain\w*|twist\w*|rolled|fractur\w*|"
+    r"sprain\w*|twist\w*|rolled|fractur\w*|broke(?!\s+out)|broken|break|"
     r"feeling\s+(?:really\s+|very\s+|so\s+)?(?:down|low)|low\s+mood|depress\w*|"
     r"can(?:no|['’])?t\s+sleep|insomnia)\b", re.IGNORECASE)
 
 
+def companions(text):
+    """The different companions `text` names, one per kind."""
+    return [m.group(0) for m in (c.search(text) for c in COMPANIONS) if m]
+
+
 def off_territory(text):
     """(refuse, reason). Refuses when `text` names something outside the
-    chest-pain territory and nothing inside it. See the block above."""
+    chest-pain territory, nothing from its core, and fewer than two different
+    companions. See the block above."""
     t = str(text or "")
     off = OFF_TERRITORY.search(t)
-    if not off or IN_TERRITORY.search(t):
+    if not off or CORE_TERRITORY.search(t) or len(companions(t)) >= 2:
         return False, ""
     return True, (f'the question is about "{off.group(0)}", and nothing in it '
                   f"is about the chest, heart or breathing, which is all the "

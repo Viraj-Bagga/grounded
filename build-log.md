@@ -6122,3 +6122,31 @@ Checked instead: every download URL answers 200, every committed input exists
 in the clone, the merge script's arguments parse, llama-quantize is present. The
 existing GGUF was hard-linked in as the stand-in, and its sha256 matches the one
 the README publishes.
+
+### 2026-09-29 Subject scope in two tiers, and two companions rescue
+
+Viraj's call, after reviewing the word lists. With one inside list, a single
+companion kept a text in scope, so "headache and feeling sick", "headache, stiff
+neck and fever", "rash on my arm", "a sore throat and a cough" and "sprained my
+wrist and feel dizzy" all passed. Inside is now two tiers: CORE (chest, heart,
+lungs, breathing, palpitations, reflux, swallowing, upper stomach, panic) and
+COMPANIONS (where heart pain spreads, the legs, cough, and what a heart attack
+or panic attack comes with).
+
+**His rule as first specified, refuse unless a core word matches, refused 5 of
+the 10 atypical stress phrasings**: tooth pain with sweat and nausea, teeth and
+jaw with sweating, faint with blurred vision, knee and calf after a flight, arm
+and hand tingling. Measured before anything changed, and put to him. **His call:
+two different companions rescue.** Refuse when an outside word matches, no core
+word does, and fewer than two different companions do. That keeps the two
+dental-pain phrasings and refuses the other three, recorded as fixtures that
+expect refusal, the accepted cost. "broke", "broken" and "break" are outside
+now, for "I think I broke my arm"; "broke out" is not.
+
+**In scope 165 of 168 pass**: every held-out case, pair, preset and calibration
+query, and 7 of 10 stress phrasings. **Out of scope 15 of 15 refused.** Of the
+seven asked for: refused "headache and feeling sick", "headache, stiff neck and
+fever", "rash on my arm", "sore throat and a cough", "I think I broke my arm",
+"sprained my wrist and feel dizzy"; not refused "jaw pain, sweating and I feel
+sick", which names nothing outside. guards.py 159/159. `ui-audit/copy.md` leaves
+git and stays on disk.

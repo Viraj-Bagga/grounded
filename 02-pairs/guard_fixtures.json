@@ -1048,9 +1048,9 @@
       "refused": false
     },
     {
-      "name": "atypical: faint with blurred vision, is not refused",
+      "name": "faint with blurred vision, is refused. ACCEPTED COST of the two tiers: one companion (faint), one outside word (vision)",
       "text": "I feel faint and my vision went blurry",
-      "refused": false
+      "refused": true
     },
     {
       "name": "atypical: no body part at all, is not refused",
@@ -1068,14 +1068,14 @@
       "refused": false
     },
     {
-      "name": "DVT: knee and calf after a flight, is not refused",
+      "name": "knee and calf after a flight, is refused. ACCEPTED COST of the two tiers: one companion (calf), one outside word (knee)",
       "text": "My knee and calf are swollen after a long flight",
-      "refused": false
+      "refused": true
     },
     {
-      "name": "radiation: arm and hand, is not refused",
+      "name": "arm and hand tingling, is refused. ACCEPTED COST of the two tiers: one companion (arm), one outside word (hand)",
       "text": "Pain in my left arm and my hand is tingling",
-      "refused": false
+      "refused": true
     },
     {
       "name": "pleuritic with a headache, is not refused",
@@ -1118,9 +1118,9 @@
       "refused": true
     },
     {
-      "name": "calibration out-of-scope, rash, passes. KNOWN MISS: `arm` is where heart pain spreads",
+      "name": "calibration out-of-scope, rash, is refused (passed under one tier: `arm` kept it in)",
       "text": "I have got a rash on my arm that itches.",
-      "refused": false
+      "refused": true
     },
     {
       "name": "calibration out-of-scope, mental health, is refused",
@@ -1153,8 +1153,48 @@
       "refused": true
     },
     {
-      "name": "calibration out-of-scope, ENT, the near miss, passes. KNOWN MISS: `cough` is pneumonia",
+      "name": "calibration out-of-scope, ENT, the near miss, is refused (passed under one tier: `cough` kept it in)",
       "text": "I have a sore throat and a cough.",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'headache and feeling sick', is refused: one companion is not enough",
+      "text": "headache and feeling sick",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'headache, stiff neck and fever', is refused: meningitis territory; one companion (neck)",
+      "text": "headache, stiff neck and fever",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'rash on my arm', is refused: one companion (arm)",
+      "text": "rash on my arm",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'sore throat and a cough', is refused: one companion (cough)",
+      "text": "sore throat and a cough",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'I think I broke my arm', is refused: `broke` is outside, `arm` alone is one companion",
+      "text": "I think I broke my arm",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'sprained my wrist and feel dizzy', is refused: one companion (dizzy)",
+      "text": "sprained my wrist and feel dizzy",
+      "refused": true
+    },
+    {
+      "name": "tiers 2026-09-29: 'jaw pain, sweating and I feel sick', is not refused: no outside word at all, and three companions",
+      "text": "jaw pain, sweating and I feel sick",
+      "refused": false
+    },
+    {
+      "name": "tiers 2026-09-29: 'I broke out in a sweat and my chest is tight', is not refused: `broke out` is not a break, and chest is core",
+      "text": "I broke out in a sweat and my chest is tight",
       "refused": false
     }
   ]

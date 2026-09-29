@@ -90,8 +90,12 @@ empty-citation check afterwards. The subject check exists because the fine-tuned
 model cites something for everything, so the empty-citation check stopped
 catching anything: a twisted knee, a three-day headache and a toothache were all
 triaged until 2026-09-29. It refuses a question that names a body part outside
-the chest-pain territory and nothing inside it, and it is a word list, so it has
-holes: "a rash on my arm" and "a sore throat and a cough" still get through.
+the chest-pain territory unless it also names the chest, heart, breathing or
+reflux, or two different things a heart attack can come with (jaw, arm, sweat,
+nausea and the like). It is a word list, so it errs both ways: it refuses "I
+feel faint and my vision went blurry", "my knee and calf are swollen after a
+long flight" and "pain in my left arm and my hand is tingling", which can be a
+heart attack or a clot, and it cannot see anything it has no word for.
 A refusal is drawn in neutral grey and never looks like a fourth, milder
 category.
 

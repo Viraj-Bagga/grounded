@@ -436,8 +436,9 @@ class Engine:
             # model cites something for everything, so the post-flight check no
             # longer catches an out-of-scope question: a twisted knee, a
             # three-day headache and a toothache were all triaged on
-            # 2026-09-29. Refuses only a text that names something outside the
-            # chest-pain territory and nothing inside it. See off_territory.
+            # 2026-09-29. Refuses a text that names something outside the
+            # chest-pain territory, nothing from its core, and fewer than two
+            # companions. See off_territory.
             off, offwhy = off_territory(query)
             if off:
                 ev = {"message": REFUSAL, "reason": offwhy,
