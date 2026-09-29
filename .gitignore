@@ -21,3 +21,9 @@ __pycache__/
 
 # Junk an R session drops in whatever directory it was started from.
 .Rhistory
+
+# macOS Finder metadata, and a design tool's local cache. Never source.
+.DS_Store
+.impeccable/
+# The separate environment the README uses to merge the adapter.
+.venv-merge/
