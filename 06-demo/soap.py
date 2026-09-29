@@ -110,8 +110,10 @@ def _header(conv, version, now):
               "was produced by a small language model running on the machine that "
               "wrote this note, with "
               "no internet, constrained by app-side guards, from a corpus of public "
-              "government pages about chest pain and nothing else. Anything outside "
-              "that subject is refused rather than answered.", indent=""),
+              "government pages about chest pain and nothing else. A question that "
+              "names a body part or complaint outside chest pain, and nothing about "
+              "the chest, heart or breathing, is refused rather than answered; one "
+              "that names neither can still be answered.", indent=""),
         "",
         f"Assessment   {conv['id']}, {conv.get('mode', 'single')}, for {who}",
         f"Generated    {now.strftime('%Y-%m-%d %H:%M UTC')}",

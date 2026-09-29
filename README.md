@@ -392,7 +392,12 @@ returns yellow 3 times out of 3. The base model got it red 3 out of 3. With the
 correct chunks supplied directly it is red 3 of 3, so this is retrieval handing
 it something the tuned model reads down, not the fine-tune losing ACS. It is the
 one error class this whole project exists to avoid, and it is invisible in the
-81.8% headline. It is not fixed.
+81.8% headline. **In the app it now shows red**, because the model's own steps
+say "Call emergency services now" under its yellow, and the steps rule raises
+any yellow or green whose steps say that. Verified once live, on 2026-09-29. **The
+model's verdict is still yellow**, the eval still scores it yellow, and the
+retrieval fault is not fixed: the app is catching the model contradicting
+itself, not the model getting it right.
 
 **The eval set is small.** 22 cases. A change that fixes one condition and
 breaks another can score the same as one that does nothing.

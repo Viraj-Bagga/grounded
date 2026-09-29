@@ -444,8 +444,9 @@ prompt moved underneath it.
 
 ## 8. The training half: ALL FIVE STEPS RUN 2026-09-19
 
-**Step 5 ran and the result ships.** 120 pairs, 124 examples, 2 epochs, 30
-optimizer steps, 189 s on one A6000, loss 1.5787 to 0.6851. Merged, then back
+**Step 5 ran and the result ships.** 120 pairs, 124 examples, 2 epochs, 32
+optimizer steps (the training log's header says 30, an estimate; it logs steps 1
+to 32), 189 s on one A6000, loss 1.5787 to 0.6851. Merged, then back
 through sections 3 to 7 of this runbook with every gate passing, giving
 `03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf`, **which is what the demo
 loads since 2026-09-19.** Held out against the base on the frozen 22: 46.0 to

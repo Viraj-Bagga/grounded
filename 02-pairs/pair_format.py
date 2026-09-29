@@ -99,9 +99,10 @@ def build_human_turn(profile: str, symptoms: str, reference_keys, chunk_text_by_
     """The inference-time human turn, block order fixed.
 
     reference_keys in order. An empty list writes `none`, which is the case
-    that teaches the model to decline rather than invent, per spec 4.1. That
-    case is also the measured origin of the CP-RISK-014 and MED-ANTICOAG-007
-    fabrications, so the pairs that cover it matter.
+    that teaches the model to decline rather than invent, per spec 4.1.
+    CP-RISK-014 and MED-ANTICOAG-007 are NOT from this case, whatever older
+    notes say: they were placeholder chunk keys in the spike request
+    (spike/req-final.json), which the model copied back. Corrected 2026-09-29.
     """
     parts = [f"[PATIENT PROFILE]\n{profile}\n[/PATIENT PROFILE]"]
     if timeline is not None:
