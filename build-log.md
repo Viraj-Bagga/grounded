@@ -6083,3 +6083,17 @@ committed imatrix. It says plainly that a rebuild will probably not match the
 original sha256 and that the path has not been run end to end on a fresh
 machine. The code is MIT, `LICENSE`; the README says MIT covers the code only.
 The out-of-scope paragraph names the new subject check and its two known holes.
+
+### 2026-09-29 claude.md brought in line with the code, six items from the audit
+
+- Raised-red steps are two lines, not three: "Stay where you are." was cut on
+  2026-09-20 and claude.md still listed it.
+- Test counts: guards.py 151 (87 before the subject-scope fixtures), guards.ts
+  47, not 48. Counted by running both.
+- The fine-tune ran 32 optimizer steps, not 30. The training log's header says
+  30, an estimate; its own loss table runs steps 1 to 32.
+- The sharp-pain preset runs on You, not Aunt Sue.
+- The model pack on the distribution node is the base GGUF, not the tuned one.
+- HE01: all three tuned retrieval runs put "Call emergency services now" under
+  a yellow, not two, and S1 now raises that to red in the app. Verified live
+  once, with HE01's text on the You profile.
