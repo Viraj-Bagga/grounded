@@ -483,8 +483,10 @@ async function compare(out) {
       const conv = await (await fetch("/api/conversations/" + location.pathname.split("/")[2])).json();
       return conv.sides.flatMap(s => s.turns).flatMap(t => ((t.event || {}).dropped || {}).next_steps_urgency || []);
     })()`);
+    // The removals list cuts each item to 90 characters (cut() in answer.js),
+    // so compare the start of each step, not the whole of it.
     check("the model's green steps are kept as removed, and shown struck", struck.length > 0 &&
-      struck.every(x => raise.text.includes(x.replace(/\s+/g, " "))), JSON.stringify(struck));
+      struck.every(x => raise.text.includes(x.replace(/\s+/g, " ").slice(0, 80))), JSON.stringify(struck));
   }
   await oneLeftEdge(p, "compare");
   await p.shot(join(out, "desktop-compare.png"), true);
