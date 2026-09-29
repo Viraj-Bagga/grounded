@@ -83,6 +83,8 @@ body { margin: 0; background: var(--paper); color: var(--ink);
 h2 { font: 700 var(--fs-meta)/1.4 var(--font); color: var(--ink-2); margin: 1.75rem 0 .5rem;
   text-transform: none; }
 h2 .n { color: var(--ink-3); font-weight: 400; margin-left: .25rem; }
+/* The line under Not flagged, saying why those rows are not in Needs review. */
+h2 + .sub { color: var(--ink-2); font-size: var(--fs-meta); margin: 0 0 .5rem; }
 
 /* --------------------------------------------------------- new arrivals */
 .newbar { display: flex; align-items: center; gap: .75rem; margin: .75rem 0 0;

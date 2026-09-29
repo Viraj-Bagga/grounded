@@ -6000,3 +6000,19 @@ The compare check's printed NOTE is now two assertions: the raised yellow shows
 the disposition in place of the steps, and the struck steps are read from the
 saved turn and found on the page. The red branch no longer expects "Stay where
 you are.", which the code dropped on 2026-09-27. Full suite passed, 163 checks.
+
+### 2026-09-29 Base: nothing is filed as Reviewed unless a person reviewed it
+
+Found in the audit. A clean green (no guard removed anything) is not
+outstanding, correctly, but the page put every row that was not outstanding
+under "Reviewed", so an out-of-scope toothache nobody had opened sat under
+Reviewed with a "Mark reviewed" button beside it. The footer says reviewed
+"records that a person looked", so the page contradicted itself.
+
+Now three groups: Needs review (outstanding), **Not flagged** (a clean green
+nobody has reviewed, with the line "Green, and no guard removed anything.
+Nobody has reviewed these."), and Reviewed (a person pressed the button). The
+empty-queue panel said "All N assessments ... have been looked at", which was
+false for the same reason; it now counts the reviewed and the not flagged
+separately. The Attention column shows 0 instead of a bare "None". The outstanding
+rule in base_server.py is unchanged. Full suite passed, 163 checks.

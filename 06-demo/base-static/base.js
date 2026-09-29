@@ -74,7 +74,8 @@ function attention(r) {
     if (s.raised) t.push(`<span class="tg box">raised to ${esc(s.state || "")}</span>`);
     if (s.removed) t.push(`<span class="tg removed">${s.removed} removed</span>`);
   }
-  return t.length ? t.join("") : `<span class="none-mark">None</span>`;
+  // Nothing to flag reads as a count of nothing, 0, not a bare "None".
+  return t.length ? t.join("") : `<span class="none-mark">0</span>`;
 }
 
 const people = r => r.sides.map(s => esc(s.label)).join(" and ");
@@ -224,9 +225,13 @@ function emptyWindow(d) {
 function render(d) {
   const all = d.assessments;
   const rows = all.filter(inWindow);
+  // THREE GROUPS, since 2026-09-29. A clean green is not outstanding, so it
+  // stays out of Needs review, but nobody has looked at it either, so it is
+  // not Reviewed. Reviewed means a person pressed the button, nothing else.
+  const newest = (a, b) => String(b.updated || "").localeCompare(String(a.updated || ""));
   const needs = rows.filter(r => r.outstanding).sort(priority);
-  const seen = rows.filter(r => !r.outstanding)
-    .sort((a, b) => String(b.updated || "").localeCompare(String(a.updated || "")));
+  const quiet = rows.filter(r => !r.outstanding && !r.reviewed).sort(newest);
+  const seen = rows.filter(r => !r.outstanding && r.reviewed).sort(newest);
 
   const head = `<div class="pg-head">
       <h1>Caseload</h1>
@@ -251,12 +256,15 @@ function render(d) {
       : `<h2>Needs review <span class="n">0</span></h2>
          <div class="well-panel done-panel">${icon("check")}
            <div><b>Nothing needs review.</b>
-           <p>All ${rows.length} assessment${rows.length === 1 ? "" : "s"}
-             ${S.window === "today" ? "today" : "here"} have been looked at.</p></div></div>`;
-    // An empty Reviewed section does not render its heading at all.
+           <p>${seen.length} reviewed by a person${quiet.length
+             ? `, ${quiet.length} not flagged and not yet reviewed` : ""}.</p></div></div>`;
+    // Empty sections do not render their heading at all.
+    const quietBlock = quiet.length
+      ? `<h2>Not flagged <span class="n">${quiet.length}</span></h2>
+         <p class="sub">Green, and no guard removed anything. Nobody has reviewed these.</p>${section(quiet)}` : "";
     const seenBlock = seen.length
       ? `<h2>Reviewed <span class="n">${seen.length}</span></h2>${section(seen)}` : "";
-    body = needsBlock + seenBlock;
+    body = needsBlock + quietBlock + seenBlock;
   }
   $("#main").innerHTML = head + bar + body;
   bind();
