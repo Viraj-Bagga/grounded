@@ -6097,3 +6097,28 @@ The out-of-scope paragraph names the new subject check and its two known holes.
 - HE01: all three tuned retrieval runs put "Call emergency services now" under
   a yellow, not two, and S1 now raises that to red in the app. Verified live
   once, with HE01's text on the You profile.
+
+### 2026-09-29 Followed the new README from a fresh clone: two corrections
+
+Cloned `ui-polish` into a temp folder (not GitHub: nothing is pushed) and
+followed the README until the app answered a preset. It did: preset 1, RED in
+28.7 s, cited, no console errors, with Hugging Face forced offline after the
+one-time MiniLM download, which proves that step does what it says.
+
+**`requirements.txt` did not resolve.** It pinned transformers 4.57.6 beside
+sentence-transformers 6.0.1, which needs 5.x. The working `.venv` has exactly
+that pair, but only because llama.cpp's converter requirements downgraded
+transformers after the fact; `pip check` there reports the conflict. The pin is
+dropped, so a fresh install gets transformers 5.17.0. **Checked before dropping
+it, not assumed:** over the 22 held-out cases and the 24 scope calibration
+queries, the same top-3 on all 46 and a scope score identical to the old
+environment's.
+
+**`brew install llama.cpp` now gives 0.4.1**, not the 0.4.0 build 10809 every
+number was measured on. The README says so.
+
+**Not run: the model rebuild.** 19 GiB free against about 26 GB at the peak.
+Checked instead: every download URL answers 200, every committed input exists
+in the clone, the merge script's arguments parse, llama-quantize is present. The
+existing GGUF was hard-linked in as the stand-in, and its sha256 matches the one
+the README publishes.

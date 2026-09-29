@@ -259,7 +259,8 @@ no internet once the one-time downloads below are done.
 git clone https://github.com/Viraj-Bagga/grounded.git && cd grounded
 
 # llama.cpp for llama-server and llama-quantize. Every number here was
-# measured on Homebrew's build 10809.
+# measured on Homebrew's llama.cpp 0.4.0, build 10809; a fresh install today
+# gets a later version, which has not been measured.
 brew install llama.cpp
 
 # Python dependencies for the app, in a virtual environment
