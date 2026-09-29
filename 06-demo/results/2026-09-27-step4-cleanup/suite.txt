@@ -1,6 +1,6 @@
 2026-09-27 17:26:21 06-demo full suite
 field http://127.0.0.1:8772   base 8781   llama http://127.0.0.1:8080   node 8790 up
-build d0c26e5, 06-demo has uncommitted changes
+build 136f725, 06-demo has uncommitted changes
 
 === offline self-tests
   ok    06-demo/caseload.py   29/29 self-tests passed.

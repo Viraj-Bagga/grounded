@@ -81,7 +81,7 @@ spacing:
 
 Built 27 September 2026 from option B of `ui-audit/overhaul.html`, which Viraj
 picked over a dark Linear-style option. It replaced the square, black-bordered
-Carbon look (in git history before `33b2771`). Everything here is in
+Carbon look (in git history before `de97d37`). Everything here is in
 `06-demo/static/app.css` and `06-demo/base-static/base.css`, and the house
 rules in `06-demo/CLAUDE.md` still hold.
 

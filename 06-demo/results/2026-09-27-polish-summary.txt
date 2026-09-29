@@ -1,7 +1,7 @@
 2026-09-27 UI polish of 06-demo under the rules now in 06-demo/CLAUDE.md
 config:  llama-server TUNED-120pairs-imatrix-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192;
          field app on 8772 (see PORT below); base on 8781; distribution node on 8790
-build:   main at 9001af8, every change below uncommitted
+build:   main at 28d1d8f, every change below uncommitted
 choices: Viraj, 2026-09-27: take Carbon's STRUCTURE only (square corners, 1px
          hairlines, 4px grid, bottom-rule fields, line tabs); rename the visible
          brand to Grounded; save the rules as 06-demo/CLAUDE.md.

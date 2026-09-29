@@ -1,5 +1,5 @@
 2026-09-29 subject scope (off_territory), live through the demo API, one run each
-build: ui-polish 52f17a2 plus the off_territory change, uncommitted at run time
+build: ui-polish 9fdeb30 plus the off_territory change, uncommitted at run time
 llama-server: TUNED-120pairs-imatrix-Q4_K_M.gguf --jinja -np 2 -ngl 0 -c 8192, b10809
 driver: POST /api/conversations then /turn, last SSE payload per side
 
