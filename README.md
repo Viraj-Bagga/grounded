@@ -1,4 +1,4 @@
-# Triage
+# Grounded
 
 Offline medical triage that runs on the device. Describe chest pain in plain
 language and get a WHO urgency category back, with what to do, why, and the
@@ -37,11 +37,11 @@ keys, follow-up questions.
 
 Then the app takes that output apart.
 
-That second half is the interesting part. A small model left alone will invent a
-citation key, copy a symptom out of a source document and attribute it to the
-patient, tell someone to take a cardiac drug, and answer confidently about a
-condition it has never read a word about. All four were measured here, not
-imagined. Each one has a guard in app logic that removes it and shows on screen
+That second half is the interesting part. A small model left alone will cite a
+key that is not in the registry, copy a symptom out of a source document and
+attribute it to the patient, tell someone to take a cardiac drug, and answer
+confidently about a condition it has never read a word about. All four were
+measured here, not imagined. Each one has a guard in app logic that removes it and shows on screen
 what was removed and why.
 
 The rule throughout: **the model proposes, deterministic code disposes.** A
@@ -54,10 +54,15 @@ can ignore it.
 
 These run on every answer. Each came from something the model actually did.
 
-**Citation keys are checked against the registry.** With no sources in context
-the model returned `CP-RISK-014` and `MED-ANTICOAG-007`. Neither exists. Any key
-not in `citations.csv` is dropped before the answer renders, so a judge clicking
-a source never hits a dead one.
+**Citation keys are checked against the registry.** In an early spike the model
+cited `CP-RISK-014` and `MED-ANTICOAG-007`. Neither is in the registry. They were
+not invented: they were the keys of placeholder chunks written into that spike's
+request, and the model copied them back. The lesson holds either way: a key the
+model cites is only as good as the context it was handed, and the model also
+cites things that are not keys at all, such as a section label of the prompt
+(`PATIENT PROFILE: ...`) in 8 of 37 turns measured on 2026-09-19. Any key not in
+`citations.csv` is dropped before the answer renders, so a judge clicking a
+source never hits a dead one.
 
 **Red flags must be grounded in the case text.** Given a pleuritic case whose
 text mentions neither, the model returned `red_flags: ["fast heartbeat",
@@ -79,8 +84,14 @@ nothing else. Asked about stomach pain and a late period, the model produced a
 reassuring non-urgent verdict with zero citations. That presentation includes
 ectopic pregnancy. A system with no knowledge of a condition had produced a
 calm answer about it, which is the most dangerous output this project made.
-Refusal now happens on three independent conditions: categorical exclusions
-before generation, a relevance floor, and an empty-citation check afterwards.
+Refusal now happens on four independent conditions: categorical exclusions
+before generation, a subject check before generation, a relevance floor, and an
+empty-citation check afterwards. The subject check exists because the fine-tuned
+model cites something for everything, so the empty-citation check stopped
+catching anything: a twisted knee, a three-day headache and a toothache were all
+triaged until 2026-09-29. It refuses a question that names a body part outside
+the chest-pain territory and nothing inside it, and it is a word list, so it has
+holes: "a rash on my arm" and "a sore throat and a cough" still get through.
 A refusal is drawn in neutral grey and never looks like a fourth, milder
 category.
 
@@ -239,21 +250,100 @@ The button is absent there with a reason rather than present and broken.
 
 ## Running it
 
-Needs Python 3.9+, a `llama.cpp` build, and the GGUF.
+Tested on an M4 MacBook Air, macOS, Python 3.14. The app itself needs no GPU and
+no internet once the one-time downloads below are done.
+
+### 1. One-time setup, while online
 
 ```bash
-# 1. the model
+git clone https://github.com/Viraj-Bagga/grounded.git && cd grounded
+
+# llama.cpp for llama-server and llama-quantize. Every number here was
+# measured on Homebrew's build 10809.
+brew install llama.cpp
+
+# Python dependencies for the app, in a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+
+# The embedding model retrieval uses, about 90 MB, cached by Hugging Face.
+# Without this the app tries to fetch it on first start and fails offline.
+python3 -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
+
+# The packs the Regions page downloads from the distribution node. Built from
+# the committed sources; the base corpus and the two regional add-ons.
+python3 07-distribute/build_pack.py 07-distribute/specs/corpus-base.json \
+  07-distribute/specs/regional-india.json 07-distribute/specs/regional-africa-ssa.json
+```
+
+### 2. The model
+
+The fine-tuned GGUF, `03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf`, is 2.84
+GB and **is not published anywhere for download.** It is rebuilt from NVIDIA's
+base weights and the LoRA adapter committed at `03-model/adapter-120pairs/`.
+Budget about an hour, 16 GB of RAM and about 26 GB of free disk at the peak.
+
+```bash
+# a. NVIDIA's base weights, 7.9 GB. Plain HTTP; the Hugging Face downloader
+#    stalled here (03-model/RUNBOOK.md, section 2).
+mkdir -p 03-model/hf-bf16 && cd 03-model/hf-bf16
+BASE=https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16/resolve/main
+curl -L -C - -O $BASE/model.safetensors
+for f in config.json generation_config.json tokenizer.json tokenizer_config.json \
+         special_tokens_map.json; do curl -sL -O $BASE/$f; done
+cd ../..
+
+# b. Merge the adapter into the base, on CPU. This needs transformers 5.x and
+#    peft, which the app's environment does not have, so it gets its own.
+python3 -m venv .venv-merge
+.venv-merge/bin/python -m pip install "transformers>=5.17" peft torch safetensors
+.venv-merge/bin/python 03-model/brev_train_qlora.py --stage merge \
+  --model 03-model/hf-bf16 --pairs 02-pairs/review/candidates-120.jsonl \
+  --out 03-model/adapter-120pairs --merged 03-model/merged-120pairs
+
+# c. Stage the merged weights under NVIDIA's own metadata, which is what the
+#    converter was proven with (03-model/convert-src-120pairs/README.txt).
+ln -sf ../merged-120pairs/model.safetensors 03-model/convert-src-120pairs/model.safetensors
+cp 03-model/hf-bf16/tokenizer.json 03-model/hf-bf16/tokenizer_config.json \
+   03-model/convert-src-120pairs/
+
+# d. Convert to F16 with llama.cpp's converter, then quantize with the
+#    committed importance matrix. --outtype f16, never q8_0: q8_0 silently
+#    produces a broken model (RUNBOOK.md, section 3).
+git clone https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+python3 -m pip install -r /tmp/llama.cpp/requirements/requirements-convert_hf_to_gguf.txt
+python3 /tmp/llama.cpp/convert_hf_to_gguf.py ./03-model/convert-src-120pairs \
+  --outfile ./03-model/base/tuned-120pairs-F16.gguf --outtype f16
+llama-quantize --imatrix ./03-model/imatrix/imatrix-tuned-120pairs.dat \
+  ./03-model/base/tuned-120pairs-F16.gguf \
+  ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf Q4_K_M 8
+```
+
+The original is sha256 `5522122946357ba92ac61573bf23339012d552ff5473dbacfe3afaddce7d5479`.
+**Expect a rebuild not to match byte for byte:** the original merge ran on a
+Linux GPU and was converted with llama.cpp revision `e613ef2`, and a CPU merge or
+a later converter can differ in the last bits. Section 7 of
+`03-model/RUNBOOK.md` is the test of whether a rebuild is the same model. **This
+path has not been run end to end on a fresh machine;** each step ran once, the
+merge on a Linux GPU box, the rest on the M4.
+
+### 3. Run it
+
+```bash
+# the model
 llama-server -m ./03-model/base/TUNED-120pairs-imatrix-Q4_K_M.gguf \
   --jinja -np 2 -ngl 0 -c 8192 --port 8080
 
-# 2. the field app, then open http://127.0.0.1:8770
-python 06-demo/server.py
+# the field app, in a second terminal, then open http://127.0.0.1:8770
+source .venv/bin/activate
+python3 06-demo/server.py
 
-# 3. optional: the base device
-python 06-demo/base_server.py          # http://127.0.0.1:8781
+# optional: the base device
+python3 06-demo/base_server.py          # http://127.0.0.1:8781
 
-# 4. optional: the distribution node, for the Regions page
-python 07-distribute/server.py         # http://127.0.0.1:8790
+# optional: the distribution node, for the Regions page
+python3 07-distribute/server.py         # http://127.0.0.1:8790
 ```
 
 `-ngl 0` is deliberate. CPU is the honest condition for a phone, so every
@@ -263,8 +353,8 @@ latency number in this repo is a CPU number.
 prints a warning that anyone on the network can read every assessment, because
 there is no password.
 
-Voice needs `bash 03-model/whisper/build.sh` once. It builds whisper.cpp from
-source rather than from Homebrew, because the Homebrew formula would upgrade
+Voice needs `bash 03-model/whisper/build.sh` once, online. It is macOS only and
+needs cmake. It builds whisper.cpp from source rather than from Homebrew, because the Homebrew formula would upgrade
 llama.cpp and ggml, and every measurement here was taken on the installed
 versions.
 
@@ -361,6 +451,10 @@ The model is under the NVIDIA Nemotron Open Model License. Clause 7 puts
 indemnity on the user for output from the model, and in this app the output is a
 triage verdict. That was accepted for a hackathon and needs legal review before
 anything else.
+
+**The code is MIT**, in `LICENSE`. That covers the code only. The corpus, the
+regional packs and the model keep the licences above, and MIT grants nothing
+over any of them.
 
 ---
 

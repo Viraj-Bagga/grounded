@@ -6058,3 +6058,28 @@ it non-urgent. Run 1 is yellow and cites all three chunks, so the
 empty-citation check alone would not have caught it; the pregnancy exclusion,
 since 2026-09-18, refuses this text before generation.
 `01-data/eval/runs/2026-09-29-stomach-late-period-base-rerun.txt`, raw.
+
+### 2026-09-29 README: runnable from a clone, and the invented-keys story corrected
+
+**CP-RISK-014 and MED-ANTICOAG-007 were never invented.** The audit found both
+are the keys of placeholder chunks written into `spike/req-final.json`, the
+request this log names for the 2026-09-15 run (the CPU-number entry). The model
+copied keys it was handed; they are simply not in the real registry. This log
+said three times that they were fabricated "with no chunks in context", and the
+README and claude.md constraint 9 repeated it. Those two are corrected; the
+earlier entries here stand as written, as a record of what was believed. The
+rule itself does not depend on it: the model cites prompt section labels in
+place of keys, 8 of 37 turns on 2026-09-19.
+
+**The README was not runnable from a clone.** It is retitled Grounded and now
+has: `requirements.txt` (sqlite-vec, sentence-transformers, and the pins every
+measurement was taken on); a one-time MiniLM download, without which the server
+cannot start offline; the pack build step, without which the Regions page is
+empty; `python3` throughout; and the model. **The tuned GGUF is not published
+anywhere**, so the README gives the rebuild from NVIDIA's BF16 weights and the
+committed adapter: download, merge on CPU in a separate transformers 5.x
+environment, stage under NVIDIA's metadata, convert at F16, quantize with the
+committed imatrix. It says plainly that a rebuild will probably not match the
+original sha256 and that the path has not been run end to end on a fresh
+machine. The code is MIT, `LICENSE`; the README says MIT covers the code only.
+The out-of-scope paragraph names the new subject check and its two known holes.

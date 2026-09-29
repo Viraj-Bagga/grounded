@@ -1,0 +1,10 @@
+# The app: retrieval (sqlite-vec plus all-MiniLM-L6-v2) for 06-demo/server.py.
+# Everything else in 06-demo and 07-distribute is the standard library.
+# Pinned to the versions every measurement in this repo was taken on, Python
+# 3.14. torch and numpy match what llama.cpp's converter pins, so installing
+# its requirements for a model rebuild changes nothing here.
+sqlite-vec==0.1.9
+sentence-transformers==6.0.1
+transformers==4.57.6
+torch==2.11.0
+numpy==2.2.6
