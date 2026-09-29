@@ -266,7 +266,7 @@ Violating any of these silently breaks something downstream. They are not prefer
 
     **Nothing is hidden.** The rationale and the steps both render struck through, tagged "removed: written for a yellow", and they count in the removed total on the Checked line, same as every other guard removal. The rationale is shown whole, not clipped like a removed citation, because it is the model's entire reason. Verified live 2026-09-19: `06-demo/results/2026-09-19-copy-and-one-click.txt`, and the compare check in `06-demo/ui_check.mjs` asserts both.
 
-    **Where the two rules differ, and why:** the rationale goes on any raise, to yellow or to red, because it always argues for the lower verdict. The steps are only replaced on a raise to red, because those three lines are red instructions and there is no equivalent set for a yellow, so **a raise that ends at yellow still shows the model's steps.** Python and the demo only; `guards.ts` has no port.
+    **A raise to yellow replaces the steps too, since 2026-09-29, Viraj's call.** Until then a raise that ended at yellow kept the steps the model wrote for its green, so Mum's "Be seen today" sat above "Sit down and rest for the rest of the day". The replacement is `RAISED_YELLOW_STEPS`, the disposition alone, "Be seen today.", with no new clinical wording; the page does not repeat the disposition under the banner, so it shows as one line. The model's green steps render struck, tagged "written for a green". **Known cost:** those steps often carry the model's own safety net, "Call emergency services if it returns with breathlessness at rest", and it goes with them. So the rationale and the steps now go on every raise, to yellow or to red. Python and the demo only; `guards.ts` has no port.
 
 ---
 

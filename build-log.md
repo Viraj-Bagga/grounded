@@ -5983,3 +5983,20 @@ pair is refused. guards.py 151/151.
 **It is a lexicon and it has holes.** It adds a layer; the floor and the
 post-flight check still run after it. The lists are a clinical call and want
 Viraj's review.
+
+### 2026-09-29 A raise to yellow replaces the model's steps with the disposition
+
+Constraint 16's known gap, closed on Viraj's call. A profile rule raising a
+green to yellow kept the steps the model wrote for its green, so Mum's "Be seen
+today" sat above "Sit down and rest for the rest of the day". Now any raise
+replaces the steps: `RAISED_RED_STEPS` on a raise to red, `RAISED_YELLOW_STEPS`
+on a raise to yellow, which is the disposition alone, "Be seen today.", with no
+new clinical wording. The model's green steps render struck, tagged "written
+for a green". **Known cost:** they often carry the model's own safety net ("Call
+emergency services if it returns with breathlessness at rest"), and it goes
+with them.
+
+The compare check's printed NOTE is now two assertions: the raised yellow shows
+the disposition in place of the steps, and the struck steps are read from the
+saved turn and found on the page. The red branch no longer expects "Stay where
+you are.", which the code dropped on 2026-09-27. Full suite passed, 163 checks.

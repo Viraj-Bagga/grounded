@@ -428,10 +428,8 @@ async function compare(out) {
   // nothing left to strike, and asserting constraint 16 here fails a page that
   // is behaving correctly.
   // RAISE TO YELLOW: constraint 16 strikes the rationale, because it argues
-  // for the lower verdict, and deliberately does NOT replace the steps,
-  // because there is no yellow equivalent of the three red lines. That gap is
-  // recorded rather than asserted, so this check keeps passing when it is
-  // closed. See the note it prints.
+  // for the lower verdict, and since 2026-09-29 replaces the steps with the
+  // disposition alone, "Be seen today.", which the page shows as one line.
   if (raise && raise.rescued) {
     console.log("      the raise came through the refusal rescue: the not-grounded branch");
     check("a rescued red shows the urgency, its disposition and the not-grounded line",
@@ -451,7 +449,7 @@ async function compare(out) {
     // The banner carries "Call emergency services now", so since the overhaul
     // (2026-09-27) the app's first step is not repeated under it.
     check("a raised red shows the app's steps",
-      ["Call emergency services now", "Do not drive yourself.", "Stay where you are."].every(t => raise.text.includes(t)), raise.text.slice(0, 300));
+      ["Call emergency services now", "Do not drive yourself."].every(t => raise.text.includes(t)), raise.text.slice(0, 300));
     check("the model's own steps are shown as removed", /written for a (yellow|green)/.test(raise.text), raise.text.slice(0, 300));
   }
   // The half of constraint 16 that holds on EVERY raise, whichever level it
@@ -469,17 +467,24 @@ async function compare(out) {
     })()`) === true);
   }
   if (raise && raise.level === "yellow") {
-    // KNOWN GAP, measured 2026-09-19 on the tuned model and not a failure of
-    // this check: a raise to yellow keeps the steps the model wrote for its
-    // green, so "Be seen today" can sit above "eat the rest of the meal".
-    // Printed, not asserted, so closing it does not turn this red.
+    // Constraint 16 on a raise to yellow, since 2026-09-29: the steps the
+    // model wrote for its green are struck, and "What to do" shows the
+    // disposition alone. Until then this was a printed NOTE, the known gap.
     const steps = await p.eval(`(() => {
       const side = [...document.querySelectorAll(".side-ans")].find(s => /Raised to yellow/.test(s.innerText));
       const sec = [...side.querySelectorAll(".sec")].find(x => /^What to do\\b/.test(x.innerText));
-      return sec ? [...sec.querySelectorAll("li")].map(li => li.innerText.replace(/\\s+/g, " ")) : [];
+      return sec ? { items: sec.querySelectorAll("li").length, text: sec.innerText.replace(/\\s+/g, " ") } : null;
     })()`);
-    console.log(`      NOTE, constraint 16 gap: a raise to yellow keeps the model's own steps`);
-    steps.forEach(x => console.log(`        ${x}`));
+    check("a raised yellow shows the disposition in place of the model's steps",
+      !!steps && steps.items === 0 && /Be seen today\./.test(steps.text), JSON.stringify(steps));
+    // Read from the saved turn, not the page: the struck rationale also says
+    // "written for a green", so the page text cannot tell the two apart.
+    const struck = await p.eval(`(async () => {
+      const conv = await (await fetch("/api/conversations/" + location.pathname.split("/")[2])).json();
+      return conv.sides.flatMap(s => s.turns).flatMap(t => ((t.event || {}).dropped || {}).next_steps_urgency || []);
+    })()`);
+    check("the model's green steps are kept as removed, and shown struck", struck.length > 0 &&
+      struck.every(x => raise.text.includes(x.replace(/\s+/g, " "))), JSON.stringify(struck));
   }
   await oneLeftEdge(p, "compare");
   await p.shot(join(out, "desktop-compare.png"), true);

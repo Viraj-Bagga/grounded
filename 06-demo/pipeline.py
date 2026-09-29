@@ -88,6 +88,17 @@ MAX_FOLLOWUPS = 4
 RAISED_RED_STEPS = ("Call emergency services now.",
                     "Do not drive yourself.")
 
+# A RAISE TO YELLOW REPLACES THE STEPS TOO, since 2026-09-29, Viraj's call.
+# Until then a raise to yellow kept the steps the model wrote for its green, so
+# "Be seen today" sat above "Sit down and rest for the rest of the day". The
+# replacement is the disposition and nothing else: no new clinical wording.
+# The page does not repeat the disposition under the banner, so it renders as
+# one muted line. The model's green steps go out struck, tagged "written for a
+# green", like every constraint 16 removal. KNOWN COST: those steps often carry
+# the model's own safety net ("Call emergency services if it returns with
+# breathlessness at rest"), and that goes with them.
+RAISED_YELLOW_STEPS = ("Be seen today.",)
+
 # WHILE YOU WAIT, AND ONLY WHERE THE CORPUS ACTUALLY SAYS SOMETHING.
 #
 # Audited 2026-09-20 across all 35 chunks. ONE of them carries advice for the
@@ -625,12 +636,14 @@ class Engine:
             if result.get("rationale"):
                 dropped = dict(dropped, rationale_urgency=result["rationale"])
                 result["rationale"] = ""
-            # Steps are replaced only on a raise to red: those are the app's own
-            # words, and there is no equivalent set for a raise to yellow.
-            if result["urgency"] == "red":
+            # The steps were written for the lower verdict too, so they are
+            # replaced by the app's own on any raise: the red set on a raise to
+            # red, the disposition alone on a raise to yellow.
+            if result["urgency"] in ("red", "yellow"):
                 dropped = dict(dropped, next_steps_urgency=list(
                     result.get("next_steps") or []))
-                result["next_steps"] = list(RAISED_RED_STEPS)
+                result["next_steps"] = list(RAISED_RED_STEPS if result["urgency"] == "red"
+                                            else RAISED_YELLOW_STEPS)
 
         cites = [self.chunk_meta(k) for k in result.get("citations", [])]
         ev = {"result": result, "ungrounded": ungrounded, "escalation": escalation,
