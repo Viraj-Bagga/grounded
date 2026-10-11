@@ -13,6 +13,26 @@ Built solo for SteelHacks XIII at Pitt, 19 to 20 September 2026.
 > validation, no regulatory approval and no users. Do not use it to make a real
 > decision about a real person.
 
+<p align="center">
+  <img src="paper-figures/fig2a-result.png" width="380" alt="A red result: call emergency services now, with the steps, the reason and the two NHLBI sources it cited">
+  &nbsp;
+  <img src="paper-figures/fig2b-aunt-sue-raise.png" width="380" alt="A profile rule raising the verdict to red, with three model-written steps struck through and the reason for each removal">
+</p>
+<p align="center"><sub>Left: a red verdict with the sources it read. Right: a profile rule raises the verdict, and the guards strike the steps the model wrote for the lower one.</sub></p>
+
+## At a glance
+
+- **Fine-tuned Nemotron 3 Nano 4B** with LoRA on 120 pairs. On 22 held-out cases
+  frozen before training, correct answers went from **45.5% to 81.8%**, and
+  answers citing nothing that resolves went from **9/33 to 0/53**.
+- **Runs offline on CPU.** Quantised to a 2.84 GB GGUF, about 3 GB resident,
+  first answer in 15 to 55 s on an M4 MacBook Air.
+- **Grounded in sources.** 35 chunks from US government health sites, retrieved
+  with sqlite-vec plus BM25. Every answer cites what it read.
+- **Six guards in app code check every answer.** Unresolvable citations,
+  findings copied out of sources, medication instructions and out-of-scope
+  questions are removed or refused, and every removal stays on screen.
+
 ---
 
 ## The problem it is aimed at
@@ -47,6 +67,16 @@ what was removed and why.
 The rule throughout: **the model proposes, deterministic code disposes.** A
 prompt instruction cannot hold a safety property, because the next sampling run
 can ignore it.
+
+```mermaid
+flowchart LR
+    A["Typed or spoken symptoms<br/>whisper.cpp on device"] --> B["Retrieve 3 chunks<br/>sqlite-vec + BM25<br/>35 government sources"]
+    B --> C["Nemotron 3 Nano 4B + LoRA<br/>Q4_K_M, llama.cpp, CPU"]
+    C --> D["Structured JSON<br/>urgency, steps, citations"]
+    D --> E["Guards in app code<br/>citations, grounding, medication,<br/>scope, profile rules, steps"]
+    E --> F["Result on screen<br/>every removal shown"]
+    F --> G["Caseload syncs to base<br/>one direction, sha256-checked"]
+```
 
 ---
 
@@ -465,6 +495,17 @@ anything else.
 **The code is MIT**, in `LICENSE`. That covers the code only. The corpus, the
 regional packs and the model keep the licences above, and MIT grants nothing
 over any of them.
+
+---
+
+## How it was built
+
+Solo, over the SteelHacks weekend and the week after it. The model side is
+mine: the corpus pipeline, the training pairs, the fine-tune, the evaluation and
+the quantisation chain. The web UI and the retrieval layer were built with
+Claude Code, working inside the constraints written in `claude.md` and
+`06-demo/CLAUDE.md`, with `06-demo/suite.sh` run after every batch. Every
+decision and measurement is recorded in `build-log.md`.
 
 ---
 
