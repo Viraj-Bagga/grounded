@@ -70,12 +70,10 @@ can ignore it.
 
 ```mermaid
 flowchart LR
-    A["Typed or spoken symptoms<br/>whisper.cpp on device"] --> B["Retrieve 3 chunks<br/>sqlite-vec + BM25<br/>35 government sources"]
-    B --> C["Nemotron 3 Nano 4B + LoRA<br/>Q4_K_M, llama.cpp, CPU"]
-    C --> D["Structured JSON<br/>urgency, steps, citations"]
-    D --> E["Guards in app code<br/>citations, grounding, medication,<br/>scope, profile rules, steps"]
-    E --> F["Result on screen<br/>every removal shown"]
-    F --> G["Caseload syncs to base<br/>one direction, sha256-checked"]
+    A["Symptoms<br/>typed or spoken"] --> B["Retrieve 3 chunks<br/>sqlite-vec + BM25"]
+    B --> C["Nemotron 3 Nano 4B<br/>+ LoRA, CPU<br/>returns JSON"]
+    C --> D["Six guards<br/>in app code"]
+    D --> E["Result, removals<br/>shown, syncs to base"]
 ```
 
 ---
